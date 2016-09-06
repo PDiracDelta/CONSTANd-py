@@ -1,8 +1,9 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
-'''
+"""
 Python implementation of mass spectrometer protein data analysis using the CONSTANd_RAS algorithm
-'''
+"""
 
 __author__ = "Joris Van Houtven"
 __copyright__ = "Copyright ?, VITO"
@@ -14,7 +15,9 @@ __email__ = "vanhoutvenjoris@gmail.com"
 __status__ = "Development"
 
 import sys
-
+#import pandas as pd
+#import numpy as np
+#import matplotlib as mpl
 
 def main():
     print("This is the main method.")
