@@ -2,6 +2,13 @@ clear all;
 close all;
 clc;
 
+if exist('INTENSITIES_ONLY','var')
+    temp=INTENSITIES_ONLY;
+end
+INTENSITIES_ONLY=false;
+import_MB_Bon_tmt_TPSM;
+INTENSITIES_ONLY=temp;
+
 load allData_20160905;
 
 [sequenceUnion,IA,IB] = unique(Sequence{1});
