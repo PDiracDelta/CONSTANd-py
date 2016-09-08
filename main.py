@@ -37,6 +37,8 @@ def importDataFrame(path=None, sep=','):
     # df = pd.read_csv('../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.txt', sep='\t') # TEST
     # df = pd.read_csv(path, sep=sep)
     df = pd.DataFrame(np.arange(10*6).reshape(10,6),columns=list('ABCDEF')) # TEST
+    df['B'][0]=np.nan
+    print(df)
     return df
 
 
@@ -45,9 +47,10 @@ def main():
     df = importDataFrame(path,sep)
     assert isinstance(df, pd.DataFrame)
     data = np.asarray(df) # ndarray instead of matrix because this is more convenient in the calculations
-    normalizedData,conergenceTrail,R,S = cd.constand(data,accuracy,maxIterations)
-    print(data)
+    normalizedData,convergenceTrail,R,S = cd.constand(data,accuracy,maxIterations)
+    #print(data)
     print(normalizedData)
+    return normalizedData,convergenceTrail
 
 if __name__ == '__main__':
     sys.exit(main())
