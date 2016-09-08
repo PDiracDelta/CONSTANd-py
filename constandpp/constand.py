@@ -23,7 +23,8 @@ from numpy import nan as NaN
 
 
 def constand(data, accuracy, maxIterations):
-    assert isinstance(data, np.matrix)
+    """ return normalizedData, convergenceTrail, R, S """
+    assert isinstance(data, np.ndarray)
     assert data.dtype is np.dtype('float64')
     assert accuracy > 0
     assert maxIterations > 0
@@ -37,26 +38,28 @@ def constand(data, accuracy, maxIterations):
 
     i = 0 # number of current iteration
     # without reshaping the ndarrays, they have shape (x,) (no second value) and the procedure fails.
-    Rd = np.ones((Nrows,1)) # R matrix diagonal from RAS
-    Sd = np.ones((Ncols,1)) # S matrix diagonal from RAS
+    R = np.ones((Nrows)) # R matrix diagonal from RAS
+    S = np.ones((Ncols)) # S matrix diagonal from RAS
     # main loop; iterates until convergence is reached (i.e., L1-norm below variable <h>) or the maximum number of
     # iteration cycles is surpassed.
     while convergence > accuracy and i < maxIterations:
 
         # fit the rows
-        Rd = Rd * 1/Ncols * np.asarray(1/np.nanmean(normalizedData,1))
-        normalizedData = (dataT * Rd).T *Sd
+        Ri = 1/Ncols * np.asarray(1/np.nanmean(normalizedData,1)).reshape(Nrows,)
+        normalizedData = (normalizedData.T * Ri).T
+        R *= Ri
         # calculate deviation from column marginals; row deviation is zero at even indices. (index start = 0)
         convergenceTrail[2*i] = Nrows * 0.5 * np.nansum(np.abs(np.nanmean(normalizedData,0) - 1/Ncols))
 
         # fit the columns
-        Sd = Sd * 1/Ncols * np.asarray(1/np.nanmean(normalizedData, 0))
-        normalizedData = (dataT * Rd).T *Sd
+        Si = 1/Ncols * np.asarray(1/np.nanmean(normalizedData, 0)).reshape(Ncols,)
+        normalizedData *= Si
+        S *= Si
         # calculate deviation from row marginals; column deviation is zero at odd indices. (index start = 0)
         convergenceTrail[2*i+1] = Ncols * 0.5 * np.nansum(np.abs(np.nanmean(normalizedData, 1) - 1/Ncols))
 
         convergence = convergenceTrail[2*i]
         i += 1
 
-    return normalizedData, convergenceTrail, Rd, Sd
+    return normalizedData, convergenceTrail, R, S
 

@@ -36,6 +36,7 @@ def importDataFrame(path=None, sep=','):
     df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10, 6)), columns=list('ABCDEF'))  # TEST
     # df = pd.read_csv('../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.txt', sep='\t') # TEST
     # df = pd.read_csv(path, sep=sep)
+    df = pd.DataFrame(np.arange(10*6).reshape(10,6),columns=list('ABCDEF')) # TEST
     return df
 
 
@@ -43,10 +44,10 @@ def main():
     path,sep,accuracy,maxIterations = getInput()
     df = importDataFrame(path,sep)
     assert isinstance(df, pd.DataFrame)
-    data = np.asmatrix(df)
-    normalized = cd.constand(data,accuracy,maxIterations)
+    data = np.asarray(df) # ndarray instead of matrix because this is more convenient in the calculations
+    normalizedData,conergenceTrail,R,S = cd.constand(data,accuracy,maxIterations)
     print(data)
-    print(normalized)
+    print(normalizedData)
 
 if __name__ == '__main__':
     sys.exit(main())
