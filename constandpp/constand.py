@@ -25,7 +25,6 @@ from numpy import nan as NaN
 def constand(data, accuracy, maxIterations):
     """ return normalizedData, convergenceTrail, R, S """
     assert isinstance(data, np.ndarray)
-    assert data.dtype is np.dtype('float64')
     assert accuracy > 0
     assert maxIterations > 0
 
@@ -33,7 +32,6 @@ def constand(data, accuracy, maxIterations):
     Nrows, Ncols = data.shape
     convergenceTrail = [NaN]*(2*maxIterations)
     convergence = np.inf
-    dataT = data.T
     normalizedData = data
 
     i = 0 # number of current iteration
@@ -58,7 +56,7 @@ def constand(data, accuracy, maxIterations):
         # calculate deviation from row marginals; column deviation is zero at odd indices. (index start = 0)
         convergenceTrail[2*i+1] = Ncols * 0.5 * np.nansum(np.abs(np.nanmean(normalizedData, 1) - 1/Ncols))
 
-        convergence = convergenceTrail[2*i]
+        convergence = convergenceTrail[2*i+1]
         i += 1
 
     return normalizedData, convergenceTrail, R, S
