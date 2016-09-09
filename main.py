@@ -32,7 +32,7 @@ def getInput():
 	return path,sep,accuracy,maxIterations
 
 
-def importDataFrame(path=None, sep=','):
+def importData(path=None, sep=','):
 	""" Get the data from disk as a Pandas DataFrame """
 	# df = pd.read_csv(path, sep=sep)
 	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10, 6)), columns=list('ABCDEF'))  # TEST
@@ -40,7 +40,9 @@ def importDataFrame(path=None, sep=','):
 	# df = pd.DataFrame(np.arange(10*6).reshape(10,6),columns=list('ABCDEF')) # TEST
 	# df['B'][0]=np.nan # TEST
 	df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10**3, 6)), columns=list('ABCDEF'))  # TEST
-	return df
+
+	data = np.asarray(df)  # ndarray instead of matrix because this is more convenient in the calculations
+	return data
 
 
 def performanceTest(): # remove for production
@@ -48,9 +50,7 @@ def performanceTest(): # remove for production
 	t = []
 	for i in range(1000):
 		path, sep, accuracy, maxIterations = getInput()
-		df = importDataFrame(path, sep)
-		assert isinstance(df, pd.DataFrame)
-		data = np.asarray(df)  # ndarray instead of matrix because this is more convenient in the calculations
+		data = importData(path, sep)
 		start = time()
 		constand(data, 1e-2, 50)
 		stop = time()
@@ -61,11 +61,10 @@ def performanceTest(): # remove for production
 def main():
 	""" For now this is just stuff for debugging and testing """
 	path,sep,accuracy,maxIterations = getInput()
-	df = importDataFrame(path,sep)
-	assert isinstance(df, pd.DataFrame)
-	data = np.asarray(df) # ndarray instead of matrix because this is more convenient in the calculations
+	data = importData(path,sep)
+	assert isinstance(data, np.ndarray)
 	normalizedData,convergenceTrail,R,S = constand(data,accuracy,maxIterations)
-	
+	#print(normalizedData)
 	performanceTest()
 
 
