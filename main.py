@@ -26,20 +26,32 @@ from time import time
 def getInput():
 	""" Get mass spec data and CONSTANd parameters """
 	path=None
-	sep='\t'
+	delim='\t'
 	accuracy=1e-2
 	maxIterations=50
-	return path,sep,accuracy,maxIterations
+	return path,delim,accuracy,maxIterations
 
 
-def importData(path=None, sep=','):
+def importDataFrame(path=None, filetype=None, delim=None):
 	""" Get the data from disk as a Pandas DataFrame """
-	# df = pd.read_csv(path, sep=sep)
+	assert path is not None
+	if filetype is None: # set filetype equal to the file extension
+		filetype = path.split('.')(-1)
+
+	if filetype == 'xlsx':
+		df = pd.read_excel(path)
+	elif filetype == 'csv':
+		df = pd.read_csv(path)
+	elif filetype == 'tsv':
+		df = pd.read_table(path)
+	else:
+		df = pd.read_table(path, delim=delim)
+
 	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10, 6)), columns=list('ABCDEF'))  # TEST
-	# df = pd.read_csv('../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.txt', sep='\t') # TEST
+	# df = pd.read_csv('../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.txt', delim='\t') # TEST
 	# df = pd.DataFrame(np.arange(10*6).reshape(10,6),columns=list('ABCDEF')) # TEST
 	# df['B'][0]=np.nan # TEST
-	df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10**3, 6)), columns=list('ABCDEF'))  # TEST
+	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10**3, 6)), columns=list('ABCDEF'))  # TEST
 
 	data = np.asarray(df)  # ndarray instead of matrix because this is more convenient in the calculations
 	return data
@@ -49,8 +61,8 @@ def performanceTest(): # remove for production
 	""" Use this development method to test the performance of the CONSTANd algorithm """
 	t = []
 	for i in range(1000):
-		path, sep, accuracy, maxIterations = getInput()
-		data = importData(path, sep)
+		path, delim, accuracy, maxIterations = getInput()
+		data = importData(path, delim)
 		start = time()
 		constand(data, 1e-2, 50)
 		stop = time()
@@ -60,8 +72,8 @@ def performanceTest(): # remove for production
 
 def main():
 	""" For now this is just stuff for debugging and testing """
-	path,sep,accuracy,maxIterations = getInput()
-	data = importData(path,sep)
+	path,delim,accuracy,maxIterations = getInput()
+	data = importData(path,delim)
 	assert isinstance(data, np.ndarray)
 	normalizedData,convergenceTrail,R,S = constand(data,accuracy,maxIterations)
 	#print(normalizedData)
