@@ -43,14 +43,15 @@ def importDataFrame(path=None, sep=','):
 	return df
 
 
-def performanceTest():
+def performanceTest(): # remove for production
+	""" Use this development method to test the performance of the CONSTANd algorithm """
 	t = []
 	for i in range(1000):
+		path, sep, accuracy, maxIterations = getInput()
 		df = importDataFrame(path, sep)
 		assert isinstance(df, pd.DataFrame)
 		data = np.asarray(df)  # ndarray instead of matrix because this is more convenient in the calculations
 		start = time()
-		# normalizedData,convergenceTrail,R,S = constand(data,accuracy,maxIterations)
 		constand(data, 1e-2, 50)
 		stop = time()
 		t.append((stop - start))
