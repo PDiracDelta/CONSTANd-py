@@ -32,6 +32,17 @@ def getInput():
 	return path,delim,accuracy,maxIterations
 
 
+def importData(path, delim):
+	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10, 6)), columns=list('ABCDEF'))  # TEST
+	# df = pd.read_csv('../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.txt', delim='\t') # TEST
+	# df = pd.DataFrame(np.arange(10*6).reshape(10,6),columns=list('ABCDEF')) # TEST
+	# df['B'][0]=np.nan # TEST
+	df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10**3, 6)), columns=list('ABCDEF'))  # TEST
+
+	data = np.asarray(df)  # ndarray instead of matrix because this is more convenient in the calculations
+	return data
+
+
 def importDataFrame(path=None, filetype=None, delim=None):
 	""" Get the data from disk as a Pandas DataFrame """
 	assert path is not None
@@ -47,13 +58,7 @@ def importDataFrame(path=None, filetype=None, delim=None):
 	else:
 		df = pd.read_table(path, delim=delim)
 
-	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10, 6)), columns=list('ABCDEF'))  # TEST
-	# df = pd.read_csv('../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.txt', delim='\t') # TEST
-	# df = pd.DataFrame(np.arange(10*6).reshape(10,6),columns=list('ABCDEF')) # TEST
-	# df['B'][0]=np.nan # TEST
-	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10**3, 6)), columns=list('ABCDEF'))  # TEST
-
-	data = np.asarray(df)  # ndarray instead of matrix because this is more convenient in the calculations
+	data = np.asarray(df)
 	return data
 
 
@@ -69,7 +74,7 @@ def performanceTest(): # remove for production
 		t.append((stop - start))
 	print("average runtime: " + str(np.mean(t)))
 
-
+#@profile
 def main():
 	""" For now this is just stuff for debugging and testing """
 	path,delim,accuracy,maxIterations = getInput()
