@@ -38,9 +38,9 @@ def importData(path, delim):
 	# df = pd.DataFrame(np.arange(10*6).reshape(10,6),columns=list('ABCDEF')) # TEST
 	# df['B'][0]=np.nan # TEST
 	df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10**3, 6)), columns=list('ABCDEF'))  # TEST
-
-	data = np.asarray(df)  # ndarray instead of matrix because this is more convenient in the calculations
-	return data
+	intensities = selectIntensities(df)
+	assert isinstance(intensities, np.ndarray) # ndarray instead of matrix because this is more convenient in the calculations
+	return intensities, df
 
 
 def importDataFrame(path=None, filetype=None, delim=None):
@@ -62,6 +62,11 @@ def importDataFrame(path=None, filetype=None, delim=None):
 	return data
 
 
+def selectIntensities(df):
+	intensities=None
+	return intensities
+
+
 def performanceTest(): # remove for production
 	""" Use this development method to test the performance of the CONSTANd algorithm """
 	t = []
@@ -74,15 +79,15 @@ def performanceTest(): # remove for production
 		t.append((stop - start))
 	print("average runtime: " + str(np.mean(t)))
 
-#@profile
+
 def main():
 	""" For now this is just stuff for debugging and testing """
 	path,delim,accuracy,maxIterations = getInput()
-	data = importData(path,delim)
-	assert isinstance(data, np.ndarray)
-	normalizedData,convergenceTrail,R,S = constand(data,accuracy,maxIterations)
-	#print(normalizedData)
-	performanceTest()
+	intensities, df = importData(path,delim)
+	assert isinstance(intensities, np.ndarray)
+	normalizedIntensities,convergenceTrail,R,S = constand(intensities,accuracy,maxIterations)
+	#print(normalizedIntensities)
+	#performanceTest()
 
 
 if __name__ == '__main__':
