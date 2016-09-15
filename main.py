@@ -26,11 +26,13 @@ from time import time
 def getInput():
 	""" Get mass spec data and CONSTANd parameters from the user or from the web interface. """
 	# path='../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.tsv' # TEST
-	path = '../data/MB_noapostrophes.tsv'  # TEST
-	delim = '\t'
+	path_in = '../data/MB_noapostrophes.tsv'  # TEST
+	delim_in = '\t'
 	accuracy = 1e-2
 	maxIterations = 50
-	return path, delim, accuracy, maxIterations
+	path_out = '../data/MB_result.tsv'  # TEST
+	delim_out = '\t'
+	return path_in, delim_in, accuracy, maxIterations, path_out, delim_out
 
 
 def importData(path=None, delim=None):
@@ -47,6 +49,14 @@ def importData(path=None, delim=None):
 	return intensities, df
 
 
+def exportData(data=None, path=None, delim=','):
+	assert data is not None
+	assert path is not None
+	assert delim is not None
+
+	np.savetxt(path, data, delimiter=delim)
+
+
 def importDataFrame(path=None, filetype=None, delim=None):
 	""" Get the data from disk as a Pandas DataFrame. """
 	assert path is not None
@@ -54,10 +64,8 @@ def importDataFrame(path=None, filetype=None, delim=None):
 		filetype = path.split('.')[-1]
 
 	if filetype == 'xlsx':
-		raise Exception("this shouldnt be executed")  # TEST
 		df = pd.read_excel(path)
 	elif filetype == 'csv':
-		raise Exception("this shouldnt be executed")  # TEST
 		if delim is None:
 			df = pd.read_csv(path, delimiter=',')
 		else:
@@ -98,11 +106,12 @@ def performanceTest():  # remove for production
 
 def main():
 	""" For now this is just stuff for debugging and testing. """
-	path, delim, accuracy, maxIterations = getInput()
-	intensities, df = importData(path, delim)
+	path_in, delim_in, accuracy, maxIterations, path_out, delim_out = getInput()
+	intensities, df = importData(path_in, delim_in)
 	assert isinstance(intensities, np.ndarray)
 	normalizedIntensities, convergenceTrail, R, S = constand(intensities, accuracy, maxIterations)
 	# print(normalizedIntensities)
+	exportData(normalizedIntensities, path_out, delim_out)
 	# performanceTest()
 
 
