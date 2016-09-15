@@ -14,7 +14,7 @@ __maintainer__ = "Joris Van Houtven"
 __email__ = "vanhoutvenjoris@gmail.com"
 __status__ = "Development"
 
-import sys
+import sys, warnings
 import pandas as pd
 import numpy as np
 # import matplotlib as mpl
@@ -40,7 +40,7 @@ def importData(path=None, delim=None):
 	# df = pd.DataFrame(np.arange(10*6).reshape(10,6),columns=list('ABCDEF')) # TEST
 	# df['B'][0]=np.nan # TEST
 	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10**3, 6)), columns=list('ABCDEF'))  # TEST
-	df = importDataFrame(path)#, delim=delim)
+	df = importDataFrame(path, delim=delim)
 	intensities = selectIntensities(df)
 	assert isinstance(intensities,
 	                  np.ndarray)  # ndarray instead of matrix because this is more convenient in the calculations
@@ -71,7 +71,7 @@ def importDataFrame(path=None, filetype=None, delim=None):
 		if delim is None:
 			raise Exception(
 				"I don't know how to handle this data: the filetype was not recognized and no delimiter was specified.")
-		raise Warning("Did not recognize filetype: treating as delimited textfile with the delimiter you specified.")
+		warnings.warn("Did not recognize filetype: treating as delimited textfile with the delimiter you specified.")
 		df = pd.read_csv(path, delimiter=delim)
 
 	return df
@@ -79,10 +79,7 @@ def importDataFrame(path=None, filetype=None, delim=None):
 
 def selectIntensities(df):
 	""" Extracts the intensity matrix from the dataFrame. """
-	print(df)
-	intensities = None
-	intensities = np.asmatrix(df[['126', '127', '128', '129', '130', '131']])
-	# print(intensities)
+	intensities = np.asarray(df[['126', '127', '128', '129', '130', '131']])
 	return intensities
 
 
@@ -106,7 +103,7 @@ def main():
 	assert isinstance(intensities, np.ndarray)
 	normalizedIntensities, convergenceTrail, R, S = constand(intensities, accuracy, maxIterations)
 	# print(normalizedIntensities)
-	performanceTest()
+	# performanceTest()
 
 
 if __name__ == '__main__':
