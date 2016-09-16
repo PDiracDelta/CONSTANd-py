@@ -50,6 +50,7 @@ def importData(path=None, delim=None):
 
 
 def exportData(data=None, path=None, delim=','):
+	""" Save the results (normalized intensities) to disk. """
 	assert data is not None
 	assert path is not None
 	assert delim is not None
