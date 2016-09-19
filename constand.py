@@ -23,7 +23,17 @@ from numpy import nan as NaN
 
 
 def constand(data, accuracy, maxIterations):
-    """ return normalizedData, convergenceTrail, R, S """
+    """
+    Return the normalized version of the input data (matrix) as an ndarray, as well as the convergence trail (residual
+    error after each iteration) and the row and column multipliers R and S.
+    :param data:                np.ndarray  (N,6) ndarray with absolute intensities
+    :param accuracy:            float       combined allowed deviation (residual error) of col and row means from 1/6
+    :param maxIterations:       int         maximum amount of iterations (1x row and 1x col per iteration)
+    :return normalizedData:     np.ndarray  (N,6) ndarray with normalized intensities
+    :return convergenceTrail:   list        list of the residual error after each iteration
+    :return R:                  np.ndarray  (N,) ndarray with the row multipliers
+    :return S:                  np.ndarray  (6,) ndarray with the column multipliers
+    """
     assert isinstance(data, np.ndarray)
     assert accuracy > 0
     assert maxIterations > 0
