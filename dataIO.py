@@ -53,10 +53,9 @@ def importData(path=None, delim=None):
 def exportData(data=None, path=None, delim=','):
 	"""
 	Save the results (normalized intensities) to disk.
-	:param data:
-	:param path:
-	:param delim:
-	:return:
+	:param data:    obj data object to be exported to disk
+	:param path:    string  path+filename where data should be exported to
+	:param delim:   char    delimiter of the data
 	"""
 	assert data is not None
 	assert path is not None
@@ -66,7 +65,13 @@ def exportData(data=None, path=None, delim=','):
 
 
 def importDataFrame(path=None, filetype=None, delim=None):
-	""" Get the data from disk as a Pandas DataFrame. """
+	"""
+	Get the data from disk as a Pandas DataFrame.
+	:param path:    string  path to input file
+	:param filetype:    string  specifier for the type of the file (file extension)
+	:param delim:   char    delimiter of the data
+	:return df: pd.dataframe    Pandas dataFrame of the file contents
+	"""
 	assert path is not None
 	if filetype is None:  # set filetype equal to the file extension
 		filetype = path.split('.')[-1]
@@ -94,6 +99,10 @@ def importDataFrame(path=None, filetype=None, delim=None):
 
 
 def selectIntensities(df):
-	""" Extracts the intensity matrix from the dataFrame. """
+	"""
+	Extracts the (absolute) intensity matrix from the dataFrame.
+	:param df:  pd.dataframe    Pandas dataFramefrom which to extract the intensities
+	:return intensities:    np.ndarray  matrix with the intensities
+	"""
 	intensities = np.asarray(df[['126', '127', '128', '129', '130', '131']])
 	return intensities
