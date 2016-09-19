@@ -11,7 +11,15 @@ import numpy as np
 
 
 def getInput():
-	""" Get mass spec data and CONSTANd parameters from the user or from the web interface. """
+	"""
+	Get mass spec data and CONSTANd parameters from the user or from the web interface.
+	:return path_in:    string  path to the input file
+	:return delim_in:   char    delimiter of the data in the input file
+	:return accuracy:   float   CONSTANd param: allowed deviation of col and row means from 1/6
+	:return maxIterations:  int CONSTANd param: maximum amount of iterations (1x row and 1x col per iteration)
+	:return path_out:   string  path to the output file
+	:return delim_out:  char    delimiter of the data in the output file
+	"""
 	# path='../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.tsv' # TEST
 	path_in = '../data/MB_noapostrophes.tsv'  # TEST
 	delim_in = '\t'
@@ -23,7 +31,13 @@ def getInput():
 
 
 def importData(path=None, delim=None):
-	""" Return the intensity matrix and the dataFrame of the data specified. """
+	"""
+	Return the intensity matrix and the dataFrame of the data specified.
+	:param path:    string  path to the data file
+	:param delim:   char    delimiter of the data
+	:return intensities:    np.ndarray  matrix with the absolute intensities
+	:return df: pd.dataframe    Pandas dataframe with the contents of the data file, including the intensities
+	"""
 	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10, 6)), columns=list('ABCDEF'))  # TEST
 	# df = pd.read_csv('../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.txt', delim='\t') # TEST
 	# df = pd.DataFrame(np.arange(10*6).reshape(10,6),columns=list('ABCDEF')) # TEST
@@ -37,7 +51,13 @@ def importData(path=None, delim=None):
 
 
 def exportData(data=None, path=None, delim=','):
-	""" Save the results (normalized intensities) to disk. """
+	"""
+	Save the results (normalized intensities) to disk.
+	:param data:
+	:param path:
+	:param delim:
+	:return:
+	"""
 	assert data is not None
 	assert path is not None
 	assert delim is not None
