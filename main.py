@@ -47,9 +47,9 @@ def main():
 	Contains and explicits the workflow of the program.
 	"""
 	# get all input parameters
-	path_in, delim_in, header_in, accuracy, maxIterations, path_out, delim_out = getInput()
+	params = getInput() # path_in, delim_in, header_in, accuracy, maxIterations, path_out, delim_out
 	# get the data
-	intensities, df = importData(path_in, delim_in, header_in)
+	intensities, df = importData(params('path_in'), params('delim_in'), params('header_in'))
 	# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
 	df = collapsePSMAlgo(df) # TODO
 	# collapse peptide list redundancy due to multiple detections at different RT
@@ -59,9 +59,9 @@ def main():
 	# perform isotopic corrections
 	intensities = isotopicCorrection(intensities) # TODO
 	# perform the CONSTANd algorithm
-	normalizedIntensities, convergenceTrail, R, S = constand(intensities, accuracy, maxIterations)
+	normalizedIntensities, convergenceTrail, R, S = constand(intensities, params('accuracy'), params('maxIterations'))
 	# save the normalized intensities obtained through CONSTANd
-	exportData(normalizedIntensities, path_out, delim_out)
+	exportData(normalizedIntensities, params('path_out'), params('delim_out'))
 	# perform differential expression analysis
 	DEresults = differentialExpression(normalizedIntensities) # TODO
 	# save the DE analysis results
