@@ -49,7 +49,7 @@ def getInput():
 def importData(path_in=None, delim=None, header_in=0):
 	"""
 	Return the intensity matrix and the dataFrame of the data specified.
-	:param path_in:            string          path to the data file
+	:param path_in:         string          path to the data file
 	:param delim:           char            delimiter of the data
 	:return intensities:    np.ndArray      (N,6) ndarray with the absolute intensities
 	:return df:             pd.dataFrame    Pandas dataframe with the contents of the data file, including the intensities
@@ -69,9 +69,9 @@ def importData(path_in=None, delim=None, header_in=0):
 def exportData(data=None, path_in=None, delim=','):
 	"""
 	Save the results (normalized intensities) to disk.
-	:param data:    obj     data object to be exported to disk
-	:param path_in:    string  path+filename where data should be exported to
-	:param delim:   char    delimiter of the data
+	:param data:        obj     data object to be exported to disk
+	:param path_in:     string  path+filename where data should be exported to
+	:param delim:       char    delimiter of the data
 	"""
 	assert data is not None
 	assert path.exists(path_in)
@@ -82,7 +82,7 @@ def exportData(data=None, path_in=None, delim=','):
 def importDataFrame(path_in=None, filetype=None, delim=None, header=0):
 	"""
 	Get the data from disk as a Pandas DataFrame.
-	:param path_in:        string          existing path to input file
+	:param path_in:     string          existing path to input file
 	:param filetype:    string          specifier for the type of the file (file extension)
 	:param delim:       char            delimiter of the data
 	:return df:         pd.dataFrame    Pandas dataFrame of the file contents
