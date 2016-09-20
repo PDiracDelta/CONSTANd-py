@@ -28,6 +28,7 @@ def getInput():
 	maxIterations = 50
 	path_out = '../data/MB_result.tsv'  # TEST
 	delim_out = '\t'
+
 	if not path.exists(path_in):
 		raise FileNotFoundError("File "+path_in+" not found.")
 	if path.exists(path_out):

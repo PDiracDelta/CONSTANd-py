@@ -5,9 +5,9 @@
 CONSTANd
 Normalizes the data matrix <data> by raking the m by n matrix such that
 the row mean and column mean equals to 1/n. Missing information needs to
-be presented as NaN values and not as zero values because CONSTANd
-employs the Matlab functionality 'nanmean' that is able to ignore
-NaN-values when calculating the mean. The variable <nbIterations> is an
+be presented as nan values and not as zero values because CONSTANd
+employs the Matlab/NumPy functionality 'nanmean' that is able to ignore
+nan-values when calculating the mean. The variable <nbIterations> is an
 integer value that denotes the number of raking cycles. The variable <h>
 defines the stopping criteria based on the L1-norm as defined by
 Friedrich Pukelsheim, Bruno Simeone in "On the Iterative Proportional
@@ -19,20 +19,20 @@ Ported to Python by Joris Van Houtven, 2016
 """
 
 import numpy as np
-from numpy import nan as NaN
+from numpy import nan
 
 
 def constand(data, accuracy, maxIterations):
     """
     Return the normalized version of the input data (matrix) as an ndarray, as well as the convergence trail (residual
     error after each iteration) and the row and column multipliers R and S.
-    :param data:                np.ndarray  (N,6) ndarray with absolute intensities
+    :param data:                np.ndArray  (N,6) absolute intensities
     :param accuracy:            float       combined allowed deviation (residual error) of col and row means from 1/6
     :param maxIterations:       int         maximum amount of iterations (1x row and 1x col per iteration)
-    :return normalizedData:     np.ndarray  (N,6) ndarray with normalized intensities
-    :return convergenceTrail:   list        list of the residual error after each iteration
-    :return R:                  np.ndarray  (N,) ndarray with the row multipliers
-    :return S:                  np.ndarray  (6,) ndarray with the column multipliers
+    :return normalizedData:     np.ndArray  (N,6) normalized intensities
+    :return convergenceTrail:   np.ndArray  list of the residual error after each iteration
+    :return R:                  np.ndArray  (N,) row multipliers
+    :return S:                  np.ndArray  (6,) column multipliers
     """
     assert isinstance(data, np.ndarray) and data.dtype == 'float64'
     assert accuracy > 0
@@ -40,7 +40,7 @@ def constand(data, accuracy, maxIterations):
 
     # initialize variables
     Nrows, Ncols = data.shape
-    convergenceTrail = [NaN]*(2*maxIterations)
+    convergenceTrail = np.asarray([nan]*(2*maxIterations))
     convergence = np.inf
     normalizedData = data
 
@@ -69,5 +69,5 @@ def constand(data, accuracy, maxIterations):
         convergence = convergenceTrail[2*i+1]
         i += 1
 
-    return normalizedData, convergenceTrail, R, S
+    return normalizedData, convergenceTrail[~np.isnan(convergenceTrail)], R, S
 
