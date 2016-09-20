@@ -24,6 +24,7 @@ def getInput():
 	# path='../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.tsv' # TEST
 	path_in = '../data/MB_noapostrophes.tsv'  # TEST
 	delim_in = '\t'
+	header_in = 0
 	accuracy = 1e-2
 	maxIterations = 50
 	path_out = '../data/MB_result.tsv'  # TEST
@@ -42,10 +43,10 @@ def getInput():
 		raise Exception("Accuracy must be strictly greater than zero.")
 	if not (maxIterations > 0 and isinstance(maxIterations,int)):
 		raise Exception("Maximum number of iterations must be an integer strictly greater than zero.")
-	return path_in, delim_in, accuracy, maxIterations, path_out, delim_out
+	return path_in, delim_in, header_in, accuracy, maxIterations, path_out, delim_out
 
 
-def importData(path_in=None, delim=None):
+def importData(path_in=None, delim=None, header_in=0):
 	"""
 	Return the intensity matrix and the dataFrame of the data specified.
 	:param path_in:            string          path to the data file
@@ -58,7 +59,7 @@ def importData(path_in=None, delim=None):
 	# df = pd.DataFrame(np.arange(10*6).reshape(10,6),columns=list('ABCDEF')) # TEST
 	# df['B'][0]=np.nan # TEST
 	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10**3, 6)), columns=list('ABCDEF'))  # TEST
-	df = importDataFrame(path_in, delim=delim)
+	df = importDataFrame(path_in, delim=delim, header=header_in)
 	intensities = selectIntensities(df)
 	assert isinstance(intensities, np.ndarray) and intensities.shape[1] == 6 and intensities.dtype == 'float64'
 
@@ -78,7 +79,7 @@ def exportData(data=None, path_in=None, delim=','):
 	np.savetxt(path_in, data, delimiter=delim)
 
 
-def importDataFrame(path_in=None, filetype=None, delim=None):
+def importDataFrame(path_in=None, filetype=None, delim=None, header=0):
 	"""
 	Get the data from disk as a Pandas DataFrame.
 	:param path_in:        string          existing path to input file
@@ -95,20 +96,20 @@ def importDataFrame(path_in=None, filetype=None, delim=None):
 		df = pd.read_excel(path_in)
 	elif filetype == 'csv':
 		if delim is None:
-			df = pd.read_csv(path_in, delimiter=',')
+			df = pd.read_csv(path_in, delimiter=',', header=header)
 		else:
-			df = pd.read_csv(path_in, delimiter=delim)
+			df = pd.read_csv(path_in, delimiter=delim, header=header)
 	elif filetype == 'tsv':
 		if delim is None:
-			df = pd.read_csv(path_in, delimiter='\t')
+			df = pd.read_csv(path_in, delimiter='\t', header=header)
 		else:
-			df = pd.read_csv(path_in, delimiter=delim)
+			df = pd.read_csv(path_in, delimiter=delim, header=header)
 	else:
 		if delim is None:
 			raise Exception(
 				"I don't know how to handle this data: the filetype was not recognized and no delimiter was specified.")
 		warnings.warn("Did not recognize filetype: treating as delimited textfile with the delimiter you specified.")
-		df = pd.read_csv(path_in, delimiter=delim)
+		df = pd.read_csv(path_in, delimiter=delim, header=header)
 
 	return df
 
