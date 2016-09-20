@@ -37,8 +37,8 @@ def performanceTest():  # remove for production
 
 def main():
 	""" For now this is just stuff for debugging and testing. """
-	path_in, delim_in, accuracy, maxIterations, path_out, delim_out = getInput()
-	intensities, df = importData(path_in, delim_in)
+	path_in, delim_in, header_in, accuracy, maxIterations, path_out, delim_out = getInput()
+	intensities, df = importData(path_in, delim_in, header_in)
 	normalizedIntensities, convergenceTrail, R, S = constand(intensities, accuracy, maxIterations)
 	# print(normalizedIntensities)
 	exportData(normalizedIntensities, path_out, delim_out)
