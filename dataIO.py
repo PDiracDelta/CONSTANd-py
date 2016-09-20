@@ -36,7 +36,7 @@ def getInput():
 		raise FileNotFoundError("File "+path_in+" not found.")
 	if path.exists(path_out):
 		# raise Exception("The file "+path_out+" already exists.")
-		warnings.warn("Overwriting file "+path.basename(path.normpath(path_out)))
+		warnings.warn("Will overwrite file "+path.basename(path.normpath(path_out)))
 	if not (len(delim_in) == 1 and isinstance(delim_in, str)):
 		raise Exception("Delimiter of input file must be a character (string of length one).")
 	if not(len(delim_out) == 1 and isinstance(delim_out, str)):
