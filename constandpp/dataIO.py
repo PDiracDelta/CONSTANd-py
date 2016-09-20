@@ -13,15 +13,17 @@ from os import path
 
 def getInput():
 	"""
-	Get mass spec data and CONSTANd parameters from the user or from the web interface.
-	:return path_in:        string  path to the input file
-	:return delim_in:       char    delimiter of the data in the input file
-	:return accuracy:       float   CONSTANd param: combined allowed deviation of col and row means from 1/6
-	:return maxIterations:  int     CONSTANd param: maximum amount of iterations (1x row and 1x col per iteration)
-	:return path_out:       string  path to the output file
-	:return delim_out:      char    delimiter of the data in the output file
+	Get mass spec data and CONSTANd parameters from the user or from the web interface as a dict.
+	:return params:         dict    dictionary containing all paraeters mentioned below:
+		:return path_in:        string  path to the input file
+		:return delim_in:       char    delimiter of the data in the input file
+		:return accuracy:       float   CONSTANd param: combined allowed deviation of col and row means from 1/6
+		:return header_in:      integer row number containing the dataFrame header (can be None if no header)
+		:return maxIterations:  int     CONSTANd param: maximum amount of iterations (1x row and 1x col per iteration)
+		:return path_out:       string  path to the output file
+		:return delim_out:      char    delimiter of the data in the output file
 	"""
-	# path='../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.tsv' # TEST
+	# path_in='../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.tsv' # TEST
 	path_in = '../data/MB_noapostrophes.tsv'  # TEST
 	delim_in = '\t'
 	header_in = 0
@@ -43,7 +45,15 @@ def getInput():
 		raise Exception("Accuracy must be strictly greater than zero.")
 	if not (maxIterations > 0 and isinstance(maxIterations,int)):
 		raise Exception("Maximum number of iterations must be an integer strictly greater than zero.")
-	return path_in, delim_in, header_in, accuracy, maxIterations, path_out, delim_out
+
+	params = {'path_in': path_in,
+	          'delim_in': delim_in,
+	          'header_in': header_in,
+	          'accuracy': accuracy,
+	          'maxIterations': maxIterations,
+	          'path_out': path_out,
+	          'delim_out': delim_out}
+	return params
 
 
 def importData(path_in=None, delim=None, header_in=0):
