@@ -15,7 +15,7 @@ def getInput():
 	"""
 	Get mass spec data and CONSTANd parameters from the user or from the web interface as a dict.
 	:return params:         dict    dictionary containing all paraeters mentioned below:
-		:return path_in:        string  path to the input file
+		:return file_in:        string  path to the input file
 		:return delim_in:       char    delimiter of the data in the input file
 		:return accuracy:       float   CONSTANd param: combined allowed deviation of col and row means from 1/6
 		:return header_in:      integer row number containing the dataFrame header (can be None if no header)
@@ -24,23 +24,24 @@ def getInput():
 		:return delim_out:      char    delimiter of the data in the output file
 	"""
 	# TODO add .lower() to all string input
-	# path_in='../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.tsv' # TEST
-	path_in = '../data/MB_noapostrophes.tsv'  # TEST
+	# file_in='../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.tsv' # TEST
+	file_in = '../data/MB_noapostrophes.tsv'  # TEST
 	delim_in = '\t'
 	header_in = 0
 	collapsePSMAlgo_bool = True
 	collapsePSMAlgo_master = 'mascot'
 	collapseRT_bool = True
-	collapseRT_centermeasure = 'mean'
+	collapseRT_centerMeasure = 'mean'
 	collapseCharge_bool = True
 	isotopicCorrectionsMatrix = np.asmatrix(np.diag(np.ones([6,])))
 	accuracy = 1e-2
 	maxIterations = 50
-	path_out = '../data/MB_result.tsv'  # TEST
+	path_out = '../data'  # TEST
+	filename_out = 'MB_result.tsv' # TEST
 	delim_out = '\t'
 
-	if not path.exists(path_in):
-		raise FileNotFoundError("File "+path_in+" not found.")
+	if not path.exists(file_in):
+		raise FileNotFoundError("File "+file_in+" not found.")
 	if not (len(delim_in) == 1 and isinstance(delim_in, str)):
 		raise Exception("Delimiter of input file must be a character (string of length one).")
 	if not ((isinstance(header_in, int) and header_in >= 0) or header_in is None):
@@ -51,8 +52,8 @@ def getInput():
 		raise Exception("Invalid master PSM algorithm: '"+collapsePSMAlgo_master+"'. Please pick 'mascot' or 'sequest'.")
 	if collapseRT_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple retention times.")
-	if collapseRT_centermeasure not in ('mean', 'median'):
-		raise Exception("Invalid center measure: '"+collapseRT_centermeasure+"'. Please pick 'mean' or 'median'.")
+	if collapseRT_centerMeasure not in ('mean', 'median'):
+		raise Exception("Invalid center measure: '"+collapseRT_centerMeasure+"'. Please pick 'mean' or 'median'.")
 	if collapseCharge_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple charge states.")
 	if not (isotopicCorrectionsMatrix.shape == [6,6]):
@@ -61,25 +62,27 @@ def getInput():
 		raise Exception("Accuracy must be strictly greater than zero.")
 	if not (maxIterations > 0 and isinstance(maxIterations,int)):
 		raise Exception("Maximum number of iterations must be an integer strictly greater than zero.")
-	if path.exists(path_out):
-		# raise Exception("The file "+path_out+" already exists.")
+	if not path.exists(path_out):
+		raise FileNotFoundError("Path " + path_out + " not found.")
+	if path.exists(path_out+'/'+filename_out):
 		warnings.warn("Will overwrite file "+path.basename(path.normpath(path_out)))
 	if not (len(delim_out) == 1 and isinstance(delim_out, str)):
 		raise Exception("Delimiter of output file must be a character (string of length one).")
 
 	params = {
-		'path_in': path_in,
+		'file_in': file_in,
 		'delim_in': delim_in,
 		'header_in': header_in,
 		'collapsePSMAlgo_bool': collapsePSMAlgo_bool,
 		'collapsePSMAlgo_master': collapsePSMAlgo_master,
 		'collapseRT_bool': collapseRT_bool,
-		'collapseRT_centermeasure': collapseRT_centermeasure,
+		'collapseRT_centerMeasure': collapseRT_centerMeasure,
 		'collapseCharge_bool': collapseCharge_bool,
 		'isotopicCorrectionsMatrix': isotopicCorrectionsMatrix,
 		'accuracy': accuracy,
 		'maxIterations': maxIterations,
 		'path_out': path_out,
+		'filename_out': filename_out,
 		'delim_out': delim_out
 	}
 	return params
@@ -126,14 +129,16 @@ def importDataFrame(path_in=None, filetype=None, delim=None, header=0):
 	return df
 
 
-def exportData(data=None, path_in=None, delim=','):
+def exportData(data=None, path=None, filename=None, delim=','):
+	# TODO is path_in the complete path including the filename? If so, only one file can be exported (or you can choose
+	# to automatically put the other files alongside it in the same root).
 	"""
 	Save the results (normalized intensities) to disk.
 	:param data:        obj     data object to be exported to disk
-	:param path_in:     string  path+filename where data should be exported to
+	:param path:        string  path+filename where data should be exported to
 	:param delim:       char    delimiter of the data
 	"""
 	assert data is not None
-	assert path.exists(path_in)
+	assert path.exists(path)
 
-	np.savetxt(path_in, data, delimiter=delim)
+	np.savetxt(path+'/'+filename, data, delimiter=delim)
