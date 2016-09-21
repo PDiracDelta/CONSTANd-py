@@ -30,6 +30,7 @@ def getInput():
 	header_in = 0
 	collapsePSMAlgo_bool = True
 	collapsePSMAlgo_master = 'mascot'
+	collapsePSMAlgo_bool_exclusive = False
 	collapseRT_bool = True
 	collapseRT_centerMeasure = 'mean'
 	collapseCharge_bool = True
@@ -47,9 +48,11 @@ def getInput():
 	if not ((isinstance(header_in, int) and header_in >= 0) or header_in is None):
 		raise Exception("Header parameter of the input file must be a non-negative integer or of type None.")
 	if collapsePSMAlgo_bool is None:
-		raise Exception("Please indicate whether you would like to remove redundancy due to multuiple PSM Algorithms.")
+		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PSM Algorithms.")
 	if collapsePSMAlgo_master not in ('mascot', 'sequest'):
 		raise Exception("Invalid master PSM algorithm: '"+collapsePSMAlgo_master+"'. Please pick 'mascot' or 'sequest'.")
+	if collapsePSMAlgo_bool_exclusive is None:
+		raise Exception("Please indicate whether PSM Algorithm redundancy removal should be exclusive or not.")
 	if collapseRT_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple retention times.")
 	if collapseRT_centerMeasure not in ('mean', 'median'):
@@ -75,6 +78,7 @@ def getInput():
 		'header_in': header_in,
 		'collapsePSMAlgo_bool': collapsePSMAlgo_bool,
 		'collapsePSMAlgo_master': collapsePSMAlgo_master,
+		'collapsePSMAlgo_bool_exclusive': collapsePSMAlgo_bool_exclusive,
 		'collapseRT_bool': collapseRT_bool,
 		'collapseRT_centerMeasure': collapseRT_centerMeasure,
 		'collapseCharge_bool': collapseCharge_bool,

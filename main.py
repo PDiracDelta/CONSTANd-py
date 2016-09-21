@@ -48,7 +48,7 @@ def main():
 	"""
 	# get all input parameters and option switches
 	""" params:
-	file_in, delim_in, header_in, collapsePSMAlgo_bool, collapsePSMAlgo_master, collapseRT_bool,
+	file_in, delim_in, header_in, collapsePSMAlgo_bool, collapsePSMAlgo_master, collapsePSMAlgo_bool_exclusive, collapseRT_bool,
 	collapseRT_centerMeasure, collapseCharge_bool, isotopicCorrectionsMatrix, accuracy, maxIterations, path_out, filename_out, delim_out
 	 """
 	params = getInput()
@@ -56,9 +56,11 @@ def main():
 	df = importDataFrame(params('file_in'), delim=params('delim_in'), header=params('header_in'))
 	# add extra columns to the dataFrame for retaining condensed data after each collapse, according to bools (or not).
 	addColumns(df, bools=None)
+	if params['removeIsolationInterference_bool']:
+		df = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
 	if params['collapsePSMAlgo_bool']:
 		# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
-		df = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master']) # TODO
+		df = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master'], exclusive=params['collapsePSMAlgo_bool_exclusive']) # TODO
 	if params['collapseRT_bool']:
 		# collapse peptide list redundancy due to multiple detections at different RT
 		df = collapseRT(df, centerMeasure=params['collapseRT_centerMeasure']) # TODO
