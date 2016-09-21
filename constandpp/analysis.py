@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Performs a differential expression analysis on the normalized intensities as provided by CONSTANd. Includes data visualization.
+Performs a differential expression analysis on the normalized intensities as provided by CONSTANd.
+Includes data visualization.
 """
 
 

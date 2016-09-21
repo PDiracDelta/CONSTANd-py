@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Handle all I/O of data files to and from the workflow.
+Handle all I/O of data files and parameters to and from both the workflow and the main dataFrame.
 """
 
 import warnings
@@ -23,10 +23,17 @@ def getInput():
 		:return path_out:       string  path to the output file
 		:return delim_out:      char    delimiter of the data in the output file
 	"""
+	# TODO add .lower() to all string input
 	# path_in='../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.tsv' # TEST
 	path_in = '../data/MB_noapostrophes.tsv'  # TEST
 	delim_in = '\t'
 	header_in = 0
+	collapsePSMAlgo_bool = True
+	collapsePSMAlgo_master = 'mascot'
+	collapseRT_bool = True
+	collapseRT_centermeasure = 'mean'
+	collapseCharge_bool = True
+	isotopicCorrectionsMatrix = np.asmatrix(np.diag(np.ones([6,])))
 	accuracy = 1e-2
 	maxIterations = 50
 	path_out = '../data/MB_result.tsv'  # TEST
@@ -34,25 +41,47 @@ def getInput():
 
 	if not path.exists(path_in):
 		raise FileNotFoundError("File "+path_in+" not found.")
-	if path.exists(path_out):
-		# raise Exception("The file "+path_out+" already exists.")
-		warnings.warn("Will overwrite file "+path.basename(path.normpath(path_out)))
 	if not (len(delim_in) == 1 and isinstance(delim_in, str)):
 		raise Exception("Delimiter of input file must be a character (string of length one).")
-	if not(len(delim_out) == 1 and isinstance(delim_out, str)):
-		raise Exception("Delimiter of output file must be a character (string of length one).")
+	if not ((isinstance(header_in, int) and header_in >= 0) or header_in is None):
+		raise Exception("Header parameter of the input file must be a non-negative integer or of type None.")
+	if collapsePSMAlgo_bool is None:
+		raise Exception("Please indicate whether you would like to remove redundancy due to multuiple PSM Algorithms.")
+	if collapsePSMAlgo_master not in ('mascot', 'sequest'):
+		raise Exception("Invalid master PSM algorithm: '"+collapsePSMAlgo_master+"'. Please pick 'mascot' or 'sequest'.")
+	if collapseRT_bool is None:
+		raise Exception("Please indicate whether you would like to remove redundancy due to multiple retention times.")
+	if collapseRT_centermeasure not in ('mean', 'median'):
+		raise Exception("Invalid center measure: '"+collapseRT_centermeasure+"'. Please pick 'mean' or 'median'.")
+	if collapseCharge_bool is None:
+		raise Exception("Please indicate whether you would like to remove redundancy due to multiple charge states.")
+	if not (isotopicCorrectionsMatrix.shape == [6,6]):
+		raise Exception("Isotopic corrections matrix must have shape (6,6).")
 	if not (accuracy > 0):
 		raise Exception("Accuracy must be strictly greater than zero.")
 	if not (maxIterations > 0 and isinstance(maxIterations,int)):
 		raise Exception("Maximum number of iterations must be an integer strictly greater than zero.")
+	if path.exists(path_out):
+		# raise Exception("The file "+path_out+" already exists.")
+		warnings.warn("Will overwrite file "+path.basename(path.normpath(path_out)))
+	if not (len(delim_out) == 1 and isinstance(delim_out, str)):
+		raise Exception("Delimiter of output file must be a character (string of length one).")
 
-	params = {'path_in': path_in,
-	          'delim_in': delim_in,
-	          'header_in': header_in,
-	          'accuracy': accuracy,
-	          'maxIterations': maxIterations,
-	          'path_out': path_out,
-	          'delim_out': delim_out}
+	params = {
+		'path_in': path_in,
+		'delim_in': delim_in,
+		'header_in': header_in,
+		'collapsePSMAlgo_bool': collapsePSMAlgo_bool,
+		'collapsePSMAlgo_master': collapsePSMAlgo_master,
+		'collapseRT_bool': collapseRT_bool,
+		'collapseRT_centermeasure': collapseRT_centermeasure,
+		'collapseCharge_bool': collapseCharge_bool,
+		'isotopicCorrectionsMatrix': isotopicCorrectionsMatrix,
+		'accuracy': accuracy,
+		'maxIterations': maxIterations,
+		'path_out': path_out,
+		'delim_out': delim_out
+	}
 	return params
 
 
@@ -70,7 +99,7 @@ def importData(path_in=None, delim=None, header_in=0):
 	# df['B'][0]=np.nan # TEST
 	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10**3, 6)), columns=list('ABCDEF'))  # TEST
 	df = importDataFrame(path_in, delim=delim, header=header_in)
-	intensities = selectIntensities(df)
+	intensities = getIntensities(df)
 	assert isinstance(intensities, np.ndarray) and intensities.shape[1] == 6 and intensities.dtype == 'float64'
 
 	return intensities, df
@@ -122,14 +151,3 @@ def importDataFrame(path_in=None, filetype=None, delim=None, header=0):
 		df = pd.read_csv(path_in, delimiter=delim, header=header)
 
 	return df
-
-
-def selectIntensities(df):
-	"""
-	Extracts the (absolute) intensity matrix from the dataFrame.
-	:param df:              pd.dataFrame    Pandas dataFrame from which to extract the intensities
-	:return intensities:    np.ndArray      matrix with the intensities
-	"""
-	intensities = np.asarray(df[['126', '127', '128', '129', '130', '131']])
-
-	return intensities
