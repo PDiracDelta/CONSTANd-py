@@ -45,6 +45,7 @@ def isotopicCorrection(df, correctionsMatrix):
 	# solve the linear system
 	# Observed(6,1) = correctionMatrix(6,6) * Real(6,1)
 	# if Det(cM) = 0 no solution can be found.
+	# TODO are we allowed to put the corrected intensities in the output for non-payers? (with the copyright and all)
 	return df
 
 

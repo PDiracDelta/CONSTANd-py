@@ -28,10 +28,10 @@ def performanceTest():  # remove for production
 	""" Use this development method to test the performance of the CONSTANd algorithm. """
 	t = []
 	for i in range(1000):
-		path, delim, accuracy, maxIterations = getInput()
-		intensities, df = importData(path, delim)
+		params = getInput()
+		df = importDataFrame(params['path'], delim=params['delim_in'])
 		start = time()
-		constand(intensities, 1e-2, 50)
+		constand(getIntensities(df), 1e-2, 50)
 		stop = time()
 		t.append((stop - start))
 	print("average runtime: " + str(np.mean(t)))
@@ -48,12 +48,12 @@ def main():
 	"""
 	# get all input parameters and option switches
 	""" params:
-	path_in, delim_in, header_in, collapsePSMAlgo_bool, collapsePSMAlgo_master, collapseRT_bool,
-	collapseRT_centermeasure, collapseCharge_bool, isotopicCorrectionsMatrix, accuracy, maxIterations, path_out, delim_out
+	file_in, delim_in, header_in, collapsePSMAlgo_bool, collapsePSMAlgo_master, collapseRT_bool,
+	collapseRT_centerMeasure, collapseCharge_bool, isotopicCorrectionsMatrix, accuracy, maxIterations, path_out, filename_out, delim_out
 	 """
 	params = getInput()
 	# get the dataframe
-	df = importDataFrame(params('path_in'), delim=params('delim_in'), header=params('header_in'))
+	df = importDataFrame(params('file_in'), delim=params('delim_in'), header=params('header_in'))
 	# add extra columns to the dataFrame for retaining condensed data after each collapse, according to bools (or not).
 	addColumns(df, bools=None)
 	if params['collapsePSMAlgo_bool']:
@@ -61,16 +61,16 @@ def main():
 		df = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master']) # TODO
 	if params['collapseRT_bool']:
 		# collapse peptide list redundancy due to multiple detections at different RT
-		df = collapseRT(df, centerMeasure=params['collapseRT_centermeasure']) # TODO
+		df = collapseRT(df, centerMeasure=params['collapseRT_centerMeasure']) # TODO
 	if params['collapseCharge_bool']:
 		# collapse peptide list redundancy due to different charges (optional)
 		df = collapseCharge(df) # TODO
 	# perform isotopic corrections
-	intensities = isotopicCorrection(intensities, correctionsMatrix=params['isotopicCorrectionsMatrix']) # TODO
+	intensities = isotopicCorrection(getIntensities(df), correctionsMatrix=params['isotopicCorrectionsMatrix']) # TODO
 	# perform the CONSTANd algorithm
 	normalizedIntensities, convergenceTrail, R, S = constand(intensities, params('accuracy'), params('maxIterations'))
 	# save the normalized intensities obtained through CONSTANd
-	exportData(normalizedIntensities, params('path_out'), params('delim_out'))
+	exportData(normalizedIntensities, path=params('path_out'), filename=params['filename_out'], delim=params('delim_out'))
 	# perform differential expression analysis
 	DEresults = differentialExpression(normalizedIntensities) # TODO
 	# save the DE analysis results
