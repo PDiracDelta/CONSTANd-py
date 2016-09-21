@@ -7,7 +7,8 @@ Includes data visualization.
 """
 
 
-def differentialExpression(normalizedIntensities):
+def differentialExpression(normalizedIntensities, threshold=1):
+	# TODO: only include differentials with a fold of >threshold or <1/threshold
 	return None
 
 
