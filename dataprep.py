@@ -16,6 +16,10 @@ def collapsePSMAlgo(df):
 
 
 def collapseRT(df):
+	""" Averages over all peaks for each channel/reporter, and then rescales the magnitude of the resulting peak to
+	match the magnitude of the largest constituent peak. In this way, the absolute intensity is still that of the
+	largest peak, but the within-peak relative intensities are the average of all the constituent peaks. """
+	#setIntensities(df, intensities, location)
 	return None
 
 
@@ -25,3 +29,20 @@ def collapseCharge(df):
 
 def isotopicCorrection(intensities):
 	return None
+
+
+def getIntensities(df):
+	"""
+	Extracts the (absolute) intensity matrix from the dataFrame.
+	:param df:              pd.dataFrame    Pandas dataFrame from which to extract the intensities
+	:return intensities:    np.ndArray      matrix with the intensities
+	"""
+	intensities = np.asarray(df[['126', '127', '128', '129', '130', '131']])
+
+
+def setIntensities(df, intensities, location=[0,-1,0,-1]):
+	""" Sets the intensities of the dataframe at the specified location equal to the ndArray of given intensities."""
+	#df[['126', '127', '128', '129', '130', '131']].iloc() = [intensities[:,1], intensities[:,2], intensities[:,3],
+	#                                                  intensities[:,4], intensities[:,5], intensities[:,6]]
+
+	return df
