@@ -49,7 +49,7 @@ def main():
 	# get all input parameters and option switches
 	""" params:
 	file_in, delim_in, header_in, collapsePSMAlgo_bool, collapsePSMAlgo_master, collapsePSMAlgo_bool_exclusive, collapseRT_bool,
-	collapseRT_centerMeasure, collapseCharge_bool, isotopicCorrectionsMatrix, accuracy, maxIterations, path_out, filename_out, delim_out
+	collapseRT_centerMeasure_channels, collapseRT_centerMeasure_intensities, collapseRT_maxRelativeChannelVariance, collapseCharge_bool, isotopicCorrectionsMatrix, accuracy, maxIterations, path_out, filename_out, delim_out
 	 """
 	params = getInput()
 	# get the dataframe
@@ -60,10 +60,13 @@ def main():
 		df = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
 	if params['collapsePSMAlgo_bool']:
 		# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
-		df = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master'], exclusive=params['collapsePSMAlgo_bool_exclusive']) # TODO
+		df = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master'],
+		                     exclusive=params['collapsePSMAlgo_bool_exclusive']) # TODO
 	if params['collapseRT_bool']:
 		# collapse peptide list redundancy due to multiple detections at different RT
-		df = collapseRT(df, centerMeasure=params['collapseRT_centerMeasure']) # TODO
+		df = collapseRT(df, centerMeasure_channels=params['collapseRT_centerMeasure_channels'],
+		                centerMeasure_intensities=params['collapseRT_centerMeasure_intensities'],
+		                maxRelativeChannelVariance=params['collapseRT_maxRelativeChannelVariance']) # TODO
 	if params['collapseCharge_bool']:
 		# collapse peptide list redundancy due to different charges (optional)
 		df = collapseCharge(df) # TODO
