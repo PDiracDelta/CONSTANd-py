@@ -34,7 +34,7 @@ def constand(data, accuracy, maxIterations):
     :return R:                  np.ndArray  (N,) row multipliers
     :return S:                  np.ndArray  (6,) column multipliers
     """
-    assert isinstance(data, np.ndarray) and data.dtype == 'float64'
+    assert isinstance(data, np.ndarray) and data.shape[1] == 6 and data.dtype == 'float64'
     assert accuracy > 0
     assert maxIterations > 0
 
