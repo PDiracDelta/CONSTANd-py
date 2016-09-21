@@ -39,6 +39,7 @@ def getInput():
 	isotopicCorrectionsMatrix = np.asmatrix(np.diag(np.ones([6,])))
 	accuracy = 1e-2
 	maxIterations = 50
+	DEFoldThreshold = 1
 	path_out = '../data'  # TEST
 	filename_out = 'MB_result.tsv' # TEST
 	delim_out = '\t'
@@ -60,7 +61,8 @@ def getInput():
 	if collapseRT_centerMeasure_channels not in ('mean', 'median'):
 		raise Exception("Invalid center measure: '"+collapseRT_centerMeasure_channels+"'. Please pick 'mean' or 'median'.")
 	if collapseRT_centerMeasure_intensities not in ('max', 'mean', 'median'):
-		raise Exception("Invalid center measure: '"+collapseRT_centerMeasure_channels+"'. Please pick 'max', 'mean' or 'median'.")
+		raise Exception("Invalid center measure: '"+collapseRT_centerMeasure_channels+"'. "
+		                                                                              "Please pick 'max', 'mean' or 'median'.")
 	if collapseRT_maxRelativeChannelVariance is not None:
 		if not collapseRT_maxRelativeChannelVariance > 0:
 			raise Exception("maxRelativeChannelVariance should be either 'None' or greater than zero.")
@@ -89,10 +91,12 @@ def getInput():
 		'collapseRT_bool': collapseRT_bool,
 		'collapseRT_centerMeasure_channels': collapseRT_centerMeasure_channels,
 		'collapseRT_centerMeasure_intensities': collapseRT_centerMeasure_intensities,
+		'collapseRT_maxRelativeChannelVariance': collapseRT_maxRelativeChannelVariance,
 		'collapseCharge_bool': collapseCharge_bool,
 		'isotopicCorrectionsMatrix': isotopicCorrectionsMatrix,
 		'accuracy': accuracy,
 		'maxIterations': maxIterations,
+		'DEFoldThreshold': DEFoldThreshold,
 		'path_out': path_out,
 		'filename_out': filename_out,
 		'delim_out': delim_out

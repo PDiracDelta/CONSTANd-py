@@ -48,8 +48,10 @@ def main():
 	"""
 	# get all input parameters and option switches
 	""" params:
-	file_in, delim_in, header_in, collapsePSMAlgo_bool, collapsePSMAlgo_master, collapsePSMAlgo_bool_exclusive, collapseRT_bool,
-	collapseRT_centerMeasure_channels, collapseRT_centerMeasure_intensities, collapseRT_maxRelativeChannelVariance, collapseCharge_bool, isotopicCorrectionsMatrix, accuracy, maxIterations, path_out, filename_out, delim_out
+	file_in, delim_in, header_in, collapsePSMAlgo_bool, collapsePSMAlgo_master, collapsePSMAlgo_bool_exclusive,
+	collapseRT_bool, collapseRT_centerMeasure_channels, collapseRT_centerMeasure_intensities,
+	collapseRT_maxRelativeChannelVariance, collapseCharge_bool, isotopicCorrectionsMatrix, accuracy, maxIterations,
+	DEFoldThreshold, path_out, filename_out, delim_out
 	 """
 	params = getInput()
 	# get the dataframe
@@ -77,7 +79,7 @@ def main():
 	# save the normalized intensities obtained through CONSTANd
 	exportData(normalizedIntensities, path=params('path_out'), filename=params['filename_out'], delim=params('delim_out'))
 	# perform differential expression analysis
-	DEresults = differentialExpression(normalizedIntensities) # TODO
+	DEresults = differentialExpression(normalizedIntensities, params['DEFoldThreshold']) # TODO
 	# save the DE analysis results
 	exportData(DEresults) # TODO
 	# data visualization
