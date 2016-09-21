@@ -85,39 +85,6 @@ def getInput():
 	return params
 
 
-def importData(path_in=None, delim=None, header_in=0):
-	"""
-	Return the intensity matrix and the dataFrame of the data specified.
-	:param path_in:         string          path to the data file
-	:param delim:           char            delimiter of the data
-	:return intensities:    np.ndArray      (N,6) ndarray with the absolute intensities
-	:return df:             pd.dataFrame    Pandas dataframe with the contents of the data file, including the intensities
-	"""
-	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10, 6)), columns=list('ABCDEF'))  # TEST
-	# df = pd.read_csv('../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.txt', delim='\t') # TEST
-	# df = pd.DataFrame(np.arange(10*6).reshape(10,6),columns=list('ABCDEF')) # TEST
-	# df['B'][0]=np.nan # TEST
-	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10**3, 6)), columns=list('ABCDEF'))  # TEST
-	df = importDataFrame(path_in, delim=delim, header=header_in)
-	intensities = getIntensities(df)
-	assert isinstance(intensities, np.ndarray) and intensities.shape[1] == 6 and intensities.dtype == 'float64'
-
-	return intensities, df
-
-
-def exportData(data=None, path_in=None, delim=','):
-	"""
-	Save the results (normalized intensities) to disk.
-	:param data:        obj     data object to be exported to disk
-	:param path_in:     string  path+filename where data should be exported to
-	:param delim:       char    delimiter of the data
-	"""
-	assert data is not None
-	assert path.exists(path_in)
-
-	np.savetxt(path_in, data, delimiter=delim)
-
-
 def importDataFrame(path_in=None, filetype=None, delim=None, header=0):
 	"""
 	Get the data from disk as a Pandas DataFrame.
@@ -150,4 +117,23 @@ def importDataFrame(path_in=None, filetype=None, delim=None, header=0):
 		warnings.warn("Did not recognize filetype: treating as delimited textfile with the delimiter you specified.")
 		df = pd.read_csv(path_in, delimiter=delim, header=header)
 
+	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10, 6)), columns=list('ABCDEF'))  # TEST
+	# df = pd.read_csv('../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.txt', delim='\t') # TEST
+	# df = pd.DataFrame(np.arange(10*6).reshape(10,6),columns=list('ABCDEF')) # TEST
+	# df['B'][0]=np.nan # TEST
+	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10**3, 6)), columns=list('ABCDEF'))  # TEST
+
 	return df
+
+
+def exportData(data=None, path_in=None, delim=','):
+	"""
+	Save the results (normalized intensities) to disk.
+	:param data:        obj     data object to be exported to disk
+	:param path_in:     string  path+filename where data should be exported to
+	:param delim:       char    delimiter of the data
+	"""
+	assert data is not None
+	assert path.exists(path_in)
+
+	np.savetxt(path_in, data, delimiter=delim)

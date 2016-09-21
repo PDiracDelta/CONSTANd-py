@@ -53,7 +53,7 @@ def main():
 	 """
 	params = getInput()
 	# get the dataframe
-	intensities, df = importData(params('path_in'), params('delim_in'), params('header_in'))
+	df = importDataFrame(params('path_in'), delim=params('delim_in'), header=params('header_in'))
 	# add extra columns to the dataFrame for retaining condensed data after each collapse, according to bools (or not).
 	addColumns(df, bools=None)
 	if params['collapsePSMAlgo_bool']:
