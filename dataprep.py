@@ -34,8 +34,11 @@ def collapsePSMAlgo(df, master='mascot', exclusive=False):
 	return df
 
 
-def collapseRT(df, centerMeasure='mean'):
+def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mean', maxRelativeChannelVariance=None):
 	# TODO: retain deleted info in compact way
+	# what if the peptides resulting from the PSM do not agree between RT's? -> within-algorithm disagreement doesn't occur.
+	# TODO: second switch: what if user wants not  a peak as high as the highest peak, but as high as the mean/median?
+	# todo: check that the max RELATIVE variance on the channel intensities do not exceed given value.
 	""" Averages over all peaks for each channel/reporter, and then rescales the magnitude of the resulting peak to
 	match the magnitude of the largest constituent peak. In this way, the absolute intensity is still that of the
 	largest peak, but the within-peak relative intensities are the average of all the constituent peaks. """

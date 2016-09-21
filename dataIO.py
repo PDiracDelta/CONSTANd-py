@@ -32,7 +32,9 @@ def getInput():
 	collapsePSMAlgo_master = 'mascot'
 	collapsePSMAlgo_bool_exclusive = False
 	collapseRT_bool = True
-	collapseRT_centerMeasure = 'mean'
+	collapseRT_centerMeasure_channels = 'mean'
+	collapseRT_centerMeasure_intensities = 'max'
+	collapseRT_maxRelativeChannelVariance = None
 	collapseCharge_bool = True
 	isotopicCorrectionsMatrix = np.asmatrix(np.diag(np.ones([6,])))
 	accuracy = 1e-2
@@ -55,8 +57,13 @@ def getInput():
 		raise Exception("Please indicate whether PSM Algorithm redundancy removal should be exclusive or not.")
 	if collapseRT_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple retention times.")
-	if collapseRT_centerMeasure not in ('mean', 'median'):
-		raise Exception("Invalid center measure: '"+collapseRT_centerMeasure+"'. Please pick 'mean' or 'median'.")
+	if collapseRT_centerMeasure_channels not in ('mean', 'median'):
+		raise Exception("Invalid center measure: '"+collapseRT_centerMeasure_channels+"'. Please pick 'mean' or 'median'.")
+	if collapseRT_centerMeasure_intensities not in ('max', 'mean', 'median'):
+		raise Exception("Invalid center measure: '"+collapseRT_centerMeasure_channels+"'. Please pick 'max', 'mean' or 'median'.")
+	if collapseRT_maxRelativeChannelVariance is not None:
+		if not collapseRT_maxRelativeChannelVariance > 0:
+			raise Exception("maxRelativeChannelVariance should be either 'None' or greater than zero.")
 	if collapseCharge_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple charge states.")
 	if not (isotopicCorrectionsMatrix.shape == [6,6]):
@@ -80,7 +87,8 @@ def getInput():
 		'collapsePSMAlgo_master': collapsePSMAlgo_master,
 		'collapsePSMAlgo_bool_exclusive': collapsePSMAlgo_bool_exclusive,
 		'collapseRT_bool': collapseRT_bool,
-		'collapseRT_centerMeasure': collapseRT_centerMeasure,
+		'collapseRT_centerMeasure_channels': collapseRT_centerMeasure_channels,
+		'collapseRT_centerMeasure_intensities': collapseRT_centerMeasure_intensities,
 		'collapseCharge_bool': collapseCharge_bool,
 		'isotopicCorrectionsMatrix': isotopicCorrectionsMatrix,
 		'accuracy': accuracy,
