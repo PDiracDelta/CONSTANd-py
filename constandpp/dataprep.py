@@ -21,9 +21,16 @@ def addColumns(df, bools=None):
 	return df
 
 
-def collapsePSMAlgo(df, master='mascot'):
+def removeIsolationInterference(df, threshold):
+	# TODO: retain deleted info in compact way (peptide sequence, scannumber, isolation interference?)
+	# remove all rows with value > threshold
+	return df
+
+
+def collapsePSMAlgo(df, master='mascot', exclusive=False):
 	# TODO: retain deleted info in compact way
 	# df = df.drop('column_name', 0) # 0 = row, 1 = column
+	# if exclusive: do not select those detected only by the slave
 	return df
 
 

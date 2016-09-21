@@ -12,6 +12,7 @@ def differentialExpression(normalizedIntensities):
 
 
 def dataVisualization(DEresults):
+	# TODO (if paying customer): parameter: intensity matrix on peptide or protein level?
 	return None
 
 
