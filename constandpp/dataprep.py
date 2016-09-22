@@ -55,16 +55,12 @@ def collapseCharge(df):
 	return df
 
 
-def isotopicCorrection(df, correctionsMatrix):
+def isotopicCorrection(intensities, correctionsMatrix):
 	# solve the linear system
 	# Observed(6,1) = correctionMatrix(6,6) * Real(6,1)
 	# if Det(cM) = 0 no solution can be found.
-	# returns corrected intensities also INSIDE df if user is paying # TODO this should be more clear in main()
-	payingUser = False
-	correctedIntensities = getIntensities(df)
-	if payingUser:
-		df = setIntensities(df, correctedIntensities)
-	return df, correctedIntensities
+	correctedIntensities = intensities
+	return correctedIntensities
 
 
 def getIntensities(df):

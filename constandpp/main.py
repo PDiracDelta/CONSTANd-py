@@ -74,9 +74,9 @@ def main():
 	if params['collapseCharge_bool']:
 		# collapse peptide list redundancy due to different charges (optional)
 		df = collapseCharge(df) # TODO
-	# perform isotopic corrections
-	df, correctedIntensities = isotopicCorrection(df, correctionsMatrix=params['isotopicCorrectionsMatrix']) # TODO
-	# perform the CONSTANd algorithm
+	# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
+	correctedIntensities = isotopicCorrection(getIntensities(df), correctionsMatrix=params['isotopicCorrectionsMatrix']) # TODO
+	# perform the CONSTANd algorithm; also do NOT include normalized intensities in df --> only for paying users.
 	normalizedIntensities, convergenceTrail, R, S = constand(correctedIntensities, params['accuracy'], params['maxIterations'])
 
 	""" Data analysis and visualization """
