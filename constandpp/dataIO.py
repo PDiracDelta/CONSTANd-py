@@ -24,6 +24,7 @@ def getInput():
 		:return delim_out:      char    delimiter of the data in the output file
 	"""
 	# TODO add .lower() to all string input
+	# TODO attach real input source
 	# file_in='../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.tsv' # TEST
 	file_in = '../data/MB_noapostrophes.tsv'  # TEST
 	delim_in = '\t'

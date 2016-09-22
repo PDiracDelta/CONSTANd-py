@@ -16,18 +16,19 @@ Collection of functions that prepare the data before it can be normalized by CON
 import numpy as np
 
 
-def addColumns(df, bools):
-	""" Add extra columns to the dataFrame that will contain condensed information from to-be-deleted rows. """
-	# if bools is None: add ALL.
-	# allColumnNames = ['foo', 'bar', 'baz']
-	# df.addcolumns(allColumnNames[bools])
-	return df
-
-
 def removeIsolationInterference(df, threshold):
-	# TODO: retain deleted info in compact way (peptide sequence, scannumber, isolation interference?)
-	# remove all rows with value > threshold
-	return df
+	"""
+	Remove the data where there is too much isolation interference (above threshold) and return the remaining dataFrame
+	along with info about the deletions.
+	:param df:          pd.dataFrame    unfiltered data
+	:param threshold:   float
+	:return:
+	"""
+	colsToSave = ['Annotated Sequence', 'Isolation Interference [%]', 'Master Protein Accessions', 'First Scan']
+	toDelete = df[df['Isolation Interference [%]'] > threshold].index # indices of rows to delete
+	removedData = df.iloc[toDelete][colsToSave]
+	df.drop(toDelete, inplace=True)
+	return df, removedData
 
 
 def collapsePSMAlgo(df, master, exclusive):
