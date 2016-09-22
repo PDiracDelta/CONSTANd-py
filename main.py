@@ -57,9 +57,9 @@ def main():
 	# get the dataframe
 	df = importDataFrame(params['file_in'], delim=params['delim_in'], header=params['header_in'])
 	# add extra columns to the dataFrame for retaining condensed data after each collapse, according to bools (or not).
-	addColumns(df, bools=None)
+	addColumns(df, bools=None) # TODO
 	if params['removeIsolationInterference_bool']:
-		df = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
+		df = removeIsolationInterference(df, params['removeIsolationInterference_threshold']) # TODO
 	if params['collapsePSMAlgo_bool']:
 		# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
 		df = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master'],
