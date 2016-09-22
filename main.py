@@ -46,20 +46,22 @@ def main():
 	For now this is just stuff for debugging and testing. Later:
 	Contains and explicits the workflow of the program.
 	"""
-	# get all input parameters and option switches
-	""" params:
+	""" get all input parameters
+	params:
 	file_in, delim_in, header_in, collapsePSMAlgo_bool, collapsePSMAlgo_master, collapsePSMAlgo_bool_exclusive,
 	collapseRT_bool, collapseRT_centerMeasure_channels, collapseRT_centerMeasure_intensities,
 	collapseRT_maxRelativeChannelVariance, collapseCharge_bool, isotopicCorrectionsMatrix, accuracy, maxIterations,
 	DEFoldThreshold, path_out, filename_out, delim_out
-	 """
+	"""
 	params = getInput()
 	# get the dataframe
 	df = importDataFrame(params['file_in'], delim=params['delim_in'], header=params['header_in'])
-	# add extra columns to the dataFrame for retaining condensed data after each collapse, according to bools (or not).
-	addColumns(df, bools=None) # TODO
+
+	""" Data preparation """
+	removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
 	if params['removeIsolationInterference_bool']:
-		df = removeIsolationInterference(df, params['removeIsolationInterference_threshold']) # TODO
+		df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
+		print(str(df.shape)+', '+str(removedData['isolationInterference'].shape)) # TEST
 	if params['collapsePSMAlgo_bool']:
 		# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
 		df = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master'],
@@ -76,14 +78,22 @@ def main():
 	df, correctedIntensities = isotopicCorrection(df, correctionsMatrix=params['isotopicCorrectionsMatrix']) # TODO
 	# perform the CONSTANd algorithm
 	normalizedIntensities, convergenceTrail, R, S = constand(correctedIntensities, params['accuracy'], params['maxIterations'])
-	# save the normalized intensities obtained through CONSTANd
-	exportData(normalizedIntensities, path_out=params['path_out'], filename=params['filename_out']+'_normalizedIntensities', delim_out=params['delim_out'])
+
+	""" Data analysis and visualization """
 	# perform differential expression analysis
 	DEresults = differentialExpression(normalizedIntensities, params['DEFoldThreshold']) # TODO
-	# save the DE analysis results
-	exportData(DEresults, path_out=params['path_out'], filename=params['filename_out']+'_DEresults') # TODO
 	# data visualization
 	viz = dataVisualization(DEresults) # TODO
+
+	""" Save data to disk and generate report """
+	# save the removed data information
+	exportData(removedData, path_out=params['path_out'],
+	           filename=params['filename_out'] + '_removedData', delim_out=params['delim_out'])
+	# save the normalized intensities obtained through CONSTANd
+	exportData(normalizedIntensities, path_out=params['path_out'],
+	           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
+	# save the DE analysis results
+	exportData(DEresults, path_out=params['path_out'], filename=params['filename_out'] + '_DEresults')  # TODO
 	# save the visualizations
 	exportData(viz, path_out=params['path_out'], filename=params['filename_out']+'_dataViz') # TODO
 	# generate a report PDF (without the normalized intensities: behind paywall?
