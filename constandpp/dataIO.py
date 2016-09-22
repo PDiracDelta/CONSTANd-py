@@ -28,6 +28,8 @@ def getInput():
 	file_in = '../data/MB_noapostrophes.tsv'  # TEST
 	delim_in = '\t'
 	header_in = 0
+	removeIsolationInterference_bool = True
+	removeIsolationInterference_threshold = 70
 	collapsePSMAlgo_bool = True
 	collapsePSMAlgo_master = 'mascot'
 	collapsePSMAlgo_bool_exclusive = False
@@ -50,6 +52,10 @@ def getInput():
 		raise Exception("Delimiter of input file must be a character (string of length one).")
 	if not ((isinstance(header_in, int) and header_in >= 0) or header_in is None):
 		raise Exception("Header parameter of the input file must be a non-negative integer or of type None.")
+	if removeIsolationInterference_bool is None:
+		raise Exception("Please indicate whether you would like to remove high Isolation Interference cases.")
+	if not (0 < removeIsolationInterference_threshold < 100 or removeIsolationInterference_bool is None):
+		raise Exception("Isolation Interference Threshold should be either 'None' or between 0 and 100 (percentage).")
 	if collapsePSMAlgo_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PSM Algorithms.")
 	if collapsePSMAlgo_master not in ('mascot', 'sequest'):
@@ -85,6 +91,8 @@ def getInput():
 		'file_in': file_in,
 		'delim_in': delim_in,
 		'header_in': header_in,
+		'removeIsolationInterference_bool': removeIsolationInterference_bool,
+		'removeIsolationInterference_threshold': removeIsolationInterference_threshold,
 		'collapsePSMAlgo_bool': collapsePSMAlgo_bool,
 		'collapsePSMAlgo_master': collapsePSMAlgo_master,
 		'collapsePSMAlgo_bool_exclusive': collapsePSMAlgo_bool_exclusive,
