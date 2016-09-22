@@ -3,11 +3,14 @@
 
 """
 Collection of functions that prepare the data before it can be normalized by CONSTANd. Includes:
+* adding columns for retaining valuable information after collapsing
+* removing high isolation interference cases
 * removing redundancy due to:
 	* different peptide spectrum match (PSM) algorithms
 	* different retention time (RT) values
 	* different charges
 * correct for isotopic impurities in the reporters
+* get/set the intensity matrix of a dataFrame
 """
 
 import numpy as np
@@ -55,8 +58,12 @@ def isotopicCorrection(df, correctionsMatrix):
 	# solve the linear system
 	# Observed(6,1) = correctionMatrix(6,6) * Real(6,1)
 	# if Det(cM) = 0 no solution can be found.
-	# TODO are we allowed to put the corrected intensities in the output for non-payers? (with the copyright and all)
-	return df
+	# returns corrected intensities also INSIDE df if user is paying # TODO this should be more clear in main()
+	payingUser = False
+	correctedIntensities = getIntensities(df)
+	if payingUser:
+		df = setIntensities(df, correctedIntensities)
+	return df, correctedIntensities
 
 
 def getIntensities(df):
@@ -65,7 +72,7 @@ def getIntensities(df):
 	:param df:              pd.dataFrame    Pandas dataFrame from which to extract the intensities
 	:return intensities:    np.ndArray      matrix with the intensities
 	"""
-	intensities = np.asarray(df[['126', '127', '128', '129', '130', '131']])
+	return np.asarray(df[['126', '127', '128', '129', '130', '131']])
 
 
 def setIntensities(df, intensities, location=[0,-1,0,-1]):
