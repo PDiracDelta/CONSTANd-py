@@ -20,11 +20,12 @@ def removeIsolationInterference(df, threshold):
 	"""
 	Remove the data where there is too much isolation interference (above threshold) and return the remaining dataFrame
 	along with info about the deletions.
-	:param df:          pd.dataFrame    unfiltered data
-	:param threshold:   float
-	:return:
+	:param df:              pd.dataFrame    unfiltered data
+	:param threshold:       float           remove all data with isolation interference above this value
+	:return df:             pd.dataFrame    filtered data
+	:return removedData:    pd.dataFrame    basic info about the removed values
 	"""
-	colsToSave = ['Annotated Sequence', 'Isolation Interference [%]', 'Master Protein Accessions', 'First Scan']
+	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Isolation Interference [%]']
 	toDelete = df[df['Isolation Interference [%]'] > threshold].index # indices of rows to delete
 	removedData = df.iloc[toDelete][colsToSave]
 	df.drop(toDelete, inplace=True)
@@ -32,10 +33,31 @@ def removeIsolationInterference(df, threshold):
 
 
 def collapsePSMAlgo(df, master, exclusive):
-	# TODO: retain deleted info in compact way
-	# df = df.drop('column_name', 0) # 0 = row, 1 = column
-	# if exclusive: do not select those detected only by the slave
-	return df
+	"""
+	Removes redundant data due to different PSM algorithms producing the same peptide match. The 'master' algorithm
+	values are taken over the 'slave' algorithm values, the latter whom are removed and have their basic information
+	saved in removedData. If exclusive=true, this function only keeps master data (and saves slave(s) basic info).
+	:param df:              pd.dataFrame    unfiltered data
+	:param master:          string          master PSM algorithm (master/slave relation)
+	:param exclusive:       bool            save master data exclusively or include slave data where necessary?
+	:return df:             pd.dataFrame    collapsed data
+	:return removedData:    pd.dataFrame    basic info about the removed values
+	"""
+	if master is 'mascot':
+		colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'XCorr']
+		if exclusive:
+			toDelete = df[df['Identifying Node'] is 'Sequest HT (A2)']
+		else:
+			toDelete = df[df[['Identifying Node', 'Quan Info']] is ['Sequest HT (A2)', 'Redundant']]
+	elif master is 'sequest':
+		colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Ions Score']
+		if exclusive:
+			toDelete = df[df['Identifying Node'] is 'Mascot (A6)']
+		else:
+			toDelete = df[df[['Identifying Node', 'Quan Info']] is ['Mascot (A6)', 'Redundant']].index
+	removedData = ('master: '+master, df.iloc[toDelete][colsToSave])
+	df.drop(toDelete, inplace=True)
+	return df, removedData
 
 
 def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mean', maxRelativeChannelVariance=None):
