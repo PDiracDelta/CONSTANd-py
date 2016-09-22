@@ -55,7 +55,7 @@ def main():
 	 """
 	params = getInput()
 	# get the dataframe
-	df = importDataFrame(params('file_in'), delim=params('delim_in'), header=params('header_in'))
+	df = importDataFrame(params['file_in'], delim=params['delim_in'], header=params['header_in'])
 	# add extra columns to the dataFrame for retaining condensed data after each collapse, according to bools (or not).
 	addColumns(df, bools=None)
 	if params['removeIsolationInterference_bool']:
@@ -75,9 +75,9 @@ def main():
 	# perform isotopic corrections
 	intensities = isotopicCorrection(getIntensities(df), correctionsMatrix=params['isotopicCorrectionsMatrix']) # TODO
 	# perform the CONSTANd algorithm
-	normalizedIntensities, convergenceTrail, R, S = constand(intensities, params('accuracy'), params('maxIterations'))
+	normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
 	# save the normalized intensities obtained through CONSTANd
-	exportData(normalizedIntensities, path=params('path_out'), filename=params['filename_out'], delim=params('delim_out'))
+	exportData(normalizedIntensities, path=params['path_out'], filename=params['filename_out'], delim=params['delim_out'])
 	# perform differential expression analysis
 	DEresults = differentialExpression(normalizedIntensities, params['DEFoldThreshold']) # TODO
 	# save the DE analysis results
