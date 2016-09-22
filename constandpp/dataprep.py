@@ -16,7 +16,7 @@ Collection of functions that prepare the data before it can be normalized by CON
 import numpy as np
 
 
-def addColumns(df, bools=None):
+def addColumns(df, bools):
 	""" Add extra columns to the dataFrame that will contain condensed information from to-be-deleted rows. """
 	# if bools is None: add ALL.
 	# allColumnNames = ['foo', 'bar', 'baz']
@@ -30,7 +30,7 @@ def removeIsolationInterference(df, threshold):
 	return df
 
 
-def collapsePSMAlgo(df, master='mascot', exclusive=False):
+def collapsePSMAlgo(df, master, exclusive):
 	# TODO: retain deleted info in compact way
 	# df = df.drop('column_name', 0) # 0 = row, 1 = column
 	# if exclusive: do not select those detected only by the slave
