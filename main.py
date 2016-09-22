@@ -63,8 +63,9 @@ def main():
 		df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
 	if params['collapsePSMAlgo_bool']:
 		# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
-		df = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master'],
-		                     exclusive=params['collapsePSMAlgo_bool_exclusive']) # TODO
+		df, removedData['PSMAlgo'] = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master'],
+		                                             exclusive=params['collapsePSMAlgo_bool_exclusive']) # TODO
+		print(df.shape+', '+removedData['PSMAlgo'].shape)
 	if params['collapseRT_bool']:
 		# collapse peptide list redundancy due to multiple detections at different RT
 		df = collapseRT(df, centerMeasure_channels=params['collapseRT_centerMeasure_channels'],
