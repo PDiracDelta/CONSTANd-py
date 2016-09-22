@@ -61,7 +61,6 @@ def main():
 	removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
 	if params['removeIsolationInterference_bool']:
 		df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
-		print(str(df.shape)+', '+str(removedData['isolationInterference'].shape)) # TEST
 	if params['collapsePSMAlgo_bool']:
 		# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
 		df = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master'],
