@@ -29,7 +29,7 @@ def getInput():
 	file_in = '../data/MB_noapostrophes.tsv'  # TEST
 	delim_in = '\t'
 	header_in = 0
-	removeIsolationInterference_bool = True
+	removeIsolationInterference_bool = False
 	removeIsolationInterference_threshold = 70
 	collapsePSMAlgo_bool = True
 	collapsePSMAlgo_master = 'mascot'
