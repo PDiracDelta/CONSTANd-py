@@ -73,19 +73,19 @@ def main():
 		# collapse peptide list redundancy due to different charges (optional)
 		df = collapseCharge(df) # TODO
 	# perform isotopic corrections
-	intensities = isotopicCorrection(getIntensities(df), correctionsMatrix=params['isotopicCorrectionsMatrix']) # TODO
+	df, correctedIntensities = isotopicCorrection(df, correctionsMatrix=params['isotopicCorrectionsMatrix']) # TODO
 	# perform the CONSTANd algorithm
-	normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
+	normalizedIntensities, convergenceTrail, R, S = constand(correctedIntensities, params['accuracy'], params['maxIterations'])
 	# save the normalized intensities obtained through CONSTANd
-	exportData(normalizedIntensities, path=params['path_out'], filename=params['filename_out'], delim=params['delim_out'])
+	exportData(normalizedIntensities, path_out=params['path_out'], filename=params['filename_out']+'_normalizedIntensities', delim_out=params['delim_out'])
 	# perform differential expression analysis
 	DEresults = differentialExpression(normalizedIntensities, params['DEFoldThreshold']) # TODO
 	# save the DE analysis results
-	exportData(DEresults) # TODO
+	exportData(DEresults, path_out=params['path_out'], filename=params['filename_out']+'_DEresults') # TODO
 	# data visualization
 	viz = dataVisualization(DEresults) # TODO
 	# save the visualizations
-	exportData(viz) # TODO
+	exportData(viz, path_out=params['path_out'], filename=params['filename_out']+'_dataViz') # TODO
 	# generate a report PDF (without the normalized intensities: behind paywall?
 	generateReport(DEresults, viz) # TODO
 

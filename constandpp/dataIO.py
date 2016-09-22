@@ -153,16 +153,17 @@ def importDataFrame(path_in=None, filetype=None, delim=None, header=0):
 	return df
 
 
-def exportData(data=None, path=None, filename=None, delim=','):
+def exportData(data, path_out, filename, delim_out=','):
 	# TODO is path_in the complete path including the filename? If so, only one file can be exported (or you can choose
 	# to automatically put the other files alongside it in the same root).
 	"""
 	Save the results (normalized intensities) to disk.
 	:param data:        obj     data object to be exported to disk
-	:param path:        string  path+filename where data should be exported to
-	:param delim:       char    delimiter of the data
+	:param path_out:    string  path where data should be exported to
+	:param filename:    string  filename for the data
+	:param delim_out:       char    delimiter of the data
 	"""
-	assert data is not None
-	assert path.exists(path)
+	# assert data is not None # TODO
+	assert path.exists(path_out)
 
-	np.savetxt(path+'/'+filename, data, delimiter=delim)
+	# np.savetxt(path_out+'/'+filename, data, delimiter=delim_out) # TODO
