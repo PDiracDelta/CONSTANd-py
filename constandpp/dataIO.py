@@ -154,7 +154,7 @@ def importDataFrame(path_in=None, filetype=None, delim=None, header=0):
 	return df
 
 
-def exportData(data, path_out, filename, delim_out=','):
+def exportData(data, dataType, path_out, filename, delim_out=','):
 	# TODO is path_in the complete path including the filename? If so, only one file can be exported (or you can choose
 	# to automatically put the other files alongside it in the same root).
 	"""
@@ -167,4 +167,5 @@ def exportData(data, path_out, filename, delim_out=','):
 	# assert data is not None # TODO
 	assert path.exists(path_out)
 
-	# np.savetxt(path_out+'/'+filename, data, delimiter=delim_out) # TODO
+	if dataType is 'txt':
+		np.savetxt(path_out+'/'+filename, data, delimiter=delim_out) # TODO
