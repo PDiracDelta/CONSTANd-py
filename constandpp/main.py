@@ -42,6 +42,7 @@ def generateReport(DEresults, viz):
 
 
 def main():
+	testing=True
 	"""
 	For now this is just stuff for debugging and testing. Later:
 	Contains and explicits the workflow of the program.
@@ -56,50 +57,71 @@ def main():
 	params = getInput()
 	# get the dataframe
 	df = importDataFrame(params['file_in'], delim=params['delim_in'], header=params['header_in'])
+	if not testing:
+		""" Data preparation """
+		removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
+		if params['removeIsolationInterference_bool']:
+			df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
+		if params['collapsePSMAlgo_bool']:
+			# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
+			df, removedData['PSMAlgo'] = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master'],
+			                                             exclusive=params['collapsePSMAlgo_bool_exclusive']) # TODO
+			print(df.shape+', '+removedData['PSMAlgo'].shape)
+		if params['collapseRT_bool']:
+			# collapse peptide list redundancy due to multiple detections at different RT
+			df = collapseRT(df, centerMeasure_channels=params['collapseRT_centerMeasure_channels'],
+			                centerMeasure_intensities=params['collapseRT_centerMeasure_intensities'],
+			                maxRelativeChannelVariance=params['collapseRT_maxRelativeChannelVariance']) # TODO
+		if params['collapseCharge_bool']:
+			# collapse peptide list redundancy due to different charges (optional)
+			df = collapseCharge(df) # TODO
+		# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
+		correctedIntensities = isotopicCorrection(getIntensities(df), correctionsMatrix=params['isotopicCorrectionsMatrix']) # TODO
+		# perform the CONSTANd algorithm; also do NOT include normalized intensities in df --> only for paying users.
+		normalizedIntensities, convergenceTrail, R, S = constand(correctedIntensities, params['accuracy'], params['maxIterations'])
 
-	""" Data preparation """
-	removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
-	if params['removeIsolationInterference_bool']:
-		df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
-	if params['collapsePSMAlgo_bool']:
-		# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
-		df, removedData['PSMAlgo'] = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master'],
-		                                             exclusive=params['collapsePSMAlgo_bool_exclusive']) # TODO
-		print(df.shape+', '+removedData['PSMAlgo'].shape)
-	if params['collapseRT_bool']:
-		# collapse peptide list redundancy due to multiple detections at different RT
-		df = collapseRT(df, centerMeasure_channels=params['collapseRT_centerMeasure_channels'],
-		                centerMeasure_intensities=params['collapseRT_centerMeasure_intensities'],
-		                maxRelativeChannelVariance=params['collapseRT_maxRelativeChannelVariance']) # TODO
-	if params['collapseCharge_bool']:
-		# collapse peptide list redundancy due to different charges (optional)
-		df = collapseCharge(df) # TODO
-	# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
-	correctedIntensities = isotopicCorrection(getIntensities(df), correctionsMatrix=params['isotopicCorrectionsMatrix']) # TODO
-	# perform the CONSTANd algorithm; also do NOT include normalized intensities in df --> only for paying users.
-	normalizedIntensities, convergenceTrail, R, S = constand(correctedIntensities, params['accuracy'], params['maxIterations'])
+		""" Data analysis and visualization """
+		# perform differential expression analysis
+		DEresults = differentialExpression(normalizedIntensities, params['DEFoldThreshold']) # TODO
+		# data visualization
+		viz = dataVisualization(DEresults) # TODO
 
-	""" Data analysis and visualization """
-	# perform differential expression analysis
-	DEresults = differentialExpression(normalizedIntensities, params['DEFoldThreshold']) # TODO
-	# data visualization
-	viz = dataVisualization(DEresults) # TODO
+		""" Save data to disk and generate report """
+		# save the removed data information
+		exportData(removedData, path_out=params['path_out'],
+		           filename=params['filename_out'] + '_removedData', delim_out=params['delim_out'])
+		# save the normalized intensities obtained through CONSTANd
+		exportData(normalizedIntensities, path_out=params['path_out'],
+		           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
+		# save the DE analysis results
+		exportData(DEresults, path_out=params['path_out'], filename=params['filename_out'] + '_DEresults')  # TODO
+		# save the visualizations
+		exportData(viz, path_out=params['path_out'], filename=params['filename_out']+'_dataViz') # TODO
+		# generate a report PDF (without the normalized intensities: behind paywall?
+		generateReport(DEresults, viz) # TODO
 
-	""" Save data to disk and generate report """
-	# save the removed data information
-	exportData(removedData, path_out=params['path_out'],
-	           filename=params['filename_out'] + '_removedData', delim_out=params['delim_out'])
-	# save the normalized intensities obtained through CONSTANd
-	exportData(normalizedIntensities, path_out=params['path_out'],
-	           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
-	# save the DE analysis results
-	exportData(DEresults, path_out=params['path_out'], filename=params['filename_out'] + '_DEresults')  # TODO
-	# save the visualizations
-	exportData(viz, path_out=params['path_out'], filename=params['filename_out']+'_dataViz') # TODO
-	# generate a report PDF (without the normalized intensities: behind paywall?
-	generateReport(DEresults, viz) # TODO
+	if testing:
+		# performanceTest()
 
-	# performanceTest()
+		## test if isotopic correction is necessary:
+		params = getInput()
+		# get the dataframe
+		df = importDataFrame(params['file_in'], delim=params['delim_in'], header=params['header_in'])
+		correctedIntensities = getIntensities(df)
+		normalizedIntensities, convergenceTrail, R, S = constand(correctedIntensities, params['accuracy'],
+		                                                         params['maxIterations'])
+		# exportData(normalizedIntensities, 'txt', path_out=params['path_out'],
+		#            filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
+		# test "impure data"
+		correctedIntensities_impure = correctedIntensities
+		spillover = correctedIntensities_impure[0,:]*0.1
+		correctedIntensities_impure[0,:] -= spillover
+		correctedIntensities_impure[1,:] += spillover
+		normalizedIntensities_impure, convergenceTrail_i, R_i, S_i = constand(correctedIntensities_impure, params['accuracy'],
+		                                                         params['maxIterations'])
+		diff=normalizedIntensities-normalizedIntensities_impure
+		print(np.allclose(normalizedIntensities, normalizedIntensities_impure, atol=1e-3, equal_nan=True))
+		# False tot en met 1e-3 --> fouten van > 0.1%
 
 if __name__ == '__main__':
 	sys.exit(main())
