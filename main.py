@@ -37,8 +37,40 @@ def performanceTest():  # remove for production
 	print("average runtime: " + str(np.mean(t)))
 
 
+def isotopicImpuritiesTest():
+	## test if isotopic correction is necessary:
+	params = getInput()
+	# get the dataframe
+	df = importDataFrame(params['file_in'], delim=params['delim_in'], header=params['header_in'])
+	correctedIntensities = getIntensities(df)
+	normalizedIntensities, convergenceTrail, R, S = constand(correctedIntensities, params['accuracy'],
+	                                                         params['maxIterations'])
+	# exportData(normalizedIntensities, 'txt', path_out=params['path_out'],
+	#            filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
+	# test "impure data"
+	correctedIntensities_impure = correctedIntensities
+	spillover = correctedIntensities_impure[0, :] * 0.1
+	correctedIntensities_impure[0, :] -= spillover
+	correctedIntensities_impure[1, :] += spillover
+	normalizedIntensities_impure, convergenceTrail_i, R_i, S_i = constand(correctedIntensities_impure,
+	                                                                      params['accuracy'],
+	                                                                      params['maxIterations'])
+	diff = abs(normalizedIntensities - normalizedIntensities_impure)
+	print(np.allclose(normalizedIntensities, normalizedIntensities_impure, atol=1e-3, equal_nan=True))
+	print(np.nanmean(np.nanmean(diff[:, 0:1], 1)))
+	print(max(np.amax(diff, 1)))
+
+
+# False tot en met 1e-3 --> fouten van > 0.1%
+
 def generateReport(DEresults, viz):
 	pass
+
+
+def devStuff():
+	pass
+	# performanceTest()
+	# isotopicImpuritiesTest()
 
 
 def main():
@@ -101,27 +133,7 @@ def main():
 		generateReport(DEresults, viz) # TODO
 
 	if testing:
-		# performanceTest()
-
-		## test if isotopic correction is necessary:
-		params = getInput()
-		# get the dataframe
-		df = importDataFrame(params['file_in'], delim=params['delim_in'], header=params['header_in'])
-		correctedIntensities = getIntensities(df)
-		normalizedIntensities, convergenceTrail, R, S = constand(correctedIntensities, params['accuracy'],
-		                                                         params['maxIterations'])
-		# exportData(normalizedIntensities, 'txt', path_out=params['path_out'],
-		#            filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
-		# test "impure data"
-		correctedIntensities_impure = correctedIntensities
-		spillover = correctedIntensities_impure[0,:]*0.1
-		correctedIntensities_impure[0,:] -= spillover
-		correctedIntensities_impure[1,:] += spillover
-		normalizedIntensities_impure, convergenceTrail_i, R_i, S_i = constand(correctedIntensities_impure, params['accuracy'],
-		                                                         params['maxIterations'])
-		diff=normalizedIntensities-normalizedIntensities_impure
-		print(np.allclose(normalizedIntensities, normalizedIntensities_impure, atol=1e-3, equal_nan=True))
-		# False tot en met 1e-3 --> fouten van > 0.1%
+		devStuff()
 
 if __name__ == '__main__':
 	sys.exit(main())
