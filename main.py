@@ -27,11 +27,11 @@ from analysis import *
 def performanceTest():  # remove for production
 	""" Use this development method to test the performance of the CONSTANd algorithm. """
 	t = []
-	for i in range(1000):
+	for i in range(100):
 		params = getInput()
-		df = importDataFrame(params['path'], delim=params['delim_in'])
+		df = importDataFrame(params['file_in'], delim=params['delim_in'])
 		start = time()
-		constand(getIntensities(df), 1e-2, 50)
+		constand(np.asarray(df), 1e-2, 50)
 		stop = time()
 		t.append((stop - start))
 	print("average runtime: " + str(np.mean(t)))
@@ -69,7 +69,7 @@ def generateReport(DEresults, viz):
 
 def devStuff():
 	pass
-	# performanceTest()
+	performanceTest()
 	# isotopicImpuritiesTest()
 
 
