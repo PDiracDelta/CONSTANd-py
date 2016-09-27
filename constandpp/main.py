@@ -29,7 +29,7 @@ def performanceTest():  # remove for production
 	t = []
 	for i in range(100):
 		params = getInput()
-		df = importDataFrame(params['file_in'], delim=params['delim_in'])
+		df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(2*10**3, 6)), columns=list('ABCDEF'))
 		start = time()
 		constand(np.asarray(df), 1e-2, 50)
 		stop = time()
