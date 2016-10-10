@@ -68,8 +68,9 @@ def generateReport(DEresults, viz):
 
 
 def devStuff():
+	dummy = getInput()
 	pass
-	performanceTest()
+	# performanceTest()
 	# isotopicImpuritiesTest()
 
 
