@@ -8,6 +8,7 @@ Handle all I/O of data files and parameters to and from both the workflow and th
 import warnings
 import pandas as pd
 import numpy as np
+import configparser
 from os import path
 
 
@@ -23,30 +24,37 @@ def getInput():
 		:return path_out:       string  path to the output file
 		:return delim_out:      char    delimiter of the data in the output file
 	"""
+	# TODO add all parameters in docstring
 	# TODO add .lower() to all string input
 	# TODO attach real input source
 	# file_in='../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.tsv' # TEST
-	file_in = '../data/MB_noapostrophes.tsv'  # TEST
-	delim_in = '\t'
-	header_in = 0
-	removeIsolationInterference_bool = False
-	removeIsolationInterference_threshold = 70
-	collapsePSMAlgo_bool = True
-	collapsePSMAlgo_master = 'mascot'
-	collapsePSMAlgo_bool_exclusive = False
-	collapseRT_bool = True
-	collapseRT_centerMeasure_channels = 'mean'
-	collapseRT_centerMeasure_intensities = 'max'
-	collapseRT_maxRelativeChannelVariance = None
-	collapseCharge_bool = True
-	isotopicCorrectionsMatrix = np.asmatrix(np.diag(np.ones([6,])))
-	accuracy = 1e-2
-	maxIterations = 50
-	DEFoldThreshold = 1
-	path_out = '../data'  # TEST
-	filename_out = 'MB_result.tsv' # TEST
-	delim_out = '\t'
 
+	# read the config file to obtain the defaults
+	config = configparser.ConfigParser(inline_comment_prefixes='#') # TODO split up CONFIG and PARAMS (user input files vs workflow params)
+	config.read('config.ini')
+
+	file_in = config['DEFAULT']['file_in']
+	delim_in = config['DEFAULT']['delim_in']
+	header_in = config['DEFAULT'].getint('header_in')
+	removeIsolationInterference_bool = config['DEFAULT'].getboolean('removeIsolationInterference_bool')
+	removeIsolationInterference_threshold = config['DEFAULT'].getfloat('removeIsolationInterference_threshold')
+	collapsePSMAlgo_bool = config['DEFAULT'].getboolean('collapsePSMAlgo_bool')
+	collapsePSMAlgo_master = config['DEFAULT']['collapsePSMAlgo_master']
+	collapsePSMAlgo_bool_exclusive = config['DEFAULT'].getboolean('collapsePSMAlgo_bool_exclusive')
+	collapseRT_bool = config['DEFAULT'].getboolean('collapseRT_bool')
+	collapseRT_centerMeasure_channels = config['DEFAULT']['collapseRT_centerMeasure_channels']
+	collapseRT_centerMeasure_intensities = config['DEFAULT']['collapseRT_centerMeasure_intensities']
+	collapseRT_maxRelativeChannelVariance = config['DEFAULT'].getfloat('collapseRT_maxRelativeChannelVariance')
+	collapseCharge_bool = config['DEFAULT'].getboolean('collapseCharge_bool')
+	isotopicCorrectionsMatrix = eval(config['DEFAULT']['isotopicCorrectionsMatrix']) # TODO: separate file?
+	accuracy = config['DEFAULT'].getfloat('accuracy')
+	maxIterations = config['DEFAULT'].getint('maxIterations')
+	DEFoldThreshold = config['DEFAULT'].getfloat('DEFoldThreshold')
+	path_out = config['DEFAULT']['path_out']
+	filename_out = config['DEFAULT']['filename_out']
+	delim_out = config['DEFAULT']['delim_out']
+
+	# perform checks on the validity of the parameters and raise exceptions if necessary
 	if not path.exists(file_in):
 		raise FileNotFoundError("File "+file_in+" not found.")
 	if not (len(delim_in) == 1 and isinstance(delim_in, str)):
