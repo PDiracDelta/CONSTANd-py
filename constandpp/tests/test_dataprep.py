@@ -5,3 +5,9 @@ class TestRemoveIsolationInterference(TestCase):
 	def test_removeIsolationInterference(self):
 		# print(str(df.shape) + ', ' + str(removedData['isolationInterference'].shape)) # shapes must agree / add up
 		self.fail()
+
+
+class TestCollapsePSMAlgo(TestCase):
+	def test_collapsePSMAlgo(self):
+		# test shape of deleted data with known shape from MB_Bon....txt Excel info.
+		self.fail()

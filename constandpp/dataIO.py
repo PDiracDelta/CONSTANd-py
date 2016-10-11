@@ -34,34 +34,29 @@ def getInput():
 	config = configparser.ConfigParser(allow_no_value=True, inline_comment_prefixes='#') # TODO split up CONFIG and PARAMS (user input files vs workflow params)
 	config.optionxform = str # so that strings dont automatically get .lower()-ed
 	config.read('config.ini', encoding='utf-8')
-	params = config._defaults
-	dontForgetAnyParameters = len(params)
+	dontForgetAnyParameters = len(config._defaults)
 
-	# treat delimiters correctly: ignore first escape
-	params['delim_in'] = gd("unicode_escape")(params['delim_in'])[0]
-	params['delim_out'] = gd("unicode_escape")(params['delim_out'])[0]
-
-	# get variables from dict
-	file_in = params['file_in']
-	delim_in = params['delim_in']
-	header_in = int(params['header_in'])
-	removeIsolationInterference_bool = bool(params['removeIsolationInterference_bool'])
-	removeIsolationInterference_threshold = float(params['removeIsolationInterference_threshold'])
-	collapsePSMAlgo_bool = bool(params['collapsePSMAlgo_bool'])
-	collapsePSMAlgo_master = params['collapsePSMAlgo_master']
-	collapsePSMAlgo_bool_exclusive = bool(params['collapsePSMAlgo_bool_exclusive'])
-	collapseRT_bool = bool(params['collapseRT_bool'])
-	collapseRT_centerMeasure_channels = params['collapseRT_centerMeasure_channels']
-	collapseRT_centerMeasure_intensities = params['collapseRT_centerMeasure_intensities']
-	collapseRT_maxRelativeChannelVariance = float(params['collapseRT_maxRelativeChannelVariance'])
-	collapseCharge_bool = bool(params['collapseCharge_bool'])
-	isotopicCorrectionsMatrix = eval(params['isotopicCorrectionsMatrix']) # TODO: separate file?
-	accuracy = float(params['accuracy'])
-	maxIterations = int(params['maxIterations'])
-	DEFoldThreshold = float(params['DEFoldThreshold'])
-	path_out = params['path_out']
-	filename_out = params['filename_out']
-	delim_out = params['delim_in']
+	# get variables from config in correct typography
+	file_in = config.get('DEFAULT','file_in')
+	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
+	header_in = config.getint('DEFAULT','header_in')
+	removeIsolationInterference_bool = config.getboolean('DEFAULT','removeIsolationInterference_bool')
+	removeIsolationInterference_threshold = config.getfloat('DEFAULT','removeIsolationInterference_threshold')
+	collapsePSMAlgo_bool = config.getboolean('DEFAULT','collapsePSMAlgo_bool')
+	collapsePSMAlgo_master = config.get('DEFAULT','collapsePSMAlgo_master')
+	collapsePSMAlgo_exclusive_bool = config.getboolean('DEFAULT','collapsePSMAlgo_exclusive_bool')
+	collapseRT_bool = config.getboolean('DEFAULT','collapseRT_bool')
+	collapseRT_centerMeasure_channels = config.get('DEFAULT','collapseRT_centerMeasure_channels')
+	collapseRT_centerMeasure_intensities = config.get('DEFAULT','collapseRT_centerMeasure_intensities')
+	collapseRT_maxRelativeChannelVariance = config.getfloat('DEFAULT','collapseRT_maxRelativeChannelVariance')
+	collapseCharge_bool = config.getboolean('DEFAULT','collapseCharge_bool')
+	isotopicCorrectionsMatrix = eval(config.get('DEFAULT','isotopicCorrectionsMatrix')) # TODO: separate file?
+	accuracy = config.getfloat('DEFAULT','accuracy')
+	maxIterations = config.getint('DEFAULT','maxIterations')
+	DEFoldThreshold = config.getfloat('DEFAULT','DEFoldThreshold')
+	path_out = config.get('DEFAULT','path_out')
+	filename_out = config.get('DEFAULT','filename_out')
+	delim_out = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
 
 	# perform checks on the validity of the parameters and raise exceptions if necessary
 	# DO NOT change the value of variables here!
@@ -80,7 +75,7 @@ def getInput():
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PSM Algorithms.")
 	if collapsePSMAlgo_master not in ('mascot', 'sequest'):
 		raise Exception("Invalid master PSM algorithm: '"+collapsePSMAlgo_master+"'. Please pick 'mascot' or 'sequest'.")
-	if collapsePSMAlgo_bool_exclusive is None:
+	if collapsePSMAlgo_exclusive_bool is None:
 		raise Exception("Please indicate whether PSM Algorithm redundancy removal should be exclusive or not.")
 	if collapseRT_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple retention times.")
@@ -116,7 +111,7 @@ def getInput():
 		'removeIsolationInterference_threshold': removeIsolationInterference_threshold,
 		'collapsePSMAlgo_bool': collapsePSMAlgo_bool,
 		'collapsePSMAlgo_master': collapsePSMAlgo_master,
-		'collapsePSMAlgo_bool_exclusive': collapsePSMAlgo_bool_exclusive,
+		'collapsePSMAlgo_exclusive_bool': collapsePSMAlgo_exclusive_bool,
 		'collapseRT_bool': collapseRT_bool,
 		'collapseRT_centerMeasure_channels': collapseRT_centerMeasure_channels,
 		'collapseRT_centerMeasure_intensities': collapseRT_centerMeasure_intensities,
