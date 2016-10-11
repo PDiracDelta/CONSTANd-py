@@ -75,8 +75,8 @@ def devStuff():
 
 
 def main():
-	testing=False
-	writeToDisk=False
+	testing=False # TEST
+	writeToDisk=False # TEST
 	"""
 	For now this is just stuff for debugging and testing. Later:
 	Contains and explicits the workflow of the program.
@@ -99,9 +99,7 @@ def main():
 		if params['collapsePSMAlgo_bool']:
 			# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
 			df, removedData['PSMAlgo'] = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master'],
-			                                             exclusive=params['collapsePSMAlgo_exclusive_bool']) # TODO
-			exportData(df, 'df', path_out=params['path_out'],
-			           filename=params['filename_out'] + '_df', delim_out=params['delim_out'])
+			                                             exclusive=params['collapsePSMAlgo_exclusive_bool'])
 		if params['collapseRT_bool']:
 			# collapse peptide list redundancy due to multiple detections at different RT
 			df = collapseRT(df, centerMeasure_channels=params['collapseRT_centerMeasure_channels'],
