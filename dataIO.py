@@ -185,7 +185,7 @@ def exportData(data, dataType, path_out, filename, delim_out=','):
 	fullPath = path_out + '/' + filename + extension
 
 	if dataType == 'txt':
-		np.savetxt(path_out+'/'+filename, data, delimiter=delim_out) # TODO
+		np.savetxt(fullPath, data, delimiter=delim_out) # TODO
 	elif dataType == 'df':
 		data.to_csv(fullPath, sep=delim_out, index=False)
 
