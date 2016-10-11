@@ -34,8 +34,8 @@ def getInput():
 	config = configparser.ConfigParser(allow_no_value=True, inline_comment_prefixes='#') # TODO split up CONFIG and PARAMS (user input files vs workflow params)
 	config.optionxform = str # so that strings dont automatically get .lower()-ed
 	config.read('config.ini', encoding='utf-8')
-	#params = config._sections['DEFAULT']
 	params = config._defaults
+	dontForgetAnyParameters = len(params)
 
 	# treat delimiters correctly: ignore first escape
 	params['delim_in'] = gd("unicode_escape")(params['delim_in'])[0]
@@ -64,6 +64,7 @@ def getInput():
 	delim_out = params['delim_in']
 
 	# perform checks on the validity of the parameters and raise exceptions if necessary
+	# DO NOT change the value of variables here!
 	# TODO the 'is None' checks are obsolete. remove them (keep the error messages for later, now).
 	if not path.exists(file_in):
 		raise FileNotFoundError("File "+file_in+" not found.")
@@ -106,28 +107,34 @@ def getInput():
 	if not (len(delim_out) == 1 and isinstance(delim_out, str)):
 		raise Exception("Delimiter of output file must be a character (string of length one).")
 
-	# params = {
-	# 	'file_in': file_in,
-	# 	'delim_in': delim_in,
-	# 	'header_in': header_in,
-	# 	'removeIsolationInterference_bool': removeIsolationInterference_bool,
-	# 	'removeIsolationInterference_threshold': removeIsolationInterference_threshold,
-	# 	'collapsePSMAlgo_bool': collapsePSMAlgo_bool,
-	# 	'collapsePSMAlgo_master': collapsePSMAlgo_master,
-	# 	'collapsePSMAlgo_bool_exclusive': collapsePSMAlgo_bool_exclusive,
-	# 	'collapseRT_bool': collapseRT_bool,
-	# 	'collapseRT_centerMeasure_channels': collapseRT_centerMeasure_channels,
-	# 	'collapseRT_centerMeasure_intensities': collapseRT_centerMeasure_intensities,
-	# 	'collapseRT_maxRelativeChannelVariance': collapseRT_maxRelativeChannelVariance,
-	# 	'collapseCharge_bool': collapseCharge_bool,
-	# 	'isotopicCorrectionsMatrix': isotopicCorrectionsMatrix,
-	# 	'accuracy': accuracy,
-	# 	'maxIterations': maxIterations,
-	# 	'DEFoldThreshold': DEFoldThreshold,
-	# 	'path_out': path_out,
-	# 	'filename_out': filename_out,
-	# 	'delim_out': delim_out
-	# }
+	# assign the TYPOGRAPHICALLY CORRECT values to the params dict.
+	params = {
+		'file_in': file_in,
+		'delim_in': delim_in,
+		'header_in': header_in,
+		'removeIsolationInterference_bool': removeIsolationInterference_bool,
+		'removeIsolationInterference_threshold': removeIsolationInterference_threshold,
+		'collapsePSMAlgo_bool': collapsePSMAlgo_bool,
+		'collapsePSMAlgo_master': collapsePSMAlgo_master,
+		'collapsePSMAlgo_bool_exclusive': collapsePSMAlgo_bool_exclusive,
+		'collapseRT_bool': collapseRT_bool,
+		'collapseRT_centerMeasure_channels': collapseRT_centerMeasure_channels,
+		'collapseRT_centerMeasure_intensities': collapseRT_centerMeasure_intensities,
+		'collapseRT_maxRelativeChannelVariance': collapseRT_maxRelativeChannelVariance,
+		'collapseCharge_bool': collapseCharge_bool,
+		'isotopicCorrectionsMatrix': isotopicCorrectionsMatrix,
+		'accuracy': accuracy,
+		'maxIterations': maxIterations,
+		'DEFoldThreshold': DEFoldThreshold,
+		'path_out': path_out,
+		'filename_out': filename_out,
+		'delim_out': delim_out
+	}
+
+	# check if you forgot to hardcode new parameters
+	if not dontForgetAnyParameters == len(params):
+		raise Exception("Number of parameters in config.ini not equal to number of parameters returned by getInput().")
+
 	return params
 
 
