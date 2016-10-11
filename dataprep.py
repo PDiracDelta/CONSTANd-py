@@ -41,7 +41,7 @@ def collapsePSMAlgo(df, master, exclusive):
 	:param master:          string          master PSM algorithm (master/slave relation)
 	:param exclusive:       bool            save master data exclusively or include slave data where necessary?
 	:return df:             pd.dataFrame    collapsed data
-	:return removedData:    pd.dataFrame    basic info about the removed values
+	:return removedData:    pd.dataFrame    basic info about the removed entries
 	"""
 	if master == 'mascot':
 		colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'XCorr']
@@ -80,8 +80,60 @@ def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mea
 
 
 def collapseCharge(df):
+	import pandas as pd
 	# TODO: retain deleted info in compact way
-	return df
+	"""
+	Replaces identical sequence entries with a different charge by one containing the sum of their intensities. The
+	'Charge' column is then deleted from the dataFrame. Deleted charges, scan numbers, ... are saved in removedData.
+	:param df:              pd.dataFrame    with sequence duplicates due to difference in Charge.
+	:return df:             pd.dataFrame    without sequence duplicates due to difference in Charge.
+	:return removedData:    pd.dataFrame    basic info about removed entries
+	"""
+
+	def getDuplicates(indices):
+		def checkTrueDuplicates(x, y): # RT close? same PSMAlgo->same first scan number->same charge?
+			if x['Charge'] == y['Charge']: # well obviously they should duplicate due to charge difference...
+				return False
+			if x['RT [min]']!=y['RT [min]']: # HOW CLOSE SHOULD THIS BE? HOW ARE THE MS2 SCANS BINNED BELONGING TO THE SAME MS1 SWEEP?
+				return False # the difference should not be due to RT difference (different ms1 sweep)
+			return True
+
+		candidatesDf = df.iloc[indices] # create new dataframe with only the possible duplicates to reduce overhead.
+		candidatesDf['index'] = pd.Series(indices) # add the original indices as a column 'index'
+		candidatesDf.set_index('index') # set the index to the original indices
+		duplicates = {} # keep a dict of which indices are duplicates of which
+		stillMatchable = indices # keep a dict of indices that can still be checked for having duplicates
+		for i in indices:
+			if i in stillMatchable: # if i has already been matched as a duplicate
+				stillMatchable.remove(i)
+				duplicates[i]=[] # (see above) keep a dict of which indices are duplicates of which
+				stillMatchableTemp = stillMatchable # cannot modify the variable while its being iterated over -> keep temp
+				for j in stillMatchable:
+					if checkTrueDuplicates(candidatesDf.iloc[i], candidatesDf.iloc[j]):
+						duplicates[i].append(j) # mark index of rowj as a duplicate of index of rowi
+						stillMatchableTemp.remove(j)
+				stillMatchable = stillMatchableTemp # now that iteration is done, modify.
+		duplicates = dict((x,y) for x,y in duplicates.items() if y) # remove empty lists of duplicates
+		duplicatesDf = candidatesDf.iloc[duplicates.keys().extend(duplicates.values())] # df of only the duplicates
+		return duplicates, duplicatesDf
+
+	def updateFirstOccurrences(duplicates, duplicatesDf):
+		# sum intensities
+		pass
+
+	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Charge', 'Intensity']
+	allSequences = df.groupby('Annotated Sequence').groups  # dict of SEQUENCE:[INDICES]
+	toDelete = []
+	for sequence,indices in allSequences.items():
+		if len(indices)>1: # only treat duplicated sequences
+			duplicates, duplicatesDf = getDuplicates(indices) # dict with duplicates per keyed by first occurrence, and
+														# dataFrame with original indices but with only the duplicates
+			updateFirstOccurrences(duplicates, duplicatesDf) # assign new intensities to duplicates' first occurrences.
+			toDelete.extend(duplicates.values())
+
+	# removedData = df.iloc[toDelete][colsToSave]
+	# df[(df['Annotated Sequence'] == 'Mascot (A6)')
+	return df # , removedData
 
 
 def isotopicCorrection(intensities, correctionsMatrix):
