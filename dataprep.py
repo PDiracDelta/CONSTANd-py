@@ -43,20 +43,26 @@ def collapsePSMAlgo(df, master, exclusive):
 	:return df:             pd.dataFrame    collapsed data
 	:return removedData:    pd.dataFrame    basic info about the removed values
 	"""
-	if master is 'mascot':
+	if master == 'mascot':
 		colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'XCorr']
 		if exclusive:
-			toDelete = df[df['Identifying Node'] is 'Sequest HT (A2)']
+			toDelete = df[df['Identifying Node'] == 'Sequest HT (A2)'].index
 		else:
-			toDelete = df[df[['Identifying Node', 'Quan Info']] is ['Sequest HT (A2)', 'Redundant']]
-	elif master is 'sequest':
+			toDelete = df[(df['Identifying Node'] == 'Sequest HT (A2)') * (df['Quan Info'] == 'Redundant')].index
+	elif master == 'sequest':
 		colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Ions Score']
 		if exclusive:
-			toDelete = df[df['Identifying Node'] is 'Mascot (A6)']
+			toDelete = df[df['Identifying Node'] == 'Mascot (A6)'].index
 		else:
-			toDelete = df[df[['Identifying Node', 'Quan Info']] is ['Mascot (A6)', 'Redundant']].index
+			toDelete = df[(df['Identifying Node'] == 'Mascot (A6)') * (df['Quan Info'] == 'Redundant')].index
+	else:
+		raise Exception(
+			"Invalid master PSM algorithm: '" + master + "'. Please pick 'mascot' or 'sequest'.")
 	removedData = ('master: '+master, df.iloc[toDelete][colsToSave])
+	dflen=df.shape[0] # TEST
 	df.drop(toDelete, inplace=True)
+	assert(dflen == df.shape[0]+removedData[1].shape[0]) # TEST
+
 	return df, removedData
 
 

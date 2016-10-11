@@ -75,14 +75,15 @@ def devStuff():
 
 
 def main():
-	testing=True
+	testing=False
+	writeToDisk=False
 	"""
 	For now this is just stuff for debugging and testing. Later:
 	Contains and explicits the workflow of the program.
 	"""
 	""" get all input parameters
 	params:
-	file_in, delim_in, header_in, collapsePSMAlgo_bool, collapsePSMAlgo_master, collapsePSMAlgo_bool_exclusive,
+	file_in, delim_in, header_in, collapsePSMAlgo_bool, collapsePSMAlgo_master, collapsePSMAlgo_exclusive_bool,
 	collapseRT_bool, collapseRT_centerMeasure_channels, collapseRT_centerMeasure_intensities,
 	collapseRT_maxRelativeChannelVariance, collapseCharge_bool, isotopicCorrectionsMatrix, accuracy, maxIterations,
 	DEFoldThreshold, path_out, filename_out, delim_out
@@ -98,8 +99,7 @@ def main():
 		if params['collapsePSMAlgo_bool']:
 			# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
 			df, removedData['PSMAlgo'] = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master'],
-			                                             exclusive=params['collapsePSMAlgo_bool_exclusive']) # TODO
-			print(df.shape+', '+removedData['PSMAlgo'].shape)
+			                                             exclusive=params['collapsePSMAlgo_exclusive_bool']) # TODO
 		if params['collapseRT_bool']:
 			# collapse peptide list redundancy due to multiple detections at different RT
 			df = collapseRT(df, centerMeasure_channels=params['collapseRT_centerMeasure_channels'],
@@ -120,18 +120,19 @@ def main():
 		viz = dataVisualization(DEresults) # TODO
 
 		""" Save data to disk and generate report """
-		# save the removed data information
-		exportData(removedData, path_out=params['path_out'],
-		           filename=params['filename_out'] + '_removedData', delim_out=params['delim_out'])
-		# save the normalized intensities obtained through CONSTANd
-		exportData(normalizedIntensities, path_out=params['path_out'],
-		           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
-		# save the DE analysis results
-		exportData(DEresults, path_out=params['path_out'], filename=params['filename_out'] + '_DEresults')  # TODO
-		# save the visualizations
-		exportData(viz, path_out=params['path_out'], filename=params['filename_out']+'_dataViz') # TODO
-		# generate a report PDF (without the normalized intensities: behind paywall?
-		generateReport(DEresults, viz) # TODO
+		if writeToDisk:
+			# save the removed data information
+			exportData(removedData, path_out=params['path_out'],
+			           filename=params['filename_out'] + '_removedData', delim_out=params['delim_out'])
+			# save the normalized intensities obtained through CONSTANd
+			exportData(normalizedIntensities, path_out=params['path_out'],
+			           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
+			# save the DE analysis results
+			exportData(DEresults, path_out=params['path_out'], filename=params['filename_out'] + '_DEresults')  # TODO
+			# save the visualizations
+			exportData(viz, path_out=params['path_out'], filename=params['filename_out']+'_dataViz') # TODO
+			# generate a report PDF (without the normalized intensities: behind paywall?
+			generateReport(DEresults, viz) # TODO
 
 	if testing:
 		devStuff()
