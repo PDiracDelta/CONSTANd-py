@@ -133,7 +133,7 @@ def getInput():
 	return params
 
 
-def importDataFrame(path_in=None, filetype=None, delim=None, header=0):
+def importDataFrame(path_in=None, delim=None, header=0):
 	"""
 	Get the data from disk as a Pandas DataFrame.
 	:param path_in:     string          existing path to input file
@@ -143,27 +143,21 @@ def importDataFrame(path_in=None, filetype=None, delim=None, header=0):
 	"""
 	assert path.exists(path_in)
 
-	if filetype is None:  # set filetype equal to the file extension
-		filetype = path_in.split('.')[-1]
-
-	if filetype == 'xlsx':
-		df = pd.read_excel(path_in)
-	elif filetype == 'csv':
-		if delim is None:
-			df = pd.read_csv(path_in, delimiter=',', header=header)
-		else:
-			df = pd.read_csv(path_in, delimiter=delim, header=header)
-	elif filetype == 'tsv':
-		if delim is None:
-			df = pd.read_csv(path_in, delimiter='\t', header=header)
-		else:
-			df = pd.read_csv(path_in, delimiter=delim, header=header)
-	else:
+	if delim is None:
+		extension = path_in.split('.')[-1] # set extension equal to the file extension (can return None)
+		delim = ext2delim(extension)
 		if delim is None:
 			raise Exception(
-				"I don't know how to handle this data: the filetype was not recognized and no delimiter was specified.")
-		warnings.warn("Did not recognize filetype: treating as delimited textfile with the delimiter you specified.")
+				"Cannot handle data: filetype not recognized and no delimiter specified.")
+
+	if delim=='xlsx':
+		df = pd.read_excel(path_in)
+	else:
 		df = pd.read_csv(path_in, delimiter=delim, header=header)
+
+	if delim is None:
+		raise Exception(
+			"I don't know how to handle this data: the filetype was not recognized and no delimiter was specified.")
 
 	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10, 6)), columns=list('ABCDEF'))  # TEST
 	# df = pd.read_csv('../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.txt', delim='\t') # TEST
@@ -187,5 +181,35 @@ def exportData(data, dataType, path_out, filename, delim_out=','):
 	# assert data is not None # TODO
 	assert path.exists(path_out)
 
-	if dataType is 'txt':
+	extension = delim2ext(delim_out)
+	fullPath = path_out + '/' + filename + extension
+
+	if dataType == 'txt':
 		np.savetxt(path_out+'/'+filename, data, delimiter=delim_out) # TODO
+	elif dataType == 'df':
+		data.to_csv(fullPath, sep=delim_out, index=False)
+
+
+def delim2ext(delim):
+	"""
+	Returns the filename extension belonging to the specified delimiter, or returns empty string.
+	"""
+	if delim==',':
+		return '.csv'
+	elif delim=='\t':
+		return '.tsv'
+	else:
+		return ''
+
+
+def ext2delim(ext):
+	"""
+	Returns the delimiter belonging to the specified filename extension, or returns empty string.
+	"""
+	ext.lstrip('.')
+	if ext=='csv':
+		return ','
+	elif ext=='tsv':
+		return '\t'
+	else:
+		return None

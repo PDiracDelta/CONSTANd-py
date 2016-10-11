@@ -100,6 +100,8 @@ def main():
 			# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
 			df, removedData['PSMAlgo'] = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master'],
 			                                             exclusive=params['collapsePSMAlgo_exclusive_bool']) # TODO
+			exportData(df, 'df', path_out=params['path_out'],
+			           filename=params['filename_out'] + '_df', delim_out=params['delim_out'])
 		if params['collapseRT_bool']:
 			# collapse peptide list redundancy due to multiple detections at different RT
 			df = collapseRT(df, centerMeasure_channels=params['collapseRT_centerMeasure_channels'],
@@ -125,7 +127,7 @@ def main():
 			exportData(removedData, path_out=params['path_out'],
 			           filename=params['filename_out'] + '_removedData', delim_out=params['delim_out'])
 			# save the normalized intensities obtained through CONSTANd
-			exportData(normalizedIntensities, path_out=params['path_out'],
+			exportData(normalizedIntensities, dataType='txt', path_out=params['path_out'],
 			           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
 			# save the DE analysis results
 			exportData(DEresults, path_out=params['path_out'], filename=params['filename_out'] + '_DEresults')  # TODO
