@@ -136,6 +136,8 @@ def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mea
 		"""
 		# TODO combine this function with the getNewIntensities from collapseCharge? Although you might not want to weigh by MS1 intensity here, you might just want the BEST MS1 peak height.
 		weightedMS2Intensities = {} # dict with the new MS2 intensities for each firstOccurrence
+		if centerMeasure_channels and centerMeasure_intensities and False: # TODO switch for the center measures.
+			pass
 		for firstOccurrence,duplicates in duplicatesDict:
 			totalMS1Intensity = sum(duplicatesDf.iloc[[firstOccurrence]+duplicates]['Intensity'])
 			allWeights = duplicatesDf.iloc[[firstOccurrence] + duplicates]['Intensity'] / totalMS1Intensity # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
@@ -145,7 +147,7 @@ def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mea
 				warnings.warn("maxRelativeReporterVariance too high for peptide with index "+firstOccurrence+".") #TODO this shouldnt just warn, you should also decide what to do.
 		return weightedMS2Intensities # update the intensities
 
-	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Charge', 'Intensity']
+	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'RT [min]', 'Intensity']
 	allSequences = df.groupby('Annotated Sequence').groups  # dict of SEQUENCE:[INDICES]
 	allDuplicatesHierarchy = {}  # {firstOccurrence:[duplicates]}
 	for sequence,indices in allSequences.items():
@@ -159,8 +161,10 @@ def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mea
 			allDuplicatesHierarchy.update(duplicatesDict)
 	setIntensities(df, intensitiesDict)
 	toDelete = list(allDuplicatesHierarchy.values())
-	# save as {firstOccurrenceIndex : [[values, to, be, saved] for each duplicate]}
-	removedData = dict(firstOccurrence=df.iloc[allDuplicatesHierarchy[firstOccurrence]][colsToSave] for firstOccurrence in allDuplicatesHierarchy)
+	# save as {firstOccurrenceIndex : [annotated_sequence, [values, to, be, saved] for each duplicate]}
+	removedData = dict(firstOccurrence=[df.iloc[firstOccurrence][colsToSave[0]],
+	                                    df.iloc[allDuplicatesHierarchy[firstOccurrence]][colsToSave[1:]]] for
+	                   firstOccurrence in allDuplicatesHierarchy.keys())
 	df.drop(toDelete, inplace=True)
 
 	return df, removedData
@@ -173,7 +177,7 @@ def collapseCharge(df):
 	each associated with its first occurrence duplicate index.
 	:param df:              pd.dataFrame    with sequence duplicates due to difference in Charge.
 	:return df:             pd.dataFrame    without sequence duplicates due to difference in Charge.
-	:return removedData:    dict            {firstOccurrenceIndex : [[values, to, be, saved] for each duplicate]}
+	:return removedData:    dict            {firstOccurrenceIndex : [annotated_sequence, [other, values, to, be, saved] for each duplicate]}
 	"""
 
 	def checkTrueDuplicates(x, y):  # RT close? same PSMAlgo->same first scan number->same charge?
@@ -216,7 +220,9 @@ def collapseCharge(df):
 	setIntensities(df, intensitiesDict)
 	toDelete = list(allDuplicatesHierarchy.values())
 	# save as {firstOccurrenceIndex : [[values, to, be, saved] for each duplicate]}
-	removedData = dict(firstOccurrence=df.iloc[allDuplicatesHierarchy[firstOccurrence]][colsToSave] for firstOccurrence in allDuplicatesHierarchy)
+	removedData = dict(firstOccurrence=[df.iloc[firstOccurrence][colsToSave[0]],
+	                                    df.iloc[allDuplicatesHierarchy[firstOccurrence]][colsToSave[1:]]] for
+	                   firstOccurrence in allDuplicatesHierarchy.keys())
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 
