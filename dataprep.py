@@ -67,7 +67,7 @@ def collapsePSMAlgo(df, master, exclusive):
 	return df, removedData
 
 
-def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mean', maxRelativeChannelVariance=None):
+def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mean', maxRelativeChannelVariance=np.inf):
 	# TODO: retain deleted info in compact way
 	# what if the peptides resulting from the PSM do not agree between RT's? -> within-algorithm disagreement doesn't occur.
 	# TODO: second switch: what if user wants not  a peak as high as the highest peak, but as high as the mean/median?
@@ -77,18 +77,19 @@ def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mea
 	match the magnitude of the largest constituent peak. In this way, the absolute intensity is still that of the
 	largest peak, but the within-peak relative intensities are the average of all the constituent peaks. """
 	# setIntensities(df, intensities, location)
-	return df
+	return df, removedData
 
 
 def collapseCharge(df):
-	import pandas as pd
 	"""
 	Replaces identical sequence entries with a different charge by one containing the sum of their intensities. The
-	'Charge' column is then deleted from the dataFrame. Deleted charges, scan numbers, ... are saved in removedData.
+	'Charge' column is then deleted from the dataFrame. Deleted charges, scan numbers, ... are saved in removedData,
+	each associated with its first occurrence duplicate index.
 	:param df:              pd.dataFrame    with sequence duplicates due to difference in Charge.
 	:return df:             pd.dataFrame    without sequence duplicates due to difference in Charge.
-	:return removedData:    pd.dataFrame    basic info about removed entries
+	:return removedData:    dict            {firstOccurrenceIndex : [[values, to, be, saved] for each duplicate]}
 	"""
+	import pandas as pd
 
 	def getDuplicates(indices):
 		"""
@@ -132,7 +133,7 @@ def collapseCharge(df):
 
 	def getNewIntensities(duplicatesDf, duplicatesDict): # sum intensities in a weighted way
 		"""
-		Combines the duplicates' intensities into one new entry per firstOccurrence, conform the duplicatesDict structure.
+		Combines the duplicates' intensities into one new entry per first occurrence, conform the duplicatesDict structure.
 		:param duplicatesDict:          dict            {firstOccurrenceIndex:[duplicateIndices]}
 		:param duplicatesDf:            pd.dataFrame    data of only the first occurrences and duplicates
 		:return weightedMS2Intensities: dict            {firstOccurrenceIndex:np.array(newIntensities)}
@@ -147,16 +148,18 @@ def collapseCharge(df):
 
 	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Charge', 'Intensity']
 	allSequences = df.groupby('Annotated Sequence').groups  # dict of SEQUENCE:[INDICES]
-	toDelete = [] # duplicates of the first occurrence that ought to be deleted
+	allDuplicatesHierarchy = {} # {firstOccurrence:[duplicates]}
 	for sequence,indices in allSequences.items():
 		if len(indices)>1: # only treat duplicated sequences
 			# dict with duplicates per first occurrence, dataFrame with df indices but with only the duplicates
 			duplicatesDict, duplicatesDf = getDuplicates(indices)
 			# get the new intensities per first occurrence index (df index)
 			intensitiesDict = getNewIntensities(duplicatesDf, duplicatesDict)
-			toDelete.extend(duplicatesDict.values())
+			allDuplicatesHierarchy.update(duplicatesDict)
 	setIntensities(df, intensitiesDict)
-	removedData = df.iloc[toDelete][colsToSave]
+	toDelete = list(allDuplicatesHierarchy.values())
+	# save as {firstOccurrenceIndex : [[values, to, be, saved] for each duplicate]}
+	removedData = dict(firstOccurrence=df.iloc[allDuplicatesHierarchy[firstOccurrence]][colsToSave] for firstOccurrence in allDuplicatesHierarchy)
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 
