@@ -91,7 +91,20 @@ def collapseCharge(df):
 	"""
 
 	def getDuplicates(indices):
+		"""
+		Takes a list of indices of candidate-duplicates (all df entries with identical annotated sequence) and returns
+		a dict of first occurrences and their true duplicates due to charge difference, as well as the corresponding
+		data extracted from the original dataFrame df. First occurrences without duplicates do not appear in the dict.
+		:param indices:         list            indices of the locations of candidate-duplicates in the original dataFrame df.
+		:return duplicatesDict: dict            {firstOccurrenceIndex:[duplicateIndices]}
+		:return duplicatesDf:   pd.dataFrame    data of only the entries involved in true duplication due to charge
+		"""
 		def checkTrueDuplicates(x, y): # RT close? same PSMAlgo->same first scan number->same charge?
+			"""
+			Checks whether dataFrame entries x and y are truly duplicates only due to charge difference.
+			:param x:   pd.Sequence candidate firstOccurrence data
+			:param y:   pd.Sequence candidate duplicate data
+			"""
 			if x['Charge'] == y['Charge']: # well obviously they should duplicate due to charge difference...
 				return False
 			if x['RT [min]']!=y['RT [min]']: # HOW CLOSE SHOULD THIS BE? HOW ARE THE MS2 SCANS BINNED BELONGING TO THE SAME MS1 SWEEP?
@@ -117,7 +130,13 @@ def collapseCharge(df):
 		duplicatesDf = candidatesDf.iloc[list(duplicatesDict.keys())+list(duplicatesDict.values())] # df of only the duplicates
 		return duplicatesDict, duplicatesDf
 
-	def updateFirstOccurrences(duplicatesDict, duplicatesDf): # sum intensities in a weighted way
+	def getNewIntensities(duplicatesDict, duplicatesDf): # sum intensities in a weighted way
+		"""
+
+		:param duplicatesDict:
+		:param duplicatesDf:
+		:return:
+		"""
 		weightedMS2Intensities = {} # dict with the new MS2 intensities for each firstOccurrence
 		for firstOccurrence,duplicates in duplicatesDict:
 			totalMS1Intensity = sum(duplicatesDf.iloc[[firstOccurrence]+duplicates]['Intensity'])
@@ -133,10 +152,10 @@ def collapseCharge(df):
 	toDelete = [] # duplicates of the first occurrence that ought to be deleted
 	for sequence,indices in allSequences.items():
 		if len(indices)>1: # only treat duplicated sequences
-			duplicatesDict, duplicatesDf = getDuplicates(indices) # dict with duplicates per keyed by first occurrence, and
-														# dataFrame with original indices but with only the duplicates
-			intensitiesDict = updateFirstOccurrences(duplicatesDict, duplicatesDf) # assign new intensities to duplicates' first occurrences
-																						# IN THE ORIGINAL DATAFRAME df.
+			# dict with duplicates per first occurrence, dataFrame with df indices but with only the duplicates
+			duplicatesDict, duplicatesDf = getDuplicates(indices)
+			# get the new intensities per first occurrence index (df index)
+			intensitiesDict = getNewIntensities(duplicatesDict, duplicatesDf)
 			toDelete.extend(duplicatesDict.values())
 	setIntensities(df, intensitiesDict)
 	removedData = df.iloc[toDelete][colsToSave]
