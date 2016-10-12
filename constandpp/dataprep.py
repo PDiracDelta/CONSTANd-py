@@ -81,7 +81,6 @@ def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mea
 
 def collapseCharge(df):
 	import pandas as pd
-	# TODO: retain deleted info in compact way
 	"""
 	Replaces identical sequence entries with a different charge by one containing the sum of their intensities. The
 	'Charge' column is then deleted from the dataFrame. Deleted charges, scan numbers, ... are saved in removedData.
@@ -95,45 +94,55 @@ def collapseCharge(df):
 			if x['Charge'] == y['Charge']: # well obviously they should duplicate due to charge difference...
 				return False
 			if x['RT [min]']!=y['RT [min]']: # HOW CLOSE SHOULD THIS BE? HOW ARE THE MS2 SCANS BINNED BELONGING TO THE SAME MS1 SWEEP?
-				return False # the difference should not be due to RT difference (different ms1 sweep)
+				return False # the difference should not be due to RT difference (different ms1 sweep) TODO this stuff ^^^
 			return True
 
 		candidatesDf = df.iloc[indices] # create new dataframe with only the possible duplicates to reduce overhead.
 		candidatesDf['index'] = pd.Series(indices) # add the original indices as a column 'index'
 		candidatesDf.set_index('index') # set the index to the original indices
-		duplicates = {} # keep a dict of which indices are duplicates of which
+		duplicatesDict = {} # keep a dict of which indices are duplicates of which
 		stillMatchable = indices # keep a dict of indices that can still be checked for having duplicates
 		for i in indices:
 			if i in stillMatchable: # if i has already been matched as a duplicate
 				stillMatchable.remove(i)
-				duplicates[i]=[] # (see above) keep a dict of which indices are duplicates of which
+				duplicatesDict[i]=[] # (see above) keep a dict of which indices are duplicates of which
 				stillMatchableTemp = stillMatchable # cannot modify the variable while its being iterated over -> keep temp
 				for j in stillMatchable:
 					if checkTrueDuplicates(candidatesDf.iloc[i], candidatesDf.iloc[j]):
-						duplicates[i].append(j) # mark index of rowj as a duplicate of index of rowi
+						duplicatesDict[i].append(j) # mark index of rowj as a duplicate of index of rowi
 						stillMatchableTemp.remove(j)
 				stillMatchable = stillMatchableTemp # now that iteration is done, modify.
-		duplicates = dict((x,y) for x,y in duplicates.items() if y) # remove empty lists of duplicates
-		duplicatesDf = candidatesDf.iloc[duplicates.keys().extend(duplicates.values())] # df of only the duplicates
-		return duplicates, duplicatesDf
+		duplicatesDict = dict((x,y) for x,y in duplicatesDict.items() if y) # remove empty lists of duplicates
+		duplicatesDf = candidatesDf.iloc[list(duplicatesDict.keys())+list(duplicatesDict.values())] # df of only the duplicates
+		return duplicatesDict, duplicatesDf
 
-	def updateFirstOccurrences(duplicates, duplicatesDf):
-		# sum intensities
-		pass
+	def updateFirstOccurrences(duplicatesDict, duplicatesDf): # sum intensities in a weighted way
+		weightedMS2Intensities = [] # list with the new MS2 intensities for each firstOccurrence
+		for firstOccurrence,duplicates in duplicatesDict:
+			totalMS1Intensity = sum(duplicatesDf.iloc[[firstOccurrence]+duplicates]['Intensity'])
+			allWeights = duplicatesDf.iloc[[firstOccurrence] + duplicates]['Intensity'] / totalMS1Intensity # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
+			allMS2Intensities = getIntensities(duplicatesDf.iloc[[firstOccurrence]+duplicates]) # np.array
+			weightedMS2Intensities.append(np.sum((allMS2Intensities.T*allWeights).T,0)) # TODO check if the dimension are correct
+		return weightedMS2Intensities # update the intensities
 
 	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Charge', 'Intensity']
 	allSequences = df.groupby('Annotated Sequence').groups  # dict of SEQUENCE:[INDICES]
-	toDelete = []
+	toUpdate = [] # first occurrences that ought to be updated
+	toSetIntensities = [] # the new, weighted intensities for the first occurrence
+	toDelete = [] # duplicates of the first occurrence that ought to be deleted
 	for sequence,indices in allSequences.items():
 		if len(indices)>1: # only treat duplicated sequences
-			duplicates, duplicatesDf = getDuplicates(indices) # dict with duplicates per keyed by first occurrence, and
+			duplicatesDict, duplicatesDf = getDuplicates(indices) # dict with duplicates per keyed by first occurrence, and
 														# dataFrame with original indices but with only the duplicates
-			updateFirstOccurrences(duplicates, duplicatesDf) # assign new intensities to duplicates' first occurrences.
-			toDelete.extend(duplicates.values())
-
-	# removedData = df.iloc[toDelete][colsToSave]
-	# df[(df['Annotated Sequence'] == 'Mascot (A6)')
-	return df # , removedData
+			newIntensities = updateFirstOccurrences(duplicatesDict, duplicatesDf) # assign new intensities to duplicates' first occurrences
+																						# IN THE ORIGINAL DATAFRAME df.
+			toUpdate.extend(duplicatesDict.keys())
+			toSetIntensities.extend(newIntensities)
+			toDelete.extend(duplicatesDict.values())
+	setIntensities(df, toSetIntensities, toUpdate)
+	removedData = df.iloc[toDelete][colsToSave]
+	df.drop(toDelete, inplace=True)
+	return df, removedData
 
 
 def isotopicCorrection(intensities, correctionsMatrix):
@@ -153,7 +162,7 @@ def getIntensities(df):
 	return np.asarray(df[['126', '127', '128', '129', '130', '131']])
 
 
-def setIntensities(df, intensities, location=[0,-1,0,-1]):
+def setIntensities(df, intensities, indices=[0,1,3]):
 	""" Sets the intensities of the dataFrame at the specified location equal to the ndArray of given intensities."""
 	#df[['126', '127', '128', '129', '130', '131']].iloc() = [intensities[:,1], intensities[:,2], intensities[:,3],
 	#                                                  intensities[:,4], intensities[:,5], intensities[:,6]]
