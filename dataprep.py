@@ -118,12 +118,12 @@ def collapseCharge(df):
 		return duplicatesDict, duplicatesDf
 
 	def updateFirstOccurrences(duplicatesDict, duplicatesDf): # sum intensities in a weighted way
-		weightedMS2Intensities = [] # list with the new MS2 intensities for each firstOccurrence
+		weightedMS2Intensities = {} # dict with the new MS2 intensities for each firstOccurrence
 		for firstOccurrence,duplicates in duplicatesDict:
 			totalMS1Intensity = sum(duplicatesDf.iloc[[firstOccurrence]+duplicates]['Intensity'])
 			allWeights = duplicatesDf.iloc[[firstOccurrence] + duplicates]['Intensity'] / totalMS1Intensity # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
 			allMS2Intensities = getIntensities(duplicatesDf.iloc[[firstOccurrence]+duplicates]) # np.array
-			weightedMS2Intensities.append(np.sum((allMS2Intensities.T*allWeights).T,0)) # TODO check if the dimension are correct
+			weightedMS2Intensities[firstOccurrence] = np.sum((allMS2Intensities.T*allWeights).T,0) # TODO check if the dimension are correct
 		return weightedMS2Intensities # update the intensities
 
 	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Charge', 'Intensity']
@@ -135,12 +135,10 @@ def collapseCharge(df):
 		if len(indices)>1: # only treat duplicated sequences
 			duplicatesDict, duplicatesDf = getDuplicates(indices) # dict with duplicates per keyed by first occurrence, and
 														# dataFrame with original indices but with only the duplicates
-			newIntensities = updateFirstOccurrences(duplicatesDict, duplicatesDf) # assign new intensities to duplicates' first occurrences
+			intensitiesDict = updateFirstOccurrences(duplicatesDict, duplicatesDf) # assign new intensities to duplicates' first occurrences
 																						# IN THE ORIGINAL DATAFRAME df.
-			toUpdate.extend(duplicatesDict.keys())
-			toSetIntensities.extend(newIntensities)
 			toDelete.extend(duplicatesDict.values())
-	setIntensities(df, toSetIntensities, toUpdate)
+	setIntensities(df, intensitiesDict)
 	removedData = df.iloc[toDelete][colsToSave]
 	df.drop(toDelete, inplace=True)
 	return df, removedData
