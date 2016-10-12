@@ -15,6 +15,7 @@ Collection of functions that prepare the data before it can be normalized by CON
 
 import numpy as np
 
+intensityColumns = ['126', '127', '128', '129', '130', '131']
 
 def removeIsolationInterference(df, threshold):
 	"""
@@ -159,11 +160,16 @@ def getIntensities(df):
 	:param df:              pd.dataFrame    Pandas dataFrame from which to extract the intensities
 	:return intensities:    np.ndArray      matrix with the intensities
 	"""
-	return np.asarray(df[['126', '127', '128', '129', '130', '131']])
+	return np.asarray(df[intensityColumns])
 
 
-def setIntensities(df, intensities, indices=[0,1,3]):
-	""" Sets the intensities of the dataFrame at the specified location equal to the ndArray of given intensities."""
-	#df[['126', '127', '128', '129', '130', '131']].iloc() = [intensities[:,1], intensities[:,2], intensities[:,3],
-	#                                                  intensities[:,4], intensities[:,5], intensities[:,6]]
+def setIntensities(df, intensitiesDict):
+	"""
+	Sets the intensities of the dataFrame at the specified location equal to the ndArray of given intensities.
+	:param df:              pd.dataFrame    input dataFrame
+	:param intensitiesDict: dict            dict {index:[values]} with index and values of all df entries to be modified
+	:return df:             pd.dataFrame    output dataFrame with updated intensities
+	"""
+	for index in intensitiesDict.keys():
+		df.iloc[index][[intensityColumns]] = intensitiesDict[index]
 	return df
