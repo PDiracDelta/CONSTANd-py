@@ -17,6 +17,42 @@ import numpy as np
 
 intensityColumns = ['126', '127', '128', '129', '130', '131']
 
+
+def getDuplicates(df, indices, checkTrueDuplicates):
+	#TODO: implement the use of this function so that it should not be needlessly ran again by each collapse function.
+	"""
+	Takes a list of indices of candidate-duplicates (all df entries with identical annotated sequence) and returns
+	a dict of first occurrences and their true duplicates due to charge difference, as well as the corresponding
+	data extracted from the original dataFrame df. First occurrences without duplicates do not appear in the dict.
+	:param df:                  pd.dataFrame    data which is to be checked for duplicates
+	:param indices:             list            indices of the locations of candidate-duplicates in the original dataFrame df.
+	:param checkTrueDuplicates: function        function which returns True if two entries given as arguments are true duplicates.
+	:return duplicatesDict:     dict            {firstOccurrenceIndex:[duplicateIndices]}
+	:return duplicatesDf:       pd.dataFrame    data of only the entries involved in true duplication due to charge
+	"""
+	import pandas as pd
+
+	candidatesDf = df.iloc[indices]  # create new dataframe with only the possible duplicates to reduce overhead.
+	candidatesDf['index'] = pd.Series(indices)  # add the original indices as a column 'index'
+	candidatesDf.set_index('index')  # set the index to the original indices
+	duplicatesDict = {}  # keep a dict of which indices are duplicates of which
+	stillMatchable = indices  # keep a dict of indices that can still be checked for having duplicates
+	for i in indices:
+		if i in stillMatchable:  # if i has already been matched as a duplicate
+			stillMatchable.remove(i)
+			duplicatesDict[i] = []  # (see above) keep a dict of which indices are duplicates of which
+			stillMatchableTemp = stillMatchable  # cannot modify the variable while its being iterated over -> keep temp
+			for j in stillMatchable:
+				if checkTrueDuplicates(candidatesDf.iloc[i], candidatesDf.iloc[j]):
+					duplicatesDict[i].append(j)  # mark index of rowj as a duplicate of index of rowi
+					stillMatchableTemp.remove(j)
+			stillMatchable = stillMatchableTemp  # now that iteration is done, modify.
+	duplicatesDict = dict((x, y) for x, y in duplicatesDict.items() if y)  # remove empty lists of duplicates
+	duplicatesDf = candidatesDf.iloc[
+		list(duplicatesDict.keys()) + list(duplicatesDict.values())]  # df of only the duplicates
+	return duplicatesDict, duplicatesDf
+
+
 def removeIsolationInterference(df, threshold):
 	"""
 	Remove the data where there is too much isolation interference (above threshold) and return the remaining dataFrame
@@ -77,6 +113,7 @@ def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mea
 	match the magnitude of the largest constituent peak. In this way, the absolute intensity is still that of the
 	largest peak, but the within-peak relative intensities are the average of all the constituent peaks. """
 	# setIntensities(df, intensities, location)
+
 	return df, removedData
 
 
@@ -89,47 +126,19 @@ def collapseCharge(df):
 	:return df:             pd.dataFrame    without sequence duplicates due to difference in Charge.
 	:return removedData:    dict            {firstOccurrenceIndex : [[values, to, be, saved] for each duplicate]}
 	"""
-	import pandas as pd
 
-	def getDuplicates(indices):
+	def checkTrueDuplicates(x, y):  # RT close? same PSMAlgo->same first scan number->same charge?
 		"""
-		Takes a list of indices of candidate-duplicates (all df entries with identical annotated sequence) and returns
-		a dict of first occurrences and their true duplicates due to charge difference, as well as the corresponding
-		data extracted from the original dataFrame df. First occurrences without duplicates do not appear in the dict.
-		:param indices:         list            indices of the locations of candidate-duplicates in the original dataFrame df.
-		:return duplicatesDict: dict            {firstOccurrenceIndex:[duplicateIndices]}
-		:return duplicatesDf:   pd.dataFrame    data of only the entries involved in true duplication due to charge
+		Checks whether dataFrame entries x and y are truly duplicates only due to charge difference.
+		:param x:   pd.Sequence candidate firstOccurrence data
+		:param y:   pd.Sequence candidate duplicate data
 		"""
-		def checkTrueDuplicates(x, y): # RT close? same PSMAlgo->same first scan number->same charge?
-			"""
-			Checks whether dataFrame entries x and y are truly duplicates only due to charge difference.
-			:param x:   pd.Sequence candidate firstOccurrence data
-			:param y:   pd.Sequence candidate duplicate data
-			"""
-			if x['Charge'] == y['Charge']: # well obviously they should duplicate due to charge difference...
-				return False
-			if x['RT [min]']!=y['RT [min]']: # HOW CLOSE SHOULD THIS BE? HOW ARE THE MS2 SCANS BINNED BELONGING TO THE SAME MS1 SWEEP?
-				return False # the difference should not be due to RT difference (different ms1 sweep) TODO this stuff ^^^
-			return True
-
-		candidatesDf = df.iloc[indices] # create new dataframe with only the possible duplicates to reduce overhead.
-		candidatesDf['index'] = pd.Series(indices) # add the original indices as a column 'index'
-		candidatesDf.set_index('index') # set the index to the original indices
-		duplicatesDict = {} # keep a dict of which indices are duplicates of which
-		stillMatchable = indices # keep a dict of indices that can still be checked for having duplicates
-		for i in indices:
-			if i in stillMatchable: # if i has already been matched as a duplicate
-				stillMatchable.remove(i)
-				duplicatesDict[i]=[] # (see above) keep a dict of which indices are duplicates of which
-				stillMatchableTemp = stillMatchable # cannot modify the variable while its being iterated over -> keep temp
-				for j in stillMatchable:
-					if checkTrueDuplicates(candidatesDf.iloc[i], candidatesDf.iloc[j]):
-						duplicatesDict[i].append(j) # mark index of rowj as a duplicate of index of rowi
-						stillMatchableTemp.remove(j)
-				stillMatchable = stillMatchableTemp # now that iteration is done, modify.
-		duplicatesDict = dict((x,y) for x,y in duplicatesDict.items() if y) # remove empty lists of duplicates
-		duplicatesDf = candidatesDf.iloc[list(duplicatesDict.keys())+list(duplicatesDict.values())] # df of only the duplicates
-		return duplicatesDict, duplicatesDf
+		if x['Charge'] == y['Charge']:  # well obviously they should duplicate due to charge difference...
+			return False
+		if x['RT [min]'] != y[
+			'RT [min]']:  # HOW CLOSE SHOULD THIS BE? HOW ARE THE MS2 SCANS BINNED BELONGING TO THE SAME MS1 SWEEP?
+			return False  # the difference should not be due to RT difference (different ms1 sweep) TODO this stuff ^^^
+		return True
 
 	def getNewIntensities(duplicatesDf, duplicatesDict): # sum intensities in a weighted way
 		"""
@@ -152,7 +161,7 @@ def collapseCharge(df):
 	for sequence,indices in allSequences.items():
 		if len(indices)>1: # only treat duplicated sequences
 			# dict with duplicates per first occurrence, dataFrame with df indices but with only the duplicates
-			duplicatesDict, duplicatesDf = getDuplicates(indices)
+			duplicatesDict, duplicatesDf = getDuplicates(df, indices, checkTrueDuplicates)
 			# get the new intensities per first occurrence index (df index)
 			intensitiesDict = getNewIntensities(duplicatesDf, duplicatesDict)
 			allDuplicatesHierarchy.update(duplicatesDict)
