@@ -103,7 +103,7 @@ def collapsePSMAlgo(df, master, exclusive):
 	return df, removedData
 
 
-def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mean', maxRelativeChannelVariance=np.inf):
+def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mean', maxRelativeReporterVariance=np.inf):
 	# TODO: retain deleted info in compact way
 	# what if the peptides resulting from the PSM do not agree between RT's? -> within-algorithm disagreement doesn't occur.
 	# TODO: second switch: what if user wants not  a peak as high as the highest peak, but as high as the mean/median?
@@ -113,6 +113,55 @@ def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mea
 	match the magnitude of the largest constituent peak. In this way, the absolute intensity is still that of the
 	largest peak, but the within-peak relative intensities are the average of all the constituent peaks. """
 	# setIntensities(df, intensities, location)
+	import warnings
+
+	def checkTrueDuplicates(x, y):  # RT close?
+		"""
+		Checks whether dataFrame entries x and y are truly duplicates only due to RT difference.
+		:param x:   pd.Sequence candidate firstOccurrence data
+		:param y:   pd.Sequence candidate duplicate data
+		"""
+		if x['First Scan'] == y['First Scan']: # identical peptides are always in the same MS1 sweep
+			return False
+		if x['RT [min]'] == y['RT [min]']:  # HOW CLOSE SHOULD THIS BE? HOW ARE THE MS2 SCANS BINNED BELONGING TO THE SAME MS1 SWEEP?
+			return False  # the difference should be due to RT difference (different ms1 sweep) TODO this stuff ^^^
+		return True
+
+	def getNewIntensities(duplicatesDf, duplicatesDict): # sum intensities in a weighted way
+		"""
+		Combines the duplicates' intensities into one new entry per first occurrence, conform the duplicatesDict structure.
+		:param duplicatesDict:          dict            {firstOccurrenceIndex:[duplicateIndices]}
+		:param duplicatesDf:            pd.dataFrame    data of only the first occurrences and duplicates
+		:return weightedMS2Intensities: dict            {firstOccurrenceIndex:np.array(newIntensities)}
+		"""
+		# TODO combine this function with the getNewIntensities from collapseCharge? Although you might not want to weigh by MS1 intensity here, you might just want the BEST MS1 peak height.
+		weightedMS2Intensities = {} # dict with the new MS2 intensities for each firstOccurrence
+		for firstOccurrence,duplicates in duplicatesDict:
+			totalMS1Intensity = sum(duplicatesDf.iloc[[firstOccurrence]+duplicates]['Intensity'])
+			allWeights = duplicatesDf.iloc[[firstOccurrence] + duplicates]['Intensity'] / totalMS1Intensity # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
+			allMS2Intensities = getIntensities(duplicatesDf.iloc[[firstOccurrence]+duplicates]) # np.array
+			weightedMS2Intensities[firstOccurrence] = np.sum((allMS2Intensities.T*allWeights).T,0) # TODO check if the dimension are correct
+			if np.any(np.var(allMS2Intensities,0) > maxRelativeReporterVariance): # TODO this can only be consistent if executed on RELATIVE intensities.
+				warnings.warn("maxRelativeReporterVariance too high for peptide with index "+firstOccurrence+".") #TODO this shouldnt just warn, you should also decide what to do.
+		return weightedMS2Intensities # update the intensities
+
+	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Charge', 'Intensity']
+	allSequences = df.groupby('Annotated Sequence').groups  # dict of SEQUENCE:[INDICES]
+	allDuplicatesHierarchy = {}  # {firstOccurrence:[duplicates]}
+	for sequence,indices in allSequences.items():
+		if len(indices)>1: # only treat duplicated sequences
+			# dict with duplicates per first occurrence, dataFrame with df indices but with only the duplicates
+			duplicatesDict, duplicatesDf = getDuplicates(df, indices, checkTrueDuplicates)
+			if False:  # x['RT [min]'] is too far from y['RT [min]']
+				pass  # keep track of this isolated peak # TODO implement something for isolated peaks?
+			# get the new intensities per first occurrence index (df index)
+			intensitiesDict = getNewIntensities(duplicatesDf, duplicatesDict)
+			allDuplicatesHierarchy.update(duplicatesDict)
+	setIntensities(df, intensitiesDict)
+	toDelete = list(allDuplicatesHierarchy.values())
+	# save as {firstOccurrenceIndex : [[values, to, be, saved] for each duplicate]}
+	removedData = dict(firstOccurrence=df.iloc[allDuplicatesHierarchy[firstOccurrence]][colsToSave] for firstOccurrence in allDuplicatesHierarchy)
+	df.drop(toDelete, inplace=True)
 
 	return df, removedData
 
@@ -135,8 +184,7 @@ def collapseCharge(df):
 		"""
 		if x['Charge'] == y['Charge']:  # well obviously they should duplicate due to charge difference...
 			return False
-		if x['RT [min]'] != y[
-			'RT [min]']:  # HOW CLOSE SHOULD THIS BE? HOW ARE THE MS2 SCANS BINNED BELONGING TO THE SAME MS1 SWEEP?
+		if x['RT [min]'] != y['RT [min]']:  # HOW CLOSE SHOULD THIS BE? HOW ARE THE MS2 SCANS BINNED BELONGING TO THE SAME MS1 SWEEP?
 			return False  # the difference should not be due to RT difference (different ms1 sweep) TODO this stuff ^^^
 		return True
 
