@@ -48,7 +48,7 @@ def getInput():
 	collapseRT_bool = config.getboolean('DEFAULT','collapseRT_bool')
 	collapseRT_centerMeasure_channels = config.get('DEFAULT','collapseRT_centerMeasure_channels')
 	collapseRT_centerMeasure_intensities = config.get('DEFAULT','collapseRT_centerMeasure_intensities')
-	collapseRT_maxRelativeChannelVariance = config.getfloat('DEFAULT','collapseRT_maxRelativeChannelVariance')
+	collapseRT_maxRelativeReporterVariance = config.getfloat('DEFAULT','collapseRT_maxRelativeReporterVariance')
 	collapseCharge_bool = config.getboolean('DEFAULT','collapseCharge_bool')
 	isotopicCorrectionsMatrix = eval(config.get('DEFAULT','isotopicCorrectionsMatrix')) # TODO: separate file?
 	accuracy = config.getfloat('DEFAULT','accuracy')
@@ -84,8 +84,8 @@ def getInput():
 	if collapseRT_centerMeasure_intensities not in ('max', 'mean', 'median'):
 		raise Exception("Invalid center measure: '"+collapseRT_centerMeasure_channels+"'. "
 		                                                                              "Please pick 'max', 'mean' or 'median'.")
-	if collapseRT_maxRelativeChannelVariance is not None:
-		if not collapseRT_maxRelativeChannelVariance > 0:
+	if collapseRT_maxRelativeReporterVariance is not None:
+		if not collapseRT_maxRelativeReporterVariance > 0:
 			raise Exception("maxRelativeChannelVariance should be either 'None' or greater than zero.")
 	if collapseCharge_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple charge states.")
@@ -115,7 +115,7 @@ def getInput():
 		'collapseRT_bool': collapseRT_bool,
 		'collapseRT_centerMeasure_channels': collapseRT_centerMeasure_channels,
 		'collapseRT_centerMeasure_intensities': collapseRT_centerMeasure_intensities,
-		'collapseRT_maxRelativeChannelVariance': collapseRT_maxRelativeChannelVariance,
+		'collapseRT_maxRelativeReporterVariance': collapseRT_maxRelativeReporterVariance,
 		'collapseCharge_bool': collapseCharge_bool,
 		'isotopicCorrectionsMatrix': isotopicCorrectionsMatrix,
 		'accuracy': accuracy,
