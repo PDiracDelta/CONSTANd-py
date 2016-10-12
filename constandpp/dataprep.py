@@ -130,12 +130,12 @@ def collapseCharge(df):
 		duplicatesDf = candidatesDf.iloc[list(duplicatesDict.keys())+list(duplicatesDict.values())] # df of only the duplicates
 		return duplicatesDict, duplicatesDf
 
-	def getNewIntensities(duplicatesDict, duplicatesDf): # sum intensities in a weighted way
+	def getNewIntensities(duplicatesDf, duplicatesDict): # sum intensities in a weighted way
 		"""
-
-		:param duplicatesDict:
-		:param duplicatesDf:
-		:return:
+		Combines the duplicates' intensities into one new entry per firstOccurrence, conform the duplicatesDict structure.
+		:param duplicatesDict:          dict            {firstOccurrenceIndex:[duplicateIndices]}
+		:param duplicatesDf:            pd.dataFrame    data of only the first occurrences and duplicates
+		:return weightedMS2Intensities: dict            {firstOccurrenceIndex:np.array(newIntensities)}
 		"""
 		weightedMS2Intensities = {} # dict with the new MS2 intensities for each firstOccurrence
 		for firstOccurrence,duplicates in duplicatesDict:
@@ -147,15 +147,13 @@ def collapseCharge(df):
 
 	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Charge', 'Intensity']
 	allSequences = df.groupby('Annotated Sequence').groups  # dict of SEQUENCE:[INDICES]
-	toUpdate = [] # first occurrences that ought to be updated
-	toSetIntensities = [] # the new, weighted intensities for the first occurrence
 	toDelete = [] # duplicates of the first occurrence that ought to be deleted
 	for sequence,indices in allSequences.items():
 		if len(indices)>1: # only treat duplicated sequences
 			# dict with duplicates per first occurrence, dataFrame with df indices but with only the duplicates
 			duplicatesDict, duplicatesDf = getDuplicates(indices)
 			# get the new intensities per first occurrence index (df index)
-			intensitiesDict = getNewIntensities(duplicatesDict, duplicatesDf)
+			intensitiesDict = getNewIntensities(duplicatesDf, duplicatesDict)
 			toDelete.extend(duplicatesDict.values())
 	setIntensities(df, intensitiesDict)
 	removedData = df.iloc[toDelete][colsToSave]
