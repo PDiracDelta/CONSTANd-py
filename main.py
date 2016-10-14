@@ -59,9 +59,20 @@ def isotopicImpuritiesTest():
 	print(np.allclose(normalizedIntensities, normalizedIntensities_impure, atol=1e-3, equal_nan=True))
 	print(np.nanmean(np.nanmean(diff[:, 0:1], 1)))
 	print(max(np.amax(diff, 1)))
-
-
 # False tot en met 1e-3 --> fouten van > 0.1%
+
+def isotopicCorrectionsTest(params):
+	if params['isotopicCorrection_bool']:
+		int_in = np.array([range(6), range(6)]) + np.array([np.zeros(6), 5*np.ones(6)])
+		# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
+		icm = params['isotopicCorrectionsMatrix']
+		icm[0,0] = 0.9
+		icm[0,1] = 0.1
+		int_out = isotopicCorrection(int_in, correctionsMatrix=icm)
+		print(int_out)
+		# M=np.eye(6); M[0,0]=0.9; M[0,1]=0.1; b=np.asarray(range(6)); c=np.asarray(range(6))+5
+		# print(int_out) above should be equal to:
+		# [np.linalg.solve(M, b) ; np.linalg.solve(M, c)]
 
 def generateReport(DEresults, viz):
 	pass
@@ -69,14 +80,7 @@ def generateReport(DEresults, viz):
 
 def devStuff(df, params):
 	#performanceTest()
-	if params['isotopicCorrection_bool']:
-		int_in = np.array([[1000, 1000, 1000, 1000, 1000, 1000], [2000, 2000, 2000, 2000, 2000, 2000]])
-		# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
-		icm = params['isotopicCorrectionsMatrix']
-		icm[0,0] = 0.9
-		icm[0,1] = 0.1
-		int_out = isotopicCorrection(int_in, correctionsMatrix=icm)
-		print(int_out)
+	isotopicCorrectionsTest(params)
 
 def main():
 	testing=True # TEST
