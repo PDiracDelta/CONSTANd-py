@@ -50,7 +50,7 @@ def getInput():
 	collapseRT_centerMeasure_intensities = config.get('DEFAULT','collapseRT_centerMeasure_intensities')
 	collapseRT_maxRelativeReporterVariance = config.getfloat('DEFAULT','collapseRT_maxRelativeReporterVariance')
 	collapseCharge_bool = config.getboolean('DEFAULT','collapseCharge_bool')
-	isotopicCorrectionsMatrix = eval(config.get('DEFAULT','isotopicCorrectionsMatrix')) # TODO: separate file?
+	isotopicCorrectionsMatrix = getIsotopicCorrectionsMatrix(config.get('DEFAULT','isotopicCorrectionsMatrix'))
 	accuracy = config.getfloat('DEFAULT','accuracy')
 	maxIterations = config.getint('DEFAULT','maxIterations')
 	DEFoldThreshold = config.getfloat('DEFAULT','DEFoldThreshold')
@@ -131,6 +131,15 @@ def getInput():
 		raise Exception("Number of parameters in config.ini not equal to number of parameters returned by getInput().")
 
 	return params
+
+
+def getIsotopicCorrectionsMatrix(path_in='ICM_default.tsv'):
+	"""
+	Reads the isotopic corrections matrix from a file on disk and returns it.
+	:param path_in: str         path of the isotopic corrections matrix file
+	:return icm:    pd.ndarray  isotopic corrections matrix
+	"""
+	return pd.asmatrix(pd.read_csv(path_in))
 
 
 def importDataFrame(path_in=None, delim=None, header=0):
