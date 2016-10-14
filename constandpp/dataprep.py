@@ -230,9 +230,10 @@ def collapseCharge(df):
 def isotopicCorrection(intensities, correctionsMatrix):
 	# solve the linear system
 	# Observed(6,1) = correctionMatrix(6,6) * Real(6,1)
-	# if Det(cM) = 0 no solution can be found.
-	correctedIntensities = intensities
-	return correctedIntensities
+	correctedIntensities = []
+	for row in intensities:
+		correctedIntensities.append(np.linalg.solve(correctionsMatrix, row))
+	return np.asarray(correctedIntensities)
 
 
 def getIntensities(df):
