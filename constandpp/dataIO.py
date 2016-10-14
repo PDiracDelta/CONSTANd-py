@@ -147,7 +147,7 @@ def getIsotopicCorrectionsMatrix(path_in='ICM_default.tsv'):
 	:param path_in: str         path of the isotopic corrections matrix file
 	:return icm:    pd.ndarray  isotopic corrections matrix
 	"""
-	return np.asmatrix(importDataFrame(path_in,delim='\t', header=None))
+	return np.asmatrix(importDataFrame(path_in,delim='\t', header=None)).astype('float64') # make sure its float64
 
 
 def importDataFrame(path_in, delim=None, header=0):
