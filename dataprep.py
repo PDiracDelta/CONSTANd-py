@@ -162,9 +162,9 @@ def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mea
 	setIntensities(df, intensitiesDict)
 	toDelete = list(allDuplicatesHierarchy.values())
 	# save as {firstOccurrenceIndex : [annotated_sequence, [values, to, be, saved] for each duplicate]}
-	removedData = dict(firstOccurrence=[df.iloc[firstOccurrence][colsToSave[0]],
-	                                    df.iloc[allDuplicatesHierarchy[firstOccurrence]][colsToSave[1:]]] for
-	                   firstOccurrence in allDuplicatesHierarchy.keys())
+	removedData = dict((firstOccurrence, [df.iloc[firstOccurrence][colsToSave[0]],
+	                                      df.iloc[allDuplicatesHierarchy[firstOccurrence]][colsToSave[1:]]])
+	                   for firstOccurrence in allDuplicatesHierarchy.keys())
 	df.drop(toDelete, inplace=True)
 
 	return df, removedData
@@ -220,9 +220,9 @@ def collapseCharge(df):
 	setIntensities(df, intensitiesDict)
 	toDelete = list(allDuplicatesHierarchy.values())
 	# save as {firstOccurrenceIndex : [[values, to, be, saved] for each duplicate]}
-	removedData = dict(firstOccurrence=[df.iloc[firstOccurrence][colsToSave[0]],
-	                                    df.iloc[allDuplicatesHierarchy[firstOccurrence]][colsToSave[1:]]] for
-	                   firstOccurrence in allDuplicatesHierarchy.keys())
+	removedData = dict((firstOccurrence, [df.iloc[firstOccurrence][colsToSave[0]],
+	                                    df.iloc[allDuplicatesHierarchy[firstOccurrence]][colsToSave[1:]]])
+	                   for firstOccurrence in allDuplicatesHierarchy.keys())
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 
