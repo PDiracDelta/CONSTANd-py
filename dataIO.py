@@ -91,6 +91,8 @@ def getInput():
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple charge states.")
 	if not (isotopicCorrectionsMatrix.shape == (6,6)):
 		raise Exception("Isotopic corrections matrix must have shape (6,6).")
+	if not (np.allclose(np.sum(isotopicCorrectionsMatrix,0),np.ones(6),atol=1e-9)): # absolute tolerance: intensities known up to ~1e-10
+		raise Exception("Isotopic corrections matrix row values do not add up to 1.")
 	if not (accuracy > 0):
 		raise Exception("Accuracy must be strictly greater than zero.")
 	if not (maxIterations > 0 and isinstance(maxIterations,int)):
