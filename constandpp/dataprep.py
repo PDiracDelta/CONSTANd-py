@@ -228,8 +228,13 @@ def collapseCharge(df):
 
 
 def isotopicCorrection(intensities, correctionsMatrix):
-	# solve the linear system
-	# Observed(6,1) = correctionMatrix(6,6) * Real(6,1)
+	"""
+	Corrects isotopic impurities in the intensities using a given corrections matrix by solving the linear system:
+	Observed(6,1) = correctionMatrix(6,6) * Real(6,1)
+	:param intensities:         np.ndarray  array of arrays with the uncorrected intensities
+	:param correctionsMatrix:   np.matrix   matrix with the isotopic corrections
+	:return:                    np.ndarray  array of arrays with the corrected intensities
+	"""
 	correctedIntensities = []
 	for row in intensities:
 		correctedIntensities.append(np.linalg.solve(correctionsMatrix, row))
