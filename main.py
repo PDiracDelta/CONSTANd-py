@@ -67,15 +67,16 @@ def generateReport(DEresults, viz):
 	pass
 
 
-def devStuff():
-	dummy = getInput()
-	#pass
-	performanceTest()
-	# isotopicImpuritiesTest()
-
+def devStuff(df, params):
+	#performanceTest()
+	if params['isotopicCorrection_bool']:
+		int_in = np.array([[1000, 1000, 1000, 1000, 1000, 1000], [2000, 2000, 2000, 2000, 2000, 2000]])
+		# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
+		int_out = isotopicCorrection(int_in, correctionsMatrix=params['isotopicCorrectionsMatrix'])
+		print(int_out)
 
 def main():
-	testing=False # TEST
+	testing=True # TEST
 	writeToDisk=False # TEST
 	"""
 	For now this is just stuff for debugging and testing. Later:
