@@ -46,7 +46,7 @@ def getInput():
 	collapsePSMAlgo_master = config.get('DEFAULT','collapsePSMAlgo_master')
 	collapsePSMAlgo_exclusive_bool = config.getboolean('DEFAULT','collapsePSMAlgo_exclusive_bool')
 	collapseRT_bool = config.getboolean('DEFAULT','collapseRT_bool')
-	collapseRT_centerMeasure_channels = config.get('DEFAULT','collapseRT_centerMeasure_channels')
+	collapseRT_centerMeasure_reporters = config.get('DEFAULT','collapseRT_centerMeasure_reporters')
 	collapseRT_centerMeasure_intensities = config.get('DEFAULT','collapseRT_centerMeasure_intensities')
 	collapseRT_maxRelativeReporterVariance = config.getfloat('DEFAULT','collapseRT_maxRelativeReporterVariance')
 	collapseCharge_bool = config.getboolean('DEFAULT','collapseCharge_bool')
@@ -80,10 +80,10 @@ def getInput():
 		raise Exception("Please indicate whether PSM Algorithm redundancy removal should be exclusive or not.")
 	if collapseRT_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple retention times.")
-	if collapseRT_centerMeasure_channels not in ('mean', 'median'):
-		raise Exception("Invalid center measure: '"+collapseRT_centerMeasure_channels+"'. Please pick 'mean' or 'median'.")
+	if collapseRT_centerMeasure_reporters not in ('mean', 'median'):
+		raise Exception("Invalid center measure: '"+collapseRT_centerMeasure_reporters+"'. Please pick 'mean' or 'median'.")
 	if collapseRT_centerMeasure_intensities not in ('max', 'mean', 'median'):
-		raise Exception("Invalid center measure: '"+collapseRT_centerMeasure_channels+"'. "
+		raise Exception("Invalid center measure: '"+collapseRT_centerMeasure_reporters+"'. "
 		                                                                              "Please pick 'max', 'mean' or 'median'.")
 	if collapseRT_maxRelativeReporterVariance is not None:
 		if not collapseRT_maxRelativeReporterVariance > 0:
@@ -120,7 +120,7 @@ def getInput():
 		'collapsePSMAlgo_master': collapsePSMAlgo_master,
 		'collapsePSMAlgo_exclusive_bool': collapsePSMAlgo_exclusive_bool,
 		'collapseRT_bool': collapseRT_bool,
-		'collapseRT_centerMeasure_channels': collapseRT_centerMeasure_channels,
+		'collapseRT_centerMeasure_reporters': collapseRT_centerMeasure_reporters,
 		'collapseRT_centerMeasure_intensities': collapseRT_centerMeasure_intensities,
 		'collapseRT_maxRelativeReporterVariance': collapseRT_maxRelativeReporterVariance,
 		'collapseCharge_bool': collapseCharge_bool,

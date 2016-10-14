@@ -103,7 +103,7 @@ def collapsePSMAlgo(df, master, exclusive):
 	return df, removedData
 
 
-def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mean', maxRelativeReporterVariance=np.inf):
+def collapseRT(df, centerMeasure_reporters='mean', centerMeasure_intensities='mean', maxRelativeReporterVariance=np.inf):
 	# TODO: retain deleted info in compact way
 	# what if the peptides resulting from the PSM do not agree between RT's? -> within-algorithm disagreement doesn't occur.
 	# TODO: second switch: what if user wants not  a peak as high as the highest peak, but as high as the mean/median?
@@ -136,7 +136,7 @@ def collapseRT(df, centerMeasure_channels='mean', centerMeasure_intensities='mea
 		"""
 		# TODO combine this function with the getNewIntensities from collapseCharge? Although you might not want to weigh by MS1 intensity here, you might just want the BEST MS1 peak height.
 		weightedMS2Intensities = {} # dict with the new MS2 intensities for each firstOccurrence
-		if centerMeasure_channels and centerMeasure_intensities and False: # TODO switch for the center measures.
+		if centerMeasure_reporters and centerMeasure_intensities and False: # TODO switch for the center measures.
 			pass
 		for firstOccurrence,duplicates in duplicatesDict:
 			totalMS1Intensity = sum(duplicatesDf.iloc[[firstOccurrence]+duplicates]['Intensity'])

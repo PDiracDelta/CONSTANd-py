@@ -72,7 +72,10 @@ def devStuff(df, params):
 	if params['isotopicCorrection_bool']:
 		int_in = np.array([[1000, 1000, 1000, 1000, 1000, 1000], [2000, 2000, 2000, 2000, 2000, 2000]])
 		# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
-		int_out = isotopicCorrection(int_in, correctionsMatrix=params['isotopicCorrectionsMatrix'])
+		icm = params['isotopicCorrectionsMatrix']
+		icm[0,0] = 0.9
+		icm[0,1] = 0.1
+		int_out = isotopicCorrection(int_in, correctionsMatrix=icm)
 		print(int_out)
 
 def main():
@@ -86,7 +89,7 @@ def main():
 	params:
 	file_in, delim_in, header_in, collapsePSMAlgo_bool, removeIsolationInterference_bool,
 	removeIsolationInterference_master, collapsePSMAlgo_master, collapsePSMAlgo_exclusive_bool,	collapseRT_bool,
-	collapseRT_centerMeasure_channels, collapseRT_centerMeasure_intensities, collapseRT_maxRelativeReporterVariance,
+	collapseRT_centerMeasure_reporters, collapseRT_centerMeasure_intensities, collapseRT_maxRelativeReporterVariance,
 	collapseCharge_bool, isotopicCorrection_bool, isotopicCorrectionsMatrix, accuracy, maxIterations, DEFoldThreshold,
 	path_out, filename_out, delim_out
 	"""
@@ -104,7 +107,7 @@ def main():
 			                                             exclusive=params['collapsePSMAlgo_exclusive_bool'])
 		if params['collapseRT_bool']:
 			# collapse peptide list redundancy due to multiple detections at different RT
-			df = collapseRT(df, centerMeasure_channels=params['collapseRT_centerMeasure_channels'],
+			df = collapseRT(df, centerMeasure_reporters=params['collapseRT_centerMeasure_reporters'],
 			                centerMeasure_intensities=params['collapseRT_centerMeasure_intensities'],
 			                maxRelativeReporterVariance=params['collapseRT_maxRelativeReporterVariance']) # TODO
 		if params['collapseCharge_bool']:
@@ -140,7 +143,7 @@ def main():
 			generateReport(DEresults, viz) # TODO
 
 	if testing:
-		devStuff()
+		devStuff(df, params)
 
 if __name__ == '__main__':
 	sys.exit(main())
