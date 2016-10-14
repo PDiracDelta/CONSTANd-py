@@ -50,6 +50,7 @@ def getInput():
 	collapseRT_centerMeasure_intensities = config.get('DEFAULT','collapseRT_centerMeasure_intensities')
 	collapseRT_maxRelativeReporterVariance = config.getfloat('DEFAULT','collapseRT_maxRelativeReporterVariance')
 	collapseCharge_bool = config.getboolean('DEFAULT','collapseCharge_bool')
+	isotopicCorrection_bool = config.getboolean('DEFAULT','isotopicCorrection_bool')
 	isotopicCorrectionsMatrix = getIsotopicCorrectionsMatrix(config.get('DEFAULT','isotopicCorrectionsMatrix'))
 	accuracy = config.getfloat('DEFAULT','accuracy')
 	maxIterations = config.getint('DEFAULT','maxIterations')
@@ -89,6 +90,8 @@ def getInput():
 			raise Exception("maxRelativeChannelVariance should be either 'None' or greater than zero.")
 	if collapseCharge_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple charge states.")
+	if isotopicCorrection_bool is None:
+		raise Exception("Please indicate whether you would like to correct for isotopic impurities.")
 	if not (isotopicCorrectionsMatrix.shape == (6,6)):
 		raise Exception("Isotopic corrections matrix must have shape (6,6).")
 	if not (np.allclose(np.sum(isotopicCorrectionsMatrix,0),np.ones(6),atol=1e-9)): # absolute tolerance: intensities known up to ~1e-10
@@ -121,6 +124,7 @@ def getInput():
 		'collapseRT_centerMeasure_intensities': collapseRT_centerMeasure_intensities,
 		'collapseRT_maxRelativeReporterVariance': collapseRT_maxRelativeReporterVariance,
 		'collapseCharge_bool': collapseCharge_bool,
+		'isotopicCorrection_bool': isotopicCorrection_bool,
 		'isotopicCorrectionsMatrix': isotopicCorrectionsMatrix,
 		'accuracy': accuracy,
 		'maxIterations': maxIterations,
@@ -182,8 +186,6 @@ def importDataFrame(path_in=None, delim=None, header=0):
 
 
 def exportData(data, dataType, path_out, filename, delim_out=','):
-	# TODO is path_in the complete path including the filename? If so, only one file can be exported (or you can choose
-	# to automatically put the other files alongside it in the same root).
 	"""
 	Save the results (normalized intensities) to disk.
 	:param data:        obj     data object to be exported to disk
@@ -201,6 +203,8 @@ def exportData(data, dataType, path_out, filename, delim_out=','):
 		np.savetxt(fullPath, data, delimiter=delim_out) # TODO
 	elif dataType == 'df':
 		data.to_csv(fullPath, sep=delim_out, index=False)
+	elif dataType == 'viz': # TODO
+		pass # plt.savefig('foo.png', bbox_inches='tight')
 
 
 def delim2ext(delim):
