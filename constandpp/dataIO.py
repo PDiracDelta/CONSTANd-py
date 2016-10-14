@@ -143,19 +143,19 @@ def getInput():
 
 def getIsotopicCorrectionsMatrix(path_in='ICM_default.tsv'):
 	"""
-	Reads the isotopic corrections matrix from a file on disk and returns it.
+	Reads the isotopic corrections matrix from a file on disk through importDataFrame, and returns it as a matrix.
 	:param path_in: str         path of the isotopic corrections matrix file
 	:return icm:    pd.ndarray  isotopic corrections matrix
 	"""
-	return pd.asmatrix(pd.read_csv(path_in))
+	return np.asmatrix(importDataFrame(path_in,delim='\t', header=None))
 
 
-def importDataFrame(path_in=None, delim=None, header=0):
+def importDataFrame(path_in, delim=None, header=0):
 	"""
 	Get the data from disk as a Pandas DataFrame.
 	:param path_in:     string          existing path to input file
-	:param filetype:    string          specifier for the type of the file (file extension)
 	:param delim:       char            delimiter of the data
+	:param header:      int             row that contains the header of the data (None if no header)
 	:return df:         pd.dataFrame    Pandas dataFrame of the file contents
 	"""
 	assert path.exists(path_in)
