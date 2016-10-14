@@ -32,7 +32,7 @@ def getDuplicates(df, indices, checkTrueDuplicates):
 	"""
 	import pandas as pd
 
-	candidatesDf = df.iloc[indices]  # create new dataframe with only the possible duplicates to reduce overhead.
+	candidatesDf = df.loc[indices]  # create new dataframe with only the possible duplicates to reduce overhead.
 	candidatesDf['index'] = pd.Series(indices)  # add the original indices as a column 'index'
 	candidatesDf.set_index('index')  # set the index to the original indices
 	duplicatesDict = {}  # keep a dict of which indices are duplicates of which
@@ -43,12 +43,12 @@ def getDuplicates(df, indices, checkTrueDuplicates):
 			duplicatesDict[i] = []  # (see above) keep a dict of which indices are duplicates of which
 			stillMatchableTemp = stillMatchable  # cannot modify the variable while its being iterated over -> keep temp
 			for j in stillMatchable:
-				if checkTrueDuplicates(candidatesDf.iloc[i], candidatesDf.iloc[j]):
+				if checkTrueDuplicates(candidatesDf.loc[i], candidatesDf.loc[j]):
 					duplicatesDict[i].append(j)  # mark index of rowj as a duplicate of index of rowi
 					stillMatchableTemp.remove(j)
 			stillMatchable = stillMatchableTemp  # now that iteration is done, modify.
 	duplicatesDict = dict((x, y) for x, y in duplicatesDict.items() if y)  # remove empty lists of duplicates
-	duplicatesDf = candidatesDf.iloc[
+	duplicatesDf = candidatesDf.loc[
 		list(duplicatesDict.keys()) + list(duplicatesDict.values())]  # df of only the duplicates
 	return duplicatesDict, duplicatesDf
 
@@ -64,7 +64,7 @@ def removeIsolationInterference(df, threshold):
 	"""
 	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Isolation Interference [%]']
 	toDelete = df[df['Isolation Interference [%]'] > threshold].index # indices of rows to delete
-	removedData = df.iloc[toDelete][colsToSave]
+	removedData = df.loc[toDelete][colsToSave]
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 
@@ -95,7 +95,7 @@ def collapsePSMAlgo(df, master, exclusive):
 	else:
 		raise Exception(
 			"Invalid master PSM algorithm: '" + master + "'. Please pick 'mascot' or 'sequest'.")
-	removedData = ('master: '+master, df.iloc[toDelete][colsToSave])
+	removedData = ('master: '+master, df.loc[toDelete][colsToSave])
 	dflen=df.shape[0] # TEST
 	df.drop(toDelete, inplace=True)
 	assert(dflen == df.shape[0]+removedData[1].shape[0]) # TEST
@@ -139,9 +139,9 @@ def collapseRT(df, centerMeasure_reporters='mean', centerMeasure_intensities='me
 		if centerMeasure_reporters and centerMeasure_intensities and False: # TODO switch for the center measures.
 			pass
 		for firstOccurrence,duplicates in duplicatesDict:
-			totalMS1Intensity = sum(duplicatesDf.iloc[[firstOccurrence]+duplicates]['Intensity'])
-			allWeights = duplicatesDf.iloc[[firstOccurrence] + duplicates]['Intensity'] / totalMS1Intensity # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
-			allMS2Intensities = getIntensities(duplicatesDf.iloc[[firstOccurrence]+duplicates]) # np.array
+			totalMS1Intensity = sum(duplicatesDf.loc[[firstOccurrence]+duplicates]['Intensity'])
+			allWeights = duplicatesDf.loc[[firstOccurrence] + duplicates]['Intensity'] / totalMS1Intensity # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
+			allMS2Intensities = getIntensities(duplicatesDf.loc[[firstOccurrence]+duplicates]) # np.array
 			weightedMS2Intensities[firstOccurrence] = np.sum((allMS2Intensities.T*allWeights).T,0) # TODO check if the dimension are correct
 			if np.any(np.var(allMS2Intensities,0) > maxRelativeReporterVariance): # TODO this can only be consistent if executed on RELATIVE intensities.
 				warnings.warn("maxRelativeReporterVariance too high for peptide with index "+firstOccurrence+".") #TODO this shouldnt just warn, you should also decide what to do.
@@ -162,8 +162,8 @@ def collapseRT(df, centerMeasure_reporters='mean', centerMeasure_intensities='me
 	setIntensities(df, intensitiesDict)
 	toDelete = list(allDuplicatesHierarchy.values())
 	# save as {firstOccurrenceIndex : [annotated_sequence, [values, to, be, saved] for each duplicate]}
-	removedData = dict((firstOccurrence, [df.iloc[firstOccurrence][colsToSave[0]],
-	                                      df.iloc[allDuplicatesHierarchy[firstOccurrence]][colsToSave[1:]]])
+	removedData = dict((firstOccurrence, [df.loc[firstOccurrence][colsToSave[0]],
+	                                      df.loc[allDuplicatesHierarchy[firstOccurrence]][colsToSave[1:]]])
 	                   for firstOccurrence in allDuplicatesHierarchy.keys())
 	df.drop(toDelete, inplace=True)
 
@@ -201,9 +201,9 @@ def collapseCharge(df):
 		"""
 		weightedMS2Intensities = {} # dict with the new MS2 intensities for each firstOccurrence
 		for firstOccurrence,duplicates in duplicatesDict:
-			totalMS1Intensity = sum(duplicatesDf.iloc[[firstOccurrence]+duplicates]['Intensity'])
-			allWeights = duplicatesDf.iloc[[firstOccurrence] + duplicates]['Intensity'] / totalMS1Intensity # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
-			allMS2Intensities = getIntensities(duplicatesDf.iloc[[firstOccurrence]+duplicates]) # np.array
+			totalMS1Intensity = sum(duplicatesDf.loc[[firstOccurrence]+duplicates]['Intensity'])
+			allWeights = duplicatesDf.loc[[firstOccurrence] + duplicates]['Intensity'] / totalMS1Intensity # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
+			allMS2Intensities = getIntensities(duplicatesDf.loc[[firstOccurrence]+duplicates]) # np.array
 			weightedMS2Intensities[firstOccurrence] = np.sum((allMS2Intensities.T*allWeights).T,0) # TODO check if the dimension are correct
 		return weightedMS2Intensities # update the intensities
 
@@ -220,8 +220,8 @@ def collapseCharge(df):
 	setIntensities(df, intensitiesDict)
 	toDelete = list(allDuplicatesHierarchy.values())
 	# save as {firstOccurrenceIndex : [[values, to, be, saved] for each duplicate]}
-	removedData = dict((firstOccurrence, [df.iloc[firstOccurrence][colsToSave[0]],
-	                                    df.iloc[allDuplicatesHierarchy[firstOccurrence]][colsToSave[1:]]])
+	removedData = dict((firstOccurrence, [df.loc[firstOccurrence][colsToSave[0]],
+	                                    df.loc[allDuplicatesHierarchy[firstOccurrence]][colsToSave[1:]]])
 	                   for firstOccurrence in allDuplicatesHierarchy.keys())
 	df.drop(toDelete, inplace=True)
 	return df, removedData
@@ -258,5 +258,5 @@ def setIntensities(df, intensitiesDict):
 	:return df:             pd.dataFrame    output dataFrame with updated intensities
 	"""
 	for index in intensitiesDict.keys():
-		df.iloc[index][[intensityColumns]] = intensitiesDict[index]
+		df.loc[index][[intensityColumns]] = intensitiesDict[index]
 	return df
