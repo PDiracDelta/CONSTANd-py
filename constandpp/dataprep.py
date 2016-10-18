@@ -103,7 +103,7 @@ def collapsePSMAlgo(df, master, exclusive):
 	return df, removedData
 
 
-def collapseRT(df, centerMeasure_reporters='mean', centerMeasure_intensities='mean', maxRelativeReporterVariance=np.inf):
+def collapseRT(df, centerMeasure_addition='mean', centerMeasure_intensities='mean', maxRelativeReporterVariance=np.inf):
 	# what if the peptides resulting from the PSM do not agree between RT's? -> within-algorithm disagreement doesn't occur.
 	# TODO: second switch: what if user wants not  a peak as high as the highest peak, but as high as the mean/median?
 	# todo: check that the max RELATIVE variance on the channel intensities do not exceed given value. (better: read below)
@@ -114,16 +114,16 @@ def collapseRT(df, centerMeasure_reporters='mean', centerMeasure_intensities='me
 	# setIntensities(df, intensities, location)
 	import warnings
 
-	def checkTrueDuplicates(x, y):  # RT close?
+	def checkTrueDuplicates(x, y):
 		"""
 		Checks whether dataFrame entries x and y are truly duplicates only due to RT difference.
 		:param x:   pd.Sequence candidate firstOccurrence data
 		:param y:   pd.Sequence candidate duplicate data
 		"""
-		if x['First Scan'] == y['First Scan']: # identical peptides are always in the same MS1 sweep
+		if x['First Scan'] == y['First Scan']: # identical peptides have identical RT (you didn't do collapsePSMAlgo?)
 			return False
-		if x['RT [min]'] == y['RT [min]']:  # HOW CLOSE SHOULD THIS BE? HOW ARE THE MS2 SCANS BINNED BELONGING TO THE SAME MS1 SWEEP?
-			return False  # the difference should be due to RT difference (different ms1 sweep) TODO this stuff ^^^
+		if x['Charge'] != y['Charge']:  # different charge = different ("modified, non-redundant") peptide
+			return False
 		return True
 
 	def getNewIntensities(duplicatesDf, duplicatesDict): # sum intensities in a weighted way
@@ -135,7 +135,7 @@ def collapseRT(df, centerMeasure_reporters='mean', centerMeasure_intensities='me
 		"""
 		# TODO combine this function with the getNewIntensities from collapseCharge? Although you might not want to weigh by MS1 intensity here, you might just want the BEST MS1 peak height.
 		weightedMS2Intensities = {} # dict with the new MS2 intensities for each firstOccurrence
-		if centerMeasure_reporters and centerMeasure_intensities and False: # TODO switch for the center measures.
+		if centerMeasure_addition and centerMeasure_intensities and False: # TODO switch for the center measures.
 			pass
 		for firstOccurrence,duplicates in duplicatesDict:
 			totalMS1Intensity = sum(duplicatesDf.loc[[firstOccurrence]+duplicates]['Intensity'])
@@ -154,7 +154,7 @@ def collapseRT(df, centerMeasure_reporters='mean', centerMeasure_intensities='me
 			# dict with duplicates per first occurrence, dataFrame with df indices but with only the duplicates
 			duplicatesDict, duplicatesDf = getDuplicates(df, indices, checkTrueDuplicates)
 			if False:  # x['RT [min]'] is too far from y['RT [min]']
-				pass  # keep track of this isolated peak # TODO implement something for isolated peaks?
+				pass  # keep track of this isolated peak # TODO implement something for isolated peaks? if x['RT[min]']
 			# get the new intensities per first occurrence index (df index)
 			intensitiesDict = getNewIntensities(duplicatesDf, duplicatesDict)
 			allDuplicatesHierarchy.update(duplicatesDict)
