@@ -52,7 +52,47 @@ def getDuplicates(df, indices, checkTrueDuplicates):
 	return duplicatesDict, duplicatesDf
 
 
-def collapse(df, checkTrueDuplicates, getNewIntensities, colsToSave):
+def combineDetections(duplicatesDf, centerMeasure):
+	if centerMeasure == 'mean':
+		pass
+	if centerMeasure == 'median':
+		pass
+	if centerMeasure == 'weighted':
+		pass
+	return newIntensities
+
+
+def getNewIntensities(duplicatesDf, duplicatesDict, method, centerMeasure, maxRelativeReporterVariance):
+	"""
+	Combines the true duplicates' intensities into one new entry per first occurrence, conform the duplicatesDict structure.
+	:param duplicatesDict:          dict            {firstOccurrenceIndex:[duplicateIndices]}
+	:param duplicatesDf:            pd.dataFrame    data of only the first occurrences and duplicates
+	:return weightedMS2Intensities: dict            {firstOccurrenceIndex:np.array(newIntensities)}
+	"""
+	import warnings
+	weightedMS2Intensities = {}  # dict with the new MS2 intensities for each firstOccurrence
+	if method == 'bestMatch':
+		pass
+	elif method == 'mostIntense':
+		pass
+	elif method == 'centerMeasure':
+		newIntensities = combineDetections(duplicatesDf, centerMeasure)
+	# TODO the next section is obsolete if you use combineDetections
+	for firstOccurrence, duplicates in duplicatesDict:  # TODO flag PTM differences.
+		totalMS1Intensity = sum(duplicatesDf.loc[[firstOccurrence] + duplicates]['Intensity'])
+		allWeights = duplicatesDf.loc[[firstOccurrence] + duplicates][
+			             'Intensity'] / totalMS1Intensity  # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
+		allMS2Intensities = getIntensities(duplicatesDf.loc[[firstOccurrence] + duplicates])  # np.array
+		weightedMS2Intensities[firstOccurrence] = np.sum((allMS2Intensities.T * allWeights).T,
+		                                                 0)  # TODO check if the dimension are correct
+		if np.any(np.var(allMS2Intensities,
+		                 0) > maxRelativeReporterVariance):  # TODO this can only be consistent if executed on RELATIVE intensities.
+			warnings.warn(
+				"maxRelativeReporterVariance too high for peptide with index " + firstOccurrence + ".")  # TODO this shouldnt just warn, you should also decide what to do.
+	return weightedMS2Intensities  # update the intensities
+
+
+def collapse(df, checkTrueDuplicates, colsToSave):
 	"""
 	Generic collapse function. Looks for duplicate 'Annotated Sequence' values in the dataFrame and verifies
 	true duplication using checkTrueDuplicates function. Modifies df according to true duplicates and newly acquired
@@ -74,7 +114,7 @@ def collapse(df, checkTrueDuplicates, getNewIntensities, colsToSave):
 			if False:  # TODO flag isolated peaks
 				pass
 			# get the new intensities per first occurrence index (df index)
-			intensitiesDict = getNewIntensities(duplicatesDf, duplicatesDict)
+			intensitiesDict = getNewIntensities(duplicatesDf, duplicatesDict, method, centerMeasure, maxRelativeReporterVariance)
 			allDuplicatesHierarchy.update(duplicatesDict)
 	setIntensities(df, intensitiesDict)
 	toDelete = list(allDuplicatesHierarchy.values())
@@ -85,16 +125,6 @@ def collapse(df, checkTrueDuplicates, getNewIntensities, colsToSave):
 	df.drop(toDelete, inplace=True)
 
 	return df, removedData
-
-
-def combineDetections(duplicatesDf, centerMeasure):
-	if centerMeasure == 'mean':
-		pass
-	if centerMeasure == 'median':
-		pass
-	if centerMeasure == 'weighted':
-		pass
-	return newIntensities
 
 
 def removeIsolationInterference(df, threshold):
@@ -147,7 +177,7 @@ def collapsePSMAlgo(df, master, exclusive):
 	return df, removedData
 
 
-def collapseRT(df, method='centerMeasure', centerMeasure='mean', maxRelativeReporterVariance=np.inf):
+def collapseRT(df, method, centerMeasure, maxRelativeReporterVariance):
 	# todo: check that the max RELATIVE variance on the channel intensities do not exceed given value. (better: read below)
 	# todo: report when RT differences exceed a certain threshold
 	"""
@@ -178,36 +208,13 @@ def collapseRT(df, method='centerMeasure', centerMeasure='mean', maxRelativeRepo
 			return False
 		return True
 
-	def getNewIntensities(duplicatesDf, duplicatesDict, method, centerMeasure):
-		"""
-		Combines the true duplicates' intensities into one new entry per first occurrence, conform the duplicatesDict structure.
-		:param duplicatesDict:          dict            {firstOccurrenceIndex:[duplicateIndices]}
-		:param duplicatesDf:            pd.dataFrame    data of only the first occurrences and duplicates
-		:return weightedMS2Intensities: dict            {firstOccurrenceIndex:np.array(newIntensities)}
-		"""
-		weightedMS2Intensities = {} # dict with the new MS2 intensities for each firstOccurrence
-		if method == 'bestMatch':
-			pass
-		elif method == 'mostIntense':
-			pass
-		elif method == 'centerMeasure':
-			combineDetections(duplicatesDf, centerMeasure)
-		for firstOccurrence,duplicates in duplicatesDict:
-			totalMS1Intensity = sum(duplicatesDf.loc[[firstOccurrence]+duplicates]['Intensity'])
-			allWeights = duplicatesDf.loc[[firstOccurrence] + duplicates]['Intensity'] / totalMS1Intensity # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
-			allMS2Intensities = getIntensities(duplicatesDf.loc[[firstOccurrence]+duplicates]) # np.array
-			weightedMS2Intensities[firstOccurrence] = np.sum((allMS2Intensities.T*allWeights).T,0) # TODO check if the dimension are correct
-			if np.any(np.var(allMS2Intensities,0) > maxRelativeReporterVariance): # TODO this can only be consistent if executed on RELATIVE intensities.
-				warnings.warn("maxRelativeReporterVariance too high for peptide with index "+firstOccurrence+".") #TODO this shouldnt just warn, you should also decide what to do.
-		return weightedMS2Intensities # update the intensities
-
 	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'RT [min]', 'MS2Intensity', 'PSMscore']
-	df, removedData = collapse(df, checkTrueDuplicates=checkTrueDuplicates, getNewIntensities=getNewIntensities,
-	                           colsToSave=colsToSave)
+	df, removedData = collapse(df, checkTrueDuplicates=checkTrueDuplicates, colsToSave=colsToSave, method=method,
+	                           centerMeasure=centerMeasure, maxRelativeReporterVariance=maxRelativeReporterVariance)
 	return df, removedData
 
 
-def collapseCharge(df):
+def collapseCharge(df, centerMeasure, maxRelativeReporterVariance):
 	"""
 	This function should always be preceeded by collapseRT(). Combines detections in the dataFrame that differ only in
 	Charge but may have the same PTMs into a new detection. The duplicates are removed and replaced by this new detection.
@@ -232,29 +239,13 @@ def collapseCharge(df):
 			return False
 		return True
 
-	def getNewIntensities(duplicatesDf, duplicatesDict, centerMeasure):
-		"""
-		Combines the duplicates' intensities into one new entry per first occurrence, conform the duplicatesDict structure.
-		:param duplicatesDict:          dict            {firstOccurrenceIndex:[duplicateIndices]}
-		:param duplicatesDf:            pd.dataFrame    data of only the first occurrences and duplicates
-		:return weightedMS2Intensities: dict            {firstOccurrenceIndex:np.array(newIntensities)}
-		"""
-		weightedMS2Intensities = {} # dict with the new MS2 intensities for each firstOccurrence
-		newIntensities = combineDetections(duplicatesDf, centerMeasure)
-		for firstOccurrence,duplicates in duplicatesDict:
-			totalMS1Intensity = sum(duplicatesDf.loc[[firstOccurrence]+duplicates]['Intensity'])
-			allWeights = duplicatesDf.loc[[firstOccurrence] + duplicates]['Intensity'] / totalMS1Intensity # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
-			allMS2Intensities = getIntensities(duplicatesDf.loc[[firstOccurrence]+duplicates]) # np.array
-			weightedMS2Intensities[firstOccurrence] = np.sum((allMS2Intensities.T*allWeights).T,0) # TODO check if the dimension are correct
-		return weightedMS2Intensities # update the intensities
-
 	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Charge']
-	df, removedData = collapse(df, checkTrueDuplicates=checkTrueDuplicates, getNewIntensities=getNewIntensities,
-	                           colsToSave=colsToSave)
+	df, removedData = collapse(df, checkTrueDuplicates=checkTrueDuplicates, colsToSave=colsToSave, method=method,
+	                           centerMeasure=centerMeasure, maxRelativeReporterVariance=maxRelativeReporterVariance)
 	return df, removedData
 
 
-def collapsePTM(df):
+def collapsePTM(df, method, centerMeasure, maxRelativeReporterVariance):
 	"""
 	Combines detections in the dataFrame that differ only in PTMs ('Modification') but may have the same RT or Charge
 	into a new detection. The duplicates are removed and replaced by this new detection. Essential info about removed
@@ -281,24 +272,9 @@ def collapsePTM(df):
 			return False
 		return True
 
-	def getNewIntensities(duplicatesDf, duplicatesDict):
-		"""
-		Combines the duplicates' intensities into one new entry per first occurrence, conform the duplicatesDict structure.
-		:param duplicatesDict:          dict            {firstOccurrenceIndex:[duplicateIndices]}
-		:param duplicatesDf:            pd.dataFrame    data of only the first occurrences and duplicates
-		:return weightedMS2Intensities: dict            {firstOccurrenceIndex:np.array(newIntensities)}
-		"""
-		weightedMS2Intensities = {} # dict with the new MS2 intensities for each firstOccurrence
-		for firstOccurrence,duplicates in duplicatesDict: # TODO flag PTM differences.
-			totalMS1Intensity = sum(duplicatesDf.loc[[firstOccurrence]+duplicates]['Intensity'])
-			allWeights = duplicatesDf.loc[[firstOccurrence] + duplicates]['Intensity'] / totalMS1Intensity # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
-			allMS2Intensities = getIntensities(duplicatesDf.loc[[firstOccurrence]+duplicates]) # np.array
-			weightedMS2Intensities[firstOccurrence] = np.sum((allMS2Intensities.T*allWeights).T,0) # TODO check if the dimension are correct
-		return weightedMS2Intensities # update the intensities
-
 	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Modifications']
-	df, removedData = collapse(df, checkTrueDuplicates=checkTrueDuplicates, getNewIntensities=getNewIntensities,
-	                           colsToSave=colsToSave)
+	df, removedData = collapse(df, checkTrueDuplicates=checkTrueDuplicates, colsToSave=colsToSave, method=method,
+	                           centerMeasure=centerMeasure, maxRelativeReporterVariance=maxRelativeReporterVariance)
 	return df, removedData
 
 
