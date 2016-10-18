@@ -53,6 +53,15 @@ def getDuplicates(df, indices, checkTrueDuplicates):
 	return duplicatesDict, duplicatesDf
 
 
+def combineDetections(duplicatesDf, centerMeasure):
+	if centerMeasure == 'mean':
+		pass
+	if centerMeasure == 'median':
+		pass
+	if centerMeasure == 'weighted':
+		pass
+
+
 def removeIsolationInterference(df, threshold):
 	"""
 	Remove the data where there is too much isolation interference (above threshold) and return the remaining dataFrame
@@ -126,9 +135,9 @@ def collapseRT(df, method='centerMeasure', centerMeasure='mean', maxRelativeRepo
 			return False
 		return True
 
-	def getNewIntensities(duplicatesDf, duplicatesDict): # sum intensities in a weighted way
+	def getNewIntensities(duplicatesDf, duplicatesDict):
 		"""
-		Combines the duplicates' intensities into one new entry per first occurrence, conform the duplicatesDict structure.
+		Combines the true duplicates' intensities into one new entry per first occurrence, conform the duplicatesDict structure.
 		:param duplicatesDict:          dict            {firstOccurrenceIndex:[duplicateIndices]}
 		:param duplicatesDf:            pd.dataFrame    data of only the first occurrences and duplicates
 		:return weightedMS2Intensities: dict            {firstOccurrenceIndex:np.array(newIntensities)}
@@ -140,12 +149,7 @@ def collapseRT(df, method='centerMeasure', centerMeasure='mean', maxRelativeRepo
 		elif method == 'mostIntense':
 			pass
 		elif method == 'centerMeasure':
-			if centerMeasure == 'mean':
-				pass
-			if centerMeasure == 'median':
-				pass
-			if centerMeasure == 'weighted':
-				pass
+			combineDetections()
 		for firstOccurrence,duplicates in duplicatesDict:
 			totalMS1Intensity = sum(duplicatesDf.loc[[firstOccurrence]+duplicates]['Intensity'])
 			allWeights = duplicatesDf.loc[[firstOccurrence] + duplicates]['Intensity'] / totalMS1Intensity # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
