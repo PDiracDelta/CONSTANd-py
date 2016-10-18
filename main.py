@@ -24,7 +24,7 @@ from dataprep import *
 from analysis import *
 
 
-def performanceTest():  # remove for production
+def performanceTest():  # remove for production # TEST
 	""" Use this development method to test the performance of the CONSTANd algorithm. """
 	t = []
 	for i in range(100):
@@ -37,7 +37,7 @@ def performanceTest():  # remove for production
 	print("average runtime: " + str(np.mean(t)))
 
 
-def isotopicImpuritiesTest():
+def isotopicImpuritiesTest(): # TEST
 	## test if isotopic correction is necessary:
 	params = getInput()
 	# get the dataframe
@@ -61,7 +61,7 @@ def isotopicImpuritiesTest():
 	print(max(np.amax(diff, 1)))
 # False tot en met 1e-3 --> fouten van > 0.1%
 
-def isotopicCorrectionsTest(params):
+def isotopicCorrectionsTest(params): # TEST
 	if params['isotopicCorrection_bool']:
 		int_in = np.array([range(6), range(6)]) + np.array([np.zeros(6), 5*np.ones(6)])
 		# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
@@ -78,7 +78,7 @@ def generateReport(DEresults, viz):
 	pass
 
 
-def devStuff(df, params):
+def devStuff(df, params): # TEST
 	#performanceTest()
 	isotopicCorrectionsTest(params)
 

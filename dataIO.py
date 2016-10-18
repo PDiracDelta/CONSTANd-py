@@ -90,6 +90,10 @@ def getInput():
 			raise Exception("maxRelativeChannelVariance should be either 'None' or greater than zero.")
 	if collapseCharge_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple charge states.")
+	elif collapseCharge_bool is True:
+		if collapseRT_bool is False:
+			collapseRT_bool = True
+			warnings.warn("Removal of charge redundancy requires removal of retention time redundancy; setting 'collapseRT_bool=True'.")
 	if isotopicCorrection_bool is None:
 		raise Exception("Please indicate whether you would like to correct for isotopic impurities.")
 	if not (isotopicCorrectionsMatrix.shape == (6,6)):
