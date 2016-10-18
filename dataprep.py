@@ -135,8 +135,17 @@ def collapseRT(df, method='centerMeasure', centerMeasure='mean', maxRelativeRepo
 		"""
 		# TODO combine this function with the getNewIntensities from collapseCharge? Although you might not want to weigh by MS1 intensity here, you might just want the BEST MS1 peak height.
 		weightedMS2Intensities = {} # dict with the new MS2 intensities for each firstOccurrence
-		if centerMeasure and method and False: # TODO switch for the center measures.
+		if method == 'bestMatch':
 			pass
+		elif method == 'mostIntense':
+			pass
+		elif method == 'centerMeasure':
+			if centerMeasure == 'mean':
+				pass
+			if centerMeasure == 'median':
+				pass
+			if centerMeasure == 'weighted':
+				pass
 		for firstOccurrence,duplicates in duplicatesDict:
 			totalMS1Intensity = sum(duplicatesDf.loc[[firstOccurrence]+duplicates]['Intensity'])
 			allWeights = duplicatesDf.loc[[firstOccurrence] + duplicates]['Intensity'] / totalMS1Intensity # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
