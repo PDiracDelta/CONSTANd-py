@@ -129,6 +129,11 @@ def main():
 		if params['collapseCharge_bool']:
 			# collapse peptide list redundancy due to different charges (optional)
 			df, removedData['charge'] = collapseCharge(df) # TODO
+
+		# SANITY CHECK: there should be no more duplicates if all collapses have been applied.
+		if params['collapsePSMAlgo_bool'] and params['collapseRT_bool'] and params['collapseCharge_bool']:
+			assert np.prod((i < 2 for (s, i) in df.groupby('Annotated Sequence').groups)) # only 1 index vector in dict of SEQUENCE:[INDICES] for all sequences
+
 		if params['isotopicCorrection_bool']:
 			# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
 			intensities = isotopicCorrection(getIntensities(df), correctionsMatrix=params['isotopicCorrectionsMatrix'])
