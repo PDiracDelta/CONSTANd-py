@@ -104,7 +104,6 @@ def collapsePSMAlgo(df, master, exclusive):
 
 
 def collapseRT(df, centerMeasure_reporters='mean', centerMeasure_intensities='mean', maxRelativeReporterVariance=np.inf):
-	# TODO: retain deleted info in compact way
 	# what if the peptides resulting from the PSM do not agree between RT's? -> within-algorithm disagreement doesn't occur.
 	# TODO: second switch: what if user wants not  a peak as high as the highest peak, but as high as the mean/median?
 	# todo: check that the max RELATIVE variance on the channel intensities do not exceed given value. (better: read below)
@@ -206,6 +205,8 @@ def collapseCharge(df):
 			allMS2Intensities = getIntensities(duplicatesDf.loc[[firstOccurrence]+duplicates]) # np.array
 			weightedMS2Intensities[firstOccurrence] = np.sum((allMS2Intensities.T*allWeights).T,0) # TODO check if the dimension are correct
 		return weightedMS2Intensities # update the intensities
+
+	assert False # TODO assert that no more RT redundancy
 
 	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Charge', 'Intensity']
 	allSequences = df.groupby('Annotated Sequence').groups  # dict of SEQUENCE:[INDICES]

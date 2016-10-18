@@ -111,12 +111,12 @@ def main():
 			                                             exclusive=params['collapsePSMAlgo_exclusive_bool'])
 		if params['collapseRT_bool']:
 			# collapse peptide list redundancy due to multiple detections at different RT
-			df = collapseRT(df, centerMeasure_reporters=params['collapseRT_centerMeasure_reporters'],
+			df, removedData['RT'] = collapseRT(df, centerMeasure_reporters=params['collapseRT_centerMeasure_reporters'],
 			                centerMeasure_intensities=params['collapseRT_centerMeasure_intensities'],
 			                maxRelativeReporterVariance=params['collapseRT_maxRelativeReporterVariance']) # TODO
 		if params['collapseCharge_bool']:
 			# collapse peptide list redundancy due to different charges (optional)
-			df = collapseCharge(df) # TODO
+			df, removedData['charge'] = collapseCharge(df) # TODO
 		if params['isotopicCorrection_bool']:
 			# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
 			intensities = isotopicCorrection(getIntensities(df), correctionsMatrix=params['isotopicCorrectionsMatrix'])
