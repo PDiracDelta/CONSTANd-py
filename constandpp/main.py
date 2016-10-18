@@ -89,9 +89,9 @@ def generateReport(DEresults, viz):
 
 
 def devStuff(df, params): # TEST
-	#performanceTest()
-	#isotopicCorrectionsTest(params)
-	#MS2IntensityDoesntMatter(df)
+	# performanceTest()
+	# isotopicCorrectionsTest(params)
+	# MS2IntensityDoesntMatter(df)
 	pass
 
 def main():
@@ -121,6 +121,9 @@ def main():
 			# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
 			df, removedData['PSMAlgo'] = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master'],
 			                                             exclusive=params['collapsePSMAlgo_exclusive_bool'])
+			# SANITY CHECK: no detections with the same scan number may exist after collapsePSMAlgo()
+			assert np.prod((i < 2 for (s, i) in df.groupby('First Scan').groups))
+
 		if params['collapseRT_bool']:
 			# collapse peptide list redundancy due to multiple detections at different RT
 			df, removedData['RT'] = collapseRT(df, method=params['collapseRT_method'],
