@@ -198,10 +198,12 @@ def collapseCharge(df):
 		:param x:   pd.Sequence candidate firstOccurrence data
 		:param y:   pd.Sequence candidate duplicate data
 		"""
-		if x['Charge'] == y['Charge']:  # well obviously they should duplicate due to charge difference...
+		if x['First Scan'] == y['First Scan']:  # identical peptides have identical RT (you didn't do collapsePSMAlgo?)
+			assert False # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSEPSMALGO() # TEST
 			return False
-		if x['RT [min]'] != y['RT [min]']:  # HOW CLOSE SHOULD THIS BE? HOW ARE THE MS2 SCANS BINNED BELONGING TO THE SAME MS1 SWEEP?
-			return False  # the difference should not be due to RT difference (different ms1 sweep) TODO this stuff ^^^
+		if x['Charge'] == y['Charge']:  # well obviously they should duplicate due to charge difference...
+			assert False  # THIS SHOULD NOT BE REACHABLE IF COLLAPSERT() WAS DONE RIGHT
+			return False
 		return True
 
 	def getNewIntensities(duplicatesDf, duplicatesDict): # sum intensities in a weighted way
@@ -218,8 +220,6 @@ def collapseCharge(df):
 			allMS2Intensities = getIntensities(duplicatesDf.loc[[firstOccurrence]+duplicates]) # np.array
 			weightedMS2Intensities[firstOccurrence] = np.sum((allMS2Intensities.T*allWeights).T,0) # TODO check if the dimension are correct
 		return weightedMS2Intensities # update the intensities
-
-	assert False # TODO assert that no more RT redundancy
 
 	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Charge', 'Intensity']
 	allSequences = df.groupby('Annotated Sequence').groups  # dict of SEQUENCE:[INDICES]
