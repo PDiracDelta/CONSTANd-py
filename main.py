@@ -93,7 +93,7 @@ def main():
 	params:
 	file_in, delim_in, header_in, collapsePSMAlgo_bool, removeIsolationInterference_bool,
 	removeIsolationInterference_master, collapsePSMAlgo_master, collapsePSMAlgo_exclusive_bool,	collapseRT_bool,
-	collapseRT_centerMeasure_addition, collapseRT_centerMeasure_intensities, collapseRT_maxRelativeReporterVariance,
+	collapseRT_method, collapseRT_centerMeasure_reporters, collapseRT_maxRelativeReporterVariance,
 	collapseCharge_bool, isotopicCorrection_bool, isotopicCorrectionsMatrix, accuracy, maxIterations, DEFoldThreshold,
 	path_out, filename_out, delim_out
 	"""
@@ -111,8 +111,8 @@ def main():
 			                                             exclusive=params['collapsePSMAlgo_exclusive_bool'])
 		if params['collapseRT_bool']:
 			# collapse peptide list redundancy due to multiple detections at different RT
-			df, removedData['RT'] = collapseRT(df, centerMeasure_addition=params['collapseRT_centerMeasure_addition'],
-			                                   centerMeasure_intensities=params['collapseRT_centerMeasure_intensities'],
+			df, removedData['RT'] = collapseRT(df, centerMeasure_addition=params['collapseRT_centerMeasure_reporters'],
+			                                   method=params['collapseRT_method'],
 			                                   maxRelativeReporterVariance=params['collapseRT_maxRelativeReporterVariance']) # TODO
 		if params['collapseCharge_bool']:
 			# collapse peptide list redundancy due to different charges (optional)
