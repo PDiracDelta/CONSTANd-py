@@ -46,7 +46,7 @@ def getInput():
 	collapsePSMAlgo_master = config.get('DEFAULT','collapsePSMAlgo_master')
 	collapsePSMAlgo_exclusive_bool = config.getboolean('DEFAULT','collapsePSMAlgo_exclusive_bool')
 	collapseRT_bool = config.getboolean('DEFAULT','collapseRT_bool')
-	collapseRT_method = config.get('DEFAULT','collapseRT_method') # which peaks to combine and how
+	collapseRT_method = config.get('DEFAULT','collapseRT_method') # which peaks to combine and how? quality; intensity; mean; weighted; # TODO HERE
 	collapseRT_centerMeasure_addition = config.get('DEFAULT', 'collapseRT_centerMeasure_addition')  # how to add peaks? collapseRT_centerMeasure_addition
 	collapseRT_maxRelativeReporterVariance = config.getfloat('DEFAULT','collapseRT_maxRelativeReporterVariance')
 	collapseCharge_bool = config.getboolean('DEFAULT','collapseCharge_bool')
