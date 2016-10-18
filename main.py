@@ -74,13 +74,25 @@ def isotopicCorrectionsTest(params): # TEST
 		# print(int_out) above should be equal to:
 		# [np.linalg.solve(M, b) ; np.linalg.solve(M, c)]
 
+def MS2IntensityDoesntMatter(df):
+	I = getIntensities(df)
+	r1 = constand(I, 1e-5, 50)
+	I[0] *= 1e9 # this is BIG. MS2 intensity doesnt reach beyond 1e9 so if one value has magnitudeOrder 1 it's still OK.
+	r2 = constand(I, 1e-5, 50)
+	print(np.allclose(r1[0], r2[0], equal_nan=True))
+	diff = r1[0] - r2[0]
+	maxdiff = max(np.amax(diff, 1))
+	print(maxdiff)
+
 def generateReport(DEresults, viz):
 	pass
 
 
 def devStuff(df, params): # TEST
 	#performanceTest()
-	isotopicCorrectionsTest(params)
+	#isotopicCorrectionsTest(params)
+	#MS2IntensityDoesntMatter(df)
+	pass
 
 def main():
 	testing=True # TEST
