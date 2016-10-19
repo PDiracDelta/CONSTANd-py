@@ -103,9 +103,9 @@ def main():
 	"""
 	""" get all input parameters
 	params:
-	file_in, delim_in, header_in, collapsePSMAlgo_bool, removeIsolationInterference_bool, collapse_method,
+	file_in, delim_in, header_in, undoublePSMAlgo_bool, removeIsolationInterference_bool, collapse_method,
 	collapse_maxRelativeReporterVariance, removeIsolationInterference_master, masterPSMAlgo,
-	collapsePSMAlgo_exclusive_bool,	collapseRT_bool, collapseCharge_bool, collapsePTM_bool,	isotopicCorrection_bool,
+	undoublePSMAlgo_exclusive_bool,	collapseRT_bool, collapseCharge_bool, collapsePTM_bool,	isotopicCorrection_bool,
 	isotopicCorrectionsMatrix, accuracy, maxIterations, DEFoldThreshold, path_out, filename_out, delim_out
 	"""
 	params = getInput()
@@ -116,11 +116,11 @@ def main():
 		removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
 		if params['removeIsolationInterference_bool']:
 			df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
-		if params['collapsePSMAlgo_bool']:
+		if params['undoublePSMAlgo_bool']:
 			# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
-			df, removedData['PSMAlgo'] = collapsePSMAlgo(df, master=params['masterPSMAlgo'],
-			                                             exclusive=params['collapsePSMAlgo_exclusive_bool'])
-			# SANITY CHECK: no detections with the same scan number may exist after collapsePSMAlgo()
+			df, removedData['PSMAlgo'] = undoublePSMAlgo(df, master=params['masterPSMAlgo'],
+			                                             exclusive=params['undoublePSMAlgo_exclusive_bool'])
+			# SANITY CHECK: no detections with the same scan number may exist after undoublePSMAlgo()
 			assert np.prod((i < 2 for (s, i) in df.groupby('First Scan').groups))
 
 		if params['collapseRT_bool']:
@@ -137,7 +137,7 @@ def main():
 			                                   maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance']) # TODO
 
 		# SANITY CHECK: there should be no more duplicates if all collapses have been applied.
-		if params['collapsePSMAlgo_bool'] and params['collapseRT_bool'] and params['collapseCharge_bool']:
+		if params['undoublePSMAlgo_bool'] and params['collapseRT_bool'] and params['collapseCharge_bool']:
 			assert np.prod((i < 2 for (s, i) in df.groupby('Annotated Sequence').groups)) # only 1 index vector in dict of SEQUENCE:[INDICES] for all sequences
 
 		if params['isotopicCorrection_bool']:

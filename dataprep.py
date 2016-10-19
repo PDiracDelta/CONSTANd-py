@@ -216,7 +216,7 @@ def removeIsolationInterference(df, threshold):
 	return df, removedData
 
 
-def collapsePSMAlgo(df, master, exclusive):
+def undoublePSMAlgo(df, master, exclusive):
 	"""
 	Removes redundant data due to different PSM algorithms producing the same peptide match. The 'master' algorithm
 	values are taken over the 'slave' algorithm values, the latter whom are removed and have their basic information
