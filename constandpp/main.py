@@ -103,11 +103,10 @@ def main():
 	"""
 	""" get all input parameters
 	params:
-	file_in, delim_in, header_in, collapsePSMAlgo_bool, removeIsolationInterference_bool,
-	removeIsolationInterference_master, collapsePSMAlgo_master, collapsePSMAlgo_exclusive_bool,	collapseRT_bool,
-	collapseRT_method, collapseRT_centerMeasure, collapseRT_maxRelativeReporterVariance, collapseCharge_bool,
-	collapsePTM_bool, isotopicCorrection_bool, isotopicCorrectionsMatrix, accuracy, maxIterations, DEFoldThreshold,
-	path_out, filename_out, delim_out
+	file_in, delim_in, header_in, collapsePSMAlgo_bool, removeIsolationInterference_bool, collapse_method,
+	collapse_maxRelativeReporterVariance, removeIsolationInterference_master, collapsePSMAlgo_master,
+	collapsePSMAlgo_exclusive_bool,	collapseRT_bool, collapseCharge_bool, collapsePTM_bool,	isotopicCorrection_bool,
+	isotopicCorrectionsMatrix, accuracy, maxIterations, DEFoldThreshold, path_out, filename_out, delim_out
 	"""
 	params = getInput()
 	# get the dataframe
@@ -126,15 +125,16 @@ def main():
 
 		if params['collapseRT_bool']:
 			# collapse peptide list redundancy due to multiple detections at different RT
-			df, removedData['RT'] = collapseRT(df, method=params['collapseRT_method'],
-			                                                     centerMeasure = params['collapseRT_centerMeasure'],
-			                                   maxRelativeReporterVariance=params['collapseRT_maxRelativeReporterVariance']) # TODO
+			df, removedData['RT'] = collapseRT(df, method=params['collapse_method'],
+			                                   maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance']) # TODO
 		if params['collapseCharge_bool']:
 			# collapse peptide list redundancy due to different charges (optional)
-			df, removedData['charge'] = collapseCharge(df) # TODO
+			df, removedData['charge'] = collapseCharge(df, method=params['collapse_method'],
+			                                   maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance']) # TODO
 		if params['collapsePTM_bool']:
 			# collapse peptide list redundancy due to different charges (optional)
-			df, removedData['modifications'] = collapsePTM(df) # TODO
+			df, removedData['modifications'] = collapsePTM(df, method=params['collapse_method'],
+			                                   maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance']) # TODO
 
 		# SANITY CHECK: there should be no more duplicates if all collapses have been applied.
 		if params['collapsePSMAlgo_bool'] and params['collapseRT_bool'] and params['collapseCharge_bool']:

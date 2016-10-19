@@ -92,18 +92,19 @@ def getNewIntensities(duplicatesDf, duplicatesDict, method, centerMeasure, maxRe
 	return weightedMS2Intensities  # update the intensities
 
 
-def collapse(df, checkTrueDuplicates, colsToSave):
+def collapse(df, checkTrueDuplicates, colsToSave, method, maxRelativeReporterVariance):
 	"""
 	Generic collapse function. Looks for duplicate 'Annotated Sequence' values in the dataFrame and verifies
 	true duplication using checkTrueDuplicates function. Modifies df according to true duplicates and newly acquired
 	intensities (via getNewIntensities function): remove all duplicates and enter one replacement detection.
 	Returns removedData according to the colsToSave list.
-	:param df:                  pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
-	:param checkTrueDuplicates: function        returns true if two detections are true duplicates in current context
-	:param getNewIntensities:   function        returns the intensities for the replacement detection according to current context
-	:param colsToSave:          list            list of variables to be saved for detections that ought to be removed
-	:return df:                 pd.dataFrame    without sequence duplicates according to to checkTrueDuplicates.
-	:return removedData:        dict            {firstOccurrenceIndex : [annotated_sequence, [other, values, to, be, saved] for each duplicate]}
+	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
+	:param checkTrueDuplicates:         function        returns true if two detections are true duplicates in current context
+	:param colsToSave:                  list            list of variables to be saved for detections that ought to be removed
+	:param method:                      str             defines how the new detection is to be selected/constructed
+	:param maxRelativeReporterVariance: float           UNUSED value that restricts reporter variance
+	:return df:                         pd.dataFrame    without sequence duplicates according to to checkTrueDuplicates.
+	:return removedData:                dict            {firstOccurrenceIndex : [annotated_sequence, [other, values, to, be, saved] for each duplicate]}
 	"""
 	allSequences = df.groupby('Annotated Sequence').groups  # dict of SEQUENCE:[INDICES]
 	allDuplicatesHierarchy = {}  # {firstOccurrence:[duplicates]}
@@ -177,7 +178,7 @@ def collapsePSMAlgo(df, master, exclusive):
 	return df, removedData
 
 
-def collapseRT(df, method, centerMeasure, maxRelativeReporterVariance):
+def collapseRT(df, method, maxRelativeReporterVariance):
 	# todo: check that the max RELATIVE variance on the channel intensities do not exceed given value. (better: read below)
 	# todo: report when RT differences exceed a certain threshold
 	"""
@@ -185,9 +186,8 @@ def collapseRT(df, method, centerMeasure, maxRelativeReporterVariance):
 	new detection. The duplicates are removed and replaced by this new detection. Essential info about removed data is
 	also returned as removedData.
 	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
-	:param method:                      str             defines how the new detection is to be constructed
-	:param centerMeasure:               str             if method=='centerMeasure': center measure to combine multiple detections.
-	:param maxRelativeReporterVariance: float           threshold beyond which the relative reporter variance is flagged.
+	:param method:                      str             defines how the new detection is to be selected/constructed
+	:param maxRelativeReporterVariance: float           UNUSED value that restricts reporter variance
 	:return df:                         pd.dataFrame    without sequence duplicates solely due to difference in RT.
 	:return removedData:                dict            {firstOccurrenceIndex : [annotated_sequence, [other, values, to, be, saved] for each duplicate]}
 	"""
@@ -209,19 +209,20 @@ def collapseRT(df, method, centerMeasure, maxRelativeReporterVariance):
 		return True
 
 	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'RT [min]', 'MS2Intensity', 'PSMscore']
-	df, removedData = collapse(df, checkTrueDuplicates=checkTrueDuplicates, colsToSave=colsToSave, method=method,
-	                           centerMeasure=centerMeasure, maxRelativeReporterVariance=maxRelativeReporterVariance)
+	df, removedData = collapse(df, checkTrueDuplicates=checkTrueDuplicates, colsToSave=colsToSave, method=method, maxRelativeReporterVariance=maxRelativeReporterVariance)
 	return df, removedData
 
 
-def collapseCharge(df, centerMeasure, maxRelativeReporterVariance):
+def collapseCharge(df, method, maxRelativeReporterVariance): # no method parameter because always method=centerMeasure (see below)
 	"""
 	This function should always be preceeded by collapseRT(). Combines detections in the dataFrame that differ only in
 	Charge but may have the same PTMs into a new detection. The duplicates are removed and replaced by this new detection.
 	Essential info about removed data is also returned as removedData.
-	:param df:              pd.dataFrame    with sequence duplicates due to difference in Charge.
-	:return df:             pd.dataFrame    without sequence duplicates solely due to difference in Charge.
-	:return removedData:    dict            {firstOccurrenceIndex : [annotated_sequence, [other, values, to, be, saved] for each duplicate]}
+	:param method:                      str             defines how the new detection is to be selected/constructed
+	:param maxRelativeReporterVariance: float           UNUSED value that restricts reporter variance
+	:param df:                          pd.dataFrame    with sequence duplicates due to difference in Charge.
+	:return df:                         pd.dataFrame    without sequence duplicates solely due to difference in Charge.
+	:return removedData:                dict            {firstOccurrenceIndex : [annotated_sequence, [other, values, to, be, saved] for each duplicate]}
 	"""
 
 	def checkTrueDuplicates(x, y):
@@ -240,16 +241,18 @@ def collapseCharge(df, centerMeasure, maxRelativeReporterVariance):
 		return True
 
 	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Charge']
-	df, removedData = collapse(df, checkTrueDuplicates=checkTrueDuplicates, colsToSave=colsToSave, method=method,
-	                           centerMeasure=centerMeasure, maxRelativeReporterVariance=maxRelativeReporterVariance)
+	df, removedData = collapse(df, checkTrueDuplicates=checkTrueDuplicates, colsToSave=colsToSave, method=method, maxRelativeReporterVariance=maxRelativeReporterVariance)
+	# method=centerMeasure because after RT collapse the PSM algorithm scores may be gone
 	return df, removedData
 
 
-def collapsePTM(df, method, centerMeasure, maxRelativeReporterVariance):
+def collapsePTM(df, method, maxRelativeReporterVariance):
 	"""
 	Combines detections in the dataFrame that differ only in PTMs ('Modification') but may have the same RT or Charge
 	into a new detection. The duplicates are removed and replaced by this new detection. Essential info about removed
 	data is	also returned as removedData.
+	:param maxRelativeReporterVariance:
+	:param method:
 	:param df:              pd.dataFrame    with sequence duplicates due to difference in PTMs.
 	:return df:             pd.dataFrame    without sequence duplicates solely due to difference in PTMs.
 	:return removedData:    dict            {firstOccurrenceIndex : [annotated_sequence, [other, values, to, be, saved] for each duplicate]}
@@ -273,8 +276,7 @@ def collapsePTM(df, method, centerMeasure, maxRelativeReporterVariance):
 		return True
 
 	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Modifications']
-	df, removedData = collapse(df, checkTrueDuplicates=checkTrueDuplicates, colsToSave=colsToSave, method=method,
-	                           centerMeasure=centerMeasure, maxRelativeReporterVariance=maxRelativeReporterVariance)
+	df, removedData = collapse(df, checkTrueDuplicates=checkTrueDuplicates, colsToSave=colsToSave, method=method, maxRelativeReporterVariance=maxRelativeReporterVariance)
 	return df, removedData
 
 
