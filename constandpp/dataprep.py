@@ -55,14 +55,19 @@ def getDuplicates(df, indices, checkTrueDuplicates):
 def combineDetections(duplicatesDf, centerMeasure):
 	if centerMeasure == 'mean':
 		pass
-	if centerMeasure == 'median':
+	if centerMeasure == 'geometricMedian':
 		pass
 	if centerMeasure == 'weighted':
 		pass
 	return newIntensities
 
 
-def getNewIntensities(duplicatesDf, duplicatesDict, method, centerMeasure, maxRelativeReporterVariance):
+def getRepresentative(duplicatesDf, duplicatesDict, representativeMethod='bestmatch'):
+	# get the detection with the best PSM match
+	return detection
+
+
+def getNewIntensities(duplicatesDf, duplicatesDict, method, maxRelativeReporterVariance):
 	"""
 	Combines the true duplicates' intensities into one new entry per first occurrence, conform the duplicatesDict structure.
 	:param duplicatesDict:          dict            {firstOccurrenceIndex:[duplicateIndices]}
@@ -72,11 +77,17 @@ def getNewIntensities(duplicatesDf, duplicatesDict, method, centerMeasure, maxRe
 	import warnings
 	weightedMS2Intensities = {}  # dict with the new MS2 intensities for each firstOccurrence
 	if method == 'bestMatch':
-		pass
+		newIntensities = None
+		representative = getRepresentative(duplicatesDf, duplicatesDict)
+		setIntensities(representative, newIntensities)
+		pass # TODO
 	elif method == 'mostIntense':
-		pass
-	elif method == 'centerMeasure':
-		newIntensities = combineDetections(duplicatesDf, centerMeasure)
+		newIntensities = None
+		representative = getRepresentative(duplicatesDf, duplicatesDict)
+		setIntensities(newIntensities, newIntensities)
+		pass # TODO
+	else:
+		newIntensities = combineDetections(duplicatesDf, centerMeasure=method)
 	# TODO the next section is obsolete if you use combineDetections
 	for firstOccurrence, duplicates in duplicatesDict:  # TODO flag PTM differences.
 		totalMS1Intensity = sum(duplicatesDf.loc[[firstOccurrence] + duplicates]['Intensity'])
@@ -92,7 +103,7 @@ def getNewIntensities(duplicatesDf, duplicatesDict, method, centerMeasure, maxRe
 	return weightedMS2Intensities  # update the intensities
 
 
-def collapse(df, checkTrueDuplicates, colsToSave, method, maxRelativeReporterVariance):
+def collapse(df, toCollapse, colsToSave, method, maxRelativeReporterVariance):
 	"""
 	Generic collapse function. Looks for duplicate 'Annotated Sequence' values in the dataFrame and verifies
 	true duplication using checkTrueDuplicates function. Modifies df according to true duplicates and newly acquired
@@ -106,6 +117,67 @@ def collapse(df, checkTrueDuplicates, colsToSave, method, maxRelativeReporterVar
 	:return df:                         pd.dataFrame    without sequence duplicates according to to checkTrueDuplicates.
 	:return removedData:                dict            {firstOccurrenceIndex : [annotated_sequence, [other, values, to, be, saved] for each duplicate]}
 	"""
+
+	if toCollapse == 'RT':
+		def checkTrueDuplicates(x, y):
+			"""
+			Checks whether dataFrame entries x and y are truly duplicates only due to RT difference.
+			:param x:   pd.Sequence candidate firstOccurrence data
+			:param y:   pd.Sequence candidate duplicate data
+			"""
+			if x['First Scan'] == y[
+				'First Scan']:  # identical peptides have identical RT (you didn't do collapsePSMAlgo?)
+				return False
+			if x['Charge'] != y['Charge']:  # different charge = different ("modified, non-redundant") peptide
+				return False
+			if x['Modifications'] != y[
+				'Modifications']:  # different PTM = different sequence (before collapsePTM() anyway).
+				return False
+			return True
+
+		colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'RT [min]', 'MS2Intensity',
+		              'PSMscore']
+
+	elif toCollapse == 'Charge':
+		def checkTrueDuplicates(x, y):
+			"""
+			Checks whether dataFrame entries x and y are truly duplicates only due to charge difference.
+			:param x:   pd.Sequence candidate firstOccurrence data
+			:param y:   pd.Sequence candidate duplicate data
+			"""
+			if x['First Scan'] == y[
+				'First Scan']:  # identical peptides have identical RT (you didn't do collapsePSMAlgo?)
+				assert False  # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSEPSMALGO() # TEST
+				return False
+			if x['Charge'] == y['Charge']:  # well obviously they should duplicate due to charge difference...
+				return False
+			if x['Modifications'] != y[
+				'Modifications']:  # different PTM = different sequence (before collapsePTM() anyway).
+				return False
+			return True
+		colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Charge']
+
+	elif toCollapse == 'PTM':
+		def checkTrueDuplicates(x, y):
+			"""
+			Checks whether dataFrame entries x and y are truly duplicates only due to PTM difference.
+			:param x:   pd.Sequence candidate firstOccurrence data
+			:param y:   pd.Sequence candidate duplicate data
+			"""
+			if x['First Scan'] == y[
+				'First Scan']:  # identical peptides have identical RT (you didn't do collapsePSMAlgo?)
+				assert False  # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSEPSMALGO() # TEST
+				return False
+			if x['Charge'] != y[
+				'Charge']:  # well obviously they should duplicate due to charge difference... # TODO should Charge variable still exist at this point?
+				assert False  # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSECHARGE() # TEST
+				return False
+			if x['Modifications'] == y['Modifications']:
+				assert False  # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT PERFORM ALL PREVIOUS COLLAPSES # TEST
+				return False
+			return True
+		colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Modifications']
+
 	allSequences = df.groupby('Annotated Sequence').groups  # dict of SEQUENCE:[INDICES]
 	allDuplicatesHierarchy = {}  # {firstOccurrence:[duplicates]}
 	for sequence, indices in allSequences.items():
@@ -115,7 +187,7 @@ def collapse(df, checkTrueDuplicates, colsToSave, method, maxRelativeReporterVar
 			if False:  # TODO flag isolated peaks
 				pass
 			# get the new intensities per first occurrence index (df index)
-			intensitiesDict = getNewIntensities(duplicatesDf, duplicatesDict, method, centerMeasure, maxRelativeReporterVariance)
+			intensitiesDict = getNewIntensities(duplicatesDf, duplicatesDict, method, maxRelativeReporterVariance)
 			allDuplicatesHierarchy.update(duplicatesDict)
 	setIntensities(df, intensitiesDict)
 	toDelete = list(allDuplicatesHierarchy.values())
@@ -175,108 +247,6 @@ def collapsePSMAlgo(df, master, exclusive):
 	df.drop(toDelete, inplace=True)
 	assert(dflen == df.shape[0]+removedData[1].shape[0]) # TEST
 
-	return df, removedData
-
-
-def collapseRT(df, method, maxRelativeReporterVariance):
-	# todo: check that the max RELATIVE variance on the channel intensities do not exceed given value. (better: read below)
-	# todo: report when RT differences exceed a certain threshold
-	"""
-	Combines detections in the dataFrame that differ only in retention time but may have the same PTMs and Charge into a
-	new detection. The duplicates are removed and replaced by this new detection. Essential info about removed data is
-	also returned as removedData.
-	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
-	:param method:                      str             defines how the new detection is to be selected/constructed
-	:param maxRelativeReporterVariance: float           UNUSED value that restricts reporter variance
-	:return df:                         pd.dataFrame    without sequence duplicates solely due to difference in RT.
-	:return removedData:                dict            {firstOccurrenceIndex : [annotated_sequence, [other, values, to, be, saved] for each duplicate]}
-	"""
-	# setIntensities(df, intensities, location)
-	import warnings
-
-	def checkTrueDuplicates(x, y):
-		"""
-		Checks whether dataFrame entries x and y are truly duplicates only due to RT difference.
-		:param x:   pd.Sequence candidate firstOccurrence data
-		:param y:   pd.Sequence candidate duplicate data
-		"""
-		if x['First Scan'] == y['First Scan']: # identical peptides have identical RT (you didn't do collapsePSMAlgo?)
-			return False
-		if x['Charge'] != y['Charge']:  # different charge = different ("modified, non-redundant") peptide
-			return False
-		if x['Modifications'] != y['Modifications']: # different PTM = different sequence (before collapsePTM() anyway).
-			return False
-		return True
-
-	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'RT [min]', 'MS2Intensity', 'PSMscore']
-	df, removedData = collapse(df, checkTrueDuplicates=checkTrueDuplicates, colsToSave=colsToSave, method=method, maxRelativeReporterVariance=maxRelativeReporterVariance)
-	return df, removedData
-
-
-def collapseCharge(df, method, maxRelativeReporterVariance): # no method parameter because always method=centerMeasure (see below)
-	"""
-	This function should always be preceeded by collapseRT(). Combines detections in the dataFrame that differ only in
-	Charge but may have the same PTMs into a new detection. The duplicates are removed and replaced by this new detection.
-	Essential info about removed data is also returned as removedData.
-	:param method:                      str             defines how the new detection is to be selected/constructed
-	:param maxRelativeReporterVariance: float           UNUSED value that restricts reporter variance
-	:param df:                          pd.dataFrame    with sequence duplicates due to difference in Charge.
-	:return df:                         pd.dataFrame    without sequence duplicates solely due to difference in Charge.
-	:return removedData:                dict            {firstOccurrenceIndex : [annotated_sequence, [other, values, to, be, saved] for each duplicate]}
-	"""
-
-	def checkTrueDuplicates(x, y):
-		"""
-		Checks whether dataFrame entries x and y are truly duplicates only due to charge difference.
-		:param x:   pd.Sequence candidate firstOccurrence data
-		:param y:   pd.Sequence candidate duplicate data
-		"""
-		if x['First Scan'] == y['First Scan']:  # identical peptides have identical RT (you didn't do collapsePSMAlgo?)
-			assert False # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSEPSMALGO() # TEST
-			return False
-		if x['Charge'] == y['Charge']:  # well obviously they should duplicate due to charge difference...
-			return False
-		if x['Modifications'] != y['Modifications']: # different PTM = different sequence (before collapsePTM() anyway).
-			return False
-		return True
-
-	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Charge']
-	df, removedData = collapse(df, checkTrueDuplicates=checkTrueDuplicates, colsToSave=colsToSave, method=method, maxRelativeReporterVariance=maxRelativeReporterVariance)
-	# method=centerMeasure because after RT collapse the PSM algorithm scores may be gone
-	return df, removedData
-
-
-def collapsePTM(df, method, maxRelativeReporterVariance):
-	"""
-	Combines detections in the dataFrame that differ only in PTMs ('Modification') but may have the same RT or Charge
-	into a new detection. The duplicates are removed and replaced by this new detection. Essential info about removed
-	data is	also returned as removedData.
-	:param maxRelativeReporterVariance:
-	:param method:
-	:param df:              pd.dataFrame    with sequence duplicates due to difference in PTMs.
-	:return df:             pd.dataFrame    without sequence duplicates solely due to difference in PTMs.
-	:return removedData:    dict            {firstOccurrenceIndex : [annotated_sequence, [other, values, to, be, saved] for each duplicate]}
-	"""
-
-	def checkTrueDuplicates(x, y):
-		"""
-		Checks whether dataFrame entries x and y are truly duplicates only due to PTM difference.
-		:param x:   pd.Sequence candidate firstOccurrence data
-		:param y:   pd.Sequence candidate duplicate data
-		"""
-		if x['First Scan'] == y['First Scan']:  # identical peptides have identical RT (you didn't do collapsePSMAlgo?)
-			assert False # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSEPSMALGO() # TEST
-			return False
-		if x['Charge'] != y['Charge']:  # well obviously they should duplicate due to charge difference... # TODO should Charge variable still exist at this point?
-			assert False  # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSECHARGE() # TEST
-			return False
-		if x['Modifications'] == y['Modifications']:
-			assert False # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT PERFORM ALL PREVIOUS COLLAPSES # TEST
-			return False
-		return True
-
-	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Modifications']
-	df, removedData = collapse(df, checkTrueDuplicates=checkTrueDuplicates, colsToSave=colsToSave, method=method, maxRelativeReporterVariance=maxRelativeReporterVariance)
 	return df, removedData
 
 
