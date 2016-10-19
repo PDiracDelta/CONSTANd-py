@@ -45,7 +45,7 @@ def getInput():
 	collapse_method = config.get('DEFAULT', 'collapse_method')
 	collapse_maxRelativeReporterVariance = config.getfloat('DEFAULT', 'collapse_maxRelativeReporterVariance')
 	collapsePSMAlgo_bool = config.getboolean('DEFAULT','collapsePSMAlgo_bool')
-	collapsePSMAlgo_master = config.get('DEFAULT','collapsePSMAlgo_master')
+	masterPSMAlgo = config.get('DEFAULT','masterPSMAlgo')
 	collapsePSMAlgo_exclusive_bool = config.getboolean('DEFAULT','collapsePSMAlgo_exclusive_bool')
 	collapseRT_bool = config.getboolean('DEFAULT','collapseRT_bool')
 	collapseCharge_bool = config.getboolean('DEFAULT','collapseCharge_bool')
@@ -78,8 +78,8 @@ def getInput():
 			raise Exception("maxRelativeChannelVariance should be either 'None' or greater than zero.")
 	if collapsePSMAlgo_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PSM Algorithms.")
-	if collapsePSMAlgo_master not in ('mascot', 'sequest'):
-		raise Exception("Invalid master PSM algorithm: '"+collapsePSMAlgo_master+"'. Please pick 'mascot' or 'sequest'.")
+	if masterPSMAlgo not in ('mascot', 'sequest'):
+		raise Exception("Invalid master PSM algorithm: '"+masterPSMAlgo+"'. Please pick 'mascot' or 'sequest'.")
 	if collapsePSMAlgo_exclusive_bool is None:
 		raise Exception("Please indicate whether PSM Algorithm redundancy removal should be exclusive or not.")
 	if collapseRT_bool is None:
@@ -119,7 +119,7 @@ def getInput():
 		'collapse_method': collapse_method,
 		'collapse_maxRelativeReporterVariance': collapse_maxRelativeReporterVariance,
 		'collapsePSMAlgo_bool': collapsePSMAlgo_bool,
-		'collapsePSMAlgo_master': collapsePSMAlgo_master,
+		'masterPSMAlgo': masterPSMAlgo,
 		'collapsePSMAlgo_exclusive_bool': collapsePSMAlgo_exclusive_bool,
 		'collapseRT_bool': collapseRT_bool,
 		'collapseCharge_bool': collapseCharge_bool,
