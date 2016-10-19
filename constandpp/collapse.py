@@ -10,6 +10,7 @@ and replaces the duplicates with one representative detection and a combination/
 """
 
 import numpy as np
+from dataprep import setIntensities, getIntensities
 
 intensityColumns = ['126', '127', '128', '129', '130', '131']
 
@@ -99,14 +100,14 @@ def getNewIntensities(duplicatesDf, duplicatesDict, method, maxRelativeReporterV
 	return weightedMS2Intensities  # update the intensities
 
 
-def collapse(df, toCollapse, colsToSave, method, maxRelativeReporterVariance):
+def collapse(toCollapse, df, colsToSave, method, maxRelativeReporterVariance):
 	"""
 	Generic collapse function. Looks for duplicate 'Annotated Sequence' values in the dataFrame and verifies
 	true duplication using checkTrueDuplicates function. Modifies df according to true duplicates and newly acquired
 	intensities (via getNewIntensities function): remove all duplicates and enter one replacement detection.
 	Returns removedData according to the colsToSave list.
+	:param toCollapse:                  str             variable of which true duplicates are to be collapsed.
 	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
-	:param checkTrueDuplicates:         function        returns true if two detections are true duplicates in current context
 	:param colsToSave:                  list            list of variables to be saved for detections that ought to be removed
 	:param method:                      str             defines how the new detection is to be selected/constructed
 	:param maxRelativeReporterVariance: float           UNUSED value that restricts reporter variance

@@ -21,6 +21,7 @@ from constand import constand
 from time import time
 from dataIO import *
 from dataprep import *
+from collapse import collapse
 from analysis import *
 
 
