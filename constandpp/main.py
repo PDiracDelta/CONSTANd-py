@@ -104,7 +104,7 @@ def main():
 	""" get all input parameters
 	params:
 	file_in, delim_in, header_in, collapsePSMAlgo_bool, removeIsolationInterference_bool, collapse_method,
-	collapse_maxRelativeReporterVariance, removeIsolationInterference_master, collapsePSMAlgo_master,
+	collapse_maxRelativeReporterVariance, removeIsolationInterference_master, masterPSMAlgo,
 	collapsePSMAlgo_exclusive_bool,	collapseRT_bool, collapseCharge_bool, collapsePTM_bool,	isotopicCorrection_bool,
 	isotopicCorrectionsMatrix, accuracy, maxIterations, DEFoldThreshold, path_out, filename_out, delim_out
 	"""
@@ -118,7 +118,7 @@ def main():
 			df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
 		if params['collapsePSMAlgo_bool']:
 			# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
-			df, removedData['PSMAlgo'] = collapsePSMAlgo(df, master=params['collapsePSMAlgo_master'],
+			df, removedData['PSMAlgo'] = collapsePSMAlgo(df, master=params['masterPSMAlgo'],
 			                                             exclusive=params['collapsePSMAlgo_exclusive_bool'])
 			# SANITY CHECK: no detections with the same scan number may exist after collapsePSMAlgo()
 			assert np.prod((i < 2 for (s, i) in df.groupby('First Scan').groups))
