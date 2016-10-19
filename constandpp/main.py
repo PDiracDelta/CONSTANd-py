@@ -125,15 +125,15 @@ def main():
 
 		if params['collapseRT_bool']:
 			# collapse peptide list redundancy due to multiple detections at different RT
-			df, removedData['RT'] = collapseRT(df, method=params['collapse_method'],
+			df, removedData['RT'] = collapse('RT', df, method=params['collapse_method'],
 			                                   maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance']) # TODO
 		if params['collapseCharge_bool']:
 			# collapse peptide list redundancy due to different charges (optional)
-			df, removedData['charge'] = collapseCharge(df, method=params['collapse_method'],
+			df, removedData['charge'] = collapse('Charge', df, method=params['collapse_method'],
 			                                   maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance']) # TODO
 		if params['collapsePTM_bool']:
 			# collapse peptide list redundancy due to different charges (optional)
-			df, removedData['modifications'] = collapsePTM(df, method=params['collapse_method'],
+			df, removedData['modifications'] = collapse('PTM', df, method=params['collapse_method'],
 			                                   maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance']) # TODO
 
 		# SANITY CHECK: there should be no more duplicates if all collapses have been applied.
