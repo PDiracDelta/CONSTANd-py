@@ -115,6 +115,9 @@ def main():
 	if not testing:
 		""" Data preparation """
 		removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
+		df = selectEssentials(df, essentialCols=essentialCols)
+		if params['removeBadConfidence_bool']:
+			df, removedData['removeBadConfidence'] = removeBadConfidence(df, params['removeBadConfidence'])
 		if params['removeIsolationInterference_bool']:
 			df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
 		if params['undoublePSMAlgo_bool']:

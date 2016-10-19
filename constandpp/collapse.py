@@ -56,12 +56,13 @@ def combineDetections(duplicatesDf, centerMeasure):
 		pass
 	if centerMeasure == 'weighted':
 		pass
-	return newIntensities
+	return newIntensities # TODO
 
 
 def getRepresentative(duplicatesDf, duplicatesDict, representativeMethod='bestmatch'):
 	# get the detection with the best PSM match
-	return detection
+	# values of BEST PSM detection in all duplicates (master/slave-wise best)
+	return detection # TODO
 
 
 def getNewIntensities(duplicatesDf, duplicatesDict, method, maxRelativeReporterVariance):

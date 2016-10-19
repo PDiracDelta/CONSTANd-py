@@ -40,6 +40,8 @@ def getInput():
 	file_in = config.get('DEFAULT','file_in')
 	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
 	header_in = config.getint('DEFAULT','header_in')
+	removeBadConfidence_bool = config.getboolean('DEFAULT','removeBadConfidence_bool')
+	removeBadConfidence_minimum = config.get('DEFAULT','removeBadConfidence_minimum')
 	removeIsolationInterference_bool = config.getboolean('DEFAULT','removeIsolationInterference_bool')
 	removeIsolationInterference_threshold = config.getfloat('DEFAULT','removeIsolationInterference_threshold')
 	collapse_method = config.get('DEFAULT', 'collapse_method')
@@ -67,12 +69,16 @@ def getInput():
 		raise Exception("Delimiter of input file must be a character (string of length one).")
 	if not ((isinstance(header_in, int) and header_in >= 0) or header_in is None):
 		raise Exception("Header parameter of the input file must be a non-negative integer or of type None.")
+	if removeBadConfidence_bool is None:
+		raise Exception("Please indicate whether you would like to remove detections with confidence lower than certain threshold.")
+	if removeBadConfidence_bool and removeBadConfidence_minimum not in ['High', 'Medium']:
+		raise Exception("Invalid minimum confidence level: "+removeBadConfidence_minimum+". Must select 'Medium' or 'High'.")
 	if removeIsolationInterference_bool is None:
-		raise Exception("Please indicate whether you would like to remove high Isolation Interference cases.")
+		raise Exception("Please indicate whether you would like to remove high Isolation Interference detections.")
 	if not (0 < removeIsolationInterference_threshold < 100 or removeIsolationInterference_bool is None):
 		raise Exception("Isolation Interference Threshold should be either 'None' or between 0 and 100 (percentage).")
 	if collapse_method not in ('max', 'mean', 'median'):
-		raise Exception("Invalid center measure: '"+collapse_centerMeasure+"'. Please pick 'max', 'mean' or 'median'.")
+		raise Exception("Invalid collapse method: '"+collapse_method+"'. Please pick 'max', 'mean' or 'median'.")
 	if collapse_maxRelativeReporterVariance is not None:
 		if not collapse_maxRelativeReporterVariance > 0:
 			raise Exception("maxRelativeChannelVariance should be either 'None' or greater than zero.")
@@ -114,6 +120,8 @@ def getInput():
 		'file_in': file_in,
 		'delim_in': delim_in,
 		'header_in': header_in,
+		'removeBadConfidence_bool': removeBadConfidence_bool,
+		'removeBadConfidence_minimum': removeBadConfidence_minimum,
 		'removeIsolationInterference_bool': removeIsolationInterference_bool,
 		'removeIsolationInterference_threshold': removeIsolationInterference_threshold,
 		'masterPSMAlgo': masterPSMAlgo,
