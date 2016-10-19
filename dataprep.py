@@ -22,9 +22,16 @@ import numpy as np
 intensityColumns = ['126', '127', '128', '129', '130', '131']
 
 
-def selectEssentials(df):
+def selectEssentials(df, essentialCols):
 	# remove unused columns
-	return df
+	return df # TODO
+
+
+def removeBadConfidence(df, minimum):
+	# remove detections with confidence < minimum
+	# map strings to integers
+	# WATCH OUT FOR CAPITALIZATION
+	return df # TODO
 
 
 def removeIsolationInterference(df, threshold):
