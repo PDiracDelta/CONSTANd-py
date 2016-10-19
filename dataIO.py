@@ -42,13 +42,12 @@ def getInput():
 	header_in = config.getint('DEFAULT','header_in')
 	removeIsolationInterference_bool = config.getboolean('DEFAULT','removeIsolationInterference_bool')
 	removeIsolationInterference_threshold = config.getfloat('DEFAULT','removeIsolationInterference_threshold')
+	collapse_method = config.get('DEFAULT', 'collapse_method')
+	collapse_maxRelativeReporterVariance = config.getfloat('DEFAULT', 'collapse_maxRelativeReporterVariance')
 	collapsePSMAlgo_bool = config.getboolean('DEFAULT','collapsePSMAlgo_bool')
 	collapsePSMAlgo_master = config.get('DEFAULT','collapsePSMAlgo_master')
 	collapsePSMAlgo_exclusive_bool = config.getboolean('DEFAULT','collapsePSMAlgo_exclusive_bool')
 	collapseRT_bool = config.getboolean('DEFAULT','collapseRT_bool')
-	collapseRT_method = config.get('DEFAULT','collapseRT_method') # which peaks to combine and how? quality; intensity; mean; weighted; # TODO HERE
-	collapseRT_centerMeasure = config.get('DEFAULT', 'collapseRT_centerMeasure')  # how to add peaks? collapseRT_centerMeasure
-	collapseRT_maxRelativeReporterVariance = config.getfloat('DEFAULT','collapseRT_maxRelativeReporterVariance')
 	collapseCharge_bool = config.getboolean('DEFAULT','collapseCharge_bool')
 	isotopicCorrection_bool = config.getboolean('DEFAULT','isotopicCorrection_bool')
 	isotopicCorrectionsMatrix = getIsotopicCorrectionsMatrix(config.get('DEFAULT','isotopicCorrectionsMatrix'))
@@ -72,6 +71,11 @@ def getInput():
 		raise Exception("Please indicate whether you would like to remove high Isolation Interference cases.")
 	if not (0 < removeIsolationInterference_threshold < 100 or removeIsolationInterference_bool is None):
 		raise Exception("Isolation Interference Threshold should be either 'None' or between 0 and 100 (percentage).")
+	if collapse_method not in ('max', 'mean', 'median'):
+		raise Exception("Invalid center measure: '"+collapse_centerMeasure+"'. Please pick 'max', 'mean' or 'median'.")
+	if collapse_maxRelativeReporterVariance is not None:
+		if not collapse_maxRelativeReporterVariance > 0:
+			raise Exception("maxRelativeChannelVariance should be either 'None' or greater than zero.")
 	if collapsePSMAlgo_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PSM Algorithms.")
 	if collapsePSMAlgo_master not in ('mascot', 'sequest'):
@@ -80,13 +84,6 @@ def getInput():
 		raise Exception("Please indicate whether PSM Algorithm redundancy removal should be exclusive or not.")
 	if collapseRT_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple retention times.")
-	if collapseRT_method not in ('max', 'mean', 'median'):
-		raise Exception("Invalid center measure: '"+collapseRT_centerMeasure+"'. Please pick 'max', 'mean' or 'median'.")
-	if collapseRT_centerMeasure not in ('mean', 'median'):
-		raise Exception("Invalid center measure: '"+collapseRT_centerMeasure+"'. Please pick 'mean' or 'median'.")
-	if collapseRT_maxRelativeReporterVariance is not None:
-		if not collapseRT_maxRelativeReporterVariance > 0:
-			raise Exception("maxRelativeChannelVariance should be either 'None' or greater than zero.")
 	if collapseCharge_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple charge states.")
 	elif collapseCharge_bool is True:
@@ -119,13 +116,12 @@ def getInput():
 		'header_in': header_in,
 		'removeIsolationInterference_bool': removeIsolationInterference_bool,
 		'removeIsolationInterference_threshold': removeIsolationInterference_threshold,
+		'collapse_method': collapse_method,
+		'collapse_maxRelativeReporterVariance': collapse_maxRelativeReporterVariance,
 		'collapsePSMAlgo_bool': collapsePSMAlgo_bool,
 		'collapsePSMAlgo_master': collapsePSMAlgo_master,
 		'collapsePSMAlgo_exclusive_bool': collapsePSMAlgo_exclusive_bool,
 		'collapseRT_bool': collapseRT_bool,
-		'collapseRT_method': collapseRT_method,
-		'collapseRT_centerMeasure': collapseRT_centerMeasure,
-		'collapseRT_maxRelativeReporterVariance': collapseRT_maxRelativeReporterVariance,
 		'collapseCharge_bool': collapseCharge_bool,
 		'isotopicCorrection_bool': isotopicCorrection_bool,
 		'isotopicCorrectionsMatrix': isotopicCorrectionsMatrix,
