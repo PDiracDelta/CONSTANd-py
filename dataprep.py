@@ -30,14 +30,31 @@ def setIntensityColumns(intensityColumns):
 	globals()['intensityColumns'] = intensityColumns
 
 
-def selectEssentialColumns(df, essentialColumns):
+def selectRequiredColumns(df, requiredColumns):
 	"""
 	Returns a dataFrame with only the specified columns of the input dataFrame.
 	:param df:                  pd.dataFrame    input dataFrame
-	:param essentialColumns:    list            specified columns
+	:param requiredColumns:    list            specified columns
 	:return:                    pd.dataFrame    dataFrame with only the specified columns of the input dataFrame
 	"""
-	return df[essentialColumns]
+	return df[requiredColumns]
+
+
+def removeMissing(df):
+	"""
+	Removes detections for which entries in essential columns is missing, or which have no quan values or labels.
+	:param df:  pd.dataFrame    with missing values
+	:return df: pd.dataFrame    without missing values
+	"""
+	for column in ['First Scan', 'Annotated Sequence', 'Identifying Node', 'Charge', 'Modifications']:
+		# delete all detections that have a missing value in this column
+		df.drop(df[df[column].isnull()].index, inplace=True)
+	# delete all detections that have a missing value in both columns: XCorr and Ions Score
+	df.drop(df[[x and y for x, y in zip(df['XCorr'].isnull(), df['Ions Score'].isnull())]].index, inplace=True)
+	# delete all detections which have no quan values or no quan labels
+	df.drop(df[df['Quan Info'] == 'NoQuanValues'].index, inplace=True)
+	df.drop(df[df['Quan Info'] == 'NoQuanLabels'].index, inplace=True)
+	return df
 
 
 def removeBadConfidence(df, minimum):
