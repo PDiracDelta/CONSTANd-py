@@ -67,34 +67,34 @@ def combineDetections(duplicatesDf, centerMeasure):
 	return newIntensities # TODO
 
 
-def getRepresentative(duplicatesDf, duplicatesDict, representativeMethod='bestmatch'):
+def getRepresentative(duplicatesDf, duplicatesDict, masterPSMAlgo):
 	# get the detection with the best PSM match
 	# values of BEST PSM detection in all duplicates (master/slave-wise best)
-	# dont forget to increase Degeneracy
+	# dont forget to increase Degeneracy # todo
+
 	return detection # TODO
 
 
-def getNewIntensities(duplicatesDf, duplicatesDict, method, maxRelativeReporterVariance):
+def getNewIntensities(duplicatesDf, duplicatesDict, method, maxRelativeReporterVariance, masterPSMAlgo):
 	"""
 	Combines the true duplicates' intensities into one new entry per first occurrence, conform the duplicatesDict structure.
 	:param duplicatesDict:          dict            {firstOccurrenceIndex:[duplicateIndices]}
 	:param duplicatesDf:            pd.dataFrame    data of only the first occurrences and duplicates
-	:return weightedMS2Intensities: dict            {firstOccurrenceIndex:np.array(newIntensities)}
+	:return newIntensitiesDict:     dict            {firstOccurrenceIndex:np.array(newIntensities)}
 	"""
 	import warnings
 	weightedMS2Intensities = {}  # dict with the new MS2 intensities for each firstOccurrence
 	if method == 'bestMatch':
 		newIntensities = None
-		representative = getRepresentative(duplicatesDf, duplicatesDict)
-		setIntensities(representative, newIntensities)
+		representative = getRepresentative(duplicatesDf, duplicatesDict, masterPSMAlgo)
 		pass # TODO
 	elif method == 'mostIntense':
 		newIntensities = None
-		representative = getRepresentative(duplicatesDf, duplicatesDict)
-		setIntensities(newIntensities, newIntensities)
+		representative = getRepresentative(duplicatesDf, duplicatesDict, masterPSMAlgo)
 		pass # TODO
 	else:
 		newIntensities = combineDetections(duplicatesDf, centerMeasure=method)
+		representative = getRepresentative(duplicatesDf, duplicatesDict, masterPSMAlgo)
 	# TODO the next section is obsolete if you use combineDetections
 	for firstOccurrence, duplicates in duplicatesDict:  # TODO flag PTM differences.
 		totalMS1Intensity = sum(duplicatesDf.loc[[firstOccurrence] + duplicates]['Intensity'])
@@ -107,10 +107,10 @@ def getNewIntensities(duplicatesDf, duplicatesDict, method, maxRelativeReporterV
 		                 0) > maxRelativeReporterVariance):  # TODO this can only be consistent if executed on RELATIVE intensities.
 			warnings.warn(
 				"maxRelativeReporterVariance too high for peptide with index " + firstOccurrence + ".")  # TODO this shouldnt just warn, you should also decide what to do.
-	return weightedMS2Intensities  # update the intensities
+	return newIntensitiesDict
 
 
-def collapse(toCollapse, df, method, maxRelativeReporterVariance): # , RT_master=None
+def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo): #
 	"""
 	Generic collapse function. Looks for duplicate 'Annotated Sequence' values in the dataFrame and verifies
 	true duplication using checkTrueDuplicates function. Modifies df according to true duplicates and newly acquired
@@ -191,7 +191,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance): # , RT_master
 			if False:  # TODO flag isolated peaks
 				pass
 			# get the new intensities per first occurrence index (df index)
-			intensitiesDict = getNewIntensities(duplicatesDf, duplicatesDict, method, maxRelativeReporterVariance)
+			intensitiesDict = getNewIntensities(duplicatesDf, duplicatesDict, method, maxRelativeReporterVariance, masterPSMAlgo)
 			allDuplicatesHierarchy.update(duplicatesDict)
 	setIntensities(df, intensitiesDict)
 	toDelete = list(allDuplicatesHierarchy.values())
