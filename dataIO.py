@@ -87,7 +87,8 @@ def getInput():
 	if columnsToSave is None:
 		raise Exception("Please indicate which columns (in addition to the intensities) to save for removed data.")
 	if removeBadConfidence_bool is None:
-		raise Exception("Please indicate whether you would like to remove detections with confidence lower than certain threshold.")
+		raise Exception("Please indicate whether you would like to remove detections with confidence lower than certain "
+		                "threshold.")
 	if removeBadConfidence_bool and removeBadConfidence_minimum not in ['High', 'Medium']:
 		raise Exception("Invalid minimum confidence level: "+removeBadConfidence_minimum+". Must select 'Medium' or 'High'.")
 	if removeIsolationInterference_bool is None:
@@ -101,6 +102,9 @@ def getInput():
 			raise Exception("maxRelativeChannelVariance should be either 'None' or greater than zero.")
 	if undoublePSMAlgo_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PSM Algorithms.")
+	if masterPSMAlgo is None:
+		raise Exception("You have to enter a masterPSMAlgo -- even if you don't want to undouble the PSMs -- in order to "
+		                "choose the best matching representative when collapsing")
 	if masterPSMAlgo not in ('mascot', 'sequest'):
 		raise Exception("Invalid master PSM algorithm: '"+masterPSMAlgo+"'. Please pick 'mascot' or 'sequest'.")
 	if undoublePSMAlgo_exclusive_bool is None:
