@@ -38,7 +38,8 @@ def getInput():
 	# TODO add .lower() to all string input except essentialColumns and intensityColumns
 
 	# read the config file to obtain the defaults
-	config = configparser.ConfigParser(allow_no_value=True, inline_comment_prefixes='#') # TODO split up CONFIG and PARAMS (user input files vs workflow params)
+	config = configparser.ConfigParser(allow_no_value=True, comment_prefixes=';',
+	                                   inline_comment_prefixes='@')  # TODO split up CONFIG and PARAMS (user input files vs workflow params)
 	config.optionxform = str # so that strings dont automatically get .lower()-ed
 	config.read('config.ini', encoding='utf-8')
 
@@ -130,13 +131,13 @@ def getInput():
 	if not (len(delim_out) == 1 and isinstance(delim_out, str)):
 		raise Exception("Delimiter of output file must be a character (string of length one).")
 
-	# assign the TYPOGRAPHICALLY CORRECT values to the params dict.
+	# assign the TYPOGRAPHICALLY CORRECT values to the params dict and modify them if necessary.
 	params = {
 		'file_in': file_in,
 		'delim_in': delim_in,
 		'header_in': header_in,
 		'intensityColumns': intensityColumns,
-		'essentialColumns': essentialColumns.extend(intensityColumns),
+		'essentialColumns': essentialColumns+intensityColumns, # needs to include intensitycolumns
 		'removeBadConfidence_bool': removeBadConfidence_bool,
 		'removeBadConfidence_minimum': removeBadConfidence_minimum,
 		'removeIsolationInterference_bool': removeIsolationInterference_bool,

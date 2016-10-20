@@ -97,7 +97,7 @@ def devStuff(df, params): # TEST
 
 
 def main():
-	testing=False#True # TEST
+	testing=True # TEST
 	writeToDisk=False # TEST
 	"""
 	For now this is just stuff for debugging and testing. Later:
