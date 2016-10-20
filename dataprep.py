@@ -65,16 +65,21 @@ def removeMissing(df):
 
 
 def removeBadConfidence(df, minimum):
-	# remove detections with confidence < minimum
-	# map strings to integers
-	# WATCH OUT FOR CAPITALIZATION
+	"""
+	Removes detections from the input dataFrame if they have a confidence level worse than the given minimum. Saves some
+	info about data with lower than minimum confidence levels in removedData.
+	:param df:              pd.dataFrame    data with all confidence levels
+	:param minimum:         str             minimum confidence level
+	:return df:             pd.dataFrame    data with confidence levels > minimum
+	:return removedData:    pd.dataFrame    data with confidence levels < minimum
+	"""
 	columnsToSave = ['First Scan', 'Annotated Sequence', 'Identifying Node', 'Master Protein Accessions', 'Confidence']
 	conf2int = {'Low': 1, 'Medium': 2, 'High': 3}
 	try:
 		minimum = conf2int[minimum]
 		badConfidences = [conf2int[x] < minimum for x in df['Confidence']]
 	except KeyError:
-		raise KeyError("Illegal Confidence values (allowed: Low, Medium, High).")
+		raise KeyError("Illegal Confidence values (allowed: Low, Medium, High). Watch out for capitalization.")
 	toDelete = df[badConfidences].index  # indices of rows to delete
 	removedData = df.loc[toDelete][columnsToSave]
 	df.drop(toDelete, inplace=True)
