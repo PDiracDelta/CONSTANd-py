@@ -19,12 +19,26 @@ Excludes (see collapse.py):
 
 import numpy as np
 
-intensityColumns = ['126', '127', '128', '129', '130', '131']
+intensityColumns = None
 
 
-def selectEssentials(df, essentialCols):
-	# remove unused columns
-	return df # TODO
+def setIntensityColumns(ics):
+	"""
+	Sets the value of the global variable intensityColumns for use in the module functions.
+	:param intensityColumns: list   names of the columns that contain the MS2 intensities
+	"""
+	globals()['intensityColumns'] = ics
+	print(intensityColumns)
+
+
+def selectEssentialColumns(df, essentialColumns):
+	"""
+	Returns a dataFrame with only the specified columns of the input dataFrame.
+	:param df:                  pd.dataFrame    input dataFrame
+	:param essentialColumns:    list            specified columns
+	:return:                    pd.dataFrame    dataFrame with only the specified columns of the input dataFrame
+	"""
+	return df[essentialColumns]
 
 
 def removeBadConfidence(df, minimum):
@@ -115,5 +129,5 @@ def setIntensities(df, intensitiesDict):
 	:return df:             pd.dataFrame    output dataFrame with updated intensities
 	"""
 	for index in intensitiesDict.keys():
-		df.loc[index][[intensityColumns]] = intensitiesDict[index]
+		df.loc[index][intensityColumns] = intensitiesDict[index]
 	return df

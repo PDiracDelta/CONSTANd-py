@@ -12,8 +12,6 @@ and replaces the duplicates with one representative detection and a combination/
 import numpy as np
 from dataprep import setIntensities, getIntensities
 
-intensityColumns = ['126', '127', '128', '129', '130', '131']
-
 
 def getDuplicates(df, indices, checkTrueDuplicates):
 	"""

@@ -13,6 +13,15 @@ from os import path
 from codecs import getdecoder as gd
 
 
+def parseList(listInString):
+	"""
+	Takes a comma-separated list hidden in a string and returns it as a list.
+	:param listInString:    str     comma-separated list hidden in a string
+	:return:                list    the list that was hidden in the string
+	"""
+	return [x.strip(' ') for x in listInString.split(',')]
+
+
 def getInput():
 	"""
 	Get mass spec data and CONSTANd parameters from the user or from the web interface as a dict.
@@ -26,31 +35,31 @@ def getInput():
 		:return delim_out:      char    delimiter of the data in the output file
 	"""
 	# TODO add all parameters in docstring
-	# TODO add .lower() to all string input
-	# TODO attach real input source
-	# file_in='../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.tsv' # TEST
+	# TODO add .lower() to all string input except essentialColumns and intensityColumns
 
 	# read the config file to obtain the defaults
 	config = configparser.ConfigParser(allow_no_value=True, inline_comment_prefixes='#') # TODO split up CONFIG and PARAMS (user input files vs workflow params)
 	config.optionxform = str # so that strings dont automatically get .lower()-ed
 	config.read('config.ini', encoding='utf-8')
-	dontForgetAnyParameters = len(config._defaults)
 
 	# get variables from config in correct typography
 	file_in = config.get('DEFAULT','file_in')
 	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
 	header_in = config.getint('DEFAULT','header_in')
+	intensityColumns = parseList(config.get('DEFAULT', 'intensityColumns'))
+	essentialColumns = parseList(config.get('DEFAULT', 'essentialColumns'))
 	removeBadConfidence_bool = config.getboolean('DEFAULT','removeBadConfidence_bool')
 	removeBadConfidence_minimum = config.get('DEFAULT','removeBadConfidence_minimum')
 	removeIsolationInterference_bool = config.getboolean('DEFAULT','removeIsolationInterference_bool')
 	removeIsolationInterference_threshold = config.getfloat('DEFAULT','removeIsolationInterference_threshold')
 	collapse_method = config.get('DEFAULT', 'collapse_method')
 	collapse_maxRelativeReporterVariance = config.getfloat('DEFAULT', 'collapse_maxRelativeReporterVariance')
-	collapsePSMAlgo_bool = config.getboolean('DEFAULT','collapsePSMAlgo_bool')
+	undoublePSMAlgo_bool = config.getboolean('DEFAULT','undoublePSMAlgo_bool')
 	masterPSMAlgo = config.get('DEFAULT','masterPSMAlgo')
-	collapsePSMAlgo_exclusive_bool = config.getboolean('DEFAULT','collapsePSMAlgo_exclusive_bool')
+	undoublePSMAlgo_exclusive_bool = config.getboolean('DEFAULT','undoublePSMAlgo_exclusive_bool')
 	collapseRT_bool = config.getboolean('DEFAULT','collapseRT_bool')
 	collapseCharge_bool = config.getboolean('DEFAULT','collapseCharge_bool')
+	collapsePTM_bool = config.getboolean('DEFAULT','collapsePTM_bool')
 	isotopicCorrection_bool = config.getboolean('DEFAULT','isotopicCorrection_bool')
 	isotopicCorrectionsMatrix = getIsotopicCorrectionsMatrix(config.get('DEFAULT','isotopicCorrectionsMatrix'))
 	accuracy = config.getfloat('DEFAULT','accuracy')
@@ -69,6 +78,10 @@ def getInput():
 		raise Exception("Delimiter of input file must be a character (string of length one).")
 	if not ((isinstance(header_in, int) and header_in >= 0) or header_in is None):
 		raise Exception("Header parameter of the input file must be a non-negative integer or of type None.")
+	if intensityColumns is None:
+		raise Exception("Please indicate which columns contain the MS2 reporter intensities.")
+	if essentialColumns is None:
+		raise Exception("Please indicate which columns (in addition to the intensities) you would like to have output for.")
 	if removeBadConfidence_bool is None:
 		raise Exception("Please indicate whether you would like to remove detections with confidence lower than certain threshold.")
 	if removeBadConfidence_bool and removeBadConfidence_minimum not in ['High', 'Medium']:
@@ -77,16 +90,16 @@ def getInput():
 		raise Exception("Please indicate whether you would like to remove high Isolation Interference detections.")
 	if not (0 < removeIsolationInterference_threshold < 100 or removeIsolationInterference_bool is None):
 		raise Exception("Isolation Interference Threshold should be either 'None' or between 0 and 100 (percentage).")
-	if collapse_method not in ('max', 'mean', 'median'):
+	if collapse_method not in ('bestMatch', 'mostIntense', 'mean', 'geometricMedian', 'weighted'):
 		raise Exception("Invalid collapse method: '"+collapse_method+"'. Please pick 'max', 'mean' or 'median'.")
 	if collapse_maxRelativeReporterVariance is not None:
 		if not collapse_maxRelativeReporterVariance > 0:
 			raise Exception("maxRelativeChannelVariance should be either 'None' or greater than zero.")
-	if collapsePSMAlgo_bool is None:
+	if undoublePSMAlgo_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PSM Algorithms.")
 	if masterPSMAlgo not in ('mascot', 'sequest'):
 		raise Exception("Invalid master PSM algorithm: '"+masterPSMAlgo+"'. Please pick 'mascot' or 'sequest'.")
-	if collapsePSMAlgo_exclusive_bool is None:
+	if undoublePSMAlgo_exclusive_bool is None:
 		raise Exception("Please indicate whether PSM Algorithm redundancy removal should be exclusive or not.")
 	if collapseRT_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple retention times.")
@@ -96,6 +109,8 @@ def getInput():
 		if collapseRT_bool is False:
 			collapseRT_bool = True
 			warnings.warn("Removal of charge redundancy requires removal of retention time redundancy; setting 'collapseRT_bool=True'.")
+	if collapsePTM_bool is None:
+		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PTMs.")
 	if isotopicCorrection_bool is None:
 		raise Exception("Please indicate whether you would like to correct for isotopic impurities.")
 	if not (isotopicCorrectionsMatrix.shape == (6,6)):
@@ -120,17 +135,20 @@ def getInput():
 		'file_in': file_in,
 		'delim_in': delim_in,
 		'header_in': header_in,
+		'intensityColumns': intensityColumns,
+		'essentialColumns': essentialColumns.extend(intensityColumns),
 		'removeBadConfidence_bool': removeBadConfidence_bool,
 		'removeBadConfidence_minimum': removeBadConfidence_minimum,
 		'removeIsolationInterference_bool': removeIsolationInterference_bool,
 		'removeIsolationInterference_threshold': removeIsolationInterference_threshold,
 		'masterPSMAlgo': masterPSMAlgo,
-		'undoublePSMAlgo_bool': collapsePSMAlgo_bool,
-		'undoublePSMAlgo_exclusive_bool': collapsePSMAlgo_exclusive_bool,
+		'undoublePSMAlgo_bool': undoublePSMAlgo_bool,
+		'undoublePSMAlgo_exclusive_bool': undoublePSMAlgo_exclusive_bool,
 		'collapse_method': collapse_method,
 		'collapse_maxRelativeReporterVariance': collapse_maxRelativeReporterVariance,
 		'collapseRT_bool': collapseRT_bool,
 		'collapseCharge_bool': collapseCharge_bool,
+		'collapsePTM_bool': collapsePTM_bool,
 		'isotopicCorrection_bool': isotopicCorrection_bool,
 		'isotopicCorrectionsMatrix': isotopicCorrectionsMatrix,
 		'accuracy': accuracy,
@@ -142,8 +160,9 @@ def getInput():
 	}
 
 	# check if you forgot to hardcode new parameters
-	if not dontForgetAnyParameters == len(params):
-		raise Exception("Number of parameters in config.ini not equal to number of parameters returned by getInput().")
+	for param in config._defaults.keys():
+		if param not in params.keys():
+			raise Exception("You forgot to include "+param+" in the params dictionary.")
 
 	return params
 
