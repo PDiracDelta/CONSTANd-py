@@ -70,6 +70,7 @@ def combineDetections(duplicatesDf, centerMeasure):
 def getRepresentative(duplicatesDf, duplicatesDict, representativeMethod='bestmatch'):
 	# get the detection with the best PSM match
 	# values of BEST PSM detection in all duplicates (master/slave-wise best)
+	# dont forget to increase Degeneracy
 	return detection # TODO
 
 
@@ -114,6 +115,8 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance): # , RT_master
 	Generic collapse function. Looks for duplicate 'Annotated Sequence' values in the dataFrame and verifies
 	true duplication using checkTrueDuplicates function. Modifies df according to true duplicates and newly acquired
 	intensities (via getNewIntensities function): remove all duplicates and enter one replacement detection.
+	Adds a 'Degeneracy' column to the dataFrame if it didn't exist already: this contains the number of peptides that
+	have been collapsed onto that (synthetic) detection.
 	Returns removedData according to the columnsToSave list.
 	:param toCollapse:                  str             variable of which true duplicates are to be collapsed.
 	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
@@ -123,6 +126,10 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance): # , RT_master
 	:return df:                         pd.dataFrame    without sequence duplicates according to to checkTrueDuplicates.
 	:return removedData:                dict            {firstOccurrenceIndex : [annotated_sequence, [other, values, to, be, saved] for each duplicate]}
 	"""
+
+	if 'Degeneracy' not in df.columns:
+		# contains the number of peptides that have been collapsed onto each (synthetic) detection.
+		df['Degeneracy'] = [1,]*len(df.index)
 
 	if toCollapse == 'RT':
 		def checkTrueDuplicates(x, y):
