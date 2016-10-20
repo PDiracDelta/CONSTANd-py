@@ -131,13 +131,12 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance): # , RT_master
 			:param x:   pd.Sequence candidate firstOccurrence data
 			:param y:   pd.Sequence candidate duplicate data
 			"""
-			if x['First Scan'] == y[
-				'First Scan']:  # identical peptides have identical RT (you didn't do collapsePSMAlgo?)
-				return False
 			if x['Charge'] != y['Charge']:  # different charge = different ("modified, non-redundant") peptide
 				return False
-			if x['Modifications'] != y[
-				'Modifications']:  # different PTM = different sequence (before collapsePTM() anyway).
+			if x['Modifications'] != y['Modifications']:  # different PTM = different sequence (before collapsePTM() anyway).
+				return False
+			if x['First Scan'] == y['First Scan']:  # identical peptides have identical RT
+				# THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSEPSMALGO()
 				return False
 			return True
 
@@ -148,14 +147,13 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance): # , RT_master
 			:param x:   pd.Sequence candidate firstOccurrence data
 			:param y:   pd.Sequence candidate duplicate data
 			"""
-			if x['First Scan'] == y[
-				'First Scan']:  # identical peptides have identical RT (you didn't do collapsePSMAlgo?)
-				assert False  # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSEPSMALGO() # TEST
-				return False
 			if x['Charge'] == y['Charge']:  # well obviously they should duplicate due to charge difference...
 				return False
 			if x['Modifications'] != y[
 				'Modifications']:  # different PTM = different sequence (before collapsePTM() anyway).
+				return False
+			if x['First Scan'] == y['First Scan']:  # identical peptides have identical RT
+				# THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSEPSMALGO()
 				return False
 			return True
 
@@ -166,16 +164,14 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance): # , RT_master
 			:param x:   pd.Sequence candidate firstOccurrence data
 			:param y:   pd.Sequence candidate duplicate data
 			"""
-			if x['First Scan'] == y[
-				'First Scan']:  # identical peptides have identical RT (you didn't do collapsePSMAlgo?)
-				assert False  # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSEPSMALGO() # TEST
+			if x['Modifications'] == y['Modifications']:
+				# THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT PERFORM ALL PREVIOUS COLLAPSES
 				return False
 			if x['Charge'] != y['Charge']:  # well obviously they should duplicate due to charge difference...
-				#  TODO should Charge variable still exist at this point?
-				assert False  # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSECHARGE() # TEST
+				# THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSECHARGE()
 				return False
-			if x['Modifications'] == y['Modifications']:
-				assert False  # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT PERFORM ALL PREVIOUS COLLAPSES # TEST
+			if x['First Scan'] == y['First Scan']:  # identical peptides have identical RT
+				# THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSEPSMALGO()
 				return False
 			return True
 
