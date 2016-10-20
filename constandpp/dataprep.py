@@ -113,21 +113,18 @@ def undoublePSMAlgo(df, master, exclusive):
 	:return df:             pd.dataFrame    collapsed data
 	:return removedData:    pd.dataFrame    basic info about the removed entries
 	"""
+	scanDict = df.groupby('First Scan').groups # {First Scan : [list of indices]}
 	if master == 'mascot':
 		columnsToSave = ['First Scan', 'Annotated Sequence', 'Master Protein Accessions', 'XCorr']
-		if exclusive:
-			toDelete = df[df['Identifying Node'] == 'Sequest HT (A2)'].index
-		else:
-			toDelete = df[(df['Identifying Node'] == 'Sequest HT (A2)') * (df['Quan Info'] == 'Redundant')].index
+		toDelete = df.index.values.difference(scanDict['Mascot (A6)']) # all indices not discovered by Mascot
+		if not exclusive:
+			toDelete = toDelete.difference(scanDict['Sequest HT (A2)']) # indices not discovered by Sequest either
 	elif master == 'sequest':
 		columnsToSave = ['First Scan', 'Annotated Sequence', 'Master Protein Accessions', 'Ions Score']
-		if exclusive:
-			toDelete = df[df['Identifying Node'] == 'Mascot (A6)'].index
-		else:
-			toDelete = df[(df['Identifying Node'] == 'Mascot (A6)') * (df['Quan Info'] == 'Redundant')].index
-	else:
-		raise Exception(
-			"Invalid master PSM algorithm: '" + master + "'. Please pick 'mascot' or 'sequest'.")
+		toDelete = df.index.values.difference(scanDict['Sequest HT (A2)''Mascot (A6)'])  # all indices not discovered by Sequest
+		if not exclusive:
+			toDelete = toDelete.difference(scanDict['Mascot (A6)'])  # indices not discovered by Mascot either
+
 	removedData = ('master: '+master, df.loc[toDelete][columnsToSave])
 	dflen=df.shape[0] # TEST
 	df.drop(toDelete, inplace=True)
