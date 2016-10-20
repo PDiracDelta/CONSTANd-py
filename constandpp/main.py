@@ -105,7 +105,7 @@ def main():
 	"""
 	""" get all input parameters
 	params:
-	file_in, delim_in, header_in, intensityColumns, essentialColumns, columnsToSave, undoublePSMAlgo_bool,
+	file_in, delim_in, header_in, intensityColumns, requiredColumns, columnsToSave, undoublePSMAlgo_bool,
 	removeIsolationInterference_bool, collapse_method, collapse_maxRelativeReporterVariance,
 	removeIsolationInterference_master, masterPSMAlgo, undoublePSMAlgo_exclusive_bool, collapseRT_bool,
 	collapseCharge_bool, collapsePTM_bool, isotopicCorrection_bool, isotopicCorrectionsMatrix, accuracy, maxIterations,
@@ -119,7 +119,8 @@ def main():
 		removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
 		setIntensityColumns(params['intensityColumns']) # define the intensityColumns for use in dataprep.py
 		setColumnsToSave(params['columnsToSave'])  # define the intensityColumns for use in dataprep.py
-		df = selectEssentialColumns(df, essentialColumns=params['essentialColumns'])
+		df, removedData['missing'] = removeMissing(df)
+		df = selectRequiredColumns(df, requiredColumns=params['requiredColumns'])
 		if params['removeBadConfidence_bool']:
 			df, removedData['removeBadConfidence'] = removeBadConfidence(df, params['removeBadConfidence'])
 		if params['removeIsolationInterference_bool']:

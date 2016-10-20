@@ -35,7 +35,7 @@ def getInput():
 		:return delim_out:      char    delimiter of the data in the output file
 	"""
 	# TODO add all parameters in docstring
-	# TODO add .lower() to all string input except essentialColumns and intensityColumns
+	# TODO add .lower() to all string input except requiredColumns and intensityColumns
 
 	# read the config file to obtain the defaults
 	config = configparser.ConfigParser(allow_no_value=True, comment_prefixes=';',
@@ -48,7 +48,7 @@ def getInput():
 	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
 	header_in = config.getint('DEFAULT','header_in')
 	intensityColumns = parseList(config.get('DEFAULT', 'intensityColumns'))
-	essentialColumns = parseList(config.get('DEFAULT', 'essentialColumns'))
+	requiredColumns = parseList(config.get('DEFAULT', 'requiredColumns'))
 	columnsToSave = parseList(config.get('DEFAULT', 'columnsToSave'))
 	removeBadConfidence_bool = config.getboolean('DEFAULT','removeBadConfidence_bool')
 	removeBadConfidence_minimum = config.get('DEFAULT','removeBadConfidence_minimum')
@@ -82,7 +82,7 @@ def getInput():
 		raise Exception("Header parameter of the input file must be a non-negative integer or of type None.")
 	if intensityColumns is None:
 		raise Exception("Please indicate which columns contain the MS2 reporter intensities.")
-	if essentialColumns is None:
+	if requiredColumns is None:
 		raise Exception("Please indicate which columns (in addition to the intensities) you would like to have output for.")
 	if columnsToSave is None:
 		raise Exception("Please indicate which columns (in addition to the intensities) to save for removed data.")
@@ -140,7 +140,7 @@ def getInput():
 		'delim_in': delim_in,
 		'header_in': header_in,
 		'intensityColumns': intensityColumns,
-		'essentialColumns': essentialColumns+intensityColumns, # needs to include intensitycolumns
+		'requiredColumns': requiredColumns+intensityColumns, # needs to include intensitycolumns
 		'columnsToSave': columnsToSave+intensityColumns, # needs to include intensitycolumns
 		'removeBadConfidence_bool': removeBadConfidence_bool,
 		'removeBadConfidence_minimum': removeBadConfidence_minimum,
