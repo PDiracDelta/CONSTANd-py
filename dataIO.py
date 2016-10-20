@@ -5,12 +5,12 @@
 Handle all I/O of data files and parameters to and from both the workflow and the main dataFrame.
 """
 
-import warnings
 import pandas as pd
 import numpy as np
 import configparser
 from os import path
 from codecs import getdecoder as gd
+from warnings import warn
 
 
 def parseList(listInString):
@@ -112,7 +112,7 @@ def getInput():
 	elif collapseCharge_bool is True:
 		if collapseRT_bool is False:
 			collapseRT_bool = True
-			warnings.warn("Removal of charge redundancy requires removal of retention time redundancy; setting 'collapseRT_bool=True'.")
+			warn("Removal of charge redundancy requires removal of retention time redundancy; setting 'collapseRT_bool=True'.")
 	if collapsePTM_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PTMs.")
 	if isotopicCorrection_bool is None:
@@ -130,7 +130,7 @@ def getInput():
 	if not path.exists(path_out):
 		raise FileNotFoundError("Path " + path_out + " not found.")
 	if path.exists(path_out+'/'+filename_out):
-		warnings.warn("Will overwrite file "+path.basename(path.normpath(path_out)))
+		warn("Will overwrite file "+path.basename(path.normpath(path_out)))
 	if not (len(delim_out) == 1 and isinstance(delim_out, str)):
 		raise Exception("Delimiter of output file must be a character (string of length one).")
 

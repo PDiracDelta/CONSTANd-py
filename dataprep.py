@@ -18,6 +18,7 @@ Excludes (see collapse.py):
 """
 
 import numpy as np
+from warnings import warn
 
 intensityColumns = None
 
@@ -46,22 +47,38 @@ def removeMissing(df):
 	:param df:  pd.dataFrame    with missing values
 	:return df: pd.dataFrame    without missing values
 	"""
+	toDelete = []
 	for column in ['First Scan', 'Annotated Sequence', 'Identifying Node', 'Charge', 'Modifications']:
 		# delete all detections that have a missing value in this column
-		df.drop(df[df[column].isnull()].index, inplace=True)
+		toDelete.extend(df[df[column].isnull()].index)
 	# delete all detections that have a missing value in both columns: XCorr and Ions Score
-	df.drop(df[[x and y for x, y in zip(df['XCorr'].isnull(), df['Ions Score'].isnull())]].index, inplace=True)
+	toDelete.extend(df[[x and y for x, y in zip(df['XCorr'].isnull(), df['Ions Score'].isnull())]].index)
 	# delete all detections which have no quan values or no quan labels
-	df.drop(df[df['Quan Info'] == 'NoQuanValues'].index, inplace=True)
-	df.drop(df[df['Quan Info'] == 'NoQuanLabels'].index, inplace=True)
-	return df
+	toDelete.extend(df[df['Quan Info'] == 'NoQuanValues'].index)
+	toDelete.extend(df[df['Quan Info'] == 'NoQuanLabels'].index)
+	toDelete = np.unique(toDelete)
+	removedData = df.loc[toDelete]
+	if toDelete.size > 0:
+		warn("Some detections have been removed before due to missing values: see removedData['missing'].")
+	df.drop(toDelete, inplace=True)
+	return df, removedData
 
 
 def removeBadConfidence(df, minimum):
 	# remove detections with confidence < minimum
 	# map strings to integers
 	# WATCH OUT FOR CAPITALIZATION
-	return df # TODO
+	columnsToSave = ['First Scan', 'Annotated Sequence', 'Identifying Node', 'Master Protein Accessions', 'Confidence']
+	conf2int = {'Low': 1, 'Medium': 2, 'High': 3}
+	try:
+		minimum = conf2int[minimum]
+		badConfidences = [conf2int[x] < minimum for x in df['Confidence']]
+	except KeyError:
+		raise KeyError("Illegal Confidence values (allowed: Low, Medium, High).")
+	toDelete = df[badConfidences].index  # indices of rows to delete
+	removedData = df.loc[toDelete][columnsToSave]
+	df.drop(toDelete, inplace=True)
+	return df, removedData
 
 
 def removeIsolationInterference(df, threshold):
@@ -73,7 +90,7 @@ def removeIsolationInterference(df, threshold):
 	:return df:             pd.dataFrame    filtered data
 	:return removedData:    pd.dataFrame    basic info about the removed values
 	"""
-	columnsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Isolation Interference [%]']
+	columnsToSave = ['First Scan', 'Annotated Sequence', 'Identifying Node', 'Master Protein Accessions', 'Isolation Interference [%]']
 	toDelete = df[df['Isolation Interference [%]'] > threshold].index # indices of rows to delete
 	removedData = df.loc[toDelete][columnsToSave]
 	df.drop(toDelete, inplace=True)

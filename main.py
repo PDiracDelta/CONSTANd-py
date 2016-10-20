@@ -120,9 +120,9 @@ def main():
 		setIntensityColumns(params['intensityColumns']) # define the intensityColumns for use in dataprep.py
 		setColumnsToSave(params['columnsToSave'])  # define the intensityColumns for use in dataprep.py
 		df, removedData['missing'] = removeMissing(df)
-		df = selectRequiredColumns(df, requiredColumns=params['requiredColumns'])
 		if params['removeBadConfidence_bool']:
-			df, removedData['removeBadConfidence'] = removeBadConfidence(df, params['removeBadConfidence'])
+			df, removedData['removeBadConfidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'])
+		df = selectRequiredColumns(df, requiredColumns=params['requiredColumns'])
 		if params['removeIsolationInterference_bool']:
 			df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
 		if params['undoublePSMAlgo_bool']:
