@@ -21,7 +21,7 @@ from constand import constand
 from time import time
 from dataIO import *
 from dataprep import *
-from collapse import collapse, setColumnsToSave
+from collapse import collapse, setCollapseColumnsToSave
 from analysis import *
 
 
@@ -118,7 +118,7 @@ def main():
 		""" Data preparation """
 		removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
 		setIntensityColumns(params['intensityColumns']) # define the intensityColumns for use in dataprep.py
-		setColumnsToSave(params['columnsToSave'])  # define the intensityColumns for use in dataprep.py
+		setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataprep.py
 		df, removedData['missing'] = removeMissing(df)
 		if params['removeBadConfidence_bool']:
 			df, removedData['removeBadConfidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'])

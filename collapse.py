@@ -15,7 +15,7 @@ from dataprep import intensityColumns, setIntensities, getIntensities
 columnsToSave = None
 
 
-def setColumnsToSave(columnsToSave):
+def setCollapseColumnsToSave(columnsToSave):
 	"""
 	Sets the value of the global variable columnsToSave for use in the module functions.
 	:param columnsToSave: list   names of the columns that ought to be saved when removing data in a collapse.
