@@ -62,6 +62,7 @@ def isotopicImpuritiesTest(): # TEST
 	print(max(np.amax(diff, 1)))
 # False tot en met 1e-3 --> fouten van > 0.1%
 
+
 def isotopicCorrectionsTest(params): # TEST
 	if params['isotopicCorrection_bool']:
 		int_in = np.array([range(6), range(6)]) + np.array([np.zeros(6), 5*np.ones(6)])
@@ -75,6 +76,7 @@ def isotopicCorrectionsTest(params): # TEST
 		# print(int_out) above should be equal to:
 		# [np.linalg.solve(M, b) ; np.linalg.solve(M, c)]
 
+
 def MS2IntensityDoesntMatter(df):
 	I = getIntensities(df)
 	r1 = constand(I, 1e-5, 50)
@@ -84,6 +86,7 @@ def MS2IntensityDoesntMatter(df):
 	diff = r1[0] - r2[0]
 	maxdiff = max(np.amax(diff, 1))
 	print(maxdiff)
+
 
 def generateReport(DEresults, viz):
 	pass
