@@ -115,6 +115,10 @@ def getInput():
 			warn("Removal of charge redundancy requires removal of retention time redundancy; setting 'collapseRT_bool=True'.")
 	if collapsePTM_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PTMs.")
+	elif collapsePTM_bool is True:
+		if collapseRT_bool is False:
+			collapseRT_bool = True
+			warn("Removal of PTM redundancy requires removal of retention time redundancy; setting 'collapseRT_bool=True'.")
 	if isotopicCorrection_bool is None:
 		raise Exception("Please indicate whether you would like to correct for isotopic impurities.")
 	if not (isotopicCorrectionsMatrix.shape == (6,6)):
