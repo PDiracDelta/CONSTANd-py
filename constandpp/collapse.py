@@ -10,7 +10,7 @@ and replaces the duplicates with one representative detection and a combination/
 """
 
 import numpy as np
-from dataprep import setIntensities, getIntensities
+from dataprep import intensityColumns, setIntensities, getIntensities
 
 
 def getDuplicates(df, indices, checkTrueDuplicates):
@@ -99,7 +99,7 @@ def getNewIntensities(duplicatesDf, duplicatesDict, method, maxRelativeReporterV
 	return weightedMS2Intensities  # update the intensities
 
 
-def collapse(toCollapse, df, colsToSave, method, maxRelativeReporterVariance):
+def collapse(toCollapse, df, method, maxRelativeReporterVariance): # , RT_master=None
 	"""
 	Generic collapse function. Looks for duplicate 'Annotated Sequence' values in the dataFrame and verifies
 	true duplication using checkTrueDuplicates function. Modifies df according to true duplicates and newly acquired
@@ -131,9 +131,6 @@ def collapse(toCollapse, df, colsToSave, method, maxRelativeReporterVariance):
 				return False
 			return True
 
-		colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'RT [min]', 'MS2Intensity',
-		              'PSMscore']
-
 	elif toCollapse == 'Charge':
 		def checkTrueDuplicates(x, y):
 			"""
@@ -151,7 +148,6 @@ def collapse(toCollapse, df, colsToSave, method, maxRelativeReporterVariance):
 				'Modifications']:  # different PTM = different sequence (before collapsePTM() anyway).
 				return False
 			return True
-		colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Charge']
 
 	elif toCollapse == 'PTM':
 		def checkTrueDuplicates(x, y):
@@ -164,16 +160,17 @@ def collapse(toCollapse, df, colsToSave, method, maxRelativeReporterVariance):
 				'First Scan']:  # identical peptides have identical RT (you didn't do collapsePSMAlgo?)
 				assert False  # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSEPSMALGO() # TEST
 				return False
-			if x['Charge'] != y[
-				'Charge']:  # well obviously they should duplicate due to charge difference... # TODO should Charge variable still exist at this point?
+			if x['Charge'] != y['Charge']:  # well obviously they should duplicate due to charge difference...
+				#  TODO should Charge variable still exist at this point?
 				assert False  # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT COLLAPSECHARGE() # TEST
 				return False
 			if x['Modifications'] == y['Modifications']:
 				assert False  # THIS SHOULD NOT BE REACHABLE ***UNLESS*** YOU DIDNT PERFORM ALL PREVIOUS COLLAPSES # TEST
 				return False
 			return True
-		colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Modifications']
 
+	colsToSave = ['First Scan', 'Annotated Sequence', 'Identifying Node', 'RT [min]', 'Charge', 'Modifications', 'Master Protein Accessions',
+	              'XCorr', 'Ions Score'] + intensityColumns
 	allSequences = df.groupby('Annotated Sequence').groups  # dict of SEQUENCE:[INDICES]
 	allDuplicatesHierarchy = {}  # {firstOccurrence:[duplicates]}
 	for sequence, indices in allSequences.items():

@@ -76,13 +76,13 @@ def undoublePSMAlgo(df, master, exclusive):
 	:return removedData:    pd.dataFrame    basic info about the removed entries
 	"""
 	if master == 'mascot':
-		colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'XCorr']
+		colsToSave = ['First Scan', 'Annotated Sequence', 'Master Protein Accessions', 'XCorr']
 		if exclusive:
 			toDelete = df[df['Identifying Node'] == 'Sequest HT (A2)'].index
 		else:
 			toDelete = df[(df['Identifying Node'] == 'Sequest HT (A2)') * (df['Quan Info'] == 'Redundant')].index
 	elif master == 'sequest':
-		colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Ions Score']
+		colsToSave = ['First Scan', 'Annotated Sequence', 'Master Protein Accessions', 'Ions Score']
 		if exclusive:
 			toDelete = df[df['Identifying Node'] == 'Mascot (A6)'].index
 		else:
