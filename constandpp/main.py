@@ -21,7 +21,7 @@ from constand import constand
 from time import time
 from dataIO import *
 from dataprep import *
-from collapse import collapse
+from collapse import collapse, setColumnsToSave
 from analysis import *
 
 
@@ -105,10 +105,10 @@ def main():
 	"""
 	""" get all input parameters
 	params:
-	file_in, delim_in, header_in, intensityColumns, essentialColumns, undoublePSMAlgo_bool,
+	file_in, delim_in, header_in, intensityColumns, essentialColumns, columnsToSave, undoublePSMAlgo_bool,
 	removeIsolationInterference_bool, collapse_method, collapse_maxRelativeReporterVariance,
 	removeIsolationInterference_master, masterPSMAlgo, undoublePSMAlgo_exclusive_bool, collapseRT_bool,
-	collapseCharge_bool, collapsePTM_bool,	isotopicCorrection_bool, isotopicCorrectionsMatrix, accuracy, maxIterations,
+	collapseCharge_bool, collapsePTM_bool, isotopicCorrection_bool, isotopicCorrectionsMatrix, accuracy, maxIterations,
 	DEFoldThreshold, path_out, filename_out, delim_out
 	"""
 	params = getInput()
@@ -118,6 +118,7 @@ def main():
 		""" Data preparation """
 		removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
 		setIntensityColumns(params['intensityColumns']) # define the intensityColumns for use in dataprep.py
+		setColumnsToSave(params['columnsToSave'])  # define the intensityColumns for use in dataprep.py
 		df = selectEssentialColumns(df, essentialColumns=params['essentialColumns'])
 		if params['removeBadConfidence_bool']:
 			df, removedData['removeBadConfidence'] = removeBadConfidence(df, params['removeBadConfidence'])
