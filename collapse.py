@@ -12,6 +12,16 @@ and replaces the duplicates with one representative detection and a combination/
 import numpy as np
 from dataprep import intensityColumns, setIntensities, getIntensities
 
+columnsToSave = None
+
+
+def setColumnsToSave(columnsToSave):
+	"""
+	Sets the value of the global variable columnsToSave for use in the module functions.
+	:param columnsToSave: list   names of the columns that ought to be saved when removing data in a collapse.
+	"""
+	globals()['columnsToSave'] = columnsToSave
+
 
 def getDuplicates(df, indices, checkTrueDuplicates):
 	"""
@@ -104,10 +114,10 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance): # , RT_master
 	Generic collapse function. Looks for duplicate 'Annotated Sequence' values in the dataFrame and verifies
 	true duplication using checkTrueDuplicates function. Modifies df according to true duplicates and newly acquired
 	intensities (via getNewIntensities function): remove all duplicates and enter one replacement detection.
-	Returns removedData according to the colsToSave list.
+	Returns removedData according to the columnsToSave list.
 	:param toCollapse:                  str             variable of which true duplicates are to be collapsed.
 	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
-	:param colsToSave:                  list            list of variables to be saved for detections that ought to be removed
+	:param columnsToSave:                  list            list of variables to be saved for detections that ought to be removed
 	:param method:                      str             defines how the new detection is to be selected/constructed
 	:param maxRelativeReporterVariance: float           UNUSED value that restricts reporter variance
 	:return df:                         pd.dataFrame    without sequence duplicates according to to checkTrueDuplicates.
@@ -169,8 +179,6 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance): # , RT_master
 				return False
 			return True
 
-	colsToSave = ['First Scan', 'Annotated Sequence', 'Identifying Node', 'RT [min]', 'Charge', 'Modifications', 'Master Protein Accessions',
-	              'XCorr', 'Ions Score'] + intensityColumns
 	allSequences = df.groupby('Annotated Sequence').groups  # dict of SEQUENCE:[INDICES]
 	allDuplicatesHierarchy = {}  # {firstOccurrence:[duplicates]}
 	for sequence, indices in allSequences.items():
@@ -185,8 +193,8 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance): # , RT_master
 	setIntensities(df, intensitiesDict)
 	toDelete = list(allDuplicatesHierarchy.values())
 	# save as {firstOccurrenceIndex : [annotated_sequence, [values, to, be, saved] for each duplicate]}
-	removedData = dict((firstOccurrence, [df.loc[firstOccurrence][colsToSave[0]],
-	                                      df.loc[allDuplicatesHierarchy[firstOccurrence]][colsToSave[1:]]])
+	removedData = dict((firstOccurrence, [df.loc[firstOccurrence][columnsToSave[0]],
+	                                      df.loc[allDuplicatesHierarchy[firstOccurrence]][columnsToSave[1:]]])
 	                   for firstOccurrence in allDuplicatesHierarchy.keys())
 	df.drop(toDelete, inplace=True)
 

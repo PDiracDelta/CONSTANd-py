@@ -22,13 +22,12 @@ import numpy as np
 intensityColumns = None
 
 
-def setIntensityColumns(ics):
+def setIntensityColumns(intensityColumns):
 	"""
 	Sets the value of the global variable intensityColumns for use in the module functions.
 	:param intensityColumns: list   names of the columns that contain the MS2 intensities
 	"""
-	globals()['intensityColumns'] = ics
-	print(intensityColumns)
+	globals()['intensityColumns'] = intensityColumns
 
 
 def selectEssentialColumns(df, essentialColumns):
@@ -57,9 +56,9 @@ def removeIsolationInterference(df, threshold):
 	:return df:             pd.dataFrame    filtered data
 	:return removedData:    pd.dataFrame    basic info about the removed values
 	"""
-	colsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Isolation Interference [%]']
+	columnsToSave = ['Annotated Sequence', 'Master Protein Accessions', 'First Scan', 'Isolation Interference [%]']
 	toDelete = df[df['Isolation Interference [%]'] > threshold].index # indices of rows to delete
-	removedData = df.loc[toDelete][colsToSave]
+	removedData = df.loc[toDelete][columnsToSave]
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 
@@ -76,13 +75,13 @@ def undoublePSMAlgo(df, master, exclusive):
 	:return removedData:    pd.dataFrame    basic info about the removed entries
 	"""
 	if master == 'mascot':
-		colsToSave = ['First Scan', 'Annotated Sequence', 'Master Protein Accessions', 'XCorr']
+		columnsToSave = ['First Scan', 'Annotated Sequence', 'Master Protein Accessions', 'XCorr']
 		if exclusive:
 			toDelete = df[df['Identifying Node'] == 'Sequest HT (A2)'].index
 		else:
 			toDelete = df[(df['Identifying Node'] == 'Sequest HT (A2)') * (df['Quan Info'] == 'Redundant')].index
 	elif master == 'sequest':
-		colsToSave = ['First Scan', 'Annotated Sequence', 'Master Protein Accessions', 'Ions Score']
+		columnsToSave = ['First Scan', 'Annotated Sequence', 'Master Protein Accessions', 'Ions Score']
 		if exclusive:
 			toDelete = df[df['Identifying Node'] == 'Mascot (A6)'].index
 		else:
@@ -90,7 +89,7 @@ def undoublePSMAlgo(df, master, exclusive):
 	else:
 		raise Exception(
 			"Invalid master PSM algorithm: '" + master + "'. Please pick 'mascot' or 'sequest'.")
-	removedData = ('master: '+master, df.loc[toDelete][colsToSave])
+	removedData = ('master: '+master, df.loc[toDelete][columnsToSave])
 	dflen=df.shape[0] # TEST
 	df.drop(toDelete, inplace=True)
 	assert(dflen == df.shape[0]+removedData[1].shape[0]) # TEST

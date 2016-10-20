@@ -49,6 +49,7 @@ def getInput():
 	header_in = config.getint('DEFAULT','header_in')
 	intensityColumns = parseList(config.get('DEFAULT', 'intensityColumns'))
 	essentialColumns = parseList(config.get('DEFAULT', 'essentialColumns'))
+	columnsToSave = parseList(config.get('DEFAULT', 'columnsToSave'))
 	removeBadConfidence_bool = config.getboolean('DEFAULT','removeBadConfidence_bool')
 	removeBadConfidence_minimum = config.get('DEFAULT','removeBadConfidence_minimum')
 	removeIsolationInterference_bool = config.getboolean('DEFAULT','removeIsolationInterference_bool')
@@ -83,6 +84,8 @@ def getInput():
 		raise Exception("Please indicate which columns contain the MS2 reporter intensities.")
 	if essentialColumns is None:
 		raise Exception("Please indicate which columns (in addition to the intensities) you would like to have output for.")
+	if columnsToSave is None:
+		raise Exception("Please indicate which columns (in addition to the intensities) to save for removed data.")
 	if removeBadConfidence_bool is None:
 		raise Exception("Please indicate whether you would like to remove detections with confidence lower than certain threshold.")
 	if removeBadConfidence_bool and removeBadConfidence_minimum not in ['High', 'Medium']:
@@ -138,6 +141,7 @@ def getInput():
 		'header_in': header_in,
 		'intensityColumns': intensityColumns,
 		'essentialColumns': essentialColumns+intensityColumns, # needs to include intensitycolumns
+		'columnsToSave': columnsToSave+intensityColumns, # needs to include intensitycolumns
 		'removeBadConfidence_bool': removeBadConfidence_bool,
 		'removeBadConfidence_minimum': removeBadConfidence_minimum,
 		'removeIsolationInterference_bool': removeIsolationInterference_bool,
