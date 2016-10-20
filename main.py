@@ -95,8 +95,9 @@ def devStuff(df, params): # TEST
 	# MS2IntensityDoesntMatter(df)
 	pass
 
+
 def main():
-	testing=True # TEST
+	testing=False#True # TEST
 	writeToDisk=False # TEST
 	"""
 	For now this is just stuff for debugging and testing. Later:
@@ -104,10 +105,11 @@ def main():
 	"""
 	""" get all input parameters
 	params:
-	file_in, delim_in, header_in, undoublePSMAlgo_bool, removeIsolationInterference_bool, collapse_method,
-	collapse_maxRelativeReporterVariance, removeIsolationInterference_master, masterPSMAlgo,
-	undoublePSMAlgo_exclusive_bool,	collapseRT_bool, collapseCharge_bool, collapsePTM_bool,	isotopicCorrection_bool,
-	isotopicCorrectionsMatrix, accuracy, maxIterations, DEFoldThreshold, path_out, filename_out, delim_out
+	file_in, delim_in, header_in, intensityColumns, essentialColumns, undoublePSMAlgo_bool,
+	removeIsolationInterference_bool, collapse_method, collapse_maxRelativeReporterVariance,
+	removeIsolationInterference_master, masterPSMAlgo, undoublePSMAlgo_exclusive_bool, collapseRT_bool,
+	collapseCharge_bool, collapsePTM_bool,	isotopicCorrection_bool, isotopicCorrectionsMatrix, accuracy, maxIterations,
+	DEFoldThreshold, path_out, filename_out, delim_out
 	"""
 	params = getInput()
 	# get the dataframe
@@ -115,7 +117,8 @@ def main():
 	if not testing:
 		""" Data preparation """
 		removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
-		df = selectEssentials(df, essentialCols=essentialCols)
+		setIntensityColumns(params['intensityColumns']) # define the intensityColumns for use in dataprep.py
+		df = selectEssentialColumns(df, essentialColumns=params['essentialColumns'])
 		if params['removeBadConfidence_bool']:
 			df, removedData['removeBadConfidence'] = removeBadConfidence(df, params['removeBadConfidence'])
 		if params['removeIsolationInterference_bool']:
