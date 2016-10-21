@@ -11,6 +11,7 @@ and replaces the duplicates with one representative detection and a combination/
 
 import numpy as np
 from dataprep import intensityColumns, setIntensities, getIntensities
+from warnings import warn
 
 columnsToSave = None
 
@@ -21,6 +22,7 @@ def setCollapseColumnsToSave(columnsToSave):
 	:param columnsToSave: list   names of the columns that ought to be saved when removing data in a collapse.
 	"""
 	globals()['columnsToSave'] = columnsToSave
+
 
 def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo, undoublePSMAlgo_bool): #
 	"""
@@ -154,11 +156,19 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			return duplicateLists
 
 	def combineDetections(duplicateLists, centerMeasure):
-		# TODO flag PTM differences.
-		if np.any(np.var(allMS2Intensities,
-		                 0) > maxRelativeReporterVariance):  # TODO this can only be consistent if executed on RELATIVE intensities.
-			warnings.warn(
-				"maxRelativeReporterVariance too high for peptide with index " + firstOccurrence + ".")  # TODO this shouldnt just warn, you should also decide what to do.
+		for duplicatesList in duplicateLists:
+			# calculate the total MS2 intensities for each duplicate
+			allMS2Intensities = np.asarray(df.loc[duplicatesList][intensityColumns])
+
+		flagMaxReporterVariance = False  # TODO flag when maxReporterVariance is exceeded
+		if flagMaxReporterVariance: # TODO flag when maxReporterVariance is exceeded
+			# this can only be consistent if executed on RELATIVE intensities.
+			Ri = 1 / allMS2Intensities.shape[1] * np.asarray(1 / np.nanmean(allMS2Intensities, 1)).reshape(allMS2Intensities.shape[0], )
+			relativeIntensities = (allMS2Intensities.T * Ri).T
+			if np.any(np.var(relativeIntensities,axis=0) > maxRelativeReporterVariance):
+				# TODO this shouldnt just warn, you should also decide what to do.
+				warn("maxRelativeReporterVariance too high for duplicates with indices: " + str(duplicatesList) + ".")
+
 		if centerMeasure == 'mean':
 			pass
 		if centerMeasure == 'geometricMedian':
@@ -241,6 +251,10 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 
 	# get a nested list of duplicates according to toCollapse. [[duplicates1], [duplicates2], ...]
 	duplicateLists = getDuplicates()
+	if method == 'RT':
+		pass # TODO flag isolated RT peaks
+	elif method == 'PTM':
+		pass # TODO flag PTM differences.
 	# get the new intensities per first occurrence index (df index)
 	bestIndices = getBestIndices(duplicateLists) # {bestIndex : [duplicates]}
 	# add the new representative detections to the dataFrame
