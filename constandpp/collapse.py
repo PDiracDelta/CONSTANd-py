@@ -243,8 +243,8 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			representative = getRepresentative(duplicatesDf, duplicatesDict, masterPSMAlgo)
 		# TODO the next section is obsolete if you use combineDetections
 		for firstOccurrence, duplicates in duplicatesDict:  # TODO flag PTM differences.
-			totalMS1Intensity = sum(duplicatesDf.loc[[firstOccurrence] + duplicates]['Intensity'])
-			allWeights = duplicatesDf.loc[[firstOccurrence] + duplicates][
+			totalMS1Intensity = sum(duplicatesDf.loc[[firstOccurrence] + duplicates,'Intensity'])
+			allWeights = duplicatesDf.loc[[firstOccurrence] + duplicates,
 				             'Intensity'] / totalMS1Intensity  # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
 			allMS2Intensities = getIntensities(duplicatesDf.loc[[firstOccurrence] + duplicates])  # np.array
 			weightedMS2Intensities[firstOccurrence] = np.sum((allMS2Intensities.T * allWeights).T,
@@ -272,9 +272,9 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 	representativesDf = getRepresentativesDf(bestIndices)
 	df = df.append(representativesDf)
 	toDelete = [item for sublist in duplicateLists for item in sublist] # unpack list of lists
-	# save as {representativeIndex : df[for each duplicate][values, to, be, saved]}
-	removedData = dict((representative.name, df.loc[toDelete][columnsToSave]) # representative.name = representative.index
-	                   for representative in representatives)
+	# save as {representativeIndex : df[for each duplicate,[values, to, be, saved]]}
+	duplicatesDfList = [df.loc[duplicatesList,columnsToSave] for duplicatesList in duplicateLists]
+	removedData = dict(zip(representativesDf.index, duplicatesDfList))
 	df.drop(toDelete, inplace=True)
 
 	return df, removedData

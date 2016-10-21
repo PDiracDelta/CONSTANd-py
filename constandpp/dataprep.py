@@ -81,7 +81,7 @@ def removeBadConfidence(df, minimum):
 	except KeyError:
 		raise KeyError("Illegal Confidence values (allowed: Low, Medium, High). Watch out for capitalization.")
 	toDelete = df[badConfidences].index  # indices of rows to delete
-	removedData = df.loc[toDelete][columnsToSave]
+	removedData = df.loc[toDelete,columnsToSave]
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 
@@ -97,7 +97,7 @@ def removeIsolationInterference(df, threshold):
 	"""
 	columnsToSave = ['First Scan', 'Annotated Sequence', 'Identifying Node', 'Master Protein Accessions', 'Isolation Interference [%]']
 	toDelete = df[df['Isolation Interference [%]'] > threshold].index # indices of rows to delete
-	removedData = df.loc[toDelete][columnsToSave]
+	removedData = df.loc[toDelete,columnsToSave]
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 
@@ -125,7 +125,7 @@ def undoublePSMAlgo(df, master, exclusive):
 		if not exclusive:
 			toDelete = toDelete.difference(scanDict['Mascot (A6)'])  # indices not discovered by Mascot either
 
-	removedData = ('master: '+master, df.loc[toDelete][columnsToSave])
+	removedData = ('master: '+master, df.loc[toDelete,columnsToSave])
 	dflen=df.shape[0] # TEST
 	df.drop(toDelete, inplace=True)
 	assert(dflen == df.shape[0]+removedData[1].shape[0]) # TEST
