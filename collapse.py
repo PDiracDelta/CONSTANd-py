@@ -156,36 +156,26 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			return duplicateLists
 
 	def combineDetections(duplicateLists, centerMeasure):
+		flagMaxRelativeReporterVariance = False
 		for duplicatesList in duplicateLists:
 			# calculate the total MS2 intensities for each duplicate
 			allMS2Intensities = np.asarray(df.loc[duplicatesList][intensityColumns])
 
-		flagMaxReporterVariance = False  # TODO flag when maxReporterVariance is exceeded
-		if flagMaxReporterVariance: # TODO flag when maxReporterVariance is exceeded
-			# this can only be consistent if executed on RELATIVE intensities.
-			Ri = 1 / allMS2Intensities.shape[1] * np.asarray(1 / np.nanmean(allMS2Intensities, 1)).reshape(allMS2Intensities.shape[0], )
-			relativeIntensities = (allMS2Intensities.T * Ri).T
-			if np.any(np.var(relativeIntensities,axis=0) > maxRelativeReporterVariance):
-				# TODO this shouldnt just warn, you should also decide what to do.
-				warn("maxRelativeReporterVariance too high for duplicates with indices: " + str(duplicatesList) + ".")
+			if flagMaxRelativeReporterVariance: # TODO flag when maxRelativeReporterVariance is exceeded
+				# this can only be consistent if executed on RELATIVE intensities.
+				Ri = 1 / allMS2Intensities.shape[1] * np.asarray(1 / np.nanmean(allMS2Intensities, 1)).reshape(allMS2Intensities.shape[0], )
+				relativeIntensities = (allMS2Intensities.T * Ri).T
+				if np.any(np.var(relativeIntensities,axis=0) > maxRelativeReporterVariance):
+					# TODO this shouldnt just warn, you should also decide what to do.
+					warn("maxRelativeReporterVariance too high for duplicates with indices: " + str(duplicatesList) + ".")
 
-		if centerMeasure == 'mean':
-			pass
-		if centerMeasure == 'geometricMedian':
-			pass
-		if centerMeasure == 'weighted':
-			pass
-		return newIntensities  # TODO
-
-	def getNewIntensities(duplicatesDf, duplicatesDict, masterPSMAlgo):
-		"""
-		Combines the true duplicates' intensities into one new entry per first occurrence, conform the duplicatesDict structure.
-		:param duplicatesDict:          dict            {firstOccurrenceIndex:[duplicateIndices]}
-		:param duplicatesDf:            pd.dataFrame    data of only the first occurrences and duplicates
-		:return newIntensitiesDict:     dict            {firstOccurrenceIndex:np.array(newIntensities)}
-		"""
-
-		return detection  # TODO
+			if centerMeasure == 'mean':
+				newIntensities = np.mean(allMS2Intensities, 0)
+			elif centerMeasure == 'geometricMedian': # TODO
+				pass
+			elif centerMeasure == 'weighted': # TODO
+				pass
+		return newIntensities
 
 	def getBestIndices(duplicateLists):
 		# get the detection with the best PSM match
