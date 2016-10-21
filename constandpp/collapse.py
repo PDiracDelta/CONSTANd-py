@@ -154,6 +154,11 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			return duplicateLists
 
 	def combineDetections(duplicateLists, centerMeasure):
+		# TODO flag PTM differences.
+		if np.any(np.var(allMS2Intensities,
+		                 0) > maxRelativeReporterVariance):  # TODO this can only be consistent if executed on RELATIVE intensities.
+			warnings.warn(
+				"maxRelativeReporterVariance too high for peptide with index " + firstOccurrence + ".")  # TODO this shouldnt just warn, you should also decide what to do.
 		if centerMeasure == 'mean':
 			pass
 		if centerMeasure == 'geometricMedian':
@@ -224,36 +229,6 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		# reindex representativesDf so it can be concatenated properly with new indices
 		representativesDf.index = list(range(df.index[-1], df.index[-1] + len(representativesDf.index)))
 		return representativesDf
-
-
-		import warnings
-		weightedMS2Intensities = {}  # dict with the new MS2 intensities for each firstOccurrence
-		if False:  # TODO flag isolated peaks
-			pass
-		if method == 'bestMatch':
-			newIntensities = getNewIntensities()
-			representative = getRepresentative(duplicatesDf, duplicatesDict, masterPSMAlgo)
-			pass  # TODO
-		elif method == 'mostIntense':
-			newIntensities = getNewIntensities()
-			representative = getRepresentative(duplicatesDf, duplicatesDict, masterPSMAlgo)
-			pass  # TODO
-		else:
-			newIntensities = combineDetections(duplicatesDf, centerMeasure=method)
-			representative = getRepresentative(duplicatesDf, duplicatesDict, masterPSMAlgo)
-		# TODO the next section is obsolete if you use combineDetections
-		for firstOccurrence, duplicates in duplicatesDict:  # TODO flag PTM differences.
-			totalMS1Intensity = sum(duplicatesDf.loc[[firstOccurrence] + duplicates,'Intensity'])
-			allWeights = duplicatesDf.loc[[firstOccurrence] + duplicates,
-				             'Intensity'] / totalMS1Intensity  # TODO this is very probably NOT correct: you are weighting absolute MS2 intensities by MS1 intensity
-			allMS2Intensities = getIntensities(duplicatesDf.loc[[firstOccurrence] + duplicates])  # np.array
-			weightedMS2Intensities[firstOccurrence] = np.sum((allMS2Intensities.T * allWeights).T,
-			                                                 0)  # TODO check if the dimension are correct
-			if np.any(np.var(allMS2Intensities,
-			                 0) > maxRelativeReporterVariance):  # TODO this can only be consistent if executed on RELATIVE intensities.
-				warnings.warn(
-					"maxRelativeReporterVariance too high for peptide with index " + firstOccurrence + ".")  # TODO this shouldnt just warn, you should also decide what to do.
-		return newIntensitiesDict
 
 		i = len(df.index)
 		for representative in representatives:
