@@ -46,7 +46,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		Takes the dataFrame df and returns a nested list of duplicates per category according to the toCollapse variable.
 		Based on iterative use of the pd.DataFrame.groupby('property').groups function which returns a dict
 		{ propertyValue : [duplicateIndices] }.
-		:return duplicateLists:     list            [[duplicates] per toCollapse value in the df]
+		:return duplicateLists:     list            [[group of duplicates] per toCollapse value in the df]
 		"""
 		# todo outdated documentation
 
@@ -69,7 +69,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			This function correctly groups by PSMAlgo when required and does not when it is prohibited.
 			:param byPropDict:          dict    { propertyValue : [duplicateIndices] }
 			:param remainingProperties: list    properties still to be grouped by
-			:return duplicateLists:     list    [[duplicates] per combination-of-properties values in the dataFrame]
+			:return duplicateLists:     list    [[group of duplicates] per combination-of-properties values in the dataFrame]
 			"""
 			# TODO: if the code inside this function doesnt work, use the one outside this function instead
 			if remainingProperties:
@@ -80,7 +80,6 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 						                           remainingProperties[1:])
 			else:
 				duplicateLists.extend(byPropDict.values)
-			return duplicateLists
 
 		youreFeelingLucky = True  # TODO: disable this if the code above doesnt work (TRIGGERS CODE IN FUNCTION ABOVE)
 		if youreFeelingLucky:
@@ -99,7 +98,6 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 				groupByIdenticalProperties(byFirstPropDict, properties + ['Modifications'])
 			elif toCollapse == 'PTM':
 				groupByIdenticalProperties(byFirstPropDict, properties + ['Charge'])
-			return duplicateLists
 
 		elif not youreFeelingLucky:
 			## SELECT IDENTICAL SEQUENCE ##
@@ -167,7 +165,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 								for PTM, byPTMIndices in byPTMByChargeBySequenceDict:
 									assert len(
 										byPTMIndices) < 2  # if same Sequence and same Charge, PTM cannot be the same because it would have been RT-collapsed.
-			return duplicateLists
+		return duplicateLists
 
 	def combineDetections(duplicateLists, centerMeasure):
 		"""
@@ -175,7 +173,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		dataFrame df --	for each sublist into one new row of intensities for the representative that is to be their
 		replacement. This function should also flag cases where the variance between the intensities (calculated per
 		reporter channel) exceeds a maxRelativeReporterVariance.
-		:param duplicateLists:  list        [[duplicates] per toCollapse value in the df]
+		:param duplicateLists:  list        [[group of duplicates] per toCollapse value in the df]
 		:param centerMeasure:   str         specifies the method of combination
 		:return newIntensities: np.ndarray  new intensities of the representative detection
 		"""
@@ -204,7 +202,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		"""
 		For each sublist in the nested list of duplicates duplicateLists, calculates the index of the duplicate with the
 		best PSM match according to dataFrame df. Does this intelligently by taking masterPSMAlgo into account.
-		:param duplicateLists:  list        [[duplicates] per toCollapse value in the df]
+		:param duplicateLists:  list        [[group of duplicates] per toCollapse value in the df]
 		:return bestIndices:    list        [indices of detections with the best PSM score per group of duplicates]
 		"""
 		bestIndices = []
@@ -228,7 +226,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		"""
 		For each sublist in the nested list of duplicates duplicateLists, calculates the total MS2 intensity according
 		to dataFrame df and returns the results as a list.
-		:param duplicateLists:      list        [[duplicates] per toCollapse value in the df]
+		:param duplicateLists:      list        [[group of duplicates] per toCollapse value in the df]
 		:return intenseIndices:     list        [indices of detections with the highest total MS2 intensity per group of duplicates]
 		"""
 		intenseIndices = []
@@ -242,6 +240,15 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		return intenseIndices
 
 	def getRepresentativesDf(bestIndices, duplicateLists):
+		"""
+		Uses a list of indices of the best PSM matches bestIndices amongst each group of duplicates in the nested list
+		duplicateLists, all indices with respect to dataFrame df. Based on this best PSM match, generates a
+		representative detection for each group of duplicates. This is done by copying all bestMatch properties, but by
+		calculating new intensities when necessary and also updating the Degeneracy parameter.
+		:param bestIndices:         list            indices of the best PSM matches inside a group of duplicates (see duplicatLists)
+		:param duplicateLists:      list            [[group of duplicates] per toCollapse value in the df]
+		:return representativesDf:  pd.dataFrame    all representatives data that will replace the duplicate entries in the dataFrame df
+		"""
 		representativesDf = df.loc[bestIndices]
 		# sum the degeneracies of all duplicates involved in each representative
 		representativesDf['Degeneracy'] = [np.sum(np.asarray(representativesDf[duplicatesList, 'Degeneracy']))
