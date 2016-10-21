@@ -178,9 +178,6 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		return newIntensities
 
 	def getBestIndices(duplicateLists):
-		# get the detection with the best PSM match
-		# values of BEST PSM detection in all duplicates (master/slave-wise best)
-		# dont forget to increase Degeneracy # todo
 		bestIndices = []
 		if masterPSMAlgo == 'mascot':
 			for duplicatesList in duplicateLists:
@@ -209,8 +206,11 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			intenseIndices.append(intenseIndex)
 		return intenseIndices
 
-	def getRepresentativesDf(bestIndices):
+	def getRepresentativesDf(bestIndices, duplicateLists):
 		representativesDf = df.loc[bestIndices]
+		# sum the degeneracies of all duplicates involved in each representative
+		representativesDf['Degeneracy'] = [np.sum(np.asarray(representativesDf[duplicatesList, 'Degeneracy']))
+		                                   for duplicatesList in duplicateLists]
 		if method == 'bestMatch':
 			pass
 		elif method == 'mostIntense':
@@ -248,7 +248,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 	# get the new intensities per first occurrence index (df index)
 	bestIndices = getBestIndices(duplicateLists) # {bestIndex : [duplicates]}
 	# add the new representative detections to the dataFrame
-	representativesDf = getRepresentativesDf(bestIndices)
+	representativesDf = getRepresentativesDf(bestIndices, duplicateLists)
 	df = df.append(representativesDf)
 	toDelete = [item for sublist in duplicateLists for item in sublist] # unpack list of lists
 	# save as {representativeIndex : df[for each duplicate,[values, to, be, saved]]}
