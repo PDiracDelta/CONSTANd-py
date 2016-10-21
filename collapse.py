@@ -153,7 +153,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 										byPTMIndices) < 2  # if same Sequence and same Charge, PTM cannot be the same because it would have been RT-collapsed.
 			return duplicateLists
 
-	def combineDetections(duplicatesDf, centerMeasure):
+	def combineDetections(duplicateLists, centerMeasure):
 		if centerMeasure == 'mean':
 			pass
 		if centerMeasure == 'geometricMedian':
@@ -172,48 +172,58 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 
 		return detection  # TODO
 
-	def getBestIndicesDict(duplicateLists):
+	def getBestIndices(duplicateLists):
 		# get the detection with the best PSM match
 		# values of BEST PSM detection in all duplicates (master/slave-wise best)
 		# dont forget to increase Degeneracy # todo
-		bestIndicesDict = {}
+		bestIndices = []
 		if masterPSMAlgo == 'mascot':
 			for duplicatesList in duplicateLists:
 				bestIndex = df['Ions Score'].loc[duplicatesList].idxmax(axis=0,skipna=True)
 				if np.isnan(bestIndex): # no Mascot scores found --> take best Sequest
 					bestIndex = df['XCorr'].loc[duplicatesList].idxmax(axis=0, skipna=True)
 					assert not np.isnan(bestIndex)
-					bestIndicesDict[bestIndex] = duplicatesList
+					bestIndices.append(bestIndex)
 		elif masterPSMAlgo == 'sequest':
 			for duplicatesList in duplicateLists:
 				bestIndex = df['XCorr'].loc[duplicatesList].idxmax(axis=0,skipna=True)
 				if np.isnan(bestIndex): # no Sequest scores found --> take best Mascot
 					bestIndex = df['Ions Score'].loc[duplicatesList].idxmax(axis=0, skipna=True)
 					assert not np.isnan(bestIndex)
-					bestIndicesDict[bestIndex] = duplicatesList
-		return bestIndicesDict
+					bestIndices.append(bestIndex)
+		return bestIndices
 
-	def getIntenseIndicesDict(duplicateLists):
-		intenseIndicesDict = {}
+	def getIntenseIndices(duplicateLists):
+		intenseIndices = []
 		for duplicatesList in duplicateLists:
 			# calculate the total MS2 intensities for each duplicate
 			totalIntensities = np.sum(np.asarray(df.loc[duplicatesList][intensityColumns]),axis=1)
 			# get the most intense duplicate
 			intenseIndex = duplicatesList[np.argmax(totalIntensities)]
 			assert not np.isnan(intenseIndex)
-			intenseIndicesDict[intenseIndex] = duplicatesList
-		return intenseIndicesDict
+			intenseIndices.append(intenseIndex)
+		return intenseIndices
 
-	def addRepresentatives(bestIndicesDict):
-		representativesDf = df.loc[bestIndicesDict.keys()]
-		# reindex representativesDf so it can be concatenated properly
-
+	def getRepresentativesDf(bestIndices):
+		representativesDf = df.loc[bestIndices]
 		if method == 'bestMatch':
 			pass
 		elif method == 'mostIntense':
-			intenseIndicesDict = getIntenseIndicesDict(duplicateLists)
-		representativesDf.index = list(range(len(df.index), len(df.index) + len(representativesDf.index)))
-		df = df.append(representativesDf)
+			intenseIndices = getIntenseIndices(duplicateLists)
+			# generate { bestIndex : [mostIntense intensities] }
+			intensitiesDict = dict(zip(list(bestIndices), getIntensities(df.loc[intenseIndices])))
+			# set the representative intensities to be the most intense intensities
+			representativesDf = setIntensities(representativesDf, intensitiesDict)
+		else: # method == 'centerMeasure'
+			newIntensities = combineDetections(duplicateLists, centerMeasure=method)
+			# generate { intenseIndex : [intensities] }
+			intensitiesDict = dict(zip(list(bestIndices), newIntensities))
+			# set the representative intensities to be the most intense intensities
+			representativesDf = setIntensities(representativesDf, intensitiesDict)
+
+		# reindex representativesDf so it can be concatenated properly with new indices
+		representativesDf.index = list(range(df.index[-1], df.index[-1] + len(representativesDf.index)))
+		return representativesDf
 
 
 		import warnings
@@ -257,9 +267,10 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 	# get a nested list of duplicates according to toCollapse. [[duplicates1], [duplicates2], ...]
 	duplicateLists = getDuplicates()
 	# get the new intensities per first occurrence index (df index)
-	bestIndicesDict = getBestIndicesDict(duplicateLists) # {bestIndex : [duplicates]}
+	bestIndices = getBestIndices(duplicateLists) # {bestIndex : [duplicates]}
 	# add the new representative detections to the dataFrame
-	addRepresentatives(bestIndicesDict)
+	representativesDf = getRepresentativesDf(bestIndices)
+	df = df.append(representativesDf)
 	toDelete = [item for sublist in duplicateLists for item in sublist] # unpack list of lists
 	# save as {representativeIndex : df[for each duplicate][values, to, be, saved]}
 	removedData = dict((representative.name, df.loc[toDelete][columnsToSave]) # representative.name = representative.index
