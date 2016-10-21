@@ -140,19 +140,19 @@ def main():
 			df, removedData['RT'] = collapse('RT', df, method=params['collapse_method'],
 			                                   maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
 			                                 masterPSMAlgo=params['masterPSMAlgo'],
-			                                 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool']) # TODO
+			                                 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
 		if params['collapseCharge_bool']:
 			# collapse peptide list redundancy due to different charges (optional)
 			df, removedData['charge'] = collapse('Charge', df, method=params['collapse_method'],
 			                                   maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
 			                                        masterPSMAlgo=params['masterPSMAlgo'],
-			                                     undoublePSMAlgo_bool=params['undoublePSMAlgo_bool']) # TODO
+			                                     undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
 		if params['collapsePTM_bool']:
 			# collapse peptide list redundancy due to different charges (optional)
 			df, removedData['modifications'] = collapse('PTM', df, method=params['collapse_method'],
 			                                   maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
 			                                            masterPSMAlgo=params['masterPSMAlgo'],
-			                                            undoublePSMAlgo_bool=params['undoublePSMAlgo_bool']) # TODO
+			                                            undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
 
 		# SANITY CHECK: there should be no more duplicates if all collapses have been applied.
 		if params['undoublePSMAlgo_bool'] and params['collapseRT_bool'] and params['collapseCharge_bool']:
