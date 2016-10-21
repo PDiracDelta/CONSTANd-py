@@ -164,5 +164,5 @@ def setIntensities(df, intensitiesDict):
 	:return df:             pd.dataFrame    output dataFrame with updated intensities
 	"""
 	for index in intensitiesDict.keys():
-		df.loc[index][intensityColumns] = intensitiesDict[index]
+		df.loc[index,intensityColumns] = intensitiesDict[index]
 	return df
