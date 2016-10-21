@@ -225,6 +225,12 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		return bestIndices
 
 	def getIntenseIndices(duplicateLists):
+		"""
+		For each sublist in the nested list of duplicates duplicateLists, calculates the total MS2 intensity according
+		to dataFrame df and returns the results as a list.
+		:param duplicateLists:      list        [[duplicates] per toCollapse value in the df]
+		:return intenseIndices:     list        [indices of detections with the highest total MS2 intensity per group of duplicates]
+		"""
 		intenseIndices = []
 		for duplicatesList in duplicateLists:
 			# calculate the total MS2 intensities for each duplicate
