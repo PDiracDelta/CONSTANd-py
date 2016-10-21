@@ -23,7 +23,7 @@ def setCollapseColumnsToSave(columnsToSave):
 	globals()['columnsToSave'] = columnsToSave
 
 
-def getDuplicates(df, indices, checkTrueDuplicates):
+def getDuplicates(toCollapse, df, indices, checkTrueDuplicates, undoublePSMAlgo_bool):
 	"""
 	Takes a list of indices of candidate-duplicates (all df entries with identical annotated sequence) and returns
 	a dict of first occurrences and their true duplicates due to charge difference, as well as the corresponding
@@ -36,25 +36,101 @@ def getDuplicates(df, indices, checkTrueDuplicates):
 	"""
 	import pandas as pd
 
-	candidatesDf = df.loc[indices]  # create new dataframe with only the possible duplicates to reduce overhead.
-	candidatesDf['index'] = pd.Series(indices)  # add the original indices as a column 'index'
-	candidatesDf.set_index('index')  # set the index to the original indices
-	duplicatesDict = {}  # keep a dict of which indices are duplicates of which
-	stillMatchable = indices  # keep a dict of indices that can still be checked for having duplicates
-	for i in indices:
-		if i in stillMatchable:  # if i has already been matched as a duplicate
-			stillMatchable.remove(i)
-			duplicatesDict[i] = []  # (see above) keep a dict of which indices are duplicates of which
-			stillMatchableTemp = stillMatchable  # cannot modify the variable while its being iterated over -> keep temp
-			for j in stillMatchable:
-				if checkTrueDuplicates(candidatesDf.loc[i], candidatesDf.loc[j]):
-					duplicatesDict[i].append(j)  # mark index of rowj as a duplicate of index of rowi
-					stillMatchableTemp.remove(j)
-			stillMatchable = stillMatchableTemp  # now that iteration is done, modify.
-	duplicatesDict = dict((x, y) for x, y in duplicatesDict.items() if y)  # remove empty lists of duplicates
-	duplicatesDf = candidatesDf.loc[
-		list(duplicatesDict.keys()) + list(duplicatesDict.values())]  # df of only the duplicates
-	return duplicatesDict, duplicatesDf
+	duplicateLists = [] # [list of [list of duplicate indices] for each duplicate]
+
+	def groupByIdenticalProperties(byPropDict, remainingProperties):
+		# todo: if the code inside this function doesnt work, use the one outside this function instead
+		if remainingProperties:
+			for prop, byPropIndices in byPropDict:
+				if len(byPropIndices)>1: # only if there are duplicates
+					## SELECT IDENTICAL <NEXTPROPERTY> ##
+					groupByIdenticalProperties(df[byPropIndices].groupby(remainingProperties[0]), remainingProperties[1:], undoublePSMAlgo_bool)
+		else:
+			duplicateLists.extend(byPropDict.values)
+		return duplicateLists
+
+	youreFeelingLucky = True # todo: disable this if the code above doesnt work (TRIGGERS CODE IN FUNCTION ABOVE)
+	if youreFeelingLucky:
+		properties=[]
+		if not undoublePSMAlgo_bool:  # only if you didn't undoublePSMAlgo
+			## SELECT IDENTICAL PSMALGO (i.e. different First Scan) ##
+			byPSMAlgoDict = df.groupby('Identifying Node').groups
+			properties.append('Annotated Sequence')
+		else:
+			## SELECT IDENTICAL SEQUENCE ##
+			bySequenceDict = df.groupby('Annotated Sequence').groups
+		if toCollapse == 'RT':
+			groupByIdenticalProperties(bySequenceDict, properties+['Charge', 'Modifications'])
+			return duplicateLists
+		elif toCollapse == 'Charge':
+			groupByIdenticalProperties(bySequenceDict, properties+['Modifications'])
+		elif toCollapse == 'PTM':
+			groupByIdenticalProperties(bySequenceDict, properties+['Charge'])
+		return duplicateLists
+
+	elif not youreFeelingLucky:
+		## SELECT IDENTICAL SEQUENCE ##
+		bySequenceDict = df.groupby('Annotated Sequence').groups
+		if toCollapse == 'RT':
+			for sequence, bySequenceIndices in bySequenceDict:
+				if len(bySequenceIndices)>1: # only if there are duplicates
+					## SELECT IDENTICAL CHARGE ##
+					byChargeBySequenceDict = df[bySequenceIndices].groupby('Charge').groups
+					for charge, byChargeIndices in byChargeBySequenceDict:
+						if len(byChargeIndices) > 1:  # only if there are duplicates
+							## SELECT IDENTICAL PTM ##
+							byPTMByChargeBySequenceDict = df[byChargeIndices].groupby('Modifications').groups
+							if not undoublePSMAlgo_bool: # only if you didn't undoublePSMAlgo
+								for PTM, byPTMIndices in byPTMByChargeBySequenceDict:
+									if len(byPTMIndices) > 1:  # only if there are duplicates
+										## SELECT IDENTICAL PSMALGO (i.e. different First Scan) ##
+										byPSMAlgoByPTMByChargeBySequenceDict = df[byPTMIndices].groupby('Identifying Node').groups
+										duplicateLists.extend(byPSMAlgoByPTMByChargeBySequenceDict.values)
+							else:
+								duplicateLists.extend(byPTMByChargeBySequenceDict.values)
+
+		elif toCollapse == 'Charge':
+			for sequence, bySequenceIndices in bySequenceDict:
+				if len(bySequenceIndices)>1: # only if there are duplicates
+					## SELECT IDENTICAL PTM ##
+					byPTMBySequenceDict = df[bySequenceIndices].groupby('Modifications').groups
+					if not undoublePSMAlgo_bool:  # only if you didn't undoublePSMAlgo
+						for PTM, byPTMIndices in byPTMBySequenceDict:
+							if len(byPTMIndices) > 1:  # only if there are duplicates
+								## SELECT IDENTICAL PSMALGO (i.e. different First Scan) ##
+								byPSMAlgoByPTMBySequenceDict = df[byPTMIndices].groupby('Identifying Node').groups
+								duplicateLists.extend(byPSMAlgoByPTMBySequenceDict.values)
+					else: # you did undoublePSMAlgo? Great, you're done.
+						duplicateLists.extend(byPTMBySequenceDict.values)
+					## SANITY CHECK ##
+					for PTM, byPTMIndices in byPTMBySequenceDict: # TEST
+						if len(byPTMIndices) > 1:  # only if there are duplicates
+							## SELECT IDENTICAL CHARGE ##
+							byChargeByPTMBySequenceDict = df[byPTMIndices].groupby('Charge').groups
+							for charge, byChargeIndices in byChargeByPTMBySequenceDict:
+								assert len(byChargeIndices) < 2 # if same Sequence and same PTM, Charge cannot be the same because it would have been RT-collapsed.
+
+		elif toCollapse == 'PTM':
+			for sequence, bySequenceIndices in bySequenceDict:
+				if len(bySequenceIndices)>1: # only if there are duplicates
+					## SELECT IDENTICAL CHARGE ##
+					byChargeBySequenceDict = df[bySequenceIndices].groupby('Charge').groups
+					if not undoublePSMAlgo_bool:  # only if you didn't undoublePSMAlgo
+						for charge, byChargeIndices in byChargeBySequenceDict:
+							if len(byChargeIndices) > 1:  # only if there are duplicates
+								## SELECT IDENTICAL PSMALGO ##
+								byPSMAlgoByChargeBySequenceDict = df[byChargeIndices].groupby('Identifying Node').groups
+								duplicateLists.extend(byPSMAlgoByChargeBySequenceDict.values)
+					else: # you did undoublePSMAlgo? Great, you're done.
+						duplicateLists.extend(byChargeBySequenceDict.values)
+					## SANITY CHECK ##
+					for charge, byChargeIndices in byChargeBySequenceDict: # TEST
+						if len(byChargeIndices) > 1:  # only if there are duplicates
+							## SELECT IDENTICAL PTM ##
+							byPTMByChargeBySequenceDict = df[byChargeIndices].groupby('Modifications').groups
+							for PTM, byPTMIndices in byPTMByChargeBySequenceDict:
+								assert len(byPTMIndices) < 2 # if same Sequence and same Charge, PTM cannot be the same because it would have been RT-collapsed.
+		return duplicateLists
 
 
 def combineDetections(duplicatesDf, centerMeasure):
@@ -75,7 +151,7 @@ def getRepresentative(duplicatesDf, duplicatesDict, masterPSMAlgo):
 	return detection # TODO
 
 
-def getNewIntensities(duplicatesDf, duplicatesDict, method, maxRelativeReporterVariance, masterPSMAlgo):
+def getNewIntensities(df, duplicateLists, method, maxRelativeReporterVariance, masterPSMAlgo):
 	"""
 	Combines the true duplicates' intensities into one new entry per first occurrence, conform the duplicatesDict structure.
 	:param duplicatesDict:          dict            {firstOccurrenceIndex:[duplicateIndices]}
@@ -84,6 +160,8 @@ def getNewIntensities(duplicatesDf, duplicatesDict, method, maxRelativeReporterV
 	"""
 	import warnings
 	weightedMS2Intensities = {}  # dict with the new MS2 intensities for each firstOccurrence
+	if False:  # TODO flag isolated peaks
+		pass
 	if method == 'bestMatch':
 		newIntensities = None
 		representative = getRepresentative(duplicatesDf, duplicatesDict, masterPSMAlgo)
@@ -110,7 +188,7 @@ def getNewIntensities(duplicatesDf, duplicatesDict, method, maxRelativeReporterV
 	return newIntensitiesDict
 
 
-def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo): #
+def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo, undoublePSMAlgo_bool): #
 	"""
 	Generic collapse function. Looks for duplicate 'Annotated Sequence' values in the dataFrame and verifies
 	true duplication using checkTrueDuplicates function. Modifies df according to true duplicates and newly acquired
@@ -187,11 +265,9 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo)
 	for sequence, indices in allSequences.items():
 		if len(indices) > 1:  # only treat duplicated sequences
 			# dict with duplicates per first occurrence, dataFrame with df indices but with only the duplicates
-			duplicatesDict, duplicatesDf = getDuplicates(df, indices, checkTrueDuplicates)
-			if False:  # TODO flag isolated peaks
-				pass
+			duplicateLists = getDuplicates(toCollapse, df, indices, checkTrueDuplicates, undoublePSMAlgo_bool)
 			# get the new intensities per first occurrence index (df index)
-			intensitiesDict = getNewIntensities(duplicatesDf, duplicatesDict, method, maxRelativeReporterVariance, masterPSMAlgo)
+			intensitiesDict = getNewIntensities(df, duplicateLists, method, maxRelativeReporterVariance, masterPSMAlgo)
 			allDuplicatesHierarchy.update(duplicatesDict)
 	setIntensities(df, intensitiesDict)
 	toDelete = list(allDuplicatesHierarchy.values())
