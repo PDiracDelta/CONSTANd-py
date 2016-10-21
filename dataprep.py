@@ -113,17 +113,17 @@ def undoublePSMAlgo(df, master, exclusive):
 	:return df:             pd.dataFrame    collapsed data
 	:return removedData:    pd.dataFrame    basic info about the removed entries
 	"""
-	scanDict = df.groupby('First Scan').groups # {First Scan : [list of indices]}
+	byFirstScanDict = df.groupby('First Scan').groups # {First Scan : [list of indices]}
 	if master == 'mascot':
 		columnsToSave = ['First Scan', 'Annotated Sequence', 'Master Protein Accessions', 'XCorr']
-		toDelete = df.index.values.difference(scanDict['Mascot (A6)']) # all indices not discovered by Mascot
+		toDelete = df.index.values.difference(byFirstScanDict['Mascot (A6)']) # all indices not discovered by Mascot
 		if not exclusive:
-			toDelete = toDelete.difference(scanDict['Sequest HT (A2)']) # indices not discovered by Sequest either
+			toDelete = toDelete.difference(byFirstScanDict['Sequest HT (A2)']) # indices not discovered by Sequest either
 	elif master == 'sequest':
 		columnsToSave = ['First Scan', 'Annotated Sequence', 'Master Protein Accessions', 'Ions Score']
-		toDelete = df.index.values.difference(scanDict['Sequest HT (A2)''Mascot (A6)'])  # all indices not discovered by Sequest
+		toDelete = df.index.values.difference(byFirstScanDict['Sequest HT (A2)''Mascot (A6)'])  # all indices not discovered by Sequest
 		if not exclusive:
-			toDelete = toDelete.difference(scanDict['Mascot (A6)'])  # indices not discovered by Mascot either
+			toDelete = toDelete.difference(byFirstScanDict['Mascot (A6)'])  # indices not discovered by Mascot either
 
 	removedData = ('master: '+master, df.loc[toDelete,columnsToSave])
 	dflen=df.shape[0] # TEST
