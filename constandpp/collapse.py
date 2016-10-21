@@ -43,21 +43,35 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 
 	def getDuplicates():
 		"""
-		Takes a list of indices of candidate-duplicates (all df entries with identical annotated sequence) and returns
-		a dict of first occurrences and their true duplicates due to charge difference, as well as the corresponding
-		data extracted from the original dataFrame df. First occurrences without duplicates do not appear in the dict.
-		:param df:                  pd.dataFrame    data which is to be checked for duplicates
-		:param indices:             list            indices of the locations of candidate-duplicates in the original dataFrame df.
-		:param checkTrueDuplicates: function        function which returns True if two entries given as arguments are true duplicates.
-		:return duplicatesDict:     dict            {firstOccurrenceIndex:[duplicateIndices]}
-		:return duplicatesDf:       pd.dataFrame    data of only the entries involved in true duplication due to charge
+		Takes the dataFrame df and returns a nested list of duplicates per category according to the toCollapse variable.
+		Based on iterative use of the pd.DataFrame.groupby('property').groups function which returns a dict
+		{ propertyValue : [duplicateIndices] }.
+		:return duplicateLists:     list            [[duplicates] per toCollapse value in the df]
 		"""
 		# todo outdated documentation
 
 		duplicateLists = []  # [list of [list of duplicate indices] for each duplicate]
 
 		def groupByIdenticalProperties(byPropDict, remainingProperties):
-			# todo: if the code inside this function doesnt work, use the one outside this function instead
+			"""
+			Takes a dictionary which is the result of a groupby(property) call on a dataFrame. Also takes a list of
+			properties, and uses the first one to do another groupby() on each dataframe consisting of one set of
+			duplicates in the input dictionary values. Then, iteratively calls itself again using that dictionary and
+			the other remaining properties. The result is a nested list of duplicates which all have identical
+			combination-of-properties values, but non-identical toCollapse values.
+			For instance when toCollapse=='RT':
+			[
+				[2, 4, 8], # indices of detections with (Charge1, PTM2) and unique(RT2, RT4, RT8)==True
+				[1, 5, 6], # indices of detections with (Charge1, PTM1) and unique(RT1, RT5, RT6)==True
+				[3],       # indices of detections with (Charge3, PTM3) and unique(RT3)==True
+				[7, 9],    # indices of detections with (Charge3, PTM2) and unique(RT7, RT9)==True
+			]
+			This function correctly groups by PSMAlgo when required and does not when it is prohibited.
+			:param byPropDict:          dict    { propertyValue : [duplicateIndices] }
+			:param remainingProperties: list    properties still to be grouped by
+			:return duplicateLists:     list    [[duplicates] per combination-of-properties values in the dataFrame]
+			"""
+			# TODO: if the code inside this function doesnt work, use the one outside this function instead
 			if remainingProperties:
 				for prop, byPropIndices in byPropDict:
 					if len(byPropIndices) > 1:  # only if there are duplicates
@@ -68,7 +82,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 				duplicateLists.extend(byPropDict.values)
 			return duplicateLists
 
-		youreFeelingLucky = True  # todo: disable this if the code above doesnt work (TRIGGERS CODE IN FUNCTION ABOVE)
+		youreFeelingLucky = True  # TODO: disable this if the code above doesnt work (TRIGGERS CODE IN FUNCTION ABOVE)
 		if youreFeelingLucky:
 			properties = []
 			if not undoublePSMAlgo_bool:  # only if you didn't undoublePSMAlgo
@@ -156,6 +170,15 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			return duplicateLists
 
 	def combineDetections(duplicateLists, centerMeasure):
+		"""
+		Takes a nested list of the indices of duplicates and combines the rows of the intensity matrix -- found in
+		dataFrame df --	for each sublist into one new row of intensities for the representative that is to be their
+		replacement. This function should also flag cases where the variance between the intensities (calculated per
+		reporter channel) exceeds a maxRelativeReporterVariance.
+		:param duplicateLists:  list        [[duplicates] per toCollapse value in the df]
+		:param centerMeasure:   str         specifies the method of combination
+		:return newIntensities: np.ndarray  new intensities of the representative detection
+		"""
 		flagMaxRelativeReporterVariance = False
 		for duplicatesList in duplicateLists:
 			# calculate the total MS2 intensities for each duplicate
@@ -178,6 +201,12 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		return newIntensities
 
 	def getBestIndices(duplicateLists):
+		"""
+		For each sublist in the nested list of duplicates duplicateLists, calculates the index of the duplicate with the
+		best PSM match according to dataFrame df. Does this intelligently by taking masterPSMAlgo into account.
+		:param duplicateLists:  list        [[duplicates] per toCollapse value in the df]
+		:return bestIndices:    list        [indices of detections with the best PSM score per group of duplicates]
+		"""
 		bestIndices = []
 		if masterPSMAlgo == 'mascot':
 			for duplicatesList in duplicateLists:
