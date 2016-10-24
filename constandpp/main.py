@@ -101,6 +101,7 @@ def devStuff(df, params): # TEST
 
 
 def main():
+	start = time()
 	testing=False # TEST
 	writeToDisk=True # TEST
 	"""
@@ -123,11 +124,14 @@ def main():
 		removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
 		setIntensityColumns(params['intensityColumns']) # define the intensityColumns for use in dataprep.py
 		setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataprep.py
+		# remove detections where (essential) data is missing.
 		df, removedData['missing'] = removeMissing(df)
 		if params['removeBadConfidence_bool']:
 			df, removedData['removeBadConfidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'])
+		# remove all useless columns from the dataFrame
 		df = selectRequiredColumns(df, requiredColumns=params['requiredColumns'])
 		if params['removeIsolationInterference_bool']:
+			# remove all data with too high isolation interference
 			df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
 		if params['undoublePSMAlgo_bool']:
 			# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
@@ -179,7 +183,7 @@ def main():
 		if writeToDisk:
 			# save the removed data information
 			exportData(removedData, dataType='obj', path_out=params['path_out'],
-			           filename=params['filename_out'] + '_removedData', delim_out=params['delim_out'])
+			           filename=params['filename_out'] + '_removedData')
 			# save the normalized intensities obtained through CONSTANd
 			exportData(normalizedIntensities, dataType='txt', path_out=params['path_out'],
 			           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
@@ -192,6 +196,8 @@ def main():
 
 	elif testing:
 		devStuff(df, params)
+	stop = time()
+	print(stop - start)
 
 if __name__ == '__main__':
 	sys.exit(main())

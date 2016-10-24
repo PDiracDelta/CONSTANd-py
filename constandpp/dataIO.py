@@ -225,7 +225,7 @@ def importDataFrame(path_in, delim=None, header=0):
 	return df
 
 
-def exportData(data, dataType, path_out, filename, delim_out=','):
+def exportData(data, dataType, path_out, filename, delim_out=None):
 	"""
 	Save the results (normalized intensities) to disk.
 	:param data:        obj     data object to be exported to disk
