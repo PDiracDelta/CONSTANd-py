@@ -222,4 +222,4 @@ def main(testing, writeToDisk):
 
 
 if __name__ == '__main__':
-	sys.exit(main(testing=True, writeToDisk=False))
+	sys.exit(main(testing=False, writeToDisk=True))
