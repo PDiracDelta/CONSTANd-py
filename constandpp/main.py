@@ -97,18 +97,12 @@ def devStuff(df, params): # TEST
 	# isotopicCorrectionsTest(params)
 	# MS2IntensityDoesntMatter(df)
 
-
-	exportData(removedData, path_out=params['path_out'],
-	           filename=params['filename_out'] + '_removedData', delim_out=params['delim_out'])
-	# save the normalized intensities obtained through CONSTANd
-	exportData(normalizedIntensities, dataType='txt', path_out=params['path_out'],
-	           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
 	pass
 
 
 def main():
 	testing=False # TEST
-	writeToDisk=False # TEST
+	writeToDisk=True # TEST
 	"""
 	For now this is just stuff for debugging and testing. Later:
 	Contains and explicits the workflow of the program.
@@ -182,18 +176,17 @@ def main():
 		viz = dataVisualization(DEresults) # TODO
 
 		""" Save data to disk and generate report """
-		devStuff(df, params)
 		if writeToDisk:
 			# save the removed data information
-			exportData(removedData, path_out=params['path_out'],
+			exportData(removedData, dataType='obj', path_out=params['path_out'],
 			           filename=params['filename_out'] + '_removedData', delim_out=params['delim_out'])
 			# save the normalized intensities obtained through CONSTANd
 			exportData(normalizedIntensities, dataType='txt', path_out=params['path_out'],
 			           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
 			# save the DE analysis results
-			exportData(DEresults, path_out=params['path_out'], filename=params['filename_out'] + '_DEresults')  # TODO
+			exportData(DEresults, dataType='obj', path_out=params['path_out'], filename=params['filename_out'] + '_DEresults')  # TODO
 			# save the visualizations
-			exportData(viz, path_out=params['path_out'], filename=params['filename_out']+'_dataViz') # TODO
+			exportData(viz, dataType='viz', path_out=params['path_out'], filename=params['filename_out']+'_dataViz') # TODO
 			# generate a report PDF (without the normalized intensities: behind paywall?
 			generateReport(DEresults, viz) # TODO
 

@@ -8,6 +8,7 @@ Handle all I/O of data files and parameters to and from both the workflow and th
 import pandas as pd
 import numpy as np
 import configparser
+import pickle
 from os import path
 from codecs import getdecoder as gd
 from warnings import warn
@@ -239,7 +240,9 @@ def exportData(data, dataType, path_out, filename, delim_out=','):
 	fullPath = path_out + '/' + filename + extension
 
 	if dataType == 'txt':
-		np.savetxt(fullPath, data, delimiter=delim_out) # TODO
+		np.savetxt(fullPath, data, delimiter=delim_out)
+	elif dataType == 'obj':
+		pickle.dump(data, open(fullPath, 'wb'))
 	elif dataType == 'df':
 		data.to_csv(fullPath, sep=delim_out, index=False)
 	elif dataType == 'viz': # TODO
