@@ -38,7 +38,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 	:param method:                      str             defines how the new detection is to be selected/constructed
 	:param maxRelativeReporterVariance: float           UNUSED value that restricts reporter variance
 	:return df:                         pd.dataFrame    without sequence duplicates according to to checkTrueDuplicates.
-	:return removedData:                dict            {firstOccurrenceIndex : [annotated_sequence, [other, values, to, be, saved] for each duplicate]}
+	:return removedData:                dict            {representativeIndex : [df[values, to, be, saved] for each duplicate]}
 	"""
 
 	def getDuplicates():
@@ -293,7 +293,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 	representativesDf = getRepresentativesDf(bestIndices, duplicateLists)
 	df = df.append(representativesDf)
 	toDelete = [item for sublist in duplicateLists for item in sublist] # unpack list of lists
-	# save as {representativeIndex : df[for each duplicate,[values, to, be, saved]]}
+	# save as {representativeIndex : [df[values, to, be, saved] for each duplicate]}
 	duplicatesDfList = [df.loc[duplicatesList,columnsToSave] for duplicatesList in duplicateLists]
 	removedData = dict(zip(representativesDf.index, duplicatesDfList))
 	df.drop(toDelete, inplace=True)
