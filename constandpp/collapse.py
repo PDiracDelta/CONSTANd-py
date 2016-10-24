@@ -73,13 +73,13 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			"""
 			# TODO: if the code inside this function doesnt work, use the one outside this function instead
 			if remainingProperties:
-				for prop, byPropIndices in byPropDict:
-					if len(byPropIndices) > 1:  # only if there are duplicates
+				for propValue, byPropIndices in byPropDict.items():
+					if len(byPropIndices) > 1: # only if there are duplicates
 						## SELECT IDENTICAL <NEXTPROPERTY> ##
-						groupByIdenticalProperties(df[byPropIndices].groupby(remainingProperties[0]),
-						                           remainingProperties[1:])
+						groupByIdenticalProperties(df.loc[byPropIndices].groupby(remainingProperties[0]).groups,
+						                           remainingProperties[1:]) # first pop the [0] property to both return and remove it!
 			else:
-				duplicateLists.extend(byPropDict.values)
+				duplicateLists.extend(byPropDict.values())
 
 		youreFeelingLucky = True  # TODO: disable this if the code above doesnt work (TRIGGERS CODE IN FUNCTION ABOVE)
 		if youreFeelingLucky:
