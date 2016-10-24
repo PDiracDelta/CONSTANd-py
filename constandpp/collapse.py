@@ -212,14 +212,14 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 				if np.isnan(bestIndex): # no Mascot scores found --> take best Sequest
 					bestIndex = df['XCorr'].loc[duplicatesList].idxmax(axis=0, skipna=True)
 					assert not np.isnan(bestIndex)
-					bestIndices.append(bestIndex)
+				bestIndices.append(bestIndex)
 		elif masterPSMAlgo == 'sequest':
 			for duplicatesList in duplicateLists:
 				bestIndex = df['XCorr'].loc[duplicatesList].idxmax(axis=0,skipna=True)
 				if np.isnan(bestIndex): # no Sequest scores found --> take best Mascot
 					bestIndex = df['Ions Score'].loc[duplicatesList].idxmax(axis=0, skipna=True)
 					assert not np.isnan(bestIndex)
-					bestIndices.append(bestIndex)
+				bestIndices.append(bestIndex)
 		return bestIndices
 
 	def getIntenseIndices(duplicateLists):
