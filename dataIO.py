@@ -229,6 +229,7 @@ def exportData(data, dataType, path_out, filename, delim_out=','):
 	"""
 	Save the results (normalized intensities) to disk.
 	:param data:        obj     data object to be exported to disk
+	:param dataType:    str     type of data; influences the way the data is to be stored
 	:param path_out:    string  path where data should be exported to
 	:param filename:    string  filename for the data
 	:param delim_out:       char    delimiter of the data
