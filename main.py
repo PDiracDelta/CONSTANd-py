@@ -92,18 +92,37 @@ def generateReport(DEresults, viz):
 	pass
 
 
+def testDataComplementarity(df):
+	scannrs_init = set(df.groupby('First Scan').groups.keys())
+	main(testing=False, writeToDisk=True)
+	# SANITY CHECK if df + removedData scan numbers = total scan numbers.
+	scannrs_final = set(df.groupby('First Scan').groups.keys())
+	removedDataLoaded = pickle.load(open('../data/MB_result_removedData', 'rb'))
+	for value in removedDataLoaded.values():
+		if isinstance(value, dict):
+			for valuedf in value.values():
+				scannrs_final = scannrs_final.union(set(valuedf['First Scan']))
+		elif isinstance(value, tuple):
+			scannrs_final = scannrs_final.union(set(value[1]['First Scan']))
+		elif isinstance(value, pd.DataFrame):
+			scannrs_final = scannrs_final.union(set(value['First Scan']))
+		else:
+			print(type(value))
+	print(scannrs_final == scannrs_init)
+
+
 def devStuff(df, params): # TEST
 	# performanceTest()
 	# isotopicCorrectionsTest(params)
 	# MS2IntensityDoesntMatter(df)
-
+	# testDataComplementarity(df)
 	pass
 
 
-def main():
+def main(testing, writeToDisk):
 	start = time()
-	testing=False # TEST
-	writeToDisk=True # TEST
+	# testing=True # TEST
+	# writeToDisk=False # TEST
 	"""
 	For now this is just stuff for debugging and testing. Later:
 	Contains and explicits the workflow of the program.
@@ -138,7 +157,7 @@ def main():
 			df, removedData['PSMAlgo'] = undoublePSMAlgo(df, master=params['masterPSMAlgo'],
 			                                             exclusive=params['undoublePSMAlgo_exclusive_bool'])
 			# SANITY CHECK: no detections with the same scan number may exist after undoublePSMAlgo()
-			assert np.prod((i < 2 for (s, i) in df.groupby('First Scan').groups))
+			assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
 
 		if params['collapseRT_bool']:
 			# collapse peptide list redundancy due to multiple detections at different RT
@@ -184,6 +203,8 @@ def main():
 			# save the removed data information
 			exportData(removedData, dataType='obj', path_out=params['path_out'],
 			           filename=params['filename_out'] + '_removedData')
+			# save the final form of the dataFrame WITHOUT normalized intensities.
+			exportData(df, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_dataFrame', delim_out=params['delim_out'])
 			# save the normalized intensities obtained through CONSTANd
 			exportData(normalizedIntensities, dataType='txt', path_out=params['path_out'],
 			           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
@@ -199,5 +220,6 @@ def main():
 	stop = time()
 	print(stop - start)
 
+
 if __name__ == '__main__':
-	sys.exit(main())
+	sys.exit(main(testing=True, writeToDisk=False))
