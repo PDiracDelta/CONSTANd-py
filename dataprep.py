@@ -105,7 +105,7 @@ def removeIsolationInterference(df, threshold):
 def undoublePSMAlgo(df, master, exclusive):
 	"""
 	Removes redundant data due to different PSM algorithms producing the same peptide match. The 'master' algorithm
-	values are taken over the 'slave' algorithm values, the latter whom are removed and have their basic information
+	values are preferred over the 'slave' algorithm values, the latter whom are removed and have their basic information
 	saved in removedData. If exclusive=true, this function only keeps master data (and saves slave(s) basic info).
 	:param df:              pd.dataFrame    unfiltered data
 	:param master:          string          master PSM algorithm (master/slave relation)
@@ -113,15 +113,15 @@ def undoublePSMAlgo(df, master, exclusive):
 	:return df:             pd.dataFrame    collapsed data
 	:return removedData:    pd.dataFrame    basic info about the removed entries
 	"""
-	byFirstScanDict = df.groupby('First Scan').groups # {First Scan : [list of indices]}
+	byFirstScanDict = df.groupby('Identifying Node').groups # {Identifying Node : [list of indices]}
 	if master == 'mascot':
 		columnsToSave = ['First Scan', 'Annotated Sequence', 'Master Protein Accessions', 'XCorr']
-		toDelete = df.index.values.difference(byFirstScanDict['Mascot (A6)']) # all indices not discovered by Mascot
+		toDelete = set(df.index.values).difference(set(byFirstScanDict['Mascot (A6)'])) # all indices not discovered by Mascot
 		if not exclusive:
 			toDelete = toDelete.difference(byFirstScanDict['Sequest HT (A2)']) # indices not discovered by Sequest either
 	elif master == 'sequest':
 		columnsToSave = ['First Scan', 'Annotated Sequence', 'Master Protein Accessions', 'Ions Score']
-		toDelete = df.index.values.difference(byFirstScanDict['Sequest HT (A2)''Mascot (A6)'])  # all indices not discovered by Sequest
+		toDelete = set(df.index.values).difference(set(byFirstScanDict['Sequest HT (A2)''Mascot (A6)']))  # all indices not discovered by Sequest
 		if not exclusive:
 			toDelete = toDelete.difference(byFirstScanDict['Mascot (A6)'])  # indices not discovered by Mascot either
 
