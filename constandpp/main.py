@@ -96,11 +96,18 @@ def devStuff(df, params): # TEST
 	# performanceTest()
 	# isotopicCorrectionsTest(params)
 	# MS2IntensityDoesntMatter(df)
+
+
+	exportData(removedData, path_out=params['path_out'],
+	           filename=params['filename_out'] + '_removedData', delim_out=params['delim_out'])
+	# save the normalized intensities obtained through CONSTANd
+	exportData(normalizedIntensities, dataType='txt', path_out=params['path_out'],
+	           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
 	pass
 
 
 def main():
-	testing=True # TEST
+	testing=False # TEST
 	writeToDisk=False # TEST
 	"""
 	For now this is just stuff for debugging and testing. Later:
@@ -108,7 +115,7 @@ def main():
 	"""
 	""" get all input parameters
 	params:
-	file_in, delim_in, header_in, intensityColumns, requiredColumns, columnsToSave, undoublePSMAlgo_bool,
+	file_in, delim_in, header_in, intensityColumns, requiredColumns, collapseColumnsToSave, undoublePSMAlgo_bool,
 	removeIsolationInterference_bool, collapse_method, collapse_maxRelativeReporterVariance,
 	removeIsolationInterference_master, masterPSMAlgo, undoublePSMAlgo_exclusive_bool, collapseRT_bool,
 	collapseCharge_bool, collapsePTM_bool, isotopicCorrection_bool, isotopicCorrectionsMatrix, accuracy, maxIterations,
@@ -175,6 +182,7 @@ def main():
 		viz = dataVisualization(DEresults) # TODO
 
 		""" Save data to disk and generate report """
+		devStuff(df, params)
 		if writeToDisk:
 			# save the removed data information
 			exportData(removedData, path_out=params['path_out'],
@@ -189,7 +197,7 @@ def main():
 			# generate a report PDF (without the normalized intensities: behind paywall?
 			generateReport(DEresults, viz) # TODO
 
-	if testing:
+	elif testing:
 		devStuff(df, params)
 
 if __name__ == '__main__':
