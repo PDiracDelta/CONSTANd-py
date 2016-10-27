@@ -107,7 +107,7 @@ def devStuff(df, params): # TEST
 	# performanceTest()
 	# isotopicCorrectionsTest(params)
 	# MS2IntensityDoesntMatter(df)
-	# testDataComplementarity(df)
+	testDataComplementarity(df)
 	pass
 
 
@@ -214,4 +214,4 @@ def main(testing, writeToDisk):
 
 
 if __name__ == '__main__':
-	sys.exit(main(testing=False, writeToDisk=True))
+	sys.exit(main(testing=True, writeToDisk=True))
