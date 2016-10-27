@@ -6,7 +6,7 @@ from main import main
 
 pr = cProfile.Profile()
 pr.enable()
-main()
+main(False, False)
 pr.disable()
 pr.dump_stats('main.stats')
 outfilename='mainstats.txt'
