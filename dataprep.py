@@ -126,9 +126,14 @@ def undoublePSMAlgo(df, master, exclusive):
 			toDelete = toDelete.difference(singlesNotByMascotIndices) # keep only indices not discovered by Sequest
 	elif master == 'sequest':
 		columnsToSave = ['First Scan', 'Annotated Sequence', 'Master Protein Accessions', 'Ions Score']
-		toDelete = set(df.index.values).difference(set(byIdentifyingNodeDict['Sequest HT (A2)']))  # all indices of detections not done by Sequest
-		if not exclusive:
-			toDelete = toDelete.difference(byIdentifyingNodeDict['Mascot (A6)'])  # indices not discovered by Mascot
+		sequestIndices = set(byIdentifyingNodeDict['Sequest HT (A2)'])
+		toDelete = set(df.index.values).difference(sequestIndices)  # all indices of detections not done by Sequest
+		if not exclusive:  # remove unique Mascot scans from the toDelete list
+			byFirstScanDict = df.groupby('First Scan').groups
+			singles = set(map(lambda e: e[0], filter(lambda e: len(e) == 1,
+			                                         byFirstScanDict.values())))  # indices of detections done by only 1 PSMAlgo
+			singlesNotBySequestIndices = singles.difference(sequestIndices)
+			toDelete = toDelete.difference(singlesNotBySequestIndices)  # keep only indices not discovered by Mascot
 
 	removedData = df.loc[toDelete,columnsToSave]
 	dflen=df.shape[0] # TEST
