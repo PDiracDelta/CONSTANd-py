@@ -181,7 +181,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		flagMaxRelativeReporterVariance = False
 		for duplicatesList in duplicateLists:
 			# calculate the total MS2 intensities for each duplicate
-			allMS2Intensities = np.asarray(df.loc[duplicatesList][intensityColumns])
+			allMS2Intensities = np.asarray(df.loc[duplicatesList, intensityColumns])
 
 			if flagMaxRelativeReporterVariance: # TODO flag when maxRelativeReporterVariance is exceeded
 				# this can only be consistent if executed on RELATIVE intensities.
@@ -233,7 +233,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		intenseIndices = []
 		for duplicatesList in duplicateLists:
 			# calculate the total MS2 intensities for each duplicate
-			totalIntensities = np.sum(np.asarray(df.loc[duplicatesList][intensityColumns]),axis=1)
+			totalIntensities = np.sum(np.asarray(df.loc[duplicatesList, intensityColumns]),axis=1)
 			# get the most intense duplicate
 			intenseIndex = duplicatesList[np.argmax(totalIntensities)]
 			assert not np.isnan(intenseIndex)
@@ -252,7 +252,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		"""
 		representativesDf = df.loc[bestIndices]
 		# sum the degeneracies of all duplicates involved in each representative
-		representativesDf['Degeneracy'] = [np.sum(np.asarray(df['Degeneracy'].loc[duplicatesList])) for duplicatesList in duplicateLists]
+		representativesDf['Degeneracy'] = [np.sum(np.asarray(df.loc[(duplicatesList, 'Degeneracy')])) for duplicatesList in duplicateLists]
 
 		if method == 'bestMatch':
 			pass
