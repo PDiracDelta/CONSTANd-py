@@ -215,5 +215,4 @@ def main(testing, writeToDisk):
 
 
 if __name__ == '__main__':
-	import profile
-	profile.run(sys.exit(main(testing=False, writeToDisk=True)))
+	sys.exit(main(testing=False, writeToDisk=True))
