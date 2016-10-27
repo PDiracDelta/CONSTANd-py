@@ -99,13 +99,7 @@ def testDataComplementarity(df):
 	scannrs_final = set(df.groupby('First Scan').groups.keys())
 	removedDataLoaded = pickle.load(open('../data/MB_result_removedData', 'rb'))
 	for value in removedDataLoaded.values():
-		if isinstance(value, dict):
-			for valuedf in value.values():
-				scannrs_final = scannrs_final.union(set(valuedf['First Scan']))
-		elif isinstance(value, pd.DataFrame):
-			scannrs_final = scannrs_final.union(set(value['First Scan']))
-		else:
-			print(type(value))
+		scannrs_final = scannrs_final.union(set(value['First Scan']))
 	print(scannrs_final == scannrs_init)
 
 

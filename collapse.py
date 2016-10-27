@@ -10,6 +10,7 @@ and replaces the duplicates with one representative detection and a combination/
 """
 
 import numpy as np
+import pandas as pd
 from dataprep import intensityColumns, setIntensities, getIntensities
 from warnings import warn
 
@@ -34,11 +35,11 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 	Returns removedData according to the columnsToSave list.
 	:param toCollapse:                  str             variable of which true duplicates are to be collapsed.
 	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
-	:param columnsToSave:                  list            list of variables to be saved for detections that ought to be removed
+	:param columnsToSave:               list            list of variables to be saved for detections that ought to be removed
 	:param method:                      str             defines how the new detection is to be selected/constructed
 	:param maxRelativeReporterVariance: float           UNUSED value that restricts reporter variance
 	:return df:                         pd.dataFrame    without sequence duplicates according to to checkTrueDuplicates.
-	:return removedData:                dict            {representativeIndex : [df[values, to, be, saved] for each duplicate]}
+	:return removedData:                pd.dataFrame    [PARENT INDEX, and, values, to, be, saved]
 	"""
 
 	def getDuplicates():
@@ -293,9 +294,11 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 	representativesDf = getRepresentativesDf(bestIndices, duplicateLists)
 	df = df.append(representativesDf)
 	toDelete = [item for sublist in duplicateLists for item in sublist] # unpack list of lists
-	# save as {representativeIndex : [df[values, to, be, saved] for each duplicate]}
-	duplicatesDfList = [df.loc[duplicatesList,columnsToSave] for duplicatesList in duplicateLists]
-	removedData = dict(zip(representativesDf.index, duplicatesDfList))
+	# [df[PARENT INDEX, and, values, to, be, saved] for each duplicate]
+	duplicatesDfList = [df.loc[duplicatesList,columnsToSave].insert(loc=0, column='Parent index', value=representativeIndex)
+	                    for (duplicatesList,representativeIndex) in zip(duplicateLists, representativesDf.index)]
+	# concatenate all duplicates dataframes
+	removedData = pd.concat(duplicatesDfList)
 	df.drop(toDelete, inplace=True)
 
 	return df, removedData
