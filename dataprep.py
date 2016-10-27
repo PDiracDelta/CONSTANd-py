@@ -60,7 +60,7 @@ def removeMissing(df):
 	toDelete = np.unique(toDelete)
 	removedData = df.loc[toDelete]
 	if toDelete.size > 0:
-		warn("Some detections have been removed before due to missing values: see removedData['missing'].")
+		warn("Some detections have been removed from the workflow due to missing values: see removedData['missing'].")
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 

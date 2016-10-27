@@ -139,7 +139,7 @@ def main(testing, writeToDisk):
 		# remove detections where (essential) data is missing.
 		df, removedData['missing'] = removeMissing(df)
 		if params['removeBadConfidence_bool']:
-			df, removedData['removeBadConfidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'])
+			df, removedData['badConfidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'])
 		# remove all useless columns from the dataFrame
 		df = selectRequiredColumns(df, requiredColumns=params['requiredColumns'])
 		if params['removeIsolationInterference_bool']:
