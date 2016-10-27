@@ -252,8 +252,12 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		"""
 		representativesDf = df.loc[bestIndices]
 		# sum the degeneracies of all duplicates involved in each representative
-		representativesDf['Degeneracy'] = [np.sum(np.asarray(df['Degeneracy'].loc[duplicatesList]))
+		try:
+			representativesDf['Degeneracy'] = [np.sum(np.asarray(df['Degeneracy'].loc[duplicatesList]))
 		                                   for duplicatesList in duplicateLists]
+		except Warning as w:
+			pass # SettingWithCopyWarning irrelevant because I really want to set the copy, not the original.
+
 		if method == 'bestMatch':
 			pass
 		elif method == 'mostIntense':
