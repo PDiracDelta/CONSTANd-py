@@ -303,9 +303,9 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 	# concatenate all duplicates dataframes
 	removedData = pd.concat(duplicatesDfList)
 	# add the representative index of each collection of collapsed duplicates
-	removedData.insert(loc=0, column='Representative index', value=-1)
-	for duplicatesList,representativeIndex in zip(duplicateLists, representativesDf.index):
-		removedData.loc[duplicatesList, 'Representative index'] = representativeIndex
+	removedData.insert(loc=0, column='Representative First Scan', value=-1)
+	for duplicatesList,rfs in zip(duplicateLists, representativesDf['First Scan']):
+		removedData.loc[duplicatesList, 'Representative First Scan'] = rfs
 	# actually remove the toDelete detections
 	df.drop(toDelete, inplace=True)
 
