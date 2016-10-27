@@ -245,7 +245,13 @@ def exportData(data, dataType, path_out, filename, delim_out=None):
 	elif dataType == 'obj':
 		pickle.dump(data, open(fullPath, 'wb'))
 	elif dataType == 'df':
-		data.to_csv(fullPath, sep=delim_out, index=False)
+		if isinstance(data, dict):
+			for frameName,frame in data.items():
+				assert isinstance(frame, pd.DataFrame)
+				frame.to_csv(path_out + '/' + filename + '_' + frameName + extension, sep=delim_out, index=False)
+		else:
+			assert isinstance(data, pd.DataFrame)
+			data.to_csv(fullPath, sep=delim_out, index=False)
 	elif dataType == 'viz': # TODO
 		pass # plt.savefig('foo.png', bbox_inches='tight')
 

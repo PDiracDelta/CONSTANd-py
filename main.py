@@ -97,6 +97,7 @@ def testDataComplementarity(df):
 	main(testing=False, writeToDisk=True)
 	# SANITY CHECK if df + removedData scan numbers = total scan numbers.
 	scannrs_final = set(df.groupby('First Scan').groups.keys())
+	##### THIS IS OUTDATED SINCE COMMIT b98041f
 	removedDataLoaded = pickle.load(open('../data/MB_result_removedData', 'rb'))
 	for value in removedDataLoaded.values():
 		scannrs_final = scannrs_final.union(set(value['First Scan']))
@@ -107,7 +108,7 @@ def devStuff(df, params): # TEST
 	# performanceTest()
 	# isotopicCorrectionsTest(params)
 	# MS2IntensityDoesntMatter(df)
-	testDataComplementarity(df)
+	# testDataComplementarity(df)
 	pass
 
 
@@ -193,8 +194,8 @@ def main(testing, writeToDisk):
 		""" Save data to disk and generate report """
 		if writeToDisk:
 			# save the removed data information
-			exportData(removedData, dataType='obj', path_out=params['path_out'],
-			           filename=params['filename_out'] + '_removedData')
+			exportData(removedData, dataType='df', path_out=params['path_out'],
+			           filename=params['filename_out'] + '_removedData', delim_out=params['delim_out'])
 			# save the final form of the dataFrame WITHOUT normalized intensities.
 			exportData(df, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_dataFrame', delim_out=params['delim_out'])
 			# save the normalized intensities obtained through CONSTANd
@@ -214,4 +215,4 @@ def main(testing, writeToDisk):
 
 
 if __name__ == '__main__':
-	sys.exit(main(testing=True, writeToDisk=True))
+	sys.exit(main(testing=False, writeToDisk=True))
