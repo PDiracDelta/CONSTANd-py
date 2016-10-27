@@ -107,10 +107,10 @@ def undoublePSMAlgo(df, master, exclusive):
 	Removes redundant data due to different PSM algorithms producing the same peptide match. The 'master' algorithm
 	values are preferred over the 'slave' algorithm values, the latter whom are removed and have their basic information
 	saved in removedData. If exclusive=true, this function only keeps master data (and saves slave(s) basic info).
-	:param df:              pd.dataFrame    unfiltered data
+	:param df:              pd.dataFrame    data with double First Scan numbers due to PSMAlgo redundancy
 	:param master:          string          master PSM algorithm (master/slave relation)
 	:param exclusive:       bool            save master data exclusively or include slave data where necessary?
-	:return df:             pd.dataFrame    collapsed data
+	:return df:             pd.dataFrame    data without double First Scan numbers due to PSMAlgo redundancy
 	:return removedData:    pd.dataFrame    basic info about the removed entries
 	"""
 	byFirstScanDict = df.groupby('Identifying Node').groups # {Identifying Node : [list of indices]}
@@ -125,7 +125,7 @@ def undoublePSMAlgo(df, master, exclusive):
 		if not exclusive:
 			toDelete = toDelete.difference(byFirstScanDict['Mascot (A6)'])  # indices not discovered by Mascot either
 
-	removedData = ('master: '+master, df.loc[toDelete,columnsToSave])
+	removedData = df.loc[toDelete,columnsToSave]
 	dflen=df.shape[0] # TEST
 	df.drop(toDelete, inplace=True)
 	assert(dflen == df.shape[0]+removedData[1].shape[0]) # TEST
