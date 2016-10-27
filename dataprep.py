@@ -114,17 +114,21 @@ def undoublePSMAlgo(df, master, exclusive):
 	:return df:             pd.dataFrame    data without double First Scan numbers due to PSMAlgo redundancy
 	:return removedData:    pd.dataFrame    basic info about the removed entries
 	"""
-	byFirstScanDict = df.groupby('Identifying Node').groups # {Identifying Node : [list of indices]}
+	byIdentifyingNodeDict = df.groupby('Identifying Node').groups # {Identifying Node : [list of indices]}
 	if master == 'mascot':
 		columnsToSave = ['First Scan', 'Annotated Sequence', 'Master Protein Accessions', 'XCorr']
-		toDelete = set(df.index.values).difference(set(byFirstScanDict['Mascot (A6)'])) # all indices not discovered by Mascot
-		if not exclusive:
-			toDelete = toDelete.difference(byFirstScanDict['Sequest HT (A2)']) # indices not discovered by Sequest either
+		mascotIndices = set(byIdentifyingNodeDict['Mascot (A6)'])
+		toDelete = set(df.index.values).difference(mascotIndices) # all indices of detections not done by Mascot
+		if not exclusive: # remove unique Sequest scans from the toDelete list
+			byFirstScanDict = df.groupby('First Scan').groups
+			singles = set(map(lambda e: e[0], filter(lambda e: len(e) == 1, byFirstScanDict.values()))) # indices of detections done by only 1 PSMAlgo
+			singlesNotByMascotIndices = singles.difference(mascotIndices)
+			toDelete = toDelete.difference(singlesNotByMascotIndices) # keep only indices not discovered by Sequest
 	elif master == 'sequest':
 		columnsToSave = ['First Scan', 'Annotated Sequence', 'Master Protein Accessions', 'Ions Score']
-		toDelete = set(df.index.values).difference(set(byFirstScanDict['Sequest HT (A2)''Mascot (A6)']))  # all indices not discovered by Sequest
+		toDelete = set(df.index.values).difference(set(byIdentifyingNodeDict['Sequest HT (A2)']))  # all indices of detections not done by Sequest
 		if not exclusive:
-			toDelete = toDelete.difference(byFirstScanDict['Mascot (A6)'])  # indices not discovered by Mascot either
+			toDelete = toDelete.difference(byIdentifyingNodeDict['Mascot (A6)'])  # indices not discovered by Mascot
 
 	removedData = df.loc[toDelete,columnsToSave]
 	dflen=df.shape[0] # TEST
