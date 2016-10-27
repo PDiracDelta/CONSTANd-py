@@ -102,8 +102,6 @@ def testDataComplementarity(df):
 		if isinstance(value, dict):
 			for valuedf in value.values():
 				scannrs_final = scannrs_final.union(set(valuedf['First Scan']))
-		elif isinstance(value, tuple):
-			scannrs_final = scannrs_final.union(set(value[1]['First Scan']))
 		elif isinstance(value, pd.DataFrame):
 			scannrs_final = scannrs_final.union(set(value['First Scan']))
 		else:

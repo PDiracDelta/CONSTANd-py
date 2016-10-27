@@ -15,6 +15,7 @@ Excludes (see collapse.py):
 	* different retention time (RT) values
 	* different charges
 	* different (post-translational) modifications (PTMs)
+Removed data is always saved into a removedData dataFrame.
 """
 
 import numpy as np
@@ -35,7 +36,7 @@ def selectRequiredColumns(df, requiredColumns):
 	"""
 	Returns a dataFrame with only the specified columns of the input dataFrame.
 	:param df:                  pd.dataFrame    input dataFrame
-	:param requiredColumns:    list            specified columns
+	:param requiredColumns:     list            specified columns
 	:return:                    pd.dataFrame    dataFrame with only the specified columns of the input dataFrame
 	"""
 	return df[requiredColumns]

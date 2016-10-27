@@ -27,13 +27,13 @@ def getInput():
 	"""
 	Get mass spec data and CONSTANd parameters from the user or from the web interface as a dict.
 	:return params:         dict    dictionary containing all paraeters mentioned below:
-		:return file_in:        string  path to the input file
-		:return delim_in:       char    delimiter of the data in the input file
-		:return accuracy:       float   CONSTANd param: combined allowed deviation of col and row means from 1/6
-		:return header_in:      integer row number containing the dataFrame header (can be None if no header)
-		:return maxIterations:  int     CONSTANd param: maximum amount of iterations (1x row and 1x col per iteration)
-		:return path_out:       string  path to the output file
-		:return delim_out:      char    delimiter of the data in the output file
+	:return file_in:        string  path to the input file
+	:return delim_in:       char    delimiter of the data in the input file
+	:return accuracy:       float   CONSTANd param: combined allowed deviation of col and row means from 1/6
+	:return header_in:      integer row number containing the dataFrame header (can be None if no header)
+	:return maxIterations:  int     CONSTANd param: maximum amount of iterations (1x row and 1x col per iteration)
+	:return path_out:       string  path to the output file
+	:return delim_out:      char    delimiter of the data in the output file
 	"""
 	# TODO add all parameters in docstring
 	# TODO add .lower() to all string input except requiredColumns and intensityColumns
