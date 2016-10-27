@@ -129,7 +129,7 @@ def undoublePSMAlgo(df, master, exclusive):
 	removedData = df.loc[toDelete,columnsToSave]
 	dflen=df.shape[0] # TEST
 	df.drop(toDelete, inplace=True)
-	assert(dflen == df.shape[0]+removedData[1].shape[0]) # TEST
+	assert(dflen == df.shape[0]+removedData.shape[0]) # TEST
 
 	return df, removedData
 
