@@ -152,8 +152,14 @@ def isotopicCorrection(intensities, correctionsMatrix):
 	:return:                    np.ndarray  array of arrays with the corrected intensities
 	"""
 	correctedIntensities = []
+	warnedYet = False
 	for row in intensities:
-		correctedIntensities.append(np.linalg.solve(correctionsMatrix, row))
+		if not np.isnan(row).any():
+			correctedIntensities.append(np.linalg.solve(correctionsMatrix, row))
+		else:
+			correctedIntensities.append(row)
+			if not warnedYet:
+				warn("Cannot correct isotope impurities for detections with NaN reporter intensities; skipping those.")
 	return np.asarray(correctedIntensities)
 
 
