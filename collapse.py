@@ -72,7 +72,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			:param remainingProperties: list    properties still to be grouped by
 			:return duplicateLists:     list    [[group of duplicates] per combination-of-properties values in the dataFrame]
 			"""
-			# TODO: if the code inside this function doesnt work, use the one outside this function instead
+
 			if remainingProperties:
 				for byPropIndices in byPropDict.values():
 					if len(byPropIndices) > 1: # only if there are duplicates
@@ -82,90 +82,22 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			else:
 				duplicateLists.extend(byPropDict.values())
 
-		youreFeelingLucky = True  # TODO: disable this if the code above doesnt work (TRIGGERS CODE IN FUNCTION ABOVE)
-		if youreFeelingLucky:
-			properties = []
-			if not undoublePSMAlgo_bool:  # only if you didn't undoublePSMAlgo
-				## SELECT IDENTICAL PSMALGO (i.e. different First Scan) ##
-				byFirstPropDict = df.groupby('Identifying Node').groups
-				properties.append('Annotated Sequence')
-			else:
-				## SELECT IDENTICAL SEQUENCE ##
-				byFirstPropDict = df.groupby('Annotated Sequence').groups
-			if toCollapse == 'RT':
-				groupByIdenticalProperties(byFirstPropDict, properties + ['Charge', 'Modifications'])
-				return duplicateLists
-			elif toCollapse == 'Charge':
-				groupByIdenticalProperties(byFirstPropDict, properties + ['Modifications'])
-			elif toCollapse == 'PTM':
-				groupByIdenticalProperties(byFirstPropDict, properties + ['Charge'])
-
-		elif not youreFeelingLucky:
+		properties = []
+		if not undoublePSMAlgo_bool:  # only if you didn't undoublePSMAlgo
+			## SELECT IDENTICAL PSMALGO (i.e. different First Scan) ##
+			byFirstPropDict = df.groupby('Identifying Node').groups
+			properties.append('Annotated Sequence')
+		else:
 			## SELECT IDENTICAL SEQUENCE ##
-			bySequenceDict = df.groupby('Annotated Sequence').groups
-			if toCollapse == 'RT':
-				for sequence, bySequenceIndices in bySequenceDict:
-					if len(bySequenceIndices) > 1:  # only if there are duplicates
-						## SELECT IDENTICAL CHARGE ##
-						byChargeBySequenceDict = df[bySequenceIndices].groupby('Charge').groups
-						for charge, byChargeIndices in byChargeBySequenceDict:
-							if len(byChargeIndices) > 1:  # only if there are duplicates
-								## SELECT IDENTICAL PTM ##
-								byPTMByChargeBySequenceDict = df[byChargeIndices].groupby('Modifications').groups
-								if not undoublePSMAlgo_bool:  # only if you didn't undoublePSMAlgo
-									for PTM, byPTMIndices in byPTMByChargeBySequenceDict:
-										if len(byPTMIndices) > 1:  # only if there are duplicates
-											## SELECT IDENTICAL PSMALGO (i.e. different First Scan) ##
-											byPSMAlgoByPTMByChargeBySequenceDict = df[byPTMIndices].groupby(
-												'Identifying Node').groups
-											duplicateLists.extend(byPSMAlgoByPTMByChargeBySequenceDict.values)
-								else:
-									duplicateLists.extend(byPTMByChargeBySequenceDict.values)
+			byFirstPropDict = df.groupby('Annotated Sequence').groups
+		if toCollapse == 'RT':
+			groupByIdenticalProperties(byFirstPropDict, properties + ['Charge', 'Modifications'])
+			return duplicateLists
+		elif toCollapse == 'Charge':
+			groupByIdenticalProperties(byFirstPropDict, properties + ['Modifications'])
+		elif toCollapse == 'PTM':
+			groupByIdenticalProperties(byFirstPropDict, properties + ['Charge'])
 
-			elif toCollapse == 'Charge':
-				for sequence, bySequenceIndices in bySequenceDict:
-					if len(bySequenceIndices) > 1:  # only if there are duplicates
-						## SELECT IDENTICAL PTM ##
-						byPTMBySequenceDict = df[bySequenceIndices].groupby('Modifications').groups
-						if not undoublePSMAlgo_bool:  # only if you didn't undoublePSMAlgo
-							for PTM, byPTMIndices in byPTMBySequenceDict:
-								if len(byPTMIndices) > 1:  # only if there are duplicates
-									## SELECT IDENTICAL PSMALGO (i.e. different First Scan) ##
-									byPSMAlgoByPTMBySequenceDict = df[byPTMIndices].groupby('Identifying Node').groups
-									duplicateLists.extend(byPSMAlgoByPTMBySequenceDict.values)
-						else:  # you did undoublePSMAlgo? Great, you're done.
-							duplicateLists.extend(byPTMBySequenceDict.values)
-						## SANITY CHECK ##
-						for PTM, byPTMIndices in byPTMBySequenceDict:  # TEST
-							if len(byPTMIndices) > 1:  # only if there are duplicates
-								## SELECT IDENTICAL CHARGE ##
-								byChargeByPTMBySequenceDict = df[byPTMIndices].groupby('Charge').groups
-								for charge, byChargeIndices in byChargeByPTMBySequenceDict:
-									assert len(
-										byChargeIndices) < 2  # if same Sequence and same PTM, Charge cannot be the same because it would have been RT-collapsed.
-
-			elif toCollapse == 'PTM':
-				for sequence, bySequenceIndices in bySequenceDict:
-					if len(bySequenceIndices) > 1:  # only if there are duplicates
-						## SELECT IDENTICAL CHARGE ##
-						byChargeBySequenceDict = df[bySequenceIndices].groupby('Charge').groups
-						if not undoublePSMAlgo_bool:  # only if you didn't undoublePSMAlgo
-							for charge, byChargeIndices in byChargeBySequenceDict:
-								if len(byChargeIndices) > 1:  # only if there are duplicates
-									## SELECT IDENTICAL PSMALGO ##
-									byPSMAlgoByChargeBySequenceDict = df[byChargeIndices].groupby(
-										'Identifying Node').groups
-									duplicateLists.extend(byPSMAlgoByChargeBySequenceDict.values)
-						else:  # you did undoublePSMAlgo? Great, you're done.
-							duplicateLists.extend(byChargeBySequenceDict.values)
-						## SANITY CHECK ##
-						for charge, byChargeIndices in byChargeBySequenceDict:  # TEST
-							if len(byChargeIndices) > 1:  # only if there are duplicates
-								## SELECT IDENTICAL PTM ##
-								byPTMByChargeBySequenceDict = df[byChargeIndices].groupby('Modifications').groups
-								for PTM, byPTMIndices in byPTMByChargeBySequenceDict:
-									assert len(
-										byPTMIndices) < 2  # if same Sequence and same Charge, PTM cannot be the same because it would have been RT-collapsed.
 		return duplicateLists
 
 	def combineDetections(duplicateLists, centerMeasure):
