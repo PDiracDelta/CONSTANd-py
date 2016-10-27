@@ -255,7 +255,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		try:
 			representativesDf['Degeneracy'] = [np.sum(np.asarray(df['Degeneracy'].loc[duplicatesList]))
 		                                   for duplicatesList in duplicateLists]
-		except Warning as w:
+		except Warning:
 			pass # SettingWithCopyWarning irrelevant because I really want to set the copy, not the original.
 
 		if method == 'bestMatch':
