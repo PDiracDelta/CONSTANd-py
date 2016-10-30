@@ -136,21 +136,21 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		:param this_duplicateLists: list        [[group of duplicates] per toCollapse value in the df]
 		:return this_bestIndices:        list        [indices of detections with the best PSM score per group of duplicates]
 		"""
-		this_bestIndices = []
+		this_bestIndices = {}
 		if masterPSMAlgo == 'mascot':
-			for this_duplicatesList in this_duplicateLists:
-				bestIndex = df['Ions Score'].loc[this_duplicatesList].idxmax(axis=0, skipna=True)
-				if np.isnan(bestIndex): # no Mascot scores found --> take best Sequest
-					bestIndex = df['XCorr'].loc[this_duplicatesList].idxmax(axis=0, skipna=True)
-					assert not np.isnan(bestIndex)
-				this_bestIndices.append(bestIndex)
+			masterScoreName = 'Ions Score'
+			slaveScoreName = 'XCorr'
 		elif masterPSMAlgo == 'sequest':
-			for this_duplicatesList in this_duplicateLists:
-				bestIndex = df['XCorr'].loc[this_duplicatesList].idxmax(axis=0, skipna=True)
-				if np.isnan(bestIndex): # no Sequest scores found --> take best Mascot
-					bestIndex = df['Ions Score'].loc[this_duplicatesList].idxmax(axis=0, skipna=True)
-					assert not np.isnan(bestIndex)
-				this_bestIndices.append(bestIndex)
+			masterScoreName = 'XCorr'
+			slaveScoreName = 'Ions Score'
+
+		for this_duplicatesList in this_duplicateLists:
+			bestIndex = df[masterScoreName].loc[this_duplicatesList].idxmax(axis=0, skipna=True)
+			if np.isnan(bestIndex):  # no MASTER scores found --> take best SLAVE
+				bestIndex = df[slaveScoreName].loc[this_duplicatesList].idxmax(axis=0, skipna=True)
+				assert not np.isnan(bestIndex)
+			this_bestIndices[bestIndex] = this_duplicatesList
+
 		return this_bestIndices
 
 	def getIntenseIndices(this_duplicateLists):
