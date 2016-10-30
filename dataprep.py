@@ -82,7 +82,7 @@ def removeBadConfidence(df, minimum):
 	except KeyError:
 		raise KeyError("Illegal Confidence values (allowed: Low, Medium, High). Watch out for capitalization.")
 	toDelete = df[badConfidences].index  # indices of rows to delete
-	removedData = df.loc[toDelete,columnsToSave]
+	removedData = df.loc[toDelete, columnsToSave]
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 
