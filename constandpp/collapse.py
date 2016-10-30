@@ -207,7 +207,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			representativesDf = setIntensities(representativesDf, intensitiesDict)
 
 		# reindex representativesDf so it can be concatenated properly with new indices
-		representativesDf.index = list(range(df.index[-1], df.index[-1] + len(representativesDf.index)))
+		representativesDf.index = list(range(max(df.index), max(df.index) + len(representativesDf.index)))
 		return representativesDf
 
 		i = len(df.index)
