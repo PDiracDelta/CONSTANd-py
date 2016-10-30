@@ -145,9 +145,9 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			slaveScoreName = 'Ions Score'
 
 		for this_duplicatesList in this_duplicateLists:
-			bestIndex = df[masterScoreName].loc[this_duplicatesList].idxmax(axis=0, skipna=True)
+			bestIndex = df.loc[this_duplicatesList, masterScoreName].idxmax(axis=0, skipna=True)
 			if np.isnan(bestIndex):  # no MASTER scores found --> take best SLAVE
-				bestIndex = df[slaveScoreName].loc[this_duplicatesList].idxmax(axis=0, skipna=True)
+				bestIndex = df.loc[this_duplicatesList, slaveScoreName].idxmax(axis=0, skipna=True)
 				assert not np.isnan(bestIndex)
 			this_bestIndices[bestIndex] = this_duplicatesList
 
@@ -215,7 +215,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 
 	if 'Degeneracy' not in df.columns:
 		# contains the number of peptides that have been collapsed onto each (synthetic) detection.
-		df['Degeneracy'] = [1, ]*len(df.index)
+		df.loc[:, 'Degeneracy'] = [1, ]*len(df.index)
 
 	# get a nested list of duplicates according to toCollapse. [[duplicates1], [duplicates2], ...]
 	duplicateLists = getDuplicates()
