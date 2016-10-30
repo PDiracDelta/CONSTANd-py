@@ -185,7 +185,8 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		"""
 		this_bestIndices = this_bestIndicesDict.keys()
 		this_duplicateLists = this_bestIndicesDict.values()
-		this_representativesDf = df.loc[this_bestIndices]
+
+		this_representativesDf = df.loc[this_bestIndices, :]
 		# sum the degeneracies of all duplicates involved in each representative
 		try:
 			this_representativesDf.loc['Degeneracy'] = [np.sum(np.asarray(df.loc[(this_duplicatesList, 'Degeneracy')])) for
@@ -198,7 +199,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		elif method == 'mostIntense':
 			intenseIndicesDict = getIntenseIndicesDict(this_bestIndicesDict)
 			# generate { bestIndex : [mostIntense intensities] }
-			intensitiesDict = dict(zip(list(this_bestIndices), getIntensities(df.loc[intenseIndicesDict, :])))
+			intensitiesDict = dict((ind_best, getIntensities(df.loc[ind_intense, :])) for (ind_best, ind_intense) in intenseIndicesDict.items())
 			# set the representative intensities to be the most intense intensities
 			this_representativesDf = setIntensities(this_representativesDf, intensitiesDict)
 		else:  # method == 'centerMeasure'
