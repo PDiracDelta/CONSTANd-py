@@ -24,7 +24,7 @@ def setCollapseColumnsToSave(this_columnsToSave):
 	globals()['columnsToSave'] = this_columnsToSave
 
 
-def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo, undoublePSMAlgo_bool): #
+def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo, undoublePSMAlgo_bool):  #
 	"""
 	Generic collapse function. Looks for duplicate 'Annotated Sequence' values in the dataFrame and verifies
 	true duplication using checkTrueDuplicates function. Modifies df according to true duplicates and newly acquired
@@ -48,6 +48,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		{ propertyValue : [duplicateIndices] }.
 		:return this_duplicateLists:     list            [[group of duplicates] per toCollapse value in the df]
 		"""
+
 		# todo outdated documentation
 
 		def groupByIdenticalProperties(byPropDict, remainingProperties):
@@ -71,12 +72,13 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			"""
 			# use only indices that are not single (i.e. that have a duplicate)
 			notSingleList = list(filter(lambda e: len(e) > 1, byPropDict.values()))
-			if remainingProperties: # check for more identical properties before marking as duplicates
-				for byPropIndices in notSingleList: # only if there actually is at least one group of duplicates
+			if remainingProperties:  # check for more identical properties before marking as duplicates
+				for byPropIndices in notSingleList:  # only if there actually is at least one group of duplicates
 					## SELECT IDENTICAL <NEXTPROPERTY> ##
 					groupByIdenticalProperties(df.loc[byPropIndices].groupby(remainingProperties[0]).groups,
-					                           remainingProperties[1:]) # first pop the [0] property to both return and remove it!
-			else: # no more properties to check: mark groups of indices as duplicates
+					                           remainingProperties[
+					                           1:])  # first pop the [0] property to both return and remove it!
+			else:  # no more properties to check: mark groups of indices as duplicates
 				this_duplicateLists.extend(notSingleList)
 
 		this_duplicateLists = []  # [list of [list of duplicate indices] for each duplicate]
@@ -113,30 +115,32 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			# calculate the total MS2 intensities for each duplicate
 			allMS2Intensities = np.asarray(df.loc[this_duplicatesList, intensityColumns])
 
-			if flagMaxRelativeReporterVariance: # TODO flag when maxRelativeReporterVariance is exceeded
+			if flagMaxRelativeReporterVariance:  # TODO flag when maxRelativeReporterVariance is exceeded
 				# this can only be consistent if executed on RELATIVE intensities.
-				Ri = 1 / allMS2Intensities.shape[1] * np.asarray(1 / np.nanmean(allMS2Intensities, 1)).reshape(allMS2Intensities.shape[0], )
+				Ri = 1 / allMS2Intensities.shape[1] * np.asarray(1 / np.nanmean(allMS2Intensities, 1)).reshape(
+					allMS2Intensities.shape[0], )
 				relativeIntensities = (allMS2Intensities.T * Ri).T
-				if np.any(np.var(relativeIntensities,axis=0) > maxRelativeReporterVariance):
+				if np.any(np.var(relativeIntensities, axis=0) > maxRelativeReporterVariance):
 					# TODO this shouldnt just warn, you should also decide what to do.
-					warn("maxRelativeReporterVariance too high for duplicates with indices: " + str(this_duplicatesList) + ".")
+					warn("maxRelativeReporterVariance too high for duplicates with indices: " + str(
+						this_duplicatesList) + ".")
 
 			if centerMeasure == 'mean':
 				newIntensities = np.mean(allMS2Intensities, 0)
-			elif centerMeasure == 'geometricMedian': # TODO
+			elif centerMeasure == 'geometricMedian':  # TODO
 				pass
-			elif centerMeasure == 'weighted': # TODO
+			elif centerMeasure == 'weighted':  # TODO
 				pass
 		return newIntensities
 
-	def getBestIndices(this_duplicateLists):
+	def getBestIndicesDict(this_duplicateLists):
 		"""
 		For each sublist in the nested list of duplicates duplicateLists, calculates the index of the duplicate with the
 		best PSM match according to dataFrame df. Does this intelligently by taking masterPSMAlgo into account.
-		:param this_duplicateLists: list        [[group of duplicates] per toCollapse value in the df]
-		:return this_bestIndices:        list        [indices of detections with the best PSM score per group of duplicates]
+		:param this_duplicateLists: list    [[group of duplicates] per toCollapse value in the df]
+		:return this_bestIndices:   dict    { [indices of detections with the best PSM score per group of duplicates] : [group of duplicates] }
 		"""
-		this_bestIndices = {}
+		this_bestIndicesDict = {}
 		if masterPSMAlgo == 'mascot':
 			masterScoreName = 'Ions Score'
 			slaveScoreName = 'XCorr'
@@ -149,9 +153,9 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			if np.isnan(bestIndex):  # no MASTER scores found --> take best SLAVE
 				bestIndex = df.loc[this_duplicatesList, slaveScoreName].idxmax(axis=0, skipna=True)
 				assert not np.isnan(bestIndex)
-			this_bestIndices[bestIndex] = this_duplicatesList
+			this_bestIndicesDict[bestIndex] = this_duplicatesList
 
-		return this_bestIndices
+		return this_bestIndicesDict
 
 	def getIntenseIndices(this_duplicateLists):
 		"""
@@ -170,22 +174,22 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			intenseIndices.append(intenseIndex)
 		return intenseIndices
 
-	def getRepresentativesDf(this_bestIndices, this_duplicateLists):
+	def getRepresentativesDf(this_bestIndicesDict):
 		"""
 		Uses a list of indices of the best PSM matches bestIndices amongst each group of duplicates in the nested list
 		duplicateLists, all indices with respect to dataFrame df. Based on this best PSM match, generates a
 		representative detection for each group of duplicates. This is done by copying all bestMatch properties, but by
 		calculating new intensities when necessary and also updating the Degeneracy parameter.
-		IMPORTANT: the representatives must be added in the same order as their respective duplicates groups in duplicateLists!
-		:param this_bestIndices:         list            indices of the best PSM matches inside a group of duplicates (see duplicatLists)
-		:param this_duplicateLists:      list            [[group of duplicates] per toCollapse value in the df]
-		:return this_representativesDf:  pd.dataFrame    all representatives data that will replace the duplicate entries in the dataFrame df
+		:param this_bestIndicesDict:     dict           { [indices of detections with the best PSM score per group of duplicates] : [group of duplicates] }
+		:return this_representativesDf:  pd.dataFrame   all representatives data that will replace the duplicate entries in the dataFrame df
 		"""
-		assert len(this_duplicateLists) == len(this_bestIndices)
+		this_bestIndices = this_bestIndicesDict.keys()
+		this_duplicateLists = this_bestIndicesDict.values()
 		this_representativesDf = df.loc[this_bestIndices]
 		# sum the degeneracies of all duplicates involved in each representative
 		try:
-			this_representativesDf.loc['Degeneracy'] = [np.sum(np.asarray(df.loc[(duplicatesList, 'Degeneracy')])) for duplicatesList in this_duplicateLists]
+			this_representativesDf.loc['Degeneracy'] = [np.sum(np.asarray(df.loc[(this_duplicatesList, 'Degeneracy')])) for
+			                                            this_duplicatesList in this_duplicateLists]
 		except ValueError:
 			pass
 
@@ -194,10 +198,10 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		elif method == 'mostIntense':
 			intenseIndices = getIntenseIndices(this_duplicateLists)
 			# generate { bestIndex : [mostIntense intensities] }
-			intensitiesDict = dict(zip(list(this_bestIndices), getIntensities(df.loc[intenseIndices])))
+			intensitiesDict = dict(zip(list(this_bestIndices), getIntensities(df.loc[intenseIndices, :])))
 			# set the representative intensities to be the most intense intensities
 			this_representativesDf = setIntensities(this_representativesDf, intensitiesDict)
-		else: # method == 'centerMeasure'
+		else:  # method == 'centerMeasure'
 			newIntensities = combineDetections(this_duplicateLists, centerMeasure=method)
 			# generate { intenseIndex : [intensities] }
 			intensitiesDict = dict(zip(list(this_bestIndices), newIntensities))
@@ -215,24 +219,25 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 
 	if 'Degeneracy' not in df.columns:
 		# contains the number of peptides that have been collapsed onto each (synthetic) detection.
-		df.loc[:, 'Degeneracy'] = [1, ]*len(df.index)
+		df.loc[:, 'Degeneracy'] = [1, ] * len(df.index)
 
 	# get a nested list of duplicates according to toCollapse. [[duplicates1], [duplicates2], ...]
 	duplicateLists = getDuplicates()
 	if method == 'RT':
-		pass # TODO flag isolated RT peaks
+		pass  # TODO flag isolated RT peaks
 	elif method == 'PTM':
-		pass # TODO flag PTM differences.
+		pass  # TODO flag PTM differences.
 	# get the new intensities per first occurrence index (df index)
-	bestIndices = getBestIndices(duplicateLists) # {bestIndex : [duplicates]}
+	bestIndicesDict = getBestIndicesDict(duplicateLists)  # {bestIndex : [duplicates]}
 	# add the new representative detections to the dataFrame
-	representativesDf = getRepresentativesDf(bestIndices, duplicateLists)
+	representativesDf = getRepresentativesDf(bestIndicesDict)
 	df = df.append(representativesDf)
-	toDelete = [item for sublist in duplicateLists for item in sublist] # unpack list of lists
-	removedData = df.loc[toDelete,columnsToSave]
+	toDelete = [item for sublist in duplicateLists for item in sublist]  # unpack list of lists
+	removedData = df.loc[toDelete, columnsToSave]
 	# add the representative index of each collection of collapsed duplicates
 	removedData.insert(loc=0, column='Representative First Scan', value=-1)
-	for duplicatesList,rfs in zip(duplicateLists, representativesDf['First Scan']): # relies on fact that order is conserved!
+	for duplicatesList, rfs in zip(duplicateLists,
+	                               representativesDf['First Scan']):  # relies on fact that order is conserved!
 		removedData.loc[duplicatesList, 'Representative First Scan'] = rfs
 	# actually remove the toDelete detections
 	df.drop(toDelete, inplace=True)
