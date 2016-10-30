@@ -227,13 +227,10 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 	representativesDf = getRepresentativesDf(bestIndices, duplicateLists)
 	df = df.append(representativesDf)
 	toDelete = [item for sublist in duplicateLists for item in sublist] # unpack list of lists
-	# [df[PARENT INDEX, and, values, to, be, saved] for each duplicate]
-	duplicatesDfList = [df.loc[duplicatesList,columnsToSave] for duplicatesList in duplicateLists]
-	# concatenate all duplicates dataframes
-	removedData = pd.concat(duplicatesDfList)
+	removedData = df.loc[toDelete,columnsToSave]
 	# add the representative index of each collection of collapsed duplicates
 	removedData.insert(loc=0, column='Representative First Scan', value=-1)
-	for duplicatesList,rfs in zip(duplicateLists, representativesDf['First Scan']):
+	for duplicatesList,rfs in zip(duplicateLists, representativesDf['First Scan']): # relies on fact that order is conserved!
 		removedData.loc[duplicatesList, 'Representative First Scan'] = rfs
 	# actually remove the toDelete detections
 	df.drop(toDelete, inplace=True)
