@@ -187,7 +187,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		representativesDf = df.loc[bestIndices]
 		# sum the degeneracies of all duplicates involved in each representative
 		try:
-			representativesDf['Degeneracy'] = [np.sum(np.asarray(df.loc[(duplicatesList, 'Degeneracy')])) for duplicatesList in duplicateLists]
+			representativesDf.loc['Degeneracy'] = [np.sum(np.asarray(df.loc[(duplicatesList, 'Degeneracy')])) for duplicatesList in duplicateLists]
 		except ValueError:
 			pass
 
