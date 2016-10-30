@@ -39,7 +39,7 @@ def selectRequiredColumns(df, requiredColumns):
 	:param requiredColumns:     list            specified columns
 	:return:                    pd.dataFrame    dataFrame with only the specified columns of the input dataFrame
 	"""
-	return df[requiredColumns]
+	return df.loc[:, requiredColumns]
 
 
 def removeMissing(df):
@@ -51,12 +51,12 @@ def removeMissing(df):
 	toDelete = []
 	for column in ['First Scan', 'Annotated Sequence', 'Identifying Node', 'Charge', 'Modifications']:
 		# delete all detections that have a missing value in this column
-		toDelete.extend(df[df[column].isnull()].index)
+		toDelete.extend(df.loc[df[column].isnull(), :].index)
 	# delete all detections that have a missing value in both columns: XCorr and Ions Score
-	toDelete.extend(df[[x and y for x, y in zip(df['XCorr'].isnull(), df['Ions Score'].isnull())]].index)
+	toDelete.extend(df.loc[[x and y for x, y in zip(df['XCorr'].isnull(), df['Ions Score'].isnull())]].index)
 	# delete all detections which have no quan values or no quan labels
-	toDelete.extend(df[df['Quan Info'] == 'NoQuanValues'].index)
-	toDelete.extend(df[df['Quan Info'] == 'NoQuanLabels'].index)
+	toDelete.extend(df.loc[df['Quan Info'] == 'NoQuanValues'].index)
+	toDelete.extend(df.loc[df['Quan Info'] == 'NoQuanLabels'].index)
 	toDelete = np.unique(toDelete)
 	removedData = df.loc[toDelete]
 	if toDelete.size > 0:
@@ -78,10 +78,10 @@ def removeBadConfidence(df, minimum):
 	conf2int = {'Low': 1, 'Medium': 2, 'High': 3}
 	try:
 		minimum = conf2int[minimum]
-		badConfidences = [conf2int[x] < minimum for x in df['Confidence']]
+		badConfidences = [conf2int[x] < minimum for x in df.loc[:, 'Confidence']]
 	except KeyError:
 		raise KeyError("Illegal Confidence values (allowed: Low, Medium, High). Watch out for capitalization.")
-	toDelete = df[badConfidences].index  # indices of rows to delete
+	toDelete = df.loc[badConfidences, :].index  # indices of rows to delete
 	removedData = df.loc[toDelete, columnsToSave]
 	df.drop(toDelete, inplace=True)
 	return df, removedData
@@ -97,7 +97,7 @@ def removeIsolationInterference(df, threshold):
 	:return removedData:    pd.dataFrame    basic info about the removed values
 	"""
 	columnsToSave = ['First Scan', 'Annotated Sequence', 'Identifying Node', 'Master Protein Accessions', 'Isolation Interference [%]']
-	toDelete = df[df['Isolation Interference [%]'] > threshold].index # indices of rows to delete
+	toDelete = df.loc[df['Isolation Interference [%]'] > threshold].index # indices of rows to delete
 	removedData = df.loc[toDelete,columnsToSave]
 	df.drop(toDelete, inplace=True)
 	return df, removedData
@@ -169,7 +169,7 @@ def getIntensities(df):
 	:param df:              pd.dataFrame    Pandas dataFrame from which to extract the intensities
 	:return intensities:    np.ndArray      matrix with the intensities
 	"""
-	return np.asarray(df[intensityColumns])
+	return np.asarray(df.loc[:, intensityColumns])
 
 
 def setIntensities(df, intensitiesDict):
@@ -180,5 +180,5 @@ def setIntensities(df, intensitiesDict):
 	:return df:             pd.dataFrame    output dataFrame with updated intensities
 	"""
 	for index in intensitiesDict.keys():
-		df.loc[index,intensityColumns] = intensitiesDict[index]
+		df.loc[index, intensityColumns] = intensitiesDict[index]
 	return df
