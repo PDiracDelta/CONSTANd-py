@@ -178,6 +178,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		duplicateLists, all indices with respect to dataFrame df. Based on this best PSM match, generates a
 		representative detection for each group of duplicates. This is done by copying all bestMatch properties, but by
 		calculating new intensities when necessary and also updating the Degeneracy parameter.
+		IMPORTANT: the representatives must be added in the same order as their respective duplicates groups in duplicateLists!
 		:param bestIndices:         list            indices of the best PSM matches inside a group of duplicates (see duplicatLists)
 		:param duplicateLists:      list            [[group of duplicates] per toCollapse value in the df]
 		:return representativesDf:  pd.dataFrame    all representatives data that will replace the duplicate entries in the dataFrame df
