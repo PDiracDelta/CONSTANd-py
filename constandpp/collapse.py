@@ -157,22 +157,22 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 
 		return this_bestIndicesDict
 
-	def getIntenseIndices(this_duplicateLists):
+	def getIntenseIndicesDict(this_bestIndicesDict):
 		"""
 		For each sublist in the nested list of duplicates duplicateLists, calculates the total MS2 intensity according
 		to dataFrame df and returns the results as a list.
-		:param this_duplicateLists:     list        [[group of duplicates] per toCollapse value in the df]
-		:return intenseIndices:         list        [indices of detections with the highest total MS2 intensity per group of duplicates]
+		:param this_bestIndicesDict:    dict    { indices of best PSM match per group of duplicates : [group of duplicates] }
+		:return intenseIndicesDict:     dict    { best PSM match indices per group of duplicates : indices of most intense MS2 values }
 		"""
-		intenseIndices = []
-		for this_duplicatesList in this_duplicateLists:
+		intenseIndicesDict = {}
+		for bestIndex, this_duplicatesList in this_bestIndicesDict.items():
 			# calculate the total MS2 intensities for each duplicate
 			totalIntensities = np.sum(np.asarray(df.loc[this_duplicatesList, intensityColumns]), axis=1)
 			# get the most intense duplicate
 			intenseIndex = this_duplicatesList[np.argmax(totalIntensities)]
 			assert not np.isnan(intenseIndex)
-			intenseIndices.append(intenseIndex)
-		return intenseIndices
+			intenseIndicesDict[bestIndex] = intenseIndex
+		return intenseIndicesDict
 
 	def getRepresentativesDf(this_bestIndicesDict):
 		"""
@@ -196,9 +196,9 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		if method == 'bestMatch':
 			pass
 		elif method == 'mostIntense':
-			intenseIndices = getIntenseIndices(this_duplicateLists)
+			intenseIndicesDict = getIntenseIndicesDict(this_bestIndicesDict)
 			# generate { bestIndex : [mostIntense intensities] }
-			intensitiesDict = dict(zip(list(this_bestIndices), getIntensities(df.loc[intenseIndices, :])))
+			intensitiesDict = dict(zip(list(this_bestIndices), getIntensities(df.loc[intenseIndicesDict, :])))
 			# set the representative intensities to be the most intense intensities
 			this_representativesDf = setIntensities(this_representativesDf, intensitiesDict)
 		else:  # method == 'centerMeasure'
