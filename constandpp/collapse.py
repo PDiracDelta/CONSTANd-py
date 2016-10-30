@@ -10,7 +10,7 @@ and replaces the duplicates with one representative detection and a combination/
 """
 
 import numpy as np
-import pandas as pd
+import pdb
 from dataprep import intensityColumns, setIntensities, getIntensities
 from warnings import warn
 
@@ -183,9 +183,13 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		:param duplicateLists:      list            [[group of duplicates] per toCollapse value in the df]
 		:return representativesDf:  pd.dataFrame    all representatives data that will replace the duplicate entries in the dataFrame df
 		"""
+		assert len(duplicateLists) == len(bestIndices)
 		representativesDf = df.loc[bestIndices]
 		# sum the degeneracies of all duplicates involved in each representative
-		representativesDf['Degeneracy'] = [np.sum(np.asarray(df.loc[(duplicatesList, 'Degeneracy')])) for duplicatesList in duplicateLists]
+		try:
+			representativesDf['Degeneracy'] = [np.sum(np.asarray(df.loc[(duplicatesList, 'Degeneracy')])) for duplicatesList in duplicateLists]
+		except ValueError:
+			pass
 
 		if method == 'bestMatch':
 			pass
@@ -213,7 +217,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 
 	if 'Degeneracy' not in df.columns:
 		# contains the number of peptides that have been collapsed onto each (synthetic) detection.
-		df['Degeneracy'] = [1,]*len(df.index)
+		df['Degeneracy'] = [1, ]*len(df.index)
 
 	# get a nested list of duplicates according to toCollapse. [[duplicates1], [duplicates2], ...]
 	duplicateLists = getDuplicates()
