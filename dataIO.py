@@ -42,6 +42,8 @@ def getInput():
 	header_in = config.getint('DEFAULT','header_in')
 	intensityColumns = parseList(config.get('DEFAULT', 'intensityColumns'))
 	requiredColumns = parseList(config.get('DEFAULT', 'requiredColumns'))
+	noMissingValuesColumns = parseList(config.get('DEFAULT', 'noMissingValuesColumns'))
+	remove_ExtraColumnsToSave = parseList(config.get('DEFAULT', 'remove_ExtraColumnsToSave'))
 	collapseColumnsToSave = parseList(config.get('DEFAULT', 'collapseColumnsToSave'))
 	removeBadConfidence_bool = config.getboolean('DEFAULT','removeBadConfidence_bool')
 	removeBadConfidence_minimum = config.get('DEFAULT','removeBadConfidence_minimum')
@@ -103,16 +105,8 @@ def getInput():
 		raise Exception("Please indicate whether PSM Algorithm redundancy removal should be exclusive or not.")
 	if collapseCharge_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple charge states.")
-	elif collapseCharge_bool is True:
-		if collapseRT_bool is False:
-			collapseRT_bool = True
-			warn("Removal of charge redundancy requires removal of retention time redundancy; setting 'collapseRT_bool=True'.")
 	if collapsePTM_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PTMs.")
-	elif collapsePTM_bool is True:
-		if collapseRT_bool is False:
-			collapseRT_bool = True
-			warn("Removal of PTM redundancy requires removal of retention time redundancy; setting 'collapseRT_bool=True'.")
 	if isotopicCorrection_bool is None:
 		raise Exception("Please indicate whether you would like to correct for isotopic impurities.")
 	if not (isotopicCorrectionsMatrix.shape == (6,6)):
@@ -139,6 +133,8 @@ def getInput():
 		'header_in': header_in,
 		'intensityColumns': intensityColumns,
 		'requiredColumns': requiredColumns+intensityColumns, # needs to include intensitycolumns
+		'noMissingValuesColumns': noMissingValuesColumns,
+		'remove_ExtraColumnsToSave': remove_ExtraColumnsToSave+intensityColumns, # needs to include intensitycolumns
 		'collapseColumnsToSave': collapseColumnsToSave+intensityColumns, # needs to include intensitycolumns
 		'removeBadConfidence_bool': removeBadConfidence_bool,
 		'removeBadConfidence_minimum': removeBadConfidence_minimum,

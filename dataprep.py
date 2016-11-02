@@ -22,14 +22,18 @@ import numpy as np
 from warnings import warn
 
 intensityColumns = None
+remove_ExtraColumnsToSave = None
+noMissingValuesColumns = None
 
 
-def setIntensityColumns(intensityColumns):
+def setGlobals(intensityColumns, remove_ExtraColumnsToSave, noMissingValuesColumns):
 	"""
 	Sets the value of the global variable intensityColumns for use in the module functions.
 	:param intensityColumns: list   names of the columns that contain the MS2 intensities
 	"""
 	globals()['intensityColumns'] = intensityColumns
+	globals()['remove_ExtraColumnsToSave'] = remove_ExtraColumnsToSave
+	globals()['remove_ExtraColumnsToSave'] = noMissingValuesColumns
 
 
 def selectRequiredColumns(df, requiredColumns):
@@ -49,7 +53,7 @@ def removeMissing(df):
 	:return df: pd.dataFrame    without missing values
 	"""
 	toDelete = []
-	for column in ['First Scan', 'Annotated Sequence', 'Identifying Node', 'Charge', 'Modifications']:
+	for column in noMissingValuesColumns:
 		# delete all detections that have a missing value in this column
 		toDelete.extend(df.loc[df[column].isnull(), :].index)
 	# delete all detections that have a missing value in both columns: XCorr and Ions Score
@@ -74,7 +78,7 @@ def removeBadConfidence(df, minimum):
 	:return df:             pd.dataFrame    data with confidence levels > minimum
 	:return removedData:    pd.dataFrame    data with confidence levels < minimum
 	"""
-	columnsToSave = ['First Scan', 'Annotated Sequence', 'Identifying Node', 'Master Protein Accessions', 'Confidence']
+	columnsToSave = ['Confidence'] + remove_ExtraColumnsToSave
 	conf2int = {'Low': 1, 'Medium': 2, 'High': 3}
 	try:
 		minimum = conf2int[minimum]
@@ -96,7 +100,7 @@ def removeIsolationInterference(df, threshold):
 	:return df:             pd.dataFrame    filtered data
 	:return removedData:    pd.dataFrame    basic info about the removed values
 	"""
-	columnsToSave = ['First Scan', 'Annotated Sequence', 'Identifying Node', 'Master Protein Accessions', 'Isolation Interference [%]']
+	columnsToSave = ['Isolation Interference [%]'] + remove_ExtraColumnsToSave
 	toDelete = df.loc[df['Isolation Interference [%]'] > threshold].index # indices of rows to delete
 	removedData = df.loc[toDelete,columnsToSave]
 	df.drop(toDelete, inplace=True)
