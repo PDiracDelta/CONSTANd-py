@@ -40,6 +40,7 @@ def getInput():
 	file_in = config.get('DEFAULT','file_in')
 	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
 	header_in = config.getint('DEFAULT','header_in')
+	unusedDetectionsInOneFile_bool = config.getboolean('DEFAULT','unusedDetectionsInOneFile_bool')
 	intensityColumns = parseList(config.get('DEFAULT', 'intensityColumns'))
 	requiredColumns = parseList(config.get('DEFAULT', 'requiredColumns'))
 	noMissingValuesColumns = parseList(config.get('DEFAULT', 'noMissingValuesColumns'))
@@ -131,6 +132,7 @@ def getInput():
 		'file_in': file_in,
 		'delim_in': delim_in,
 		'header_in': header_in,
+		'unusedDetectionsInOneFile_bool': unusedDetectionsInOneFile_bool,
 		'intensityColumns': intensityColumns,
 		'requiredColumns': requiredColumns+intensityColumns, # needs to include intensitycolumns
 		'noMissingValuesColumns': noMissingValuesColumns,
