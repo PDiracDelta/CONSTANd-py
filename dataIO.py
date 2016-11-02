@@ -26,14 +26,6 @@ def parseList(listInString):
 def getInput():
 	"""
 	Get mass spec data and CONSTANd parameters from the user or from the web interface as a dict.
-	:return params:         dict    dictionary containing all paraeters mentioned below:
-	:return file_in:        string  path to the input file
-	:return delim_in:       char    delimiter of the data in the input file
-	:return accuracy:       float   CONSTANd param: combined allowed deviation of col and row means from 1/6
-	:return header_in:      integer row number containing the dataFrame header (can be None if no header)
-	:return maxIterations:  int     CONSTANd param: maximum amount of iterations (1x row and 1x col per iteration)
-	:return path_out:       string  path to the output file
-	:return delim_out:      char    delimiter of the data in the output file
 	"""
 	# TODO add all parameters in docstring
 	# TODO add .lower() to all string input except requiredColumns and intensityColumns
@@ -60,7 +52,6 @@ def getInput():
 	undoublePSMAlgo_bool = config.getboolean('DEFAULT','undoublePSMAlgo_bool')
 	masterPSMAlgo = config.get('DEFAULT','masterPSMAlgo')
 	undoublePSMAlgo_exclusive_bool = config.getboolean('DEFAULT','undoublePSMAlgo_exclusive_bool')
-	collapseRT_bool = config.getboolean('DEFAULT','collapseRT_bool')
 	collapseCharge_bool = config.getboolean('DEFAULT','collapseCharge_bool')
 	collapsePTM_bool = config.getboolean('DEFAULT','collapsePTM_bool')
 	isotopicCorrection_bool = config.getboolean('DEFAULT','isotopicCorrection_bool')
@@ -110,8 +101,6 @@ def getInput():
 		raise Exception("Invalid master PSM algorithm: '"+masterPSMAlgo+"'. Please pick 'mascot' or 'sequest'.")
 	if undoublePSMAlgo_exclusive_bool is None:
 		raise Exception("Please indicate whether PSM Algorithm redundancy removal should be exclusive or not.")
-	if collapseRT_bool is None:
-		raise Exception("Please indicate whether you would like to remove redundancy due to multiple retention times.")
 	if collapseCharge_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple charge states.")
 	elif collapseCharge_bool is True:
@@ -160,7 +149,6 @@ def getInput():
 		'undoublePSMAlgo_exclusive_bool': undoublePSMAlgo_exclusive_bool,
 		'collapse_method': collapse_method,
 		'collapse_maxRelativeReporterVariance': collapse_maxRelativeReporterVariance,
-		'collapseRT_bool': collapseRT_bool,
 		'collapseCharge_bool': collapseCharge_bool,
 		'collapsePTM_bool': collapsePTM_bool,
 		'isotopicCorrection_bool': isotopicCorrection_bool,

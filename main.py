@@ -152,12 +152,11 @@ def main(testing, writeToDisk):
 			# SANITY CHECK: no detections with the same scan number may exist after undoublePSMAlgo()
 			assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
 
-		if params['collapseRT_bool']:
-			# collapse peptide list redundancy due to multiple detections at different RT
-			df, removedData['RT'] = collapse('RT', df, method=params['collapse_method'],
-			                                   maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
-			                                 masterPSMAlgo=params['masterPSMAlgo'],
-			                                 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
+		# collapse peptide list redundancy due to multiple detections at different RT
+		df, removedData['RT'] = collapse('RT', df, method=params['collapse_method'],
+		                                   maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
+		                                 masterPSMAlgo=params['masterPSMAlgo'],
+		                                 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
 		if params['collapseCharge_bool']:
 			# collapse peptide list redundancy due to different charges (optional)
 			df, removedData['charge'] = collapse('Charge', df, method=params['collapse_method'],
