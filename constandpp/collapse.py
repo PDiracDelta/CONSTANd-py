@@ -94,6 +94,8 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		elif toCollapse == 'Charge':
 			groupByIdenticalProperties(byFirstPropDict, properties + ['Modifications'])
 		elif toCollapse == 'PTM':
+			# modifications are apparent from the sequence! Remove this dependence!
+			byFirstPropDict = df.groupby(df['Annotated Sequence'].str.upper()).groups
 			groupByIdenticalProperties(byFirstPropDict, properties + ['Charge'])
 
 		return this_duplicateLists
