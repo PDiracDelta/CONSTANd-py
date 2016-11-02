@@ -76,8 +76,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 				for byPropIndices in notSingleList:  # only if there actually is at least one group of duplicates
 					## SELECT IDENTICAL <NEXTPROPERTY> ##
 					groupByIdenticalProperties(df.loc[byPropIndices].groupby(remainingProperties[0]).groups,
-					                           remainingProperties[
-					                           1:])  # first pop the [0] property to both return and remove it!
+					                           remainingProperties[1:])  # first pop the [0] property to both return and remove it!
 			else:  # no more properties to check: mark groups of indices as duplicates
 				this_duplicateLists.extend(notSingleList)
 
@@ -92,7 +91,6 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			byFirstPropDict = df.groupby('Annotated Sequence').groups
 		if toCollapse == 'RT':
 			groupByIdenticalProperties(byFirstPropDict, properties + ['Charge', 'Modifications'])
-			return this_duplicateLists
 		elif toCollapse == 'Charge':
 			groupByIdenticalProperties(byFirstPropDict, properties + ['Modifications'])
 		elif toCollapse == 'PTM':
@@ -186,13 +184,9 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		this_bestIndices = this_bestIndicesDict.keys()
 		this_duplicateLists = this_bestIndicesDict.values()
 
-		this_representativesDf = df.loc[this_bestIndices, :]
+		this_representativesDf = df.loc[this_bestIndices, :].copy(deep=True)
 		# sum the degeneracies of all duplicates involved in each representative
-		try:
-			this_representativesDf.loc['Degeneracy'] = [np.sum(np.asarray(df.loc[(this_duplicatesList, 'Degeneracy')])) for
-			                                            this_duplicatesList in this_duplicateLists]
-		except ValueError:
-			pass
+		this_representativesDf.loc[:, 'Degeneracy'] = [np.sum(np.asarray(df.loc[(this_duplicatesList, 'Degeneracy')])) for this_duplicatesList in this_duplicateLists]
 
 		if method == 'bestMatch':
 			pass
@@ -210,13 +204,9 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			this_representativesDf = setIntensities(this_representativesDf, intensitiesDict)
 
 		# reindex this_representativesDf so it can be concatenated properly with new indices
-		this_representativesDf.index = list(range(max(df.index), max(df.index) + len(this_representativesDf.index)))
+		this_representativesDf.index = list(range(max(df.index)+1, max(df.index)+1 + len(this_representativesDf.index)))
+		# representative indices do not correspond to these indices!!!!!
 		return this_representativesDf
-
-		i = len(df.index)
-		for representative in representatives:
-			df.loc[i] = representative
-			i += 1
 
 	if 'Degeneracy' not in df.columns:
 		# contains the number of peptides that have been collapsed onto each (synthetic) detection.
@@ -224,6 +214,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 
 	# get a nested list of duplicates according to toCollapse. [[duplicates1], [duplicates2], ...]
 	duplicateLists = getDuplicates()
+
 	if method == 'RT':
 		pass  # TODO flag isolated RT peaks
 	elif method == 'PTM':
@@ -237,8 +228,8 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 	removedData = df.loc[toDelete, columnsToSave]
 	# add the representative index of each collection of collapsed duplicates
 	removedData.insert(loc=0, column='Representative First Scan', value=-1)
-	for duplicatesList, rfs in zip(duplicateLists,
-	                               representativesDf['First Scan']):  # relies on fact that order is conserved!
+	for duplicatesList, rfs in zip(bestIndicesDict.values(),
+	                               representativesDf['First Scan']):  # relies on fact that order is conserved! #todo
 		removedData.loc[duplicatesList, 'Representative First Scan'] = rfs
 	# actually remove the toDelete detections
 	df.drop(toDelete, inplace=True)
