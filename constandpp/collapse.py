@@ -73,7 +73,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			# use only indices that are not single (i.e. that have a duplicate)
 			notSingleList = list(filter(lambda e: len(e) > 1, byPropDict.values()))
 			if remainingProperties:  # check for more identical properties before marking as duplicates
-				for byPropIndices in notSingleList:  # only if there actually is at least one group of duplicates
+				for byPropIndices in notSingleList: # only if there actually is at least one group of duplicates
 					## SELECT IDENTICAL <NEXTPROPERTY> ##
 					groupByIdenticalProperties(df.loc[byPropIndices].groupby(remainingProperties[0]).groups,
 					                           remainingProperties[1:])  # first pop the [0] property to both return and remove it!
