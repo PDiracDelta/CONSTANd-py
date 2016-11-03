@@ -173,7 +173,7 @@ def main(testing, writeToDisk):
 			                                            undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
 
 		# SANITY CHECK: there should be no more duplicates if all collapses have been applied.
-		if params['undoublePSMAlgo_bool'] and params['collapseRT_bool'] and params['collapseCharge_bool']: # TEST
+		if params['undoublePSMAlgo_bool'] and params['collapseCharge_bool']: # TEST
 			assert np.prod((len(i) < 2 for (s, i) in df.groupby('Annotated Sequence').groups)) # only 1 index vector in dict of SEQUENCE:[INDICES] for all sequences
 
 		if params['isotopicCorrection_bool']:
@@ -196,7 +196,7 @@ def main(testing, writeToDisk):
 		if writeToDisk:
 			# save the removed data information
 			exportData(removedData, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_removedData',
-			           delim_out=params['delim_out'], inOneFile=params['unusedDetectionsInOneFile_bool'])
+			           delim_out=params['delim_out'], inOneFile=params['removedDataInOneFile_bool'])
 			# save the final form of the dataFrame WITHOUT normalized intensities.
 			exportData(df, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_dataFrame', delim_out=params['delim_out'])
 			# save the normalized intensities obtained through CONSTANd
