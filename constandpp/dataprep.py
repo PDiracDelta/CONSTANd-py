@@ -24,10 +24,9 @@ from warnings import warn
 intensityColumns = None
 remove_ExtraColumnsToSave = None
 noMissingValuesColumns = None
-unusedDetectionsInOneFile_bool = False
 
 
-def setGlobals(intensityColumns, remove_ExtraColumnsToSave, noMissingValuesColumns, unusedDetectionsInOneFile_bool):
+def setGlobals(intensityColumns, remove_ExtraColumnsToSave, noMissingValuesColumns):
 	"""
 	Sets the value of the global variable intensityColumns for use in the module functions.
 	:param intensityColumns: list   names of the columns that contain the MS2 intensities
@@ -35,7 +34,6 @@ def setGlobals(intensityColumns, remove_ExtraColumnsToSave, noMissingValuesColum
 	globals()['intensityColumns'] = intensityColumns
 	globals()['remove_ExtraColumnsToSave'] = remove_ExtraColumnsToSave
 	globals()['remove_ExtraColumnsToSave'] = noMissingValuesColumns
-	globals()['remove_ExtraColumnsToSave'] = unusedDetectionsInOneFile_bool
 
 
 def selectRequiredColumns(df, requiredColumns):
@@ -88,10 +86,7 @@ def removeBadConfidence(df, minimum):
 	except KeyError:
 		raise KeyError("Illegal Confidence values (allowed: Low, Medium, High). Watch out for capitalization.")
 	toDelete = df.loc[badConfidences, :].index  # indices of rows to delete
-	if unusedDetectionsInOneFile_bool:
-		removedData = df.loc[toDelete]
-	else:
-		removedData = df.loc[toDelete, columnsToSave]
+	removedData = df.loc[toDelete, columnsToSave]
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 
@@ -107,10 +102,7 @@ def removeIsolationInterference(df, threshold):
 	"""
 	columnsToSave = ['Isolation Interference [%]'] + remove_ExtraColumnsToSave
 	toDelete = df.loc[df['Isolation Interference [%]'] > threshold].index # indices of rows to delete
-	if unusedDetectionsInOneFile_bool:
-		removedData = df.loc[toDelete]
-	else:
-		removedData = df.loc[toDelete, columnsToSave]
+	removedData = df.loc[toDelete, columnsToSave]
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 
@@ -142,10 +134,7 @@ def undoublePSMAlgo(df, master, exclusive):
 		                                         byFirstScanDict.values())))  # indices of detections done by only 1 PSMAlgo
 		singlesNotByMasterIndices = singles.difference(masterIndices)
 		toDelete = toDelete.difference(singlesNotByMasterIndices)  # keep only indices not discovered by SLAVE
-	if unusedDetectionsInOneFile_bool:
-		removedData = df.loc[toDelete]
-	else:
-		removedData = df.loc[toDelete, columnsToSave]
+	removedData = df.loc[toDelete, columnsToSave]
 	dflen=df.shape[0] # TEST
 	df.drop(toDelete, inplace=True)
 	assert(dflen == df.shape[0]+removedData.shape[0]) # TEST

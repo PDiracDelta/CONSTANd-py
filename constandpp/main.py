@@ -136,8 +136,7 @@ def main(testing, writeToDisk):
 		removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
 		# define global parameters
 		setGlobals(intensityColumns = params['intensityColumns'], remove_ExtraColumnsToSave=params['remove_ExtraColumnsToSave'],
-		           noMissingValuesColumns=params['noMissingValuesColumns'],
-		           unusedDetectionsInOneFile_bool=params['unusedDetectionsInOneFile_bool'])
+		           noMissingValuesColumns=params['noMissingValuesColumns'])
 		setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataprep.py
 		# remove detections where (essential) data is missing.
 		df, removedData['missing'] = removeMissing(df)
@@ -196,8 +195,8 @@ def main(testing, writeToDisk):
 		""" Save data to disk and generate report """
 		if writeToDisk:
 			# save the removed data information
-			exportData(removedData, dataType='df', path_out=params['path_out'],
-			           filename=params['filename_out'] + '_removedData', delim_out=params['delim_out'])
+			exportData(removedData, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_removedData',
+			           delim_out=params['delim_out'], inOneFile=params['unusedDetectionsInOneFile_bool'])
 			# save the final form of the dataFrame WITHOUT normalized intensities.
 			exportData(df, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_dataFrame', delim_out=params['delim_out'])
 			# save the normalized intensities obtained through CONSTANd

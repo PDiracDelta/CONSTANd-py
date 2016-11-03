@@ -211,7 +211,7 @@ def importDataFrame(path_in, delim=None, header=0):
 	return df
 
 
-def exportData(data, dataType, path_out, filename, delim_out=None):
+def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=False):
 	"""
 	Save the results (normalized intensities) to disk.
 	:param data:        obj     data object to be exported to disk
@@ -231,10 +231,17 @@ def exportData(data, dataType, path_out, filename, delim_out=None):
 	elif dataType == 'obj':
 		pickle.dump(data, open(fullPath, 'wb'))
 	elif dataType == 'df':
-		if isinstance(data, dict):
-			for frameName,frame in data.items():
-				assert isinstance(frame, pd.DataFrame)
-				frame.to_csv(path_out + '/' + filename + '_' + frameName + extension, sep=delim_out, index=False)
+		if isinstance(data, dict): # there are actually multiple dataFrames
+			if inOneFile: # save all removedData in one file.
+				removedData=pd.DataFrame
+				for frame in data.values():
+					assert isinstance(frame, pd.DataFrame)
+					removedData = removedData.append(frame)
+				removedData.to_csv(path_out + '/' + filename + '_removedData' + extension, sep=delim_out, index=False)
+			else: # save all removedData in separate files per category.
+				for frameName, frame in data.items():
+					assert isinstance(frame, pd.DataFrame)
+					frame.to_csv(path_out + '/' + filename + '_' + frameName + extension, sep=delim_out,index=False)
 		else:
 			assert isinstance(data, pd.DataFrame)
 			data.to_csv(fullPath, sep=delim_out, index=False)
