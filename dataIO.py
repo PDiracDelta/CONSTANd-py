@@ -233,7 +233,7 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 	elif dataType == 'df':
 		if isinstance(data, dict): # there are actually multiple dataFrames
 			if inOneFile: # save all removedData in one file.
-				removedData=pd.DataFrame
+				removedData=pd.DataFrame()
 				for frame in data.values():
 					assert isinstance(frame, pd.DataFrame)
 					removedData = removedData.append(frame)
