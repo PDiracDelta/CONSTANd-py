@@ -33,7 +33,7 @@ def setGlobals(intensityColumns, remove_ExtraColumnsToSave, noMissingValuesColum
 	"""
 	globals()['intensityColumns'] = intensityColumns
 	globals()['remove_ExtraColumnsToSave'] = remove_ExtraColumnsToSave
-	globals()['remove_ExtraColumnsToSave'] = noMissingValuesColumns
+	globals()['noMissingValuesColumns'] = noMissingValuesColumns
 
 
 def selectRequiredColumns(df, requiredColumns):
