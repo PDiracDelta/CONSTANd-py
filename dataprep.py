@@ -113,13 +113,17 @@ def setMasterProteinDescriptions(df):
 	:param df:  pd.dataFrame     dataFrame with all descriptions and accessions
 	:return df: pd.dataFrame     dataFrame with only Master Protein descriptions and accessions
 	"""
-	masterProteinsLists = df.loc[:, 'Master Protein Accessions'].apply(lambda x: x.split('; '))
-	proteinsLists = df.loc['Protein Accessions'].apply(lambda x: x.split('; '))
-	descriptionsLists = df.loc['Protein Descriptions'].apply(lambda x: x.split('; '))
-	correctIndicesLists = [[proteins.index(masterProtein) for masterProtein in masterProteins]
+	# [[master Proteins] per peptide]
+	masterProteinsLists = df.loc[:, 'Master Protein Accessions'].astype(str).apply(lambda x: x.split('; '))
+	# [[all Proteins] per peptide]
+	proteinsLists = df.loc[:, 'Protein Accessions'].astype(str).apply(lambda x: x.split('; '))
+	# [[all descriptions] per peptide]
+	descriptionsLists = df.loc[:, 'Protein Descriptions'].astype(str).apply(lambda x: x.split('; '))
+	# [[indices of master descriptions with respect to list of all descriptions] per peptide]
+	correctIndicesLists = [[proteins.index(masterProtein) for masterProtein in list(filter(lambda x: x.lower()!='nan', masterProteins))]
 	                  for masterProteins, proteins in zip(masterProteinsLists, proteinsLists)]
-	df.loc[:, 'Protein Descriptions'] = ['; '.join(descriptionsLists[correctIndices])
-	                                     for correctIndices in correctIndicesLists]
+	# [[master descriptions] per peptide]
+	df.loc[:, 'Protein Descriptions'] = ['; '.join([descriptionsList[i] for i in correctIndices]) for (descriptionsList, correctIndices) in zip(descriptionsLists, correctIndicesLists)]
 	df.drop('Protein Accessions', axis=1, inplace=True)
 	return df
 
