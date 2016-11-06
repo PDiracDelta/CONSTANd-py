@@ -147,6 +147,8 @@ def main(testing, writeToDisk):
 		if params['removeIsolationInterference_bool']:
 			# remove all data with too high isolation interference
 			df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
+		# remove all non-master protein accessions (entire column) and descriptions (selective).
+		df = setMasterProteinDescriptions(df)
 		if params['undoublePSMAlgo_bool']:
 			# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
 			df, removedData['PSMAlgo'] = undoublePSMAlgo(df, master=params['masterPSMAlgo'],
