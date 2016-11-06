@@ -107,6 +107,23 @@ def removeIsolationInterference(df, threshold):
 	return df, removedData
 
 
+def setMasterProteinDescriptions(df):
+	"""
+	Takes a dataframe and removes all non-master protein accessions (entire column) and descriptions (selective).
+	:param df:  pd.dataFrame     dataFrame with all descriptions and accessions
+	:return df: pd.dataFrame     dataFrame with only Master Protein descriptions and accessions
+	"""
+	masterProteinsLists = df.loc[:, 'Master Protein Accessions'].apply(lambda x: x.split('; '))
+	proteinsLists = df.loc['Protein Accessions'].apply(lambda x: x.split('; '))
+	descriptionsLists = df.loc['Protein Descriptions'].apply(lambda x: x.split('; '))
+	correctIndicesLists = [[proteins.index(masterProtein) for masterProtein in masterProteins]
+	                  for masterProteins, proteins in zip(masterProteinsLists, proteinsLists)]
+	df.loc[:, 'Protein Descriptions'] = ['; '.join(descriptionsLists[correctIndices])
+	                                     for correctIndices in correctIndicesLists]
+	df.drop('Protein Accessions', axis=1, inplace=True)
+	return df
+
+
 def undoublePSMAlgo(df, master, exclusive):
 	"""
 	Removes redundant data due to different PSM algorithms producing the same peptide match. The 'master' algorithm
