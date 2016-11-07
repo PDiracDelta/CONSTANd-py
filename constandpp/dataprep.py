@@ -173,6 +173,7 @@ def isotopicCorrection(intensities, correctionsMatrix):
 	:return:                    np.ndarray  array of arrays with the corrected intensities
 	"""
 	correctedIntensities = []
+	noCorrectionIndices = []
 	warnedYet = False
 	try:
 		for row in intensities:
@@ -180,11 +181,12 @@ def isotopicCorrection(intensities, correctionsMatrix):
 				correctedIntensities.append(np.linalg.solve(correctionsMatrix, row))
 			else:
 				correctedIntensities.append(row)
+				noCorrectionIndices.append(intensities.index(row))
 				if not warnedYet:
 					warn("Cannot correct isotope impurities for detections with NaN reporter intensities; skipping those.")
 	except TypeError:
 		pass
-	return np.asarray(correctedIntensities)
+	return np.asarray(correctedIntensities), noCorrectionIndices
 
 
 def getIntensities(df, indices=None):

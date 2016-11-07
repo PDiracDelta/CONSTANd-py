@@ -26,6 +26,16 @@ def getRTIsolationInfo(removedData_RT):
 	return pd.DataFrame(RTIsolationInfo, columns=['Representative First Scan', 'Degeneracy', 'mean', 'std', 'max-min'])
 
 
+def getNoIsotopicCorrection(df, noCorrectionIndices):
+	"""
+	Given a dataframe and indices of detections that received no corrections, returns some basic info about them.
+	:param df:                  pd.dataFrame
+	:param noCorrectionIndices: list            indices of detections that received no isotopic correction
+	:return:                    pd.dataFrame    ['First Scan', 'Identifying Node', 'Annotated Sequence', 'Master Protein Accessions']
+	"""
+	return df.loc[noCorrectionIndices, ['First Scan', 'Identifying Node', 'Annotated Sequence', 'Master Protein Accessions']]
+
+
 def differentialExpression(normalizedIntensities, threshold=1):
 	# TODO: only include differentials with a fold of >threshold or <1/threshold
 	# TODO: careful with peptides with more than 1 master protein
