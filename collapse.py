@@ -138,18 +138,19 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 
 		return this_duplicateLists
 
-	def combineDetections(this_duplicateLists, centerMeasure):
+	def combineDetections(this2_bestIndicesDict, centerMeasure):
 		"""
 		Takes a nested list of the indices of duplicates and combines the rows of the intensity matrix -- found in
 		dataFrame df --	for each sublist into one new row of intensities for the representative that is to be their
 		replacement. This function should also flag cases where the variance between the intensities (calculated per
 		reporter channel) exceeds a maxRelativeReporterVariance.
-		:param this_duplicateLists:  list        [[group of duplicates] per toCollapse value in the df]
-		:param centerMeasure:   str         specifies the method of combination
-		:return newIntensities: np.ndarray  new intensities of the representative detection
+		:param this_duplicateLists: list    { bestIndex : [group of duplicate indices}
+		:param centerMeasure:       str     specifies the method of combination
+		:return newIntensitiesDict: dict    { bestIndex : new intensities of the representative detection }
 		"""
 		flagMaxRelativeReporterVariance = False
-		for this_duplicatesList in this_duplicateLists:
+		newIntensitiesDict = {}
+		for bestIndex, this_duplicatesList in this2_bestIndicesDict.items():
 			# calculate the total MS2 intensities for each duplicate
 			allMS2Intensities = getIntensities(df, this_duplicatesList)
 
@@ -163,16 +164,17 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 						this_duplicatesList) + ".")
 
 			if centerMeasure == 'mean':
-				newIntensities = np.nanmean(allMS2Intensities, 0)
+				newIntensitiesDict[bestIndex] = np.nanmean(allMS2Intensities, 0)
 			elif centerMeasure == 'geometricMedian':
 				# first normalize the row sums because otherwise the Median norm isn't conserved. (set it to 1 now)
 				Ri = 1 / allMS2Intensities.shape[1] * np.asarray(1 / np.nanmean(allMS2Intensities, 1)).reshape(
 					allMS2Intensities.shape[0], )
 				relativeIntensities = (allMS2Intensities.T * Ri).T
-				newIntensities = geometricMedian(relativeIntensities)
+				newIntensitiesDict[bestIndex] = geometricMedian(relativeIntensities)
 			elif centerMeasure == 'weighted':  # TODO
 				pass
-		return newIntensities
+		print('hoi')
+		return newIntensitiesDict
 
 	def getBestIndicesDict(this_duplicateLists):
 		"""
@@ -240,11 +242,9 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			# set the representative intensities to be the most intense intensities
 			this_representativesDf = setIntensities(this_representativesDf, intensitiesDict)
 		else:  # method == 'centerMeasure'
-			newIntensities = combineDetections(this_duplicateLists, centerMeasure=method)
-			# generate { intenseIndex : [intensities] }
-			intensitiesDict = dict(zip(list(this_bestIndices), newIntensities))
+			newIntensitiesDict = combineDetections(this_bestIndicesDict, centerMeasure=method)
 			# set the representative intensities to be the most intense intensities
-			this_representativesDf = setIntensities(this_representativesDf, intensitiesDict)
+			this_representativesDf = setIntensities(this_representativesDf, newIntensitiesDict)
 
 		# reindex this_representativesDf so it can be concatenated properly with new indices
 		this_representativesDf.index = list(range(max(df.index)+1, max(df.index)+1 + len(this_representativesDf.index)))

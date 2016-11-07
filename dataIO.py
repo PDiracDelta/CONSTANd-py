@@ -220,7 +220,6 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 	:param filename:    string  filename for the data
 	:param delim_out:       char    delimiter of the data
 	"""
-	# assert data is not None # TODO
 	assert path.exists(path_out)
 
 	extension = delim2ext(delim_out)
