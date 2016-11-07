@@ -28,11 +28,14 @@ def setCollapseColumnsToSave(this_columnsToSave):
 def geometricMedian(X, eps=1e-5):
 	"""
 	Returns the geometric median conform to the algorithm developed by Yehuda Vardi and Cun-Hui Zhang.
-	(doi: 10.1073/pnas.97.4.1423) and implemented by http://stackoverflow.com/users/565635/orlp
+	(doi: 10.1073/pnas.97.4.1423) and implemented by http://stackoverflow.com/users/565635/orlp.
 	:param X:   np.ndarray      multidimensional vectors
 	:param eps: float64         precision
 	:return:    np.ndarray      geometric median multidimensional vector
 	"""
+	# throw away detections with nan-values
+	X = X[~np.isnan(X).any(axis=1)]
+
 	y = np.mean(X, 0)
 	while True: # as long as precision eps not reached
 		D = cdist(X, [y])
@@ -67,7 +70,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 	Adds a 'Degeneracy' column to the dataFrame if it didn't exist already: this contains the number of peptides that
 	have been collapsed onto that (synthetic) detection.
 	Returns removedData according to the columnsToSave list.
-	:param toCollapse:                  str             variable of which true duplicates are to be collapsed.
+	:param toCollapse:              str             variable of which true duplicates are to be collapsed.
 	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
 	:param columnsToSave:               list            list of variables to be saved for detections that ought to be removed
 	:param method:                      str             defines how the new detection is to be selected/constructed
@@ -160,7 +163,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 						this_duplicatesList) + ".")
 
 			if centerMeasure == 'mean':
-				newIntensities = np.mean(allMS2Intensities, 0)
+				newIntensities = np.nanmean(allMS2Intensities, 0)
 			elif centerMeasure == 'geometricMedian':
 				newIntensities = geometricMedian(allMS2Intensities)
 			elif centerMeasure == 'weighted':  # TODO
