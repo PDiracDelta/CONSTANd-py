@@ -165,7 +165,11 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			if centerMeasure == 'mean':
 				newIntensities = np.nanmean(allMS2Intensities, 0)
 			elif centerMeasure == 'geometricMedian':
-				newIntensities = geometricMedian(allMS2Intensities)
+				# first normalize the row sums because otherwise the Median norm isn't conserved. (set it to 1 now)
+				Ri = 1 / allMS2Intensities.shape[1] * np.asarray(1 / np.nanmean(allMS2Intensities, 1)).reshape(
+					allMS2Intensities.shape[0], )
+				relativeIntensities = (allMS2Intensities.T * Ri).T
+				newIntensities = geometricMedian(relativeIntensities)
 			elif centerMeasure == 'weighted':  # TODO
 				pass
 		return newIntensities
