@@ -37,6 +37,7 @@ def getInput():
 	config.read('config.ini', encoding='utf-8')
 
 	# get variables from config in correct typography
+	date = config.get('DEFAULT','date')
 	file_in = config.get('DEFAULT','file_in')
 	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
 	header_in = config.getint('DEFAULT','header_in')
@@ -129,6 +130,7 @@ def getInput():
 
 	# assign the TYPOGRAPHICALLY CORRECT values to the params dict and modify them if necessary.
 	params = {
+		'date': date,
 		'file_in': file_in,
 		'delim_in': delim_in,
 		'header_in': header_in,
