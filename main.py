@@ -132,6 +132,9 @@ def main(testing, writeToDisk):
 	# get the dataframe
 	df = importDataFrame(params['file_in'], delim=params['delim_in'], header=params['header_in'])
 	if not testing:
+		# metadata = {'parameters' : pd.DataFrame(params)} # todo add parameters (but contains matrix and stuff...)
+		metadata = {}
+
 		""" Data preparation """
 		removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
 		# define global parameters
@@ -180,7 +183,7 @@ def main(testing, writeToDisk):
 
 		if params['isotopicCorrection_bool']:
 			# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
-			intensities = isotopicCorrection(getIntensities(df), correctionsMatrix=params['isotopicCorrectionsMatrix'])
+			intensities, noCorrectionIndices = isotopicCorrection(getIntensities(df), correctionsMatrix=params['isotopicCorrectionsMatrix'])
 		else:
 			intensities = getIntensities(df)
 		# perform the CONSTANd algorithm; also do NOT include normalized intensities in df --> only for paying users.
@@ -188,10 +191,10 @@ def main(testing, writeToDisk):
 
 		""" Data analysis and visualization """
 		# contains statistics and metadata (like the parameters) about the analysis.
-		# metadata = {'parameters' : pd.DataFrame(params)} # todo add parameters (but contains matrix and stuff...)
-		metadata = {}
 		# perform differential expression analysis
 
+		# record detections without isotopic correction applied applied
+		metadata['noIsotopicCorrection'] = getNoIsotopicCorrection(df, noCorrectionIndices)
 		# record RT isolation statistics. Future: flag
 		metadata['RTIsolationInfo'] = getRTIsolationInfo(removedData['RT'])
 
