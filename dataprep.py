@@ -20,6 +20,7 @@ Removed data is always saved into a removedData dataFrame.
 
 import numpy as np
 from warnings import warn
+from pandas import Series
 
 intensityColumns = None
 remove_ExtraColumnsToSave = None
@@ -173,24 +174,30 @@ def isotopicCorrection(intensities, correctionsMatrix):
 	"""
 	correctedIntensities = []
 	warnedYet = False
-	for row in intensities:
-		if not np.isnan(row).any():
-			correctedIntensities.append(np.linalg.solve(correctionsMatrix, row))
-		else:
-			correctedIntensities.append(row)
-			if not warnedYet:
-				warn("Cannot correct isotope impurities for detections with NaN reporter intensities; skipping those.")
+	try:
+		for row in intensities:
+			if not np.isnan(row).any():
+				correctedIntensities.append(np.linalg.solve(correctionsMatrix, row))
+			else:
+				correctedIntensities.append(row)
+				if not warnedYet:
+					warn("Cannot correct isotope impurities for detections with NaN reporter intensities; skipping those.")
+	except TypeError:
+		pass
 	return np.asarray(correctedIntensities)
 
 
 def getIntensities(df, indices=None):
 	"""
 	Extracts the (absolute) intensity matrix from the dataFrame.
-	:param df:              pd.dataFrame    Pandas dataFrame from which to extract the intensities
-	:param indices:         list            indices of the detections for which to obtain the intensities
-	:return intensities:    np.ndArray      matrix with the intensities
+	:param df:              pd.dataFrame or pd.Series   Pandas dataFrame/Series from which to extract the intensities
+	:param indices:         list                        indices of the detections for which to obtain the intensities
+	:return intensities:    np.ndArray                  matrix with the intensities
 	"""
+	if isinstance(df, Series): # this is a dataframe with only 1 entry: indexing [:, cols] doesnt work.
+		return np.asarray(df.loc[intensityColumns])
 	if indices is None:
+		#return np.asarray(df.loc(axis=1)[intensityColumns])
 		return np.asarray(df.loc[:, intensityColumns])
 	else:
 		return np.asarray(df.loc[indices, intensityColumns])
