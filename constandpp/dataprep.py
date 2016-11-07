@@ -183,13 +183,17 @@ def isotopicCorrection(intensities, correctionsMatrix):
 	return np.asarray(correctedIntensities)
 
 
-def getIntensities(df):
+def getIntensities(df, indices=None):
 	"""
 	Extracts the (absolute) intensity matrix from the dataFrame.
 	:param df:              pd.dataFrame    Pandas dataFrame from which to extract the intensities
+	:param indices:         list            indices of the detections for which to obtain the intensities
 	:return intensities:    np.ndArray      matrix with the intensities
 	"""
-	return np.asarray(df.loc[:, intensityColumns])
+	if indices is None:
+		return np.asarray(df.loc[:, intensityColumns])
+	else:
+		return np.asarray(df.loc[indices, intensityColumns])
 
 
 def setIntensities(df, intensitiesDict):
