@@ -188,7 +188,8 @@ def main(testing, writeToDisk):
 
 		""" Data analysis and visualization """
 		# contains statistics and metadata (like the parameters) about the analysis.
-		metadata = {'parameters' : pd.DataFrame(params)}
+		# metadata = {'parameters' : pd.DataFrame(params)} # todo add parameters (but contains matrix and stuff...)
+		metadata = {}
 		# perform differential expression analysis
 
 		# record RT isolation statistics. Future: flag
