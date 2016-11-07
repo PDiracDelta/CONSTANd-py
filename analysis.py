@@ -16,14 +16,14 @@ def getRTIsolationInfo(removedData_RT):
 	Returns dataFrame with the mean, standard deviation, and max-min value of the RT values for each duplicate_group
 	representative that is found in the removedData_RT dataframe containing the removedData for the RT collapse.
 	:param removedData_RT:  pd.dataFrame    removedData for the RT collapse.
-	:return:                pd.DataFrame    statistics ['Representative First Scan', 'mean', 'std', 'max-min'] about the RT values
+	:return:                pd.DataFrame    statistics 'Degeneracy', 'mean', 'std', 'max-min' about the RT values
 	"""
 	duplicateGroups = removedData_RT.groupby('Representative First Scan').groups
 	RTIsolationInfo = []
 	for rfs, duplicates in duplicateGroups.items():
 		RTValues = removedData_RT.loc[duplicates, 'RT [min]']
-		RTIsolationInfo.append([rfs, np.nanmean(RTValues), np.std(RTValues), np.ptp(RTValues)])
-	return pd.DataFrame(RTIsolationInfo, columns=['Representative First Scan', 'mean', 'std', 'max-min'])
+		RTIsolationInfo.append([rfs, len(duplicates), np.nanmean(RTValues), np.std(RTValues), np.ptp(RTValues)])
+	return pd.DataFrame(RTIsolationInfo, columns=['Representative First Scan', 'Degeneracy', 'mean', 'std', 'max-min'])
 
 
 def differentialExpression(normalizedIntensities, threshold=1):
