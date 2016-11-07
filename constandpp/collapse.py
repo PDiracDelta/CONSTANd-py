@@ -10,7 +10,8 @@ and replaces the duplicates with one representative detection and a combination/
 """
 
 import numpy as np
-from dataprep import intensityColumns, setIntensities, getIntensities
+from dataprep import setIntensities, getIntensities
+from scipy.spatial.distance import cdist, euclidean
 from warnings import warn
 
 columnsToSave = None
@@ -22,6 +23,40 @@ def setCollapseColumnsToSave(this_columnsToSave):
 	:param this_columnsToSave: list   names of the columns that ought to be saved when removing data in a collapse.
 	"""
 	globals()['columnsToSave'] = this_columnsToSave
+
+
+def geometricMedian(X, eps=1e-5):
+	"""
+	Returns the geometric median conform to the algorithm developed by Yehuda Vardi and Cun-Hui Zhang.
+	(doi: 10.1073/pnas.97.4.1423) and implemented by http://stackoverflow.com/users/565635/orlp
+	:param X:   np.ndarray      multidimensional vectors
+	:param eps: float64         precision
+	:return:    np.ndarray      geometric median multidimensional vector
+	"""
+	y = np.mean(X, 0)
+	while True: # as long as precision eps not reached
+		D = cdist(X, [y])
+		nonzeros = (D != 0)[:, 0]
+
+		Dinv = 1 / D[nonzeros]
+		Dinvs = np.sum(Dinv)
+		W = Dinv / Dinvs
+		T = np.sum(W * X[nonzeros], 0)
+
+		num_zeros = len(X) - np.sum(nonzeros)
+		if num_zeros == 0:
+			y1 = T
+		elif num_zeros == len(X):
+			return y
+		else:
+			R = (T - y) * Dinvs
+			r = np.linalg.norm(R)
+			rinv = 0 if r == 0 else num_zeros/r
+			y1 = max(0, 1-rinv)*T + min(1, rinv)*y
+
+		if euclidean(y, y1) < eps:
+			return y1
+		y = y1
 
 
 def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo, undoublePSMAlgo_bool):  #
@@ -67,13 +102,13 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			]
 			This function correctly groups by PSMAlgo when required and does not when it is prohibited.
 			:param byPropDict:          dict    { propertyValue : [duplicateIndices] }
-			:param remainingProperties: list    properties still to be grouped by
+			:param remainingProperties: list no collapsePTM allowed   properties still to be grouped by
 			:return this_duplicateLists:     list    [[group of duplicates] per combination-of-properties values in the dataFrame]
 			"""
 			# use only indices that are not single (i.e. that have a duplicate)
 			notSingleList = list(filter(lambda e: len(e) > 1, byPropDict.values()))
 			if remainingProperties:  # check for more identical properties before marking as duplicates
-				for byPropIndices in notSingleList: # only if there actually is at least one group of duplicates
+				for byPropIndices in notSingleList: # only if there actually is at least one group of dnp.asarray(df.locuplicates
 					## SELECT IDENTICAL <NEXTPROPERTY> ##
 					groupByIdenticalProperties(df.loc[byPropIndices].groupby(remainingProperties[0]).groups,
 					                           remainingProperties[1:])  # first pop the [0] property to both return and remove it!
@@ -113,7 +148,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		flagMaxRelativeReporterVariance = False
 		for this_duplicatesList in this_duplicateLists:
 			# calculate the total MS2 intensities for each duplicate
-			allMS2Intensities = np.asarray(df.loc[this_duplicatesList, intensityColumns])
+			allMS2Intensities = getIntensities(df, this_duplicatesList)
 
 			if flagMaxRelativeReporterVariance:  # TODO flag when maxRelativeReporterVariance is exceeded
 				# this can only be consistent if executed on RELATIVE intensities.
@@ -121,14 +156,13 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 					allMS2Intensities.shape[0], )
 				relativeIntensities = (allMS2Intensities.T * Ri).T
 				if np.any(np.var(relativeIntensities, axis=0) > maxRelativeReporterVariance):
-					# TODO this shouldnt just warn, you should also decide what to do.
 					warn("maxRelativeReporterVariance too high for duplicates with indices: " + str(
 						this_duplicatesList) + ".")
 
 			if centerMeasure == 'mean':
 				newIntensities = np.mean(allMS2Intensities, 0)
-			elif centerMeasure == 'geometricMedian':  # TODO
-				pass
+			elif centerMeasure == 'geometricMedian':
+				newIntensities = geometricMedian(allMS2Intensities)
 			elif centerMeasure == 'weighted':  # TODO
 				pass
 		return newIntensities
@@ -167,7 +201,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		intenseIndicesDict = {}
 		for bestIndex, this_duplicatesList in this_bestIndicesDict.items():
 			# calculate the total MS2 intensities for each duplicate
-			totalIntensities = np.sum(np.asarray(df.loc[this_duplicatesList, intensityColumns]), axis=1)
+			totalIntensities = np.sum(getIntensities(df, this_duplicatesList), axis=1)
 			# get the most intense duplicate
 			intenseIndex = this_duplicatesList[np.argmax(totalIntensities)]
 			assert not np.isnan(intenseIndex)
