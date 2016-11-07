@@ -2,9 +2,28 @@
 # -*- coding: utf-8 -*-
 
 """
+Collection of functions involved in analyzing the data that was processed by dataprep.py and constand.py.
 Performs a differential expression analysis on the normalized intensities as provided by CONSTANd.
 Includes data visualization.
 """
+
+import numpy as np
+import pandas as pd
+
+
+def getRTIsolationInfo(removedData_RT):
+	"""
+	Returns dataFrame with the mean, standard deviation, and max-min value of the RT values for each duplicate_group
+	representative that is found in the removedData_RT dataframe containing the removedData for the RT collapse.
+	:param removedData_RT:  pd.dataFrame    removedData for the RT collapse.
+	:return:                pd.DataFrame    statistics ['Representative First Scan', 'mean', 'std', 'max-min'] about the RT values
+	"""
+	duplicateGroups = removedData_RT.groupby('Representative First Scan').groups
+	RTIsolationInfo = []
+	for rfs, duplicates in duplicateGroups.items():
+		RTValues = removedData_RT.loc[duplicates, 'RT [min]']
+		RTIsolationInfo.append([rfs, np.nanmean(RTValues), np.std(RTValues), np.ptp(RTValues)])
+	return pd.DataFrame(RTIsolationInfo, columns=['Representative First Scan', 'mean', 'std', 'max-min'])
 
 
 def differentialExpression(normalizedIntensities, threshold=1):
@@ -20,7 +39,8 @@ def mapPeptToProt(df, peptides):
 	# calculate prot2peptMin/Max and alongside it protIntensitiesMin/Max:
 	# Min is the case where proteins are only associated with 1 to 1 matching peptides in pept2prot,
 	# Max is the case where proteins are associated with all matching peptides in pept2prot
-	return protIntensitiesMin, protIntensitiesMax, prot2peptMin, prot2peptMax
+	#return protIntensitiesMin, protIntensitiesMax, prot2peptMin, prot2peptMax
+	pass
 
 def dataVisualization(DEresults):
 	# TODO (if paying customer): parameter: intensity matrix on peptide or protein level?
