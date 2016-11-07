@@ -173,7 +173,6 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 				newIntensitiesDict[bestIndex] = geometricMedian(relativeIntensities)
 			elif centerMeasure == 'weighted':  # TODO
 				pass
-		print('hoi')
 		return newIntensitiesDict
 
 	def getBestIndicesDict(this_duplicateLists):
@@ -257,11 +256,6 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 
 	# get a nested list of duplicates according to toCollapse. [[duplicates1], [duplicates2], ...]
 	duplicateLists = getDuplicates()
-
-	if method == 'RT':
-		pass  # TODO flag isolated RT peaks
-	elif method == 'PTM':
-		pass  # TODO flag PTM differences.
 	# get the new intensities per first occurrence index (df index)
 	bestIndicesDict = getBestIndicesDict(duplicateLists)  # {bestIndex : [duplicates]}
 	# add the new representative detections to the dataFrame

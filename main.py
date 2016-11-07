@@ -187,7 +187,12 @@ def main(testing, writeToDisk):
 		normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
 
 		""" Data analysis and visualization """
+		# contains statistics and metadata (like the parameters) about the analysis.
+		metadata = {'parameters' : pd.DataFrame(params)}
 		# perform differential expression analysis
+
+		# record RT isolation statistics. Future: flag
+		metadata['RTIsolationInfo'] = getRTIsolationInfo(removedData['RT'])
 
 		# the ID of each result is determined by the collection of propertes that were NOT collapsed (so if all are collapsed its only the sequence)
 		DEresults = differentialExpression(normalizedIntensities, params['DEFoldThreshold']) # TODO
@@ -208,6 +213,10 @@ def main(testing, writeToDisk):
 			exportData(DEresults, dataType='obj', path_out=params['path_out'], filename=params['filename_out'] + '_DEresults')  # TODO
 			# save the visualizations
 			exportData(viz, dataType='viz', path_out=params['path_out'], filename=params['filename_out']+'_dataViz') # TODO
+			# save the metadata
+			exportData(metadata, dataType='df', path_out=params['path_out'],
+			           filename=params['filename_out'] + '_metadata',
+			           delim_out=params['delim_out'], inOneFile=False)
 			# generate a report PDF (without the normalized intensities: behind paywall?
 			generateReport(DEresults, viz) # TODO
 
