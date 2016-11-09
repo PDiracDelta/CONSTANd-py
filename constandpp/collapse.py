@@ -182,6 +182,7 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		:param this_duplicateLists: list    [[group of duplicates] per toCollapse value in the df]
 		:return this_bestIndices:   dict    { [indices of detections with the best PSM score per group of duplicates] : [group of duplicates] }
 		"""
+		warnedYet = False
 		this_bestIndicesDict = {}
 		if masterPSMAlgo == 'mascot':
 			masterScoreName = 'Ions Score'
@@ -194,8 +195,11 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			bestIndex = df.loc[this_duplicatesList, masterScoreName].idxmax(axis=0, skipna=True)
 			if np.isnan(bestIndex):  # no MASTER scores found --> take best SLAVE
 				bestIndex = df.loc[this_duplicatesList, slaveScoreName].idxmax(axis=0, skipna=True)
-				if np.isnan(bestIndex):
-					warn("")
+				if np.isnan(bestIndex) and not warnedYet:
+					warn("No best PSM score found for some lists of duplicates; first duplicate arbitrarily chosen. "
+					     "First Scan numbers of first list encountered: "+str(df.loc[this_duplicatesList, 'First Scan']))
+					warnedYet = True
+					bestIndex = this_duplicatesList[0]
 			this_bestIndicesDict[bestIndex] = this_duplicatesList
 
 		return this_bestIndicesDict
