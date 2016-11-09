@@ -194,7 +194,8 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 			bestIndex = df.loc[this_duplicatesList, masterScoreName].idxmax(axis=0, skipna=True)
 			if np.isnan(bestIndex):  # no MASTER scores found --> take best SLAVE
 				bestIndex = df.loc[this_duplicatesList, slaveScoreName].idxmax(axis=0, skipna=True)
-				assert not np.isnan(bestIndex)
+				if np.isnan(bestIndex):
+					warn("")
 			this_bestIndicesDict[bestIndex] = this_duplicatesList
 
 		return this_bestIndicesDict
