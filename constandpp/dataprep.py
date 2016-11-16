@@ -181,7 +181,7 @@ def isotopicCorrection(intensities, correctionsMatrix):
 				correctedIntensities.append(np.linalg.solve(correctionsMatrix, row))
 			else:
 				correctedIntensities.append(row)
-				noCorrectionIndices.append(intensities.index(row))
+				noCorrectionIndices.append(np.where(intensities == row)[0][0]) # np.where()[0][0] is numpy equivalent van .index()
 				if not warnedYet:
 					warn("Cannot correct isotope impurities for detections with NaN reporter intensities; skipping those.")
 	except TypeError:
