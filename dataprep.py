@@ -37,14 +37,14 @@ def setGlobals(intensityColumns, remove_ExtraColumnsToSave, noMissingValuesColum
 	globals()['noMissingValuesColumns'] = noMissingValuesColumns
 
 
-def removeObsoleteColumns(df, requiredColumns):
+def removeObsoleteColumns(df, wantedColumns):
 	"""
 	Returns a dataFrame with only the specified columns of the input dataFrame.
 	:param df:                  pd.dataFrame    input dataFrame
-	:param requiredColumns:     list            specified columns
+	:param wantedColumns:       list            specified columns
 	:return:                    pd.dataFrame    dataFrame with only the specified columns of the input dataFrame
 	"""
-	obsolete = set(df.columns.values).difference(set(requiredColumns))
+	obsolete = set(df.columns.values).difference(set(wantedColumns))
 	return df.drop(list(obsolete), axis=1)
 
 
