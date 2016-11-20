@@ -56,7 +56,7 @@ def removeMissing(df):
 	toDelete = []
 	for column in noMissingValuesColumns:
 		# delete all detections that have a missing value in this column
-		toDelete.extend(df.loc[df[column].isnull(), :].index)
+		toDelete.extend(df.loc[df.loc[:, column].isnull(), :].index)
 	# delete all detections that have a missing value in both columns: XCorr and Ions Score
 	toDelete.extend(df.loc[[x and y for x, y in zip(df['XCorr'].isnull(), df['Ions Score'].isnull())]].index)
 	# delete all detections which have no quan values or no quan labels
