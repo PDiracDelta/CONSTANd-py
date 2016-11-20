@@ -9,6 +9,7 @@ Includes data visualization.
 
 import numpy as np
 import pandas as pd
+from collections import defaultdict
 
 
 def getRTIsolationInfo(removedData_RT):
@@ -36,21 +37,45 @@ def getNoIsotopicCorrection(df, noCorrectionIndices):
 	return df.loc[noCorrectionIndices, ['First Scan', 'Identifying Node', 'Annotated Sequence', 'Master Protein Accessions']]
 
 
+def getProteinPeptidesDicts(df):
+	"""
+	Returns two dicts with the peptide indices (w.r.t. dataframe df) associated with each protein in the df as a
+	dictionary. One dict (min) contains only the peptide indices uniquely associated per protein, the other contains
+	all peptides indices associated per protein.
+	:return minProteinPeptidesDict:	dict	{ protein : uniquely associated peptide indices }
+	:return maxProteinPeptidesDict:	dict	{ protein : all associated peptide indices }
+	"""
+	numProteinGroupsDict = df.groupby("# Protein Groups").groups  # { # Protein Groups : indices }
+	# DEFAULTDICT doesn't return a KeyError when key not found, but rather None. !!! so you can safely .extend()
+	minProteinPeptidesDict = defaultdict(
+		list)  # proteins get contribution only from peptides which correspond uniquely to them
+	maxProteinPeptidesDict = defaultdict(
+		list)  # proteins get maximal contribution from all corresponding peptides even if corresponding to multiple proteins
+	for numGroups in numProteinGroupsDict.keys():
+		if numGroups == '1':  # these have only 1 master protein accession
+			# { protein : indices }
+			minProteinPeptidesDict.extend(
+				df[numProteinGroupsDict[numGroups]].groupby("Master Protein Accessions").groups)
+			maxProteinPeptidesDict = minProteinPeptidesDict.copy()
+		else:  # multiple proteins accessions per peptide: save those to maxProteinPeptidesDict only.
+			# { multiple proteins : indices }
+			multipleProteinPeptidesDict = df[numProteinGroupsDict[numGroups]].groupby(
+				"Master Protein Accessions").groups
+			for multipleProteinsString in multipleProteinPeptidesDict.keys():
+				multipleProteins = multipleProteinsString.split('; ')
+				for protein in multipleProteins:
+					maxProteinPeptidesDict[protein].extend(multipleProteinPeptidesDict[multipleProteinsString])
+	return minProteinPeptidesDict, maxProteinPeptidesDict
+
+? minProteinPeptidesDict, maxProteinPeptidesDict = getProteinPeptidesDicts(df)
+
+
 def differentialExpression(normalizedIntensities, threshold=1):
 	# TODO: only include differentials with a fold of >threshold or <1/threshold
 	# TODO: careful with peptides with more than 1 master protein
+	# { protein : indices of (uniquely/all) associated peptides }
 	return None
 
-
-# pept2prot = mapping of peptides to proteins (1 to many) --> extract directly from df
-# prot2peptMin = mapping of proteins to peptides (1 to many) --> calculate from pept2prot
-# prot2peptMax = mapping of proteins to peptides (1 to many more) --> calculate from pept2prot
-def mapPeptToProt(df, peptides):
-	# calculate prot2peptMin/Max and alongside it protIntensitiesMin/Max:
-	# Min is the case where proteins are only associated with 1 to 1 matching peptides in pept2prot,
-	# Max is the case where proteins are associated with all matching peptides in pept2prot
-	#return protIntensitiesMin, protIntensitiesMax, prot2peptMin, prot2peptMax
-	pass
 
 def dataVisualization(DEresults):
 	# TODO (if paying customer): parameter: intensity matrix on peptide or protein level?
