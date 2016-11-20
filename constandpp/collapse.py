@@ -178,11 +178,13 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 	def getBestIndicesDict(this_duplicateLists):
 		"""
 		For each sublist in the nested list of duplicates duplicateLists, calculates the index of the duplicate with the
-		best PSM match according to dataFrame df. Does this intelligently by taking masterPSMAlgo into account.
+		best PSM match according to dataFrame df. Does this intelligently by taking masterPSMAlgo into account. If no
+		best index can be found (due to missing score for instance) it just takes the first in this_duplicateLists.
 		:param this_duplicateLists: list    [[group of duplicates] per toCollapse value in the df]
 		:return this_bestIndices:   dict    { [indices of detections with the best PSM score per group of duplicates] : [group of duplicates] }
 		"""
-		warnedYet = False
+		isNanWarnedYet = False
+		noSlavePSMAlgoWarnedYet = False
 		this_bestIndicesDict = {}
 		if masterPSMAlgo == 'mascot':
 			masterScoreName = 'Ions Score'
@@ -194,11 +196,16 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		for this_duplicatesList in this_duplicateLists:
 			bestIndex = df.loc[this_duplicatesList, masterScoreName].idxmax(axis=0, skipna=True)
 			if np.isnan(bestIndex):  # no MASTER scores found --> take best SLAVE
-				bestIndex = df.loc[this_duplicatesList, slaveScoreName].idxmax(axis=0, skipna=True)
-				if np.isnan(bestIndex) and not warnedYet:
+				try:
+					bestIndex = df.loc[this_duplicatesList, slaveScoreName].idxmax(axis=0, skipna=True)
+				except KeyError: # if no slave score column is present in the data set
+					if not noSlavePSMAlgoWarnedYet:
+						warn("No slave PSMAlgo score column ('"+slaveScoreName+"') present in data set. ")
+						noSlavePSMAlgoWarnedYet = True
+				if np.isnan(bestIndex) and not isNanWarnedYet:
 					warn("No best PSM score found for some lists of duplicates; first duplicate arbitrarily chosen. "
 					     "First Scan numbers of first list encountered: "+str(df.loc[this_duplicatesList, 'First Scan']))
-					warnedYet = True
+					isNanWarnedYet = True
 					bestIndex = this_duplicatesList[0]
 			this_bestIndicesDict[bestIndex] = this_duplicatesList
 
