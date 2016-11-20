@@ -146,7 +146,7 @@ def main(testing, writeToDisk):
 		if params['removeBadConfidence_bool']:
 			df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'])
 		# remove all useless columns from the dataFrame
-		df = selectRequiredColumns(df, requiredColumns=params['requiredColumns'])
+		df = removeObsoleteColumns(df, requiredColumns=params['requiredColumns'])
 		if params['removeIsolationInterference_bool']:
 			# remove all data with too high isolation interference
 			df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
