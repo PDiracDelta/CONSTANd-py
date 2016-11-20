@@ -43,7 +43,7 @@ def getInput():
 	header_in = config.getint('DEFAULT','header_in')
 	removedDataInOneFile_bool = config.getboolean('DEFAULT','removedDataInOneFile_bool')
 	intensityColumns = parseList(config.get('DEFAULT', 'intensityColumns'))
-	requiredColumns = parseList(config.get('DEFAULT', 'requiredColumns'))
+	wantedColumns = parseList(config.get('DEFAULT', 'wantedColumns'))
 	noMissingValuesColumns = parseList(config.get('DEFAULT', 'noMissingValuesColumns'))
 	remove_ExtraColumnsToSave = parseList(config.get('DEFAULT', 'remove_ExtraColumnsToSave'))
 	collapseColumnsToSave = parseList(config.get('DEFAULT', 'collapseColumnsToSave'))
@@ -78,7 +78,7 @@ def getInput():
 		raise Exception("Header parameter of the input file must be a non-negative integer or of type None.")
 	if intensityColumns is None:
 		raise Exception("Please indicate which columns contain the MS2 reporter intensities.")
-	if requiredColumns is None:
+	if wantedColumns is None:
 		raise Exception("Please indicate which columns (in addition to the intensities) you would like to have output for.")
 	if collapseColumnsToSave is None:
 		raise Exception("Please indicate which columns (in addition to the intensities) to save for removed data.")
@@ -136,7 +136,7 @@ def getInput():
 		'header_in': header_in,
 		'removedDataInOneFile_bool': removedDataInOneFile_bool,
 		'intensityColumns': intensityColumns,
-		'requiredColumns': requiredColumns+intensityColumns, # needs to include intensitycolumns
+		'wantedColumns': wantedColumns+intensityColumns, # needs to include intensitycolumns
 		'noMissingValuesColumns': noMissingValuesColumns,
 		'remove_ExtraColumnsToSave': remove_ExtraColumnsToSave+intensityColumns, # needs to include intensitycolumns
 		'collapseColumnsToSave': collapseColumnsToSave+intensityColumns, # needs to include intensitycolumns

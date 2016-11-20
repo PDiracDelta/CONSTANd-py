@@ -122,7 +122,7 @@ def main(testing, writeToDisk):
 	"""
 	""" get all input parameters
 	params:
-	file_in, delim_in, header_in, intensityColumns, requiredColumns, collapseColumnsToSave, undoublePSMAlgo_bool,
+	file_in, delim_in, header_in, intensityColumns, wantedColumns, collapseColumnsToSave, undoublePSMAlgo_bool,
 	removeIsolationInterference_bool, collapse_method, collapse_maxRelativeReporterVariance,
 	removeIsolationInterference_master, masterPSMAlgo, undoublePSMAlgo_exclusive_bool, collapseRT_bool,
 	collapseCharge_bool, collapsePTM_bool, isotopicCorrection_bool, isotopicCorrectionsMatrix, accuracy, maxIterations,
@@ -146,7 +146,7 @@ def main(testing, writeToDisk):
 		if params['removeBadConfidence_bool']:
 			df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'])
 		# remove all useless columns from the dataFrame
-		df = removeObsoleteColumns(df, requiredColumns=params['requiredColumns'])
+		df = removeObsoleteColumns(df, wantedColumns=params['wantedColumns'])
 		if params['removeIsolationInterference_bool']:
 			# remove all data with too high isolation interference
 			df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
