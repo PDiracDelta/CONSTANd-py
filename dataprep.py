@@ -115,18 +115,21 @@ def setMasterProteinDescriptions(df):
 	:param df:  pd.dataFrame     dataFrame with all descriptions and accessions
 	:return df: pd.dataFrame     dataFrame with only Master Protein descriptions and accessions
 	"""
-	# [[master Proteins] per peptide]
-	masterProteinsLists = df.loc[:, 'Master Protein Accessions'].astype(str).apply(lambda x: x.split('; '))
-	# [[all Proteins] per peptide]
-	proteinsLists = df.loc[:, 'Protein Accessions'].astype(str).apply(lambda x: x.split('; '))
-	# [[all descriptions] per peptide]
-	descriptionsLists = df.loc[:, 'Protein Descriptions'].astype(str).apply(lambda x: x.split('; '))
-	# [[indices of master descriptions with respect to list of all descriptions] per peptide]
-	correctIndicesLists = [[proteins.index(masterProtein) for masterProtein in list(filter(lambda x: x.lower()!='nan', masterProteins))]
-	                  for masterProteins, proteins in zip(masterProteinsLists, proteinsLists)]
-	# [[master descriptions] per peptide]
-	df.loc[:, 'Protein Descriptions'] = ['; '.join([descriptionsList[i] for i in correctIndices]) for (descriptionsList, correctIndices) in zip(descriptionsLists, correctIndicesLists)]
-	df.drop('Protein Accessions', axis=1, inplace=True)
+	if 'Protein Accessions' df.columns.names:
+		# [[master Proteins] per peptide]
+		masterProteinsLists = df.loc[:, 'Master Protein Accessions'].astype(str).apply(lambda x: x.split('; '))
+		# [[all Proteins] per peptide]
+		proteinsLists = df.loc[:, 'Protein Accessions'].astype(str).apply(lambda x: x.split('; '))
+		# [[all descriptions] per peptide]
+		descriptionsLists = df.loc[:, 'Protein Descriptions'].astype(str).apply(lambda x: x.split('; '))
+		# [[indices of master descriptions with respect to list of all descriptions] per peptide]
+		correctIndicesLists = [[proteins.index(masterProtein) for masterProtein in list(filter(lambda x: x.lower()!='nan', masterProteins))]
+			              for masterProteins, proteins in zip(masterProteinsLists, proteinsLists)]
+		# [[master descriptions] per peptide]
+		df.loc[:, 'Protein Descriptions'] = ['; '.join([descriptionsList[i] for i in correctIndices]) for (descriptionsList, correctIndices) in zip(descriptionsLists, correctIndicesLists)]
+		df.drop('Protein Accessions', axis=1, inplace=True)
+	else:
+		warn("No 'Protein Accessions' column found; leaving all 'Protein Descriptions' intact.")
 	return df
 
 
