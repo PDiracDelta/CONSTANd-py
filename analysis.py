@@ -67,10 +67,8 @@ def getProteinPeptidesDicts(df):
 					maxProteinPeptidesDict[protein].extend(multipleProteinPeptidesDict[multipleProteinsString])
 	return minProteinPeptidesDict, maxProteinPeptidesDict
 
-? minProteinPeptidesDict, maxProteinPeptidesDict = getProteinPeptidesDicts(df)
 
-
-def differentialExpression(normalizedIntensities, threshold=1):
+def differentialExpression(proteinPeptidesDict, normalizedIntensities, threshold=1):
 	# TODO: only include differentials with a fold of >threshold or <1/threshold
 	# TODO: careful with peptides with more than 1 master protein
 	# { protein : indices of (uniquely/all) associated peptides }
