@@ -10,6 +10,8 @@ Includes data visualization.
 import numpy as np
 import pandas as pd
 from collections import defaultdict
+import pandas.statsmodels.sandbox.stats.multicomp.multipletests as multipletests
+import pandas.stats.tests.ttest_ind as ttest
 
 
 def getRTIsolationInfo(removedData_RT):
@@ -67,18 +69,24 @@ def getProteinPeptidesDicts(df):
 					maxProteinPeptidesDict[protein].extend(multipleProteinPeptidesDict[multipleProteinsString])
 	return minProteinPeptidesDict, maxProteinPeptidesDict
 
-? minProteinPeptidesDict, maxProteinPeptidesDict = getProteinPeptidesDicts(df)
 
-
-def differentialExpression(normalizedIntensities, threshold=1):
-	# TODO: only include differentials with a fold of >threshold or <1/threshold
-	# TODO: careful with peptides with more than 1 master protein
-	# { protein : indices of (uniquely/all) associated peptides }
+def proteinIntensitiesPerConditionDF():
 	return None
 
 
-def dataVisualization(DEresults):
+def differentialExpression(proteinIntensitiesPerConditionDF, alpha):
+
+	return pvalues
+
+
+def foldChange():
+	""" Calculate the fold change for each protein """
+	return None
+
+
+def dataVisualization(DEresults, FCThreshold):
 	# TODO (if paying customer): parameter: intensity matrix on peptide or protein level?
+	# TODO: only include differentials with a fold of >threshold or <1/threshold
 	return None
 
 

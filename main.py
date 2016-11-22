@@ -188,20 +188,30 @@ def main(testing, writeToDisk):
 			intensities = getIntensities(df)
 		# perform the CONSTANd algorithm; also do NOT include normalized intensities in df --> only for paying users.
 		normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
+		df = setIntensities(df, normalizedIntensities)
 
 		""" Data analysis and visualization """
-		# contains statistics and metadata (like the parameters) about the analysis.
-		# perform differential expression analysis
-
 		# record detections without isotopic correction applied applied
 		metadata['noIsotopicCorrection'] = getNoIsotopicCorrection(df, noCorrectionIndices)
 		# record RT isolation statistics. Future: flag
 		metadata['RTIsolationInfo'] = getRTIsolationInfo(removedData['RT'])
 
-		# the ID of each result is determined by the collection of propertes that were NOT collapsed (so if all are collapsed its only the sequence)
-		DEresults = differentialExpression(normalizedIntensities, params['DEFoldThreshold']) # TODO
+		# get min and max protein-peptide mappings
+		minProteinPeptidesDict, maxProteinPeptidesDict = getProteinPeptidesDicts(df)
+		# execute mappings to get all intensities per protein, over each whole condition
+		minProteinIntensitiesPerConditionDF = proteinIntensitiesPerConditionDF(minProteinPeptidesDict)
+		fullProteinIntensitiesPerConditionDF = proteinIntensitiesPerConditionDF(maxProteinPeptidesDict)
+
+		# perform differential expression analysis with Benjamini-Hochberg correction.
+		minDE = differentialExpression(minProteinIntensitiesPerConditionDF)  # TODO
+		fullDE = differentialExpression(fullProteinIntensitiesPerConditionDF)
+
+		# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
+		minFold = foldChange(minDE, params['DEFoldThreshold']) # TODO
+		fullFold = foldChange(fullDE, params['DEFoldThreshold'])
+
 		# data visualization
-		viz = dataVisualization(DEresults) # TODO
+		viz = dataVisualization(minDE, fullDE, minFold, fullFold) # TODO
 
 		""" Save data to disk and generate report """
 		if writeToDisk:
