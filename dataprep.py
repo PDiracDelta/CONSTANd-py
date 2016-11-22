@@ -23,17 +23,17 @@ from warnings import warn
 from pandas import Series
 
 intensityColumns = None
-remove_ExtraColumnsToSave = None
+removalColumnsToSave = None
 noMissingValuesColumns = None
 
 
-def setGlobals(intensityColumns, remove_ExtraColumnsToSave, noMissingValuesColumns):
+def setGlobals(intensityColumns, removalColumnsToSave, noMissingValuesColumns):
 	"""
 	Sets the value of the global variable intensityColumns for use in the module functions.
 	:param intensityColumns: list   names of the columns that contain the MS2 intensities
 	"""
 	globals()['intensityColumns'] = intensityColumns
-	globals()['remove_ExtraColumnsToSave'] = remove_ExtraColumnsToSave
+	globals()['removalColumnsToSave'] = removalColumnsToSave
 	globals()['noMissingValuesColumns'] = noMissingValuesColumns
 
 
@@ -80,7 +80,7 @@ def removeBadConfidence(df, minimum):
 	:return df:             pd.dataFrame    data with confidence levels > minimum
 	:return removedData:    pd.dataFrame    data with confidence levels < minimum
 	"""
-	columnsToSave = ['Confidence'] + remove_ExtraColumnsToSave
+	columnsToSave = ['Confidence'] + removalColumnsToSave
 	conf2int = {'Low': 1, 'Medium': 2, 'High': 3}
 	try:
 		minimum = conf2int[minimum]
@@ -102,7 +102,7 @@ def removeIsolationInterference(df, threshold):
 	:return df:             pd.dataFrame    filtered data
 	:return removedData:    pd.dataFrame    basic info about the removed values
 	"""
-	columnsToSave = ['Isolation Interference [%]'] + remove_ExtraColumnsToSave
+	columnsToSave = ['Isolation Interference [%]'] + removalColumnsToSave
 	toDelete = df.loc[df['Isolation Interference [%]'] > threshold].index # indices of rows to delete
 	removedData = df.loc[toDelete, columnsToSave]
 	df.drop(toDelete, inplace=True)
@@ -151,7 +151,7 @@ def undoublePSMAlgo(df, master, exclusive):
 	elif master == 'sequest':
 		masterName = 'Sequest HT (A2)'
 		slaveScoreName = 'Ions Score'
-	columnsToSave = [slaveScoreName] + remove_ExtraColumnsToSave
+	columnsToSave = [slaveScoreName] + removalColumnsToSave
 	masterIndices = set(byIdentifyingNodeDict[masterName])
 	toDelete = set(df.index.values).difference(masterIndices)  # all indices of detections not done by MASTER
 	if not exclusive:  # remove unique SLAVE scans from the toDelete list

@@ -138,7 +138,7 @@ def main(testing, writeToDisk):
 		""" Data preparation """
 		removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
 		# define global parameters
-		setGlobals(intensityColumns = params['intensityColumns'], remove_ExtraColumnsToSave=params['remove_ExtraColumnsToSave'],
+		setGlobals(intensityColumns = params['intensityColumns'], removalColumnsToSave=params['removalColumnsToSave'],
 		           noMissingValuesColumns=params['noMissingValuesColumns'])
 		setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataprep.py
 		# remove detections where (essential) data is missing.
