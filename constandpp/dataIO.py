@@ -45,7 +45,7 @@ def getInput():
 	intensityColumns = parseList(config.get('DEFAULT', 'intensityColumns'))
 	wantedColumns = parseList(config.get('DEFAULT', 'wantedColumns'))
 	noMissingValuesColumns = parseList(config.get('DEFAULT', 'noMissingValuesColumns'))
-	remove_ExtraColumnsToSave = parseList(config.get('DEFAULT', 'remove_ExtraColumnsToSave'))
+	removalColumnsToSave = parseList(config.get('DEFAULT', 'removalColumnsToSave'))
 	collapseColumnsToSave = parseList(config.get('DEFAULT', 'collapseColumnsToSave'))
 	removeBadConfidence_bool = config.getboolean('DEFAULT','removeBadConfidence_bool')
 	removeBadConfidence_minimum = config.get('DEFAULT','removeBadConfidence_minimum')
@@ -138,7 +138,7 @@ def getInput():
 		'intensityColumns': intensityColumns,
 		'wantedColumns': wantedColumns+intensityColumns, # needs to include intensitycolumns
 		'noMissingValuesColumns': noMissingValuesColumns,
-		'remove_ExtraColumnsToSave': remove_ExtraColumnsToSave+intensityColumns, # needs to include intensitycolumns
+		'removalColumnsToSave': removalColumnsToSave+intensityColumns, # needs to include intensitycolumns
 		'collapseColumnsToSave': collapseColumnsToSave+intensityColumns, # needs to include intensitycolumns
 		'removeBadConfidence_bool': removeBadConfidence_bool,
 		'removeBadConfidence_minimum': removeBadConfidence_minimum,
