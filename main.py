@@ -67,7 +67,7 @@ def isotopicCorrectionsTest(params): # TEST
 	if params['isotopicCorrection_bool']:
 		int_in = np.array([range(6), range(6)]) + np.array([np.zeros(6), 5*np.ones(6)])
 		# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
-		icm = params['isotopicCorrectionsMatrix']
+		icm = params['isotopicCorrection_matrix']
 		icm[0,0] = 0.9
 		icm[0,1] = 0.1
 		int_out = isotopicCorrection(int_in, correctionsMatrix=icm)
@@ -125,7 +125,7 @@ def main(testing, writeToDisk):
 	file_in, delim_in, header_in, intensityColumns, wantedColumns, collapseColumnsToSave, undoublePSMAlgo_bool,
 	removeIsolationInterference_bool, collapse_method, collapse_maxRelativeReporterVariance,
 	removeIsolationInterference_master, masterPSMAlgo, undoublePSMAlgo_exclusive_bool, collapseRT_bool,
-	collapseCharge_bool, collapsePTM_bool, isotopicCorrection_bool, isotopicCorrectionsMatrix, accuracy, maxIterations,
+	collapseCharge_bool, collapsePTM_bool, isotopicCorrection_bool, isotopicCorrection_matrix, accuracy, maxIterations,
 	DEFoldThreshold, path_out, filename_out, delim_out
 	"""
 	params = getInput()
@@ -183,7 +183,7 @@ def main(testing, writeToDisk):
 
 		if params['isotopicCorrection_bool']:
 			# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
-			intensities, noCorrectionIndices = isotopicCorrection(getIntensities(df), correctionsMatrix=params['isotopicCorrectionsMatrix'])
+			intensities, noCorrectionIndices = isotopicCorrection(getIntensities(df), correctionsMatrix=params['isotopicCorrection_matrix'])
 		else:
 			intensities = getIntensities(df)
 		# perform the CONSTANd algorithm; also do NOT include normalized intensities in df --> only for paying users.

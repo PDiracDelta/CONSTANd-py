@@ -59,7 +59,7 @@ def getInput():
 	collapseCharge_bool = config.getboolean('DEFAULT','collapseCharge_bool')
 	collapsePTM_bool = config.getboolean('DEFAULT','collapsePTM_bool')
 	isotopicCorrection_bool = config.getboolean('DEFAULT','isotopicCorrection_bool')
-	isotopicCorrectionsMatrix = getIsotopicCorrectionsMatrix(config.get('DEFAULT','isotopicCorrectionsMatrix'))
+	isotopicCorrection_matrix = getIsotopicCorrectionsMatrix(config.get('DEFAULT','isotopicCorrection_matrix'))
 	accuracy = config.getfloat('DEFAULT','accuracy')
 	maxIterations = config.getint('DEFAULT','maxIterations')
 	DEFoldThreshold = config.getfloat('DEFAULT','DEFoldThreshold')
@@ -111,11 +111,11 @@ def getInput():
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PTMs.")
 	if isotopicCorrection_bool is None:
 		raise Exception("Please indicate whether you would like to correct for isotopic impurities.")
-	if not (isotopicCorrectionsMatrix.shape == (6,6)):
+	if not (isotopicCorrection_matrix.shape == (6,6)):
 		raise Exception("Isotopic corrections matrix must have shape (6,6).")
-	if not (np.allclose(np.sum(isotopicCorrectionsMatrix,0),np.ones(6),atol=1e-9)): # absolute tolerance: intensities known up to ~1e-10
+	if not (np.allclose(np.sum(isotopicCorrection_matrix,0),np.ones(6),atol=1e-9)): # absolute tolerance: intensities known up to ~1e-10
 		raise Exception("Isotopic corrections matrix row values do not add up to 1.")
-	if np.linalg.det(isotopicCorrectionsMatrix) == 0: # if Det(cM) = 0 no solution can be found.
+	if np.linalg.det(isotopicCorrection_matrix) == 0: # if Det(cM) = 0 no solution can be found.
 		raise Exception("Determinant of isotopic corrections matrix is zero; cannot solve the linear system.")
 	if not (accuracy > 0):
 		raise Exception("Accuracy must be strictly greater than zero.")
@@ -152,7 +152,7 @@ def getInput():
 		'collapseCharge_bool': collapseCharge_bool,
 		'collapsePTM_bool': collapsePTM_bool,
 		'isotopicCorrection_bool': isotopicCorrection_bool,
-		'isotopicCorrectionsMatrix': isotopicCorrectionsMatrix,
+		'isotopicCorrection_matrix': isotopicCorrection_matrix,
 		'accuracy': accuracy,
 		'maxIterations': maxIterations,
 		'DEFoldThreshold': DEFoldThreshold,
