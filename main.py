@@ -20,7 +20,7 @@ import sys
 from constand import constand
 from time import time
 from dataIO import *
-from dataprep import *
+from dataproc import *
 from collapse import collapse, setCollapseColumnsToSave
 from analysis import *
 
@@ -140,7 +140,7 @@ def main(testing, writeToDisk):
 		# define global parameters
 		setGlobals(intensityColumns = params['intensityColumns'], removalColumnsToSave=params['removalColumnsToSave'],
 		           noMissingValuesColumns=params['noMissingValuesColumns'])
-		setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataprep.py
+		setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
 		# remove detections where (essential) data is missing.
 		df, removedData['missing'] = removeMissing(df)
 		if params['removeBadConfidence_bool']:

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Collection of functions involved in analyzing the data that was processed by dataprep.py and constand.py.
+Collection of functions involved in analyzing the data that was processed by dataproc.py and constand.py.
 Performs a differential expression analysis on the normalized intensities as provided by CONSTANd.
 Includes data visualization.
 """

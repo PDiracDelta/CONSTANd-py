@@ -10,7 +10,7 @@ and replaces the duplicates with one representative detection and a combination/
 """
 
 import numpy as np
-from dataprep import setIntensities, getIntensities
+from dataproc import setIntensities, getIntensities
 from scipy.spatial.distance import cdist, euclidean
 from warnings import warn
 
