@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Collection of functions that prepare the data before it can be normalized by CONSTANd.
+Collection of functions that process the data before it can be normalized by CONSTANd.
 Includes:
 * removing unnecessary variables/columns
 * removing detections with missing values that are essential
@@ -115,7 +115,7 @@ def setMasterProteinDescriptions(df):
 	:param df:  pd.dataFrame     dataFrame with all descriptions and accessions
 	:return df: pd.dataFrame     dataFrame with only Master Protein descriptions and accessions
 	"""
-	if 'Protein Accessions' df.columns.names:
+	if 'Protein Accessions' in df.columns.names:
 		# [[master Proteins] per peptide]
 		masterProteinsLists = df.loc[:, 'Master Protein Accessions'].astype(str).apply(lambda x: x.split('; '))
 		# [[all Proteins] per peptide]
