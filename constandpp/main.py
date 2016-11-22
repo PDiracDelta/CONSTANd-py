@@ -42,7 +42,7 @@ def isotopicImpuritiesTest(): # TEST
 	## test if isotopic correction is necessary:
 	params = getInput()
 	# get the dataframe
-	df = importDataFrame(params['file_in'], delim=params['delim_in'], header=params['header_in'])
+	df = importDataFrame(params['files_in'], delim=params['delim_in'], header=params['header_in'])
 	correctedIntensities = getIntensities(df)
 	normalizedIntensities, convergenceTrail, R, S = constand(correctedIntensities, params['accuracy'],
 	                                                         params['maxIterations'])
@@ -112,6 +112,121 @@ def devStuff(df, params): # TEST
 	pass
 
 
+def processDf(df, params, writeToDisk):
+	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
+	# define global parameters
+	setGlobals(intensityColumns=params['intensityColumns'], removalColumnsToSave=params['removalColumnsToSave'],
+	           noMissingValuesColumns=params['noMissingValuesColumns'])
+	setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
+	# remove detections where (essential) data is missing.
+	df, removedData['missing'] = removeMissing(df)
+	if params['removeBadConfidence_bool']:
+		df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'])
+	# remove all useless columns from the dataFrame
+	df = removeObsoleteColumns(df, wantedColumns=params['wantedColumns'])
+	if params['removeIsolationInterference_bool']:
+		# remove all data with too high isolation interference
+		df, removedData['isolationInterference'] = removeIsolationInterference(df, params[
+			'removeIsolationInterference_threshold'])
+	# remove all non-master protein accessions (entire column) and descriptions (selective).
+	df = setMasterProteinDescriptions(df)
+	if params['undoublePSMAlgo_bool']:
+		# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
+		df, removedData['PSMAlgo'] = undoublePSMAlgo(df, master=params['masterPSMAlgo'],
+		                                             exclusive=params['undoublePSMAlgo_exclusive_bool'])
+		# SANITY CHECK: no detections with the same scan number may exist after undoublePSMAlgo()
+		assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
+
+	# collapse peptide list redundancy due to multiple detections at different RT
+	df, removedData['RT'] = collapse('RT', df, method=params['collapse_method'],
+	                                 maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
+	                                 masterPSMAlgo=params['masterPSMAlgo'],
+	                                 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
+	if params['collapseCharge_bool']:
+		# collapse peptide list redundancy due to different charges (optional)
+		df, removedData['charge'] = collapse('Charge', df, method=params['collapse_method'],
+		                                     maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
+		                                     masterPSMAlgo=params['masterPSMAlgo'],
+		                                     undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
+	if params['collapsePTM_bool']:
+		# collapse peptide list redundancy due to different charges (optional)
+		df, removedData['modifications'] = collapse('PTM', df, method=params['collapse_method'],
+		                                            maxRelativeReporterVariance=params[
+			                                            'collapse_maxRelativeReporterVariance'],
+		                                            masterPSMAlgo=params['masterPSMAlgo'],
+		                                            undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
+
+	# SANITY CHECK: there should be no more duplicates if all collapses have been applied.
+	if params['undoublePSMAlgo_bool'] and params['collapseCharge_bool']:  # TEST
+		assert np.prod((len(i) < 2 for (s, i) in df.groupby(
+			'Annotated Sequence').groups))  # only 1 index vector in dict of SEQUENCE:[INDICES] for all sequences
+
+	if params['isotopicCorrection_bool']:
+		# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
+		intensities, noCorrectionIndices = isotopicCorrection(getIntensities(df),
+		                                                      correctionsMatrix=params['isotopicCorrection_matrix'])
+	else:
+		intensities = getIntensities(df)
+	# perform the CONSTANd algorithm; also do NOT include normalized intensities in df --> only for paying users.
+	normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
+
+	""" save results """
+	if writeToDisk:
+		# save the removed data information
+		exportData(removedData, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_removedData',
+		           delim_out=params['delim_out'], inOneFile=params['removedDataInOneFile_bool'])
+		# save the final form of the dataFrame WITHOUT normalized intensities.
+		exportData(df, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_dataFrame', delim_out=params['delim_out'])
+		# save the normalized intensities obtained through CONSTANd
+		exportData(normalizedIntensities, dataType='txt', path_out=params['path_out'],
+		           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
+		# save the DE analysis results
+
+	return df, normalizedIntensities, removedData, noCorrectionIndices
+
+
+def analyzeProcessingResult(processingResults, params, writeToDisk):
+	dfs = [result[0] for result in processingResults]
+	normalizedIntensitiess = [result[1] for result in processingResults]
+	removedDatas = [result[2] for result in processingResults]
+	noCorrectionIndicess = [result[3] for result in processingResults]
+
+	# TODO effectively implement multiple experiment analysis beyond this point
+	df = dfs[0]
+	normalizedIntensities = normalizedIntensitiess[0]
+	removedData = removedDatas[0]
+	noCorrectionIndices = noCorrectionIndices[0]
+	# todo ^
+
+	# contains statistics and metadata (like the parameters) about the analysis.
+	metadata = {}
+	# perform differential expression analysis
+
+	# record detections without isotopic correction applied applied
+	metadata['noIsotopicCorrection'] = getNoIsotopicCorrection(df, noCorrectionIndices)
+	# record RT isolation statistics. Future: flag
+	metadata['RTIsolationInfo'] = getRTIsolationInfo(removedData['RT'])
+
+	# the ID of each result is determined by the collection of propertes that were NOT collapsed (so if all are collapsed its only the sequence)
+	DEresults = differentialExpression(normalizedIntensities, params['DEFoldThreshold'])  # TODO
+	# data visualization
+	viz = dataVisualization(DEresults)  # TODO
+
+	""" save results """
+	if writeToDisk:
+		exportData(DEresults, dataType='obj', path_out=params['path_out'], filename=params['filename_out'] + '_DEresults')  # TODO
+		# save the visualizations
+		exportData(viz, dataType='viz', path_out=params['path_out'], filename=params['filename_out']+'_dataViz') # TODO
+		# save the metadata
+		exportData(metadata, dataType='df', path_out=params['path_out'],
+		           filename=params['filename_out'] + '_metadata',
+		           delim_out=params['delim_out'], inOneFile=False)
+		# generate a report PDF (without the normalized intensities: behind paywall?
+
+
+	return DEresults, viz, metadata
+
+
 def main(testing, writeToDisk):
 	start = time()
 	# testing=True # TEST
@@ -122,110 +237,31 @@ def main(testing, writeToDisk):
 	"""
 	""" get all input parameters
 	params:
-	file_in, delim_in, header_in, intensityColumns, wantedColumns, collapseColumnsToSave, undoublePSMAlgo_bool,
+	files_in, delim_in, header_in, intensityColumns, wantedColumns, collapseColumnsToSave, undoublePSMAlgo_bool,
 	removeIsolationInterference_bool, collapse_method, collapse_maxRelativeReporterVariance,
 	removeIsolationInterference_master, masterPSMAlgo, undoublePSMAlgo_exclusive_bool, collapseRT_bool,
 	collapseCharge_bool, collapsePTM_bool, isotopicCorrection_bool, isotopicCorrection_matrix, accuracy, maxIterations,
 	DEFoldThreshold, path_out, filename_out, delim_out
 	"""
 	params = getInput()
-	# get the dataframe
-	df = importDataFrame(params['file_in'], delim=params['delim_in'], header=params['header_in'])
+	# get the dataframes
+	dfs = []
+	for filepath in params['files_in']:
+		dfs.append(importDataFrame(filepath, delim=params['delim_in'], header=params['header_in']))
+
 	if not testing:
-		# metadata = {'parameters' : pd.DataFrame(params)} # todo add parameters (but contains matrix and stuff...)
-		metadata = {}
-
-		""" Data preparation """
-		removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
-		# define global parameters
-		setGlobals(intensityColumns = params['intensityColumns'], removalColumnsToSave=params['removalColumnsToSave'],
-		           noMissingValuesColumns=params['noMissingValuesColumns'])
-		setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
-		# remove detections where (essential) data is missing.
-		df, removedData['missing'] = removeMissing(df)
-		if params['removeBadConfidence_bool']:
-			df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'])
-		# remove all useless columns from the dataFrame
-		df = removeObsoleteColumns(df, wantedColumns=params['wantedColumns'])
-		if params['removeIsolationInterference_bool']:
-			# remove all data with too high isolation interference
-			df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'])
-		# remove all non-master protein accessions (entire column) and descriptions (selective).
-		df = setMasterProteinDescriptions(df)
-		if params['undoublePSMAlgo_bool']:
-			# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
-			df, removedData['PSMAlgo'] = undoublePSMAlgo(df, master=params['masterPSMAlgo'],
-			                                             exclusive=params['undoublePSMAlgo_exclusive_bool'])
-			# SANITY CHECK: no detections with the same scan number may exist after undoublePSMAlgo()
-			assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
-
-		# collapse peptide list redundancy due to multiple detections at different RT
-		df, removedData['RT'] = collapse('RT', df, method=params['collapse_method'],
-		                                   maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
-		                                 masterPSMAlgo=params['masterPSMAlgo'],
-		                                 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
-		if params['collapseCharge_bool']:
-			# collapse peptide list redundancy due to different charges (optional)
-			df, removedData['charge'] = collapse('Charge', df, method=params['collapse_method'],
-			                                   maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
-			                                        masterPSMAlgo=params['masterPSMAlgo'],
-			                                     undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
-		if params['collapsePTM_bool']:
-			# collapse peptide list redundancy due to different charges (optional)
-			df, removedData['modifications'] = collapse('PTM', df, method=params['collapse_method'],
-			                                   maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
-			                                            masterPSMAlgo=params['masterPSMAlgo'],
-			                                            undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
-
-		# SANITY CHECK: there should be no more duplicates if all collapses have been applied.
-		if params['undoublePSMAlgo_bool'] and params['collapseCharge_bool']: # TEST
-			assert np.prod((len(i) < 2 for (s, i) in df.groupby('Annotated Sequence').groups)) # only 1 index vector in dict of SEQUENCE:[INDICES] for all sequences
-
-		if params['isotopicCorrection_bool']:
-			# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
-			intensities, noCorrectionIndices = isotopicCorrection(getIntensities(df), correctionsMatrix=params['isotopicCorrection_matrix'])
-		else:
-			intensities = getIntensities(df)
-		# perform the CONSTANd algorithm; also do NOT include normalized intensities in df --> only for paying users.
-		normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
+		""" Data processing """
+		# process every input dataframe
+		processingResults = [processDf(df, params, writeToDisk) for df in dfs]
 
 		""" Data analysis and visualization """
-		# contains statistics and metadata (like the parameters) about the analysis.
-		# perform differential expression analysis
+		DEresults, viz, metadata = analyzeProcessingResult(processingResults, params, writeToDisk)
 
-		# record detections without isotopic correction applied applied
-		metadata['noIsotopicCorrection'] = getNoIsotopicCorrection(df, noCorrectionIndices)
-		# record RT isolation statistics. Future: flag
-		metadata['RTIsolationInfo'] = getRTIsolationInfo(removedData['RT'])
-
-		# the ID of each result is determined by the collection of propertes that were NOT collapsed (so if all are collapsed its only the sequence)
-		DEresults = differentialExpression(normalizedIntensities, params['DEFoldThreshold']) # TODO
-		# data visualization
-		viz = dataVisualization(DEresults) # TODO
-
-		""" Save data to disk and generate report """
-		if writeToDisk:
-			# save the removed data information
-			exportData(removedData, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_removedData',
-			           delim_out=params['delim_out'], inOneFile=params['removedDataInOneFile_bool'])
-			# save the final form of the dataFrame WITHOUT normalized intensities.
-			exportData(df, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_dataFrame', delim_out=params['delim_out'])
-			# save the normalized intensities obtained through CONSTANd
-			exportData(normalizedIntensities, dataType='txt', path_out=params['path_out'],
-			           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
-			# save the DE analysis results
-			exportData(DEresults, dataType='obj', path_out=params['path_out'], filename=params['filename_out'] + '_DEresults')  # TODO
-			# save the visualizations
-			exportData(viz, dataType='viz', path_out=params['path_out'], filename=params['filename_out']+'_dataViz') # TODO
-			# save the metadata
-			exportData(metadata, dataType='df', path_out=params['path_out'],
-			           filename=params['filename_out'] + '_metadata',
-			           delim_out=params['delim_out'], inOneFile=False)
-			# generate a report PDF (without the normalized intensities: behind paywall?
-			generateReport(DEresults, viz) # TODO
+		""" generate report """
+		generateReport(DEresults, viz, metadata)  # TODO
 
 	elif testing:
-		devStuff(df, params)
+		devStuff(dfs[0], params)
 	stop = time()
 	print(stop - start)
 

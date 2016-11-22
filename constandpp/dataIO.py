@@ -38,7 +38,7 @@ def getInput():
 
 	# get variables from config in correct typography
 	date = config.get('DEFAULT','date')
-	file_in = config.get('DEFAULT','file_in')
+	files_in = parseList(config.get('DEFAULT','files_in'))
 	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
 	header_in = config.getint('DEFAULT','header_in')
 	removedDataInOneFile_bool = config.getboolean('DEFAULT','removedDataInOneFile_bool')
@@ -70,8 +70,8 @@ def getInput():
 	# perform checks on the validity of the parameters and raise exceptions if necessary
 	# DO NOT change the value of variables here!
 	# TODO the 'is None' checks are obsolete. remove them (keep the error messages for later, now).
-	if not path.exists(file_in):
-		raise FileNotFoundError("File "+file_in+" not found.")
+	if not path.exists(files_in):
+		raise FileNotFoundError("File "+files_in+" not found.")
 	if not (len(delim_in) == 1 and isinstance(delim_in, str)):
 		raise Exception("Delimiter of input file must be a character (string of length one).")
 	if not ((isinstance(header_in, int) and header_in >= 0) or header_in is None):
@@ -131,7 +131,7 @@ def getInput():
 	# assign the TYPOGRAPHICALLY CORRECT values to the params dict and modify them if necessary.
 	params = {
 		'date': date,
-		'file_in': file_in,
+		'files_in': files_in,
 		'delim_in': delim_in,
 		'header_in': header_in,
 		'removedDataInOneFile_bool': removedDataInOneFile_bool,
