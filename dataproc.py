@@ -209,13 +209,19 @@ def getIntensities(df, indices=None):
 		return np.asarray(df.loc[indices, intensityColumns])
 
 
-def setIntensities(df, intensitiesDict):
+def setIntensities(df, intensities):
 	"""
-	Sets the intensities of the dataFrame at the specified location equal to the ndArray of given intensities.
+	Sets the intensities of the dataFrame at the specified location equal to the array of given intensities, at the
+	specified locations if a dict is provided instead of an array.
 	:param df:              pd.dataFrame    input dataFrame
-	:param intensitiesDict: dict            dict {index:[values]} with index and values of all df entries to be modified
+	:param intensities:     np.ndarray      matrix with MS2 intensities
+							dict            dict {index:[values]} with index and values of all df entries to be modified
 	:return df:             pd.dataFrame    output dataFrame with updated intensities
 	"""
-	for index in intensitiesDict.keys():
-		df.loc[index, intensityColumns] = intensitiesDict[index]
+	if isinstance(intensities, np.ndarray):
+		assert df.loc[:, intensityColumns].shape == intensities.shape
+		df.loc[:, intensityColumns] = intensities
+	elif isinstance(intensities, dict):
+		for index in intensities.keys():
+			df.loc[index, intensityColumns] = intensities[index]
 	return df
