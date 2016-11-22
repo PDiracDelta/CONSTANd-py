@@ -188,10 +188,16 @@ def main(testing, writeToDisk):
 			intensities = getIntensities(df)
 		# perform the CONSTANd algorithm; also do NOT include normalized intensities in df --> only for paying users.
 		normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
+		df = setIntensities(df, normalizedIntensities)
 
 		""" Data analysis and visualization """
 		# contains statistics and metadata (like the parameters) about the analysis.
+
+		# get min and max protein-peitde maps
+		minProteinPeptidesDict, maxProteinPeptidesDict = getProteinPeptidesDicts(df)
 		# perform differential expression analysis
+		minDE = differentialExpression(minProteinPeptidesDict, normalizedIntensities)
+		maxDE = differentialExpression(maxProteinPeptidesDict, normalizedIntensities)
 
 		# record detections without isotopic correction applied applied
 		metadata['noIsotopicCorrection'] = getNoIsotopicCorrection(df, noCorrectionIndices)
