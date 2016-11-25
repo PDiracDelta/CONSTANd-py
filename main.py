@@ -290,4 +290,4 @@ def main(doProcessing, doAnalysis, writeToDisk, testing):
 
 
 if __name__ == '__main__':
-	sys.exit(main(doProcessing=False, doAnalysis=True, testing=False, writeToDisk=True))
+	sys.exit(main(doProcessing=True, doAnalysis=True, testing=False, writeToDisk=True))
