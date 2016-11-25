@@ -54,6 +54,9 @@ def getInput():
 	isotopicCorrection_matrix = getIsotopicCorrectionsMatrix(config.get('DEFAULT','isotopicCorrection_matrix'))
 	accuracy = config.getfloat('DEFAULT','accuracy')
 	maxIterations = config.getint('DEFAULT','maxIterations')
+	intensityColumnsPerCondition = getList(config.get('DEFAULT', 'intensityColumnsPerCondition'))
+	pept2protCombinationMethod = config.get('DEFAULT','pept2protCombinationMethod')
+	alpha = config.getfloat('DEFAULT','alpha')
 	FCThreshold = config.getfloat('DEFAULT','FCThreshold')
 	path_out = config.get('DEFAULT','path_out')
 	filename_out = config.get('DEFAULT','filename_out')
@@ -147,6 +150,9 @@ def getInput():
 		'isotopicCorrection_matrix': isotopicCorrection_matrix,
 		'accuracy': accuracy,
 		'maxIterations': maxIterations,
+		'intensityColumnsPerCondition': intensityColumnsPerCondition,
+		'pept2protCombinationMethod': pept2protCombinationMethod,
+		'alpha': alpha,
 		'FCThreshold': FCThreshold,
 		'path_out': path_out,
 		'filename_out': filename_out,
