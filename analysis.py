@@ -83,10 +83,18 @@ def proteinDF(df, proteinPeptidesDict, intensityColumnsPerCondition):
 def applyDifferentialExpression(this_proteinDF, alpha):
 	# TODO: careful with peptides with more than 1 master protein
 	# { protein : indices of (uniquely/all) associated peptides }
+	# def DE(row): # TEST obsolete code?
+	# 	"""
+	# 	Test the differential expression between the intensity lists of the two conditions for a certain protein.
+	# 	:param row: pd.Series   row of a certain protein in the dataframe two intensity input lists for the t-test
+	# 	:return:    float64     p-value of the t-test
+	# 	"""
+	# 	__, p = ttest(row['condition 1'], row['condition 2'])
+	# 	return p
 	this_proteinDF['p-value'] = [np.nan, ] * len(this_proteinDF.index)
 	# perform t-test on the intensities lists of both conditions of each protein, assuming data is independent.
 	this_proteinDF.loc[:, 'p-value'] = this_proteinDF.apply(
-		lambda x: ttest(x['condition 1'], x['condition 2']))
+		lambda x: ttest(x['condition 1'], x['condition 2']), axis=1)
 	# Benjamini-Hochberg correction
 	# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
 	this_proteinDF['adjusted p-value'] = multipletests(
