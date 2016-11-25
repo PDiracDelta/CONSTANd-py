@@ -85,8 +85,8 @@ def applyDifferentialExpression(this_proteinDF, alpha):
 	# { protein : indices of (uniquely/all) associated peptides }
 	this_proteinDF['p-value'] = [np.nan, ] * len(this_proteinDF.index)
 	# perform t-test on the intensities lists of both conditions of each protein, assuming data is independent.
-	__, this_proteinDF.loc[:, 'p-value'] = this_proteinDF.apply(
-		lambda x,y: ttest(x['condition 1'], y['condition 2']))
+	this_proteinDF.loc[:, 'p-value'] = this_proteinDF.apply(
+		lambda x: ttest(x['condition 1'], x['condition 2']))
 	# Benjamini-Hochberg correction
 	# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
 	this_proteinDF['adjusted p-value'] = multipletests(
