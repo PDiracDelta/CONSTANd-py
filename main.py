@@ -198,7 +198,7 @@ def main(testing, writeToDisk):
 
 		# get min and max protein-peptide mappings
 		minProteinPeptidesDict, maxProteinPeptidesDict = getProteinPeptidesDicts(df)
-		# execute mappings to get all intensities per protein, over each whole condition
+		# execute mappings to get all peptide sequences and intensities per protein, over each whole condition
 		minProteinDF = proteinDF(df, minProteinPeptidesDict, columnsPerCondition)
 		fullProteinDF = proteinDF(df, maxProteinPeptidesDict, columnsPerCondition)
 
