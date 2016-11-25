@@ -65,7 +65,7 @@ def getInput():
 	# perform checks on the validity of the parameters and raise exceptions if necessary
 	# DO NOT change the value of variables here!
 	# TODO the 'is None' checks are obsolete. remove them (keep the error messages for later, now).
-	if not path.exists(files_in):
+	if not path.exists(files_in[0]): # TODO for all files
 		raise FileNotFoundError("File "+files_in+" not found.")
 	if not (len(delim_in) == 1 and isinstance(delim_in, str)):
 		raise Exception("Delimiter of input file must be a character (string of length one).")
