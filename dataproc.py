@@ -27,7 +27,7 @@ removalColumnsToSave = None
 noMissingValuesColumns = None
 
 
-def setGlobals(intensityColumns, removalColumnsToSave, noMissingValuesColumns):
+def setProcessingGlobals(intensityColumns, removalColumnsToSave, noMissingValuesColumns):
 	"""
 	Sets the value of the global variable intensityColumns for use in the module functions.
 	:param intensityColumns: list   names of the columns that contain the MS2 intensities
