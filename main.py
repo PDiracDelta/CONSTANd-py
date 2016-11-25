@@ -260,8 +260,9 @@ def main(doProcessing, doAnalysis, writeToDisk, testing):
 	params = getInput()
 	# get the dataframes
 	dfs = []
-	for filepath in params['files_in'][0]: # TODO for all files
-		dfs.append(importDataFrame(filepath, delim=params['delim_in'], header=params['header_in']))
+	for filepath in params['files_in']:
+		if not filepath == "see_if_this_is_parsed_as_a_list": # TODO for all files #TEST
+			dfs.append(importDataFrame(filepath, delim=params['delim_in'], header=params['header_in']))
 
 	if not testing:
 		""" Data processing """
