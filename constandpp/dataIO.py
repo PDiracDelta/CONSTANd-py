@@ -62,7 +62,7 @@ def getInput():
 	isotopicCorrection_matrix = getIsotopicCorrectionsMatrix(config.get('DEFAULT','isotopicCorrection_matrix'))
 	accuracy = config.getfloat('DEFAULT','accuracy')
 	maxIterations = config.getint('DEFAULT','maxIterations')
-	DEFoldThreshold = config.getfloat('DEFAULT','DEFoldThreshold')
+	FCThreshold = config.getfloat('DEFAULT','FCThreshold')
 	path_out = config.get('DEFAULT','path_out')
 	filename_out = config.get('DEFAULT','filename_out')
 	delim_out = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
@@ -155,7 +155,7 @@ def getInput():
 		'isotopicCorrection_matrix': isotopicCorrection_matrix,
 		'accuracy': accuracy,
 		'maxIterations': maxIterations,
-		'DEFoldThreshold': DEFoldThreshold,
+		'FCThreshold': FCThreshold,
 		'path_out': path_out,
 		'filename_out': filename_out,
 		'delim_out': delim_out

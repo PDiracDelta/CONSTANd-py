@@ -126,7 +126,7 @@ def main(testing, writeToDisk):
 	removeIsolationInterference_bool, collapse_method, collapse_maxRelativeReporterVariance,
 	removeIsolationInterference_master, masterPSMAlgo, undoublePSMAlgo_exclusive_bool, collapseRT_bool,
 	collapseCharge_bool, collapsePTM_bool, isotopicCorrection_bool, isotopicCorrection_matrix, accuracy, maxIterations,
-	DEFoldThreshold, path_out, filename_out, delim_out
+	FCThreshold, path_out, filename_out, delim_out
 	"""
 	params = getInput()
 	# get the dataframe
@@ -198,7 +198,7 @@ def main(testing, writeToDisk):
 
 		# get min and max protein-peptide mappings
 		minProteinPeptidesDict, maxProteinPeptidesDict = getProteinPeptidesDicts(df)
-		# execute mappings to get all peptide sequences and intensities per protein, over each whole condition
+		# execute mappings to get all peptideintensities per protein, over each whole condition
 		minProteinDF = proteinDF(df, minProteinPeptidesDict, columnsPerCondition)
 		fullProteinDF = proteinDF(df, maxProteinPeptidesDict, columnsPerCondition)
 
@@ -207,8 +207,8 @@ def main(testing, writeToDisk):
 		fullProteinDF = applyDifferentialExpression(minProteinDF, alpha)
 
 		# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
-		minProteinDF = applyFoldChange(minProteinDF, params['DEFoldThreshold']) # TODO
-		fullProteinDF = applyFoldChange(fullProteinDF, params['DEFoldThreshold'])
+		minProteinDF = applyFoldChange(minProteinDF, params['FCThreshold']) # TODO
+		fullProteinDF = applyFoldChange(fullProteinDF, params['FCThreshold'])
 
 		# data visualization
 		viz = dataVisualization(minProteinDF, fullProteinDF) # TODO

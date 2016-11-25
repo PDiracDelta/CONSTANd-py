@@ -93,8 +93,8 @@ def applyDifferentialExpression(this_proteinDF, alpha):
 	return this_proteinDF
 
 
-def applyFoldChange():
-	""" Calculate the fold change for each protein and apply it to the given protein dataframe """
+def applyFoldChange(proteinDF, pept2protCombinationMethod):
+	""" Calculate the fold change for each protein (pept2protCombinationMethod) and apply it to the given protein dataframe """
 	return None
 
 
