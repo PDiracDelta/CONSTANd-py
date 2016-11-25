@@ -8,7 +8,7 @@ Handle all I/O of data files and parameters to and from both the workflow and th
 import pandas as pd
 import numpy as np
 import configparser
-import json.loads as getList
+from json import loads as getList
 import pickle
 from os import path
 from codecs import getdecoder as gd
