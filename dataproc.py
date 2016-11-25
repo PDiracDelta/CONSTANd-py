@@ -115,7 +115,7 @@ def setMasterProteinDescriptions(df):
 	:param df:  pd.dataFrame     dataFrame with all descriptions and accessions
 	:return df: pd.dataFrame     dataFrame with only Master Protein descriptions and accessions
 	"""
-	if 'Protein Accessions' in df.columns.names:
+	if 'Protein Accessions' in df.columns.values:
 		# [[master Proteins] per peptide]
 		masterProteinsLists = df.loc[:, 'Master Protein Accessions'].astype(str).apply(lambda x: x.split('; '))
 		# [[all Proteins] per peptide]
