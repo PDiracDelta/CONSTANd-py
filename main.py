@@ -191,8 +191,6 @@ def main(testing, writeToDisk):
 		df = setIntensities(df, normalizedIntensities)
 
 		""" Data analysis and visualization """
-		# define global parameters
-		setAnalysisGlobals(intensityColumns=params['intensityColumns'])
 		# record detections without isotopic correction applied applied
 		metadata['noIsotopicCorrection'] = getNoIsotopicCorrection(df, noCorrectionIndices)
 		# record RT isolation statistics. Future: flag
@@ -205,8 +203,8 @@ def main(testing, writeToDisk):
 		fullProteinDF = proteinDF(df, maxProteinPeptidesDict, columnsPerCondition)
 
 		# perform differential expression analysis with Benjamini-Hochberg correction.
-		minDE = differentialExpression(minProteinIntensitiesPerConditionDF, alpha)  # TODO
-		fullDE = differentialExpression(fullProteinIntensitiesPerConditionDF, alpha)
+		minDE = differentialExpression(minProteinDF, alpha)  # TODO
+		fullDE = differentialExpression(minProteinDF, alpha)
 
 		# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
 		minFold = foldChange(minDE, params['DEFoldThreshold']) # TODO
