@@ -18,6 +18,7 @@ import sys
 # import matplotlib as mpl
 # import matplotlib.pyplot as plt
 from constand import constand
+from os import path
 from time import time
 from dataIO import *
 from dataproc import *
@@ -138,6 +139,7 @@ def processDf(df, params, writeToDisk):
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
 
 	# collapse peptide list redundancy due to multiple detections at different RT
+	# TEST here the intensity columns are alraedy lost
 	df, removedData['RT'] = collapse('RT', df, method=params['collapse_method'],
 	                                 maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
 	                                 masterPSMAlgo=params['masterPSMAlgo'],
@@ -208,8 +210,8 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# get min and max protein-peptide mappings
 	minProteinPeptidesDict, maxProteinPeptidesDict = getProteinPeptidesDicts(df)
 	# execute mappings to get all peptideintensities per protein, over each whole condition
-	minProteinDF = proteinDF(df, minProteinPeptidesDict, params['columnsPerCondition'])
-	fullProteinDF = proteinDF(df, maxProteinPeptidesDict, params['columnsPerCondition'])
+	minProteinDF = proteinDF(df, minProteinPeptidesDict, params['intensityColumnsPerCondition'])
+	fullProteinDF = proteinDF(df, maxProteinPeptidesDict, params['intensityColumnsPerCondition'])
 
 	# perform differential expression analysis with Benjamini-Hochberg correction.
 	minProteinDF = applyDifferentialExpression(minProteinDF, params['alpha'])
@@ -266,7 +268,7 @@ def main(doProcessing, doAnalysis, writeToDisk, testing):
 
 	if not testing:
 		""" Data processing """
-		processingResultsDumpFilename = params['path_in']+'/processingResultsDump'
+		processingResultsDumpFilename = path.abspath(path.join(filepath, path.pardir))+'/processingResultsDump'
 		if doProcessing:
 			# process every input dataframe
 			processingResults = [processDf(df, params, writeToDisk) for df in dfs]
