@@ -30,7 +30,7 @@ def getInput():
 
 	# get variables from config in correct typography
 	date = config.get('DEFAULT','date')
-	files_in = parseList(config.get('DEFAULT','files_in'))
+	files_in = getList(config.get('DEFAULT','files_in'))
 	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
 	header_in = config.getint('DEFAULT','header_in')
 	removedDataInOneFile_bool = config.getboolean('DEFAULT','removedDataInOneFile_bool')
