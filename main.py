@@ -138,7 +138,7 @@ def main(testing, writeToDisk):
 		""" Data preparation """
 		removedData={} # is to contain basic info about data that will be removed during the workflow, per removal category.
 		# define global parameters
-		setGlobals(intensityColumns = params['intensityColumns'], removalColumnsToSave=params['removalColumnsToSave'],
+		setProcessingGlobals(intensityColumns = params['intensityColumns'], removalColumnsToSave=params['removalColumnsToSave'],
 		           noMissingValuesColumns=params['noMissingValuesColumns'])
 		setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
 		# remove detections where (essential) data is missing.
@@ -191,6 +191,8 @@ def main(testing, writeToDisk):
 		df = setIntensities(df, normalizedIntensities)
 
 		""" Data analysis and visualization """
+		# define global parameters
+		setAnalysisGlobals(intensityColumns=params['intensityColumns'])
 		# record detections without isotopic correction applied applied
 		metadata['noIsotopicCorrection'] = getNoIsotopicCorrection(df, noCorrectionIndices)
 		# record RT isolation statistics. Future: flag
@@ -199,8 +201,8 @@ def main(testing, writeToDisk):
 		# get min and max protein-peptide mappings
 		minProteinPeptidesDict, maxProteinPeptidesDict = getProteinPeptidesDicts(df)
 		# execute mappings to get all intensities per protein, over each whole condition
-		minProteinIntensitiesPerConditionDF = proteinIntensitiesPerConditionDF(minProteinPeptidesDict)
-		fullProteinIntensitiesPerConditionDF = proteinIntensitiesPerConditionDF(maxProteinPeptidesDict)
+		minProteinDF = proteinDF(df, minProteinPeptidesDict, columnsPerCondition)
+		fullProteinDF = proteinDF(df, maxProteinPeptidesDict, columnsPerCondition)
 
 		# perform differential expression analysis with Benjamini-Hochberg correction.
 		minDE = differentialExpression(minProteinIntensitiesPerConditionDF, alpha)  # TODO
