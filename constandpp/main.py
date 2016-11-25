@@ -207,11 +207,11 @@ def main(testing, writeToDisk):
 		fullProteinDF = applyDifferentialExpression(minProteinDF, alpha)
 
 		# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
-		minFold = foldChange(minDE, params['DEFoldThreshold']) # TODO
-		fullFold = foldChange(fullDE, params['DEFoldThreshold'])
+		minProteinDF = applyFoldChange(minProteinDF, params['DEFoldThreshold']) # TODO
+		fullProteinDF = applyFoldChange(fullProteinDF, params['DEFoldThreshold'])
 
 		# data visualization
-		viz = dataVisualization(minDE, fullDE, minFold, fullFold) # TODO
+		viz = dataVisualization(minProteinDF, fullProteinDF) # TODO
 
 		""" Save data to disk and generate report """
 		if writeToDisk:
