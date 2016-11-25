@@ -79,18 +79,18 @@ def proteinDF(df, proteinPeptidesDict, intensityColumnsPerCondition):
 	return proteinDF
 
 
-def differentialExpression(proteinDF, alpha):
+def differentialExpression(this_proteinDF, alpha):
 	# TODO: careful with peptides with more than 1 master protein
 	# { protein : indices of (uniquely/all) associated peptides }
-	proteinDF.loc['p-value'] = [np.nan, ] * len(proteinDF.index)
+	this_proteinDF.loc['p-value'] = [np.nan, ] * len(this_proteinDF.index)
 	# perform t-test on the intensities lists of both conditions of each protein, assuming data is independent.
-	__, proteinDF.loc[:, 'p-value'] = proteinDF.apply(
+	__, this_proteinDF.loc[:, 'p-value'] = this_proteinDF.apply(
 		lambda x,y: ttest(x['condition 1'], y['condition 2']))
 	# Benjamini-Hochberg correction
 	# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
-	proteinDF.loc[:, 'adjusted p-value'] = multipletests(
-		pvals=proteinDF.loc[:, 'p-value'], alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
-	return proteinDF
+	this_proteinDF.loc[:, 'adjusted p-value'] = multipletests(
+		pvals=this_proteinDF.loc[:, 'p-value'], alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
+	return this_proteinDF
 
 
 def foldChange():
