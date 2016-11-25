@@ -8,19 +8,11 @@ Handle all I/O of data files and parameters to and from both the workflow and th
 import pandas as pd
 import numpy as np
 import configparser
+import json.loads as getList
 import pickle
 from os import path
 from codecs import getdecoder as gd
 from warnings import warn
-
-
-def parseList(listInString):
-	"""
-	Takes a comma-separated list hidden in a string and returns it as a list.
-	:param listInString:    str     comma-separated list hidden in a string
-	:return:                list    the list that was hidden in the string
-	"""
-	return [x.strip(' ') for x in listInString.split(',')]
 
 
 def getInput():
@@ -42,11 +34,11 @@ def getInput():
 	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
 	header_in = config.getint('DEFAULT','header_in')
 	removedDataInOneFile_bool = config.getboolean('DEFAULT','removedDataInOneFile_bool')
-	intensityColumns = parseList(config.get('DEFAULT', 'intensityColumns'))
-	wantedColumns = parseList(config.get('DEFAULT', 'wantedColumns'))
-	noMissingValuesColumns = parseList(config.get('DEFAULT', 'noMissingValuesColumns'))
-	removalColumnsToSave = parseList(config.get('DEFAULT', 'removalColumnsToSave'))
-	collapseColumnsToSave = parseList(config.get('DEFAULT', 'collapseColumnsToSave'))
+	intensityColumns = getList(config.get('DEFAULT', 'intensityColumns'))
+	wantedColumns = getList(config.get('DEFAULT', 'wantedColumns'))
+	noMissingValuesColumns = getList(config.get('DEFAULT', 'noMissingValuesColumns'))
+	removalColumnsToSave = getList(config.get('DEFAULT', 'removalColumnsToSave'))
+	collapseColumnsToSave = getList(config.get('DEFAULT', 'collapseColumnsToSave'))
 	removeBadConfidence_bool = config.getboolean('DEFAULT','removeBadConfidence_bool')
 	removeBadConfidence_minimum = config.get('DEFAULT','removeBadConfidence_minimum')
 	removeIsolationInterference_bool = config.getboolean('DEFAULT','removeIsolationInterference_bool')
