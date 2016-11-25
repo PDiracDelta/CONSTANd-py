@@ -191,6 +191,9 @@ def main(testing, writeToDisk):
 		df = setIntensities(df, normalizedIntensities)
 
 		""" Data analysis and visualization """
+		# contains statistics and metadata (like the parameters) about the analysis.
+		# perform differential expression analysis
+
 		# record detections without isotopic correction applied applied
 		metadata['noIsotopicCorrection'] = getNoIsotopicCorrection(df, noCorrectionIndices)
 		# record RT isolation statistics. Future: flag
