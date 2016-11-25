@@ -265,9 +265,16 @@ def main(doProcessing, doAnalysis, writeToDisk, testing):
 
 	if not testing:
 		""" Data processing """
+		processingResultsDumpFilename = params['path_in']+'/processingResultsDump'
 		if doProcessing:
 			# process every input dataframe
 			processingResults = [processDf(df, params, writeToDisk) for df in dfs]
+			pickle.dump(processingResults, open(processingResultsDumpFilename, 'wb')) # TEST
+		else:
+			try:
+				processingResults = pickle.load(open(processingResultsDumpFilename, 'rb'))
+			except FileNotFoundError:
+				raise FileNotFoundError("There is no previously processed data in this path.")
 
 		""" Data analysis and visualization """
 		if doAnalysis:
@@ -283,4 +290,4 @@ def main(doProcessing, doAnalysis, writeToDisk, testing):
 
 
 if __name__ == '__main__':
-	sys.exit(main(doProcessing=True, doAnalysis=True, testing=False, writeToDisk=True))
+	sys.exit(main(doProcessing=False, doAnalysis=True, testing=False, writeToDisk=True))
