@@ -61,7 +61,7 @@ def getProteinPeptidesDicts(df):
 			maxProteinPeptidesDict = minProteinPeptidesDict.copy()
 		else:  # multiple proteins accessions per peptide: save those to maxProteinPeptidesDict only.
 			# { multiple proteins : indices }
-			multipleProteinPeptidesDict = df[numProteinGroupsDict[numGroups]].groupby(
+			multipleProteinPeptidesDict = df.loc[numProteinGroupsDict[numGroups]].groupby(
 				"Master Protein Accessions").groups
 			for multipleProteinsString in multipleProteinPeptidesDict.keys():
 				multipleProteins = multipleProteinsString.split('; ')
