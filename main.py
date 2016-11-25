@@ -203,8 +203,8 @@ def main(testing, writeToDisk):
 		fullProteinDF = proteinDF(df, maxProteinPeptidesDict, columnsPerCondition)
 
 		# perform differential expression analysis with Benjamini-Hochberg correction.
-		minDE = differentialExpression(minProteinDF, alpha)  # TODO
-		fullDE = differentialExpression(minProteinDF, alpha)
+		minProteinDF = applyDifferentialExpression(minProteinDF, alpha)  # TODO
+		fullProteinDF = applyDifferentialExpression(minProteinDF, alpha)
 
 		# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
 		minFold = foldChange(minDE, params['DEFoldThreshold']) # TODO
