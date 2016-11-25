@@ -70,22 +70,27 @@ def getProteinPeptidesDicts(df):
 	return minProteinPeptidesDict, maxProteinPeptidesDict
 
 
-def proteinIntensitiesPerConditionDF():
-	return None
+def proteinDF(df, proteinPeptidesDict, intensityColumnsPerCondition):
+	proteinDF = pd.DataFrame(list(proteinPeptidesDict.keys()), columns=['protein']).set_index('protein')
+	for protein, peptideIndices in proteinPeptidesDict:
+		proteinDF.loc[protein, ['peptides', 'condition 1', 'condition 2']] = [df.loc[peptideIndices, 'Annotated Sequence'],
+		                                                                      df.loc[peptideIndices, intensityColumnsPerCondition[0]],
+		                                                                      df.loc[peptideIndices, intensityColumnsPerCondition[1]]]
+	return proteinDF
 
 
-def differentialExpression(proteinIntensitiesPerConditionDF, alpha):
+def differentialExpression(proteinDF, alpha):
 	# TODO: careful with peptides with more than 1 master protein
 	# { protein : indices of (uniquely/all) associated peptides }
-	proteinIntensitiesPerConditionDF.loc['p-value'] = [np.nan, ] * len(proteinIntensitiesPerConditionDF.index)
+	proteinDF.loc['p-value'] = [np.nan, ] * len(proteinDF.index)
 	# perform t-test on the intensities lists of both conditions of each protein, assuming data is independent.
-	__, proteinIntensitiesPerConditionDF.loc[:, 'p-value'] = proteinIntensitiesPerConditionDF.apply(
+	__, proteinDF.loc[:, 'p-value'] = proteinDF.apply(
 		lambda x,y: ttest(x['condition 1'], y['condition 2']))
 	# Benjamini-Hochberg correction
 	# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
-	proteinIntensitiesPerConditionDF.loc[:, 'adjusted p-value'] = multipletests(
-		pvals=proteinIntensitiesPerConditionDF.loc[:, 'p-value'], alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
-	return proteinIntensitiesPerConditionDF
+	proteinDF.loc[:, 'adjusted p-value'] = multipletests(
+		pvals=proteinDF.loc[:, 'p-value'], alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
+	return proteinDF
 
 
 def foldChange():
