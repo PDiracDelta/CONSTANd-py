@@ -10,8 +10,8 @@ Includes data visualization.
 import numpy as np
 import pandas as pd
 from collections import defaultdict
-import pandas.statsmodels.sandbox.stats.multicomp.multipletests as multipletests
-import pandas.stats.tests.ttest_ind as ttest
+from statsmodels.sandbox.stats.multicomp import multipletests
+from scipy.stats import ttest_ind as ttests
 
 
 def getRTIsolationInfo(removedData_RT):
