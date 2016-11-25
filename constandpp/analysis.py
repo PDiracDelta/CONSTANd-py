@@ -79,7 +79,7 @@ def proteinDF(df, proteinPeptidesDict, intensityColumnsPerCondition):
 	return proteinDF
 
 
-def differentialExpression(this_proteinDF, alpha):
+def applyDifferentialExpression(this_proteinDF, alpha):
 	# TODO: careful with peptides with more than 1 master protein
 	# { protein : indices of (uniquely/all) associated peptides }
 	this_proteinDF.loc['p-value'] = [np.nan, ] * len(this_proteinDF.index)
