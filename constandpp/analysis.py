@@ -75,8 +75,17 @@ def proteinIntensitiesPerConditionDF():
 
 
 def differentialExpression(proteinIntensitiesPerConditionDF, alpha):
-
-	return pvalues
+	# TODO: careful with peptides with more than 1 master protein
+	# { protein : indices of (uniquely/all) associated peptides }
+	proteinIntensitiesPerConditionDF.loc['p-value'] = [np.nan, ] * len(proteinIntensitiesPerConditionDF.index)
+	# perform t-test on the intensities lists of both conditions of each protein, assuming data is independent.
+	__, proteinIntensitiesPerConditionDF.loc[:, 'p-value'] = proteinIntensitiesPerConditionDF.apply(
+		lambda x,y: ttest(x['condition 1'], y['condition 2']))
+	# Benjamini-Hochberg correction
+	# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
+	proteinIntensitiesPerConditionDF.loc[:, 'adjusted p-value'] = multipletests(
+		pvals=proteinIntensitiesPerConditionDF.loc[:, 'p-value'], alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
+	return proteinIntensitiesPerConditionDF
 
 
 def foldChange():
