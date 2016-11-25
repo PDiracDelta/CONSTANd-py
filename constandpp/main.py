@@ -208,12 +208,12 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# get min and max protein-peptide mappings
 	minProteinPeptidesDict, maxProteinPeptidesDict = getProteinPeptidesDicts(df)
 	# execute mappings to get all peptideintensities per protein, over each whole condition
-	minProteinDF = proteinDF(df, minProteinPeptidesDict, columnsPerCondition)
-	fullProteinDF = proteinDF(df, maxProteinPeptidesDict, columnsPerCondition)
+	minProteinDF = proteinDF(df, minProteinPeptidesDict, params['columnsPerCondition'])
+	fullProteinDF = proteinDF(df, maxProteinPeptidesDict, params['columnsPerCondition'])
 
 	# perform differential expression analysis with Benjamini-Hochberg correction.
-	minProteinDF = applyDifferentialExpression(minProteinDF, alpha)  # TODO
-	fullProteinDF = applyDifferentialExpression(minProteinDF, alpha)
+	minProteinDF = applyDifferentialExpression(minProteinDF, params['alpha'])
+	fullProteinDF = applyDifferentialExpression(minProteinDF, params['alpha'])
 
 	# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
 	minProteinDF = applyFoldChange(minProteinDF, params['FCThreshold']) # TODO
@@ -224,7 +224,10 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 
 	""" save results """
 	if writeToDisk:
-		exportData(DEresults, dataType='obj', path_out=params['path_out'], filename=params['filename_out'] + '_DEresults')  # TODO
+		exportData(minProteinDF, dataType='obj', path_out=params['path_out'],
+		           filename=params['filename_out'] + '_results_minimal')
+		exportData(fullProteinDF, dataType='obj', path_out=params['path_out'],
+		           filename=params['filename_out'] + '_results_full')
 		# save the visualizations
 		exportData(viz, dataType='viz', path_out=params['path_out'], filename=params['filename_out']+'_dataViz') # TODO
 		# save the metadata
@@ -234,7 +237,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		# generate a report PDF (without the normalized intensities: behind paywall?
 
 
-	return DEresults, viz, metadata
+	return minProteinDF, fullProteinDF, viz, metadata
 
 
 def main(doProcessing, doAnalysis, writeToDisk, testing):
