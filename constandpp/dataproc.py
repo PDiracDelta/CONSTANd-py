@@ -206,7 +206,10 @@ def getIntensities(df, indices=None):
 		#return np.asarray(df.loc(axis=1)[intensityColumns])
 		return np.asarray(df.loc[:, intensityColumns])
 	else:
-		return np.asarray(df.loc[indices, intensityColumns])
+		try: # TEST
+			return np.asarray(df.loc[indices, intensityColumns])
+		except:
+			pass
 
 
 def setIntensities(df, intensities):

@@ -196,10 +196,7 @@ def importDataFrame(path_in, delim=None, header=0):
 	if delim=='xlsx':
 		df = pd.read_excel(path_in)
 	else:
-		try: # TEST
-			df = pd.read_csv(path_in, delimiter=delim, header=header)
-		except Exception:
-			pass
+		df = pd.read_csv(path_in, delimiter=delim, header=header)
 
 	if delim is None:
 		raise Exception(
