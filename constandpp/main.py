@@ -227,13 +227,14 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	return DEresults, viz, metadata
 
 
-def main(testing, writeToDisk):
+def main(doProcessing, doAnalysis, writeToDisk, testing):
 	start = time()
 	# testing=True # TEST
 	# writeToDisk=False # TEST
 	"""
 	For now this is just stuff for debugging and testing. Later:
-	Contains and explicits the workflow of the program.
+	Contains and explicits the workflow of the program. Using the booleans doProcessing, doAnalysis and writeToDisk one
+	can control	which parts of the workflow to perform.
 	"""
 	""" get all input parameters
 	params:
@@ -251,11 +252,13 @@ def main(testing, writeToDisk):
 
 	if not testing:
 		""" Data processing """
-		# process every input dataframe
-		processingResults = [processDf(df, params, writeToDisk) for df in dfs]
+		if doProcessing:
+			# process every input dataframe
+			processingResults = [processDf(df, params, writeToDisk) for df in dfs]
 
 		""" Data analysis and visualization """
-		DEresults, viz, metadata = analyzeProcessingResult(processingResults, params, writeToDisk)
+		if doAnalysis:
+			DEresults, viz, metadata = analyzeProcessingResult(processingResults, params, writeToDisk)
 
 		""" generate report """
 		generateReport(DEresults, viz, metadata)  # TODO
@@ -267,4 +270,4 @@ def main(testing, writeToDisk):
 
 
 if __name__ == '__main__':
-	sys.exit(main(testing=False, writeToDisk=True))
+	sys.exit(main(doProcessing=True, doAnalysis=True, testing=False, writeToDisk=True))
