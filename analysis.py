@@ -9,6 +9,7 @@ Includes data visualization.
 
 import numpy as np
 import pandas as pd
+from warnings import warn
 from collections import defaultdict
 from statsmodels.sandbox.stats.multicomp import multipletests
 from scipy.stats import ttest_ind as ttest
@@ -53,21 +54,23 @@ def getProteinPeptidesDicts(df):
 		list)  # proteins get contribution only from peptides which correspond uniquely to them
 	maxProteinPeptidesDict = defaultdict(
 		list)  # proteins get maximal contribution from all corresponding peptides even if corresponding to multiple proteins
-	for numGroups in numProteinGroupsDict.keys():
-		if numGroups == 1:  # these have only 1 master protein accession
+	noMasterProteinAccession = []
+	for numGroups, peptideIndices in numProteinGroupsDict.items():
+		if numGroups == 0:
+			warn("Peptides without Master Protein Accession detected. Omitting them in the analysis.")
+			noMasterProteinAccession.extend(peptideIndices)
+		elif numGroups == 1:  # these have only 1 master protein accession
 			# { protein : indices }
-			minProteinPeptidesDict.extend(
-				df[numProteinGroupsDict[numGroups]].groupby("Master Protein Accessions").groups)
+			minProteinPeptidesDict.extend(df[peptideIndices].groupby("Master Protein Accessions").groups)
 			maxProteinPeptidesDict = minProteinPeptidesDict.copy()
 		else:  # multiple proteins accessions per peptide: save those to maxProteinPeptidesDict only.
 			# { multiple proteins : indices }
-			multipleProteinPeptidesDict = df.loc[numProteinGroupsDict[numGroups]].groupby(
-				"Master Protein Accessions").groups
-			for multipleProteinsString in multipleProteinPeptidesDict.keys():
+			multipleProteinPeptidesDict = df.loc[peptideIndices].groupby("Master Protein Accessions").groups
+			for multipleProteinsString, nonUniqueIndices in multipleProteinPeptidesDict.keys():
 				multipleProteins = multipleProteinsString.split('; ')
-				for protein in multipleProteins:
-					maxProteinPeptidesDict[protein].extend(multipleProteinPeptidesDict[multipleProteinsString])
-	return minProteinPeptidesDict, maxProteinPeptidesDict
+				for protein in multipleProteins: # extend the possibly (probably) already existing entry in the dict.
+					maxProteinPeptidesDict[protein].extend(nonUniqueIndices)
+	return minProteinPeptidesDict, maxProteinPeptidesDict, df.loc[noMasterProteinAccession]
 
 
 def getProteinDF(df, proteinPeptidesDict, intensityColumnsPerCondition):
