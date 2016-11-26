@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 from statsmodels.sandbox.stats.multicomp import multipletests
-from scipy.stats import ttest_ind as ttests
+from scipy.stats import ttest_ind as ttest
 
 
 def getRTIsolationInfo(removedData_RT):
