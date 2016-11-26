@@ -210,8 +210,8 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# get min and max protein-peptide mappings
 	minProteinPeptidesDict, maxProteinPeptidesDict = getProteinPeptidesDicts(df)
 	# execute mappings to get all peptideintensities per protein, over each whole condition
-	minProteinDF = proteinDF(df, minProteinPeptidesDict, params['intensityColumnsPerCondition'])
-	fullProteinDF = proteinDF(df, maxProteinPeptidesDict, params['intensityColumnsPerCondition'])
+	minProteinDF = getProteinDF(df, minProteinPeptidesDict, params['intensityColumnsPerCondition'])
+	fullProteinDF = getProteinDF(df, maxProteinPeptidesDict, params['intensityColumnsPerCondition'])
 
 	# perform differential expression analysis with Benjamini-Hochberg correction.
 	minProteinDF = applyDifferentialExpression(minProteinDF, params['alpha'])
