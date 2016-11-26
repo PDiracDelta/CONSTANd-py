@@ -277,7 +277,7 @@ def main(doProcessing, doAnalysis, writeToDisk, testing):
 			try:
 				processingResults = pickle.load(open(processingResultsDumpFilename, 'rb'))
 			except FileNotFoundError:
-				raise FileNotFoundError("There is no previously processed data in this path.")
+				raise FileNotFoundError("There is no previously processed data in this path: "+processingResultsDumpFilename)
 
 		""" Data analysis and visualization """
 		if doAnalysis:
