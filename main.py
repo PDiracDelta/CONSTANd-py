@@ -268,7 +268,7 @@ def main(doProcessing, doAnalysis, writeToDisk, testing):
 
 	if not testing:
 		""" Data processing """
-		processingResultsDumpFilename = path.abspath(path.join(filepath, path.pardir))+'/processingResultsDump'
+		processingResultsDumpFilename = path.relpath(path.join(filepath, path.pardir))+'/processingResultsDump'
 		if doProcessing:
 			# process every input dataframe
 			processingResults = [processDf(df, params, writeToDisk) for df in dfs]
