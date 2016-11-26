@@ -208,7 +208,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	metadata['RTIsolationInfo'] = getRTIsolationInfo(removedData['RT'])
 
 	# get min and max protein-peptide mappings
-	minProteinPeptidesDict, maxProteinPeptidesDict = getProteinPeptidesDicts(df)
+	minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(df)
 	# execute mappings to get all peptideintensities per protein, over each whole condition
 	minProteinDF = getProteinDF(df, minProteinPeptidesDict, params['intensityColumnsPerCondition'])
 	fullProteinDF = getProteinDF(df, maxProteinPeptidesDict, params['intensityColumnsPerCondition'])
