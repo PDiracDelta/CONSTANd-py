@@ -70,7 +70,7 @@ def getProteinPeptidesDicts(df):
 	return minProteinPeptidesDict, maxProteinPeptidesDict
 
 
-def proteinDF(df, proteinPeptidesDict, intensityColumnsPerCondition):
+def getProteinDF(df, proteinPeptidesDict, intensityColumnsPerCondition):
 	proteinDF = pd.DataFrame([list(proteinPeptidesDict.keys())].extend([[None, ]*len(proteinPeptidesDict.keys()), ]*3),
 	                         columns=['protein', 'peptides', 'condition 1', 'condition 2']).set_index('protein')
 	for protein, peptideIndices in proteinPeptidesDict.items():
