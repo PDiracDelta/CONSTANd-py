@@ -66,6 +66,8 @@ def getProteinPeptidesDicts(df):
 		else:  # multiple proteins accessions per peptide: save those to maxProteinPeptidesDict only.
 			# { multiple proteins : indices }
 			multipleProteinPeptidesDict = df.loc[peptideIndices].groupby("Master Protein Accessions").groups
+			# cast to list # todo find a non-ugly fix
+			multipleProteinPeptidesDict = dict((k,v) for k,v in multipleProteinPeptidesDict.iteritems()) # ugly
 			for multipleProteinsString, nonUniqueIndices in multipleProteinPeptidesDict.items():
 				multipleProteins = multipleProteinsString.split('; ')
 				for protein in multipleProteins: # extend the possibly (probably) already existing entry in the dict.
