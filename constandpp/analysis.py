@@ -46,7 +46,7 @@ def getProteinPeptidesDicts(df):
 	all peptides indices associated per protein.
 	:return minProteinPeptidesDict:	dict	{ protein : uniquely associated peptide indices }
 	:return maxProteinPeptidesDict:	dict	{ protein : all associated peptide indices }
-	"""
+	""" # todo make this function independent of # protein groups
 	numProteinGroupsDict = df.groupby("# Protein Groups").groups  # { # Protein Groups : indices }
 	# DEFAULTDICT doesn't return a KeyError when key not found, but rather None. !!! so you can safely .extend()
 	minProteinPeptidesDict = defaultdict(
@@ -54,7 +54,7 @@ def getProteinPeptidesDicts(df):
 	maxProteinPeptidesDict = defaultdict(
 		list)  # proteins get maximal contribution from all corresponding peptides even if corresponding to multiple proteins
 	for numGroups in numProteinGroupsDict.keys():
-		if numGroups == '1':  # these have only 1 master protein accession
+		if numGroups == 1:  # these have only 1 master protein accession
 			# { protein : indices }
 			minProteinPeptidesDict.extend(
 				df[numProteinGroupsDict[numGroups]].groupby("Master Protein Accessions").groups)
