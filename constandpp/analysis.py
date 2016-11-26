@@ -47,13 +47,13 @@ def getProteinPeptidesDicts(df):
 	all peptides indices associated per protein.
 	:return minProteinPeptidesDict:	dict	{ protein : uniquely associated peptide indices }
 	:return maxProteinPeptidesDict:	dict	{ protein : all associated peptide indices }
-	""" # todo make this function independent of # protein groups
+	:return 						list	peptide sequences without master protein accession
+	"""
+	# todo make this function independent of # protein groups
 	numProteinGroupsDict = df.groupby("# Protein Groups").groups  # { # Protein Groups : indices }
 	# DEFAULTDICT doesn't return a KeyError when key not found, but rather None. !!! so you can safely .extend()
-	minProteinPeptidesDict = defaultdict(
-		list)  # proteins get contribution only from peptides which correspond uniquely to them
-	maxProteinPeptidesDict = defaultdict(
-		list)  # proteins get maximal contribution from all corresponding peptides even if corresponding to multiple proteins
+	minProteinPeptidesDict = None  # proteins get contribution only from peptides which correspond uniquely to them
+	maxProteinPeptidesDict = None  # proteins get maximal contribution from all corresponding peptides even if corresponding to multiple proteins
 	noMasterProteinAccession = []
 	for numGroups, peptideIndices in numProteinGroupsDict.items():
 		if numGroups == 0:
@@ -61,16 +61,16 @@ def getProteinPeptidesDicts(df):
 			noMasterProteinAccession.extend(peptideIndices)
 		elif numGroups == 1:  # these have only 1 master protein accession
 			# { protein : indices }
-			minProteinPeptidesDict.extend(df[peptideIndices].groupby("Master Protein Accessions").groups)
-			maxProteinPeptidesDict = minProteinPeptidesDict.copy()
+			minProteinPeptidesDict = df.loc[peptideIndices].groupby("Master Protein Accessions").groups
+			maxProteinPeptidesDict = defaultdict(list, minProteinPeptidesDict.copy())
 		else:  # multiple proteins accessions per peptide: save those to maxProteinPeptidesDict only.
 			# { multiple proteins : indices }
 			multipleProteinPeptidesDict = df.loc[peptideIndices].groupby("Master Protein Accessions").groups
-			for multipleProteinsString, nonUniqueIndices in multipleProteinPeptidesDict.keys():
+			for multipleProteinsString, nonUniqueIndices in multipleProteinPeptidesDict.items():
 				multipleProteins = multipleProteinsString.split('; ')
 				for protein in multipleProteins: # extend the possibly (probably) already existing entry in the dict.
 					maxProteinPeptidesDict[protein].extend(nonUniqueIndices)
-	return minProteinPeptidesDict, maxProteinPeptidesDict, df.loc[noMasterProteinAccession]
+	return minProteinPeptidesDict, maxProteinPeptidesDict, list(df.loc[noMasterProteinAccession, 'Annotated Sequence'])
 
 
 def getProteinDF(df, proteinPeptidesDict, intensityColumnsPerCondition):
