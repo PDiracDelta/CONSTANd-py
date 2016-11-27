@@ -227,9 +227,9 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	""" save results """
 	if writeToDisk:
 		exportData(minProteinDF, dataType='obj', path_out=params['path_out'],
-		           filename=params['filename_out'] + '_results_minimal')
+		           filename=params['filename_out'] + '_results_minimal', delim_out=params['delim_out'])
 		exportData(fullProteinDF, dataType='obj', path_out=params['path_out'],
-		           filename=params['filename_out'] + '_results_full')
+		           filename=params['filename_out'] + '_results_full', delim_out=params['delim_out'])
 		# save the visualizations
 		exportData(viz, dataType='viz', path_out=params['path_out'], filename=params['filename_out']+'_dataViz') # TODO
 		# save the metadata
