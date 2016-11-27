@@ -72,7 +72,7 @@ def getProteinPeptidesDicts(df):
 				multipleProteins = multipleProteinsString.split('; ')
 				for protein in multipleProteins: # extend the possibly (probably) already existing entry in the dict.
 					maxProteinPeptidesDict[protein].extend(nonUniqueIndices)
-	return minProteinPeptidesDict, maxProteinPeptidesDict, list(df.loc[noMasterProteinAccession, 'Annotated Sequence'])
+	return minProteinPeptidesDict, maxProteinPeptidesDict, df.loc[noMasterProteinAccession, 'Annotated Sequence']
 
 
 def getProteinDF(df, proteinPeptidesDict, intensityColumnsPerCondition):
