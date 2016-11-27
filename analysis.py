@@ -116,7 +116,8 @@ def applyDifferentialExpression(this_proteinDF, alpha):
 
 def applyFoldChange(proteinDF, pept2protCombinationMethod):
 	""" Calculate the fold change for each protein (pept2protCombinationMethod) and apply it to the given protein dataframe """
-	return None
+	proteinDF['fold change'] = [np.nan, ]*len(proteinDF.index)
+	return proteinDF
 
 
 def dataVisualization(DEresults, FCThreshold):
