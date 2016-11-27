@@ -228,8 +228,8 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	handyColumnOrder = ['protein', 'adjusted p-value', 'fold change', 'p-value', 'peptides', 'condition 1', 'condition 2']
 	minProteinDF.reset_index(level=0, inplace=True)
 	fullProteinDF.reset_index(level=0, inplace=True)
-	minProteinDF.reindex_axis(handyColumnOrder, axis=1, inplace=True)
-	fullProteinDF.reindex_axis(handyColumnOrder, axis=1, inplace=True)
+	minProteinDF = minProteinDF.reindex_axis(handyColumnOrder, axis=1)
+	fullProteinDF = fullProteinDF.reindex_axis(handyColumnOrder, axis=1)
 
 	""" save results """
 	if writeToDisk:
