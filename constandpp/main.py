@@ -225,7 +225,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	viz = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold']) # TODO
 
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
-	handyColumnOrder = ['protein', 'adjusted p-value', 'fold change', 'p-value', 'peptides', 'condition 1', 'condition 2']
+	handyColumnOrder = ['protein', 'adjusted p-value', 'fold change c1/c2', 'p-value', 'peptides', 'condition 1', 'condition 2']
 	minProteinDF.reset_index(level=0, inplace=True)
 	fullProteinDF.reset_index(level=0, inplace=True)
 	minProteinDF = minProteinDF.reindex_axis(handyColumnOrder, axis=1)
