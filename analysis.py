@@ -106,7 +106,7 @@ def applyDifferentialExpression(this_proteinDF, alpha):
 	this_proteinDF['p-value'] = [np.nan, ] * len(this_proteinDF.index) # todo remove this assignment, dont use .loc in line below
 	# perform t-test on the intensities lists of both conditions of each protein, assuming data is independent.
 	this_proteinDF.loc[:, 'p-value'] = this_proteinDF.apply(
-		lambda x: ttest(x['condition 1'], x['condition 2'], nan_policy='omit'), axis=1).apply(lambda x: x[1])
+		lambda x: ttest(x['condition 1'], x['condition 2'], nan_policy='omit'), axis=1)[1] # todo sometimes gives 0 as p value
 	# Benjamini-Hochberg correction
 	# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
 	__, this_proteinDF['adjusted p-value'], __, __ = multipletests(pvals=np.asarray(this_proteinDF.loc[:, 'p-value']),
@@ -116,7 +116,10 @@ def applyDifferentialExpression(this_proteinDF, alpha):
 
 def applyFoldChange(proteinDF, pept2protCombinationMethod):
 	""" Calculate the fold change for each protein (pept2protCombinationMethod) and apply it to the given protein dataframe """
-
+	if pept2protCombinationMethod == 'mean':
+		proteinDF['fold change c1/c2'] = proteinDF.apply(lambda x: np.nanmean(x['condition 1'])/np.nanmean(x['condition 2']), axis=1)
+	elif pept2protCombinationMethod == 'median':
+		proteinDF['fold change c1/c2'] = proteinDF.apply(lambda x: np.nanmedian(x['condition 1']) / np.nanmedian(x['condition 2']), axis=1)
 	return proteinDF
 
 
