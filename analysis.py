@@ -66,8 +66,8 @@ def getProteinPeptidesDicts(df):
 		else:  # multiple proteins accessions per peptide: save those to maxProteinPeptidesDict only.
 			# { multiple proteins : indices }
 			multipleProteinPeptidesDict = df.loc[peptideIndices].groupby("Master Protein Accessions").groups
-			# cast to list # todo find a non-ugly fix
-			multipleProteinPeptidesDict = dict((k,v) for k,v in multipleProteinPeptidesDict.iteritems()) # ugly
+			# cast dict values from int64index to list # todo find a non-ugly fix
+			maxProteinPeptidesDict = defaultdict(list, dict((k,list(v)) for k,v in maxProteinPeptidesDict.items()))  # ugly
 			for multipleProteinsString, nonUniqueIndices in multipleProteinPeptidesDict.items():
 				multipleProteins = multipleProteinsString.split('; ')
 				for protein in multipleProteins: # extend the possibly (probably) already existing entry in the dict.
@@ -76,16 +76,20 @@ def getProteinPeptidesDicts(df):
 
 
 def getProteinDF(df, proteinPeptidesDict, intensityColumnsPerCondition):
+	# todo docu
 	proteinDF = pd.DataFrame([list(proteinPeptidesDict.keys())].extend([[None, ]*len(proteinPeptidesDict.keys()), ]*3),
 	                         columns=['protein', 'peptides', 'condition 1', 'condition 2']).set_index('protein')
 	for protein, peptideIndices in proteinPeptidesDict.items():
-		proteinDF.loc[protein] = [df.loc[peptideIndices, 'Annotated Sequence'],
-		                          df.loc[peptideIndices, intensityColumnsPerCondition[0]],
-		                          df.loc[peptideIndices, intensityColumnsPerCondition[1]]]
+		# combine all channels into one channel per condition
+		condition1Intensities = pd.concat([df.loc[peptideIndices, channel] for channel in intensityColumnsPerCondition[0]], axis=0)
+		condition2Intensities = pd.concat([df.loc[peptideIndices, channel] for channel in intensityColumnsPerCondition[1]], axis=0)
+		# fill new dataframe on protein level, per condition
+		proteinDF.loc[protein] = [df.loc[peptideIndices, 'Annotated Sequence'], condition1Intensities, condition2Intensities]
 	return proteinDF
 
 
 def applyDifferentialExpression(this_proteinDF, alpha):
+	# todo docu
 	# TODO: careful with peptides with more than 1 master protein
 	# { protein : indices of (uniquely/all) associated peptides }
 	# def DE(row): # TEST obsolete code?
@@ -99,11 +103,11 @@ def applyDifferentialExpression(this_proteinDF, alpha):
 	this_proteinDF['p-value'] = [np.nan, ] * len(this_proteinDF.index)
 	# perform t-test on the intensities lists of both conditions of each protein, assuming data is independent.
 	this_proteinDF.loc[:, 'p-value'] = this_proteinDF.apply(
-		lambda x: ttest(x['condition 1'], x['condition 2']), axis=1)
+		lambda x: ttest(x['condition 1'], x['condition 2']), axis=1).apply(lambda x: x[1])
 	# Benjamini-Hochberg correction
 	# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
 	this_proteinDF['adjusted p-value'] = multipletests(
-		pvals=this_proteinDF.loc[:, 'p-value'], alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
+		pvals=np.asarray(this_proteinDF.loc[:, 'p-value']), alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
 	return this_proteinDF
 
 
