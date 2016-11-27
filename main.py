@@ -218,11 +218,11 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	fullProteinDF = applyDifferentialExpression(fullProteinDF, params['alpha'])
 
 	# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
-	minProteinDF = applyFoldChange(minProteinDF, params['FCThreshold']) # TODO
-	fullProteinDF = applyFoldChange(fullProteinDF, params['FCThreshold'])
+	minProteinDF = applyFoldChange(minProteinDF, params['pept2protCombinationMethod'])
+	fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
 
 	# data visualization
-	viz = dataVisualization(minProteinDF, fullProteinDF) # TODO
+	viz = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold']) # TODO
 
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
 	handyColumnOrder = ['protein', 'adjusted p-value', 'fold change', 'p-value', 'peptides', 'condition 1', 'condition 2']
