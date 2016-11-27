@@ -89,7 +89,7 @@ def MS2IntensityDoesntMatter(df):
 	print(maxdiff)
 
 
-def generateReport(DEresults, viz):
+def generateReport(minProteinDF, fullProteinDF, viz, metadata):
 	pass
 
 
@@ -280,10 +280,10 @@ def main(doProcessing, doAnalysis, writeToDisk, testing):
 
 		""" Data analysis and visualization """
 		if doAnalysis:
-			DEresults, viz, metadata = analyzeProcessingResult(processingResults, params, writeToDisk)
+			minProteinDF, fullProteinDF, viz, metadata = analyzeProcessingResult(processingResults, params, writeToDisk)
 
 		""" generate report """
-		generateReport(DEresults, viz, metadata)  # TODO
+		generateReport(minProteinDF, fullProteinDF, viz, metadata)  # TODO
 
 	elif testing:
 		devStuff(dfs[0], params)
