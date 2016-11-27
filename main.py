@@ -218,17 +218,24 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	fullProteinDF = applyDifferentialExpression(fullProteinDF, params['alpha'])
 
 	# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
-	#minProteinDF = applyFoldChange(minProteinDF, params['FCThreshold']) # TODO
-	#fullProteinDF = applyFoldChange(fullProteinDF, params['FCThreshold'])
+	minProteinDF = applyFoldChange(minProteinDF, params['FCThreshold']) # TODO
+	fullProteinDF = applyFoldChange(fullProteinDF, params['FCThreshold'])
 
 	# data visualization
 	viz = dataVisualization(minProteinDF, fullProteinDF) # TODO
 
+	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
+	handyColumnOrder = ['protein', 'adjusted p-value', 'fold change', 'p-value', 'peptides', 'condition 1', 'condition 2']
+	minProteinDF.reset_index(level=0, inplace=True)
+	fullProteinDF.reset_index(level=0, inplace=True)
+	minProteinDF.reindex_axis(handyColumnOrder, axis=1, inplace=True)
+	fullProteinDF.reindex_axis(handyColumnOrder, axis=1, inplace=True)
+
 	""" save results """
 	if writeToDisk:
-		exportData(minProteinDF.loc['p-value', 'adjusted p-value'], dataType='obj', path_out=params['path_out'],
+		exportData(minProteinDF, dataType='df', path_out=params['path_out'],
 		           filename=params['filename_out'] + '_results_minimal', delim_out=params['delim_out'])
-		exportData(fullProteinDF.loc['p-value', 'adjusted p-value'], dataType='obj', path_out=params['path_out'],
+		exportData(fullProteinDF, dataType='df', path_out=params['path_out'],
 		           filename=params['filename_out'] + '_results_full', delim_out=params['delim_out'])
 		# save the visualizations
 		exportData(viz, dataType='viz', path_out=params['path_out'], filename=params['filename_out']+'_dataViz') # TODO
