@@ -106,7 +106,7 @@ def applyDifferentialExpression(this_proteinDF, alpha):
 		lambda x: ttest(x['condition 1'], x['condition 2']), axis=1).apply(lambda x: x[1])
 	# Benjamini-Hochberg correction
 	# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
-	this_proteinDF['adjusted p-value'] = multipletests(
+	__, this_proteinDF['adjusted p-value'], __, __ = multipletests(
 		pvals=np.asarray(this_proteinDF.loc[:, 'p-value']), alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
 	return this_proteinDF
 
