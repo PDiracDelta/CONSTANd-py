@@ -83,11 +83,11 @@ def getProteinDF(df, proteinPeptidesDict, intensityColumnsPerCondition):
 	for protein, peptideIndices in proteinPeptidesDict.items():
 		# combine all channels into one channel per condition
 		condition1Intensities = pd.concat([df.loc[peptideIndices, channel] for channel in
-										   intensityColumnsPerCondition[0]], axis=0, ignore_index=True)
+										   intensityColumnsPerCondition[0]], axis=0, ignore_index=True).tolist()
 		condition2Intensities = pd.concat([df.loc[peptideIndices, channel] for channel in
-										   intensityColumnsPerCondition[1]], axis=0, ignore_index=True)
+										   intensityColumnsPerCondition[1]], axis=0, ignore_index=True).tolist()
 		# fill new dataframe on protein level, per condition
-		proteinDF.loc[protein, :] = [df.loc[peptideIndices, 'Annotated Sequence'], condition1Intensities, condition2Intensities]
+		proteinDF.loc[protein, :] = [df.loc[peptideIndices, 'Annotated Sequence'].tolist(), condition1Intensities, condition2Intensities]
 	return proteinDF
 
 
