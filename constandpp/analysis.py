@@ -103,7 +103,7 @@ def applyDifferentialExpression(this_proteinDF, alpha):
 	# 	"""
 	# 	__, p = ttest(row['condition 1'], row['condition 2'])
 	# 	return p
-	this_proteinDF['p-value'] = [np.nan, ] * len(this_proteinDF.index)
+	this_proteinDF['p-value'] = [np.nan, ] * len(this_proteinDF.index) # todo remove this assignment, dont use .loc in line below
 	# perform t-test on the intensities lists of both conditions of each protein, assuming data is independent.
 	this_proteinDF.loc[:, 'p-value'] = this_proteinDF.apply(
 		lambda x: ttest(x['condition 1'], x['condition 2'], nan_policy='omit'), axis=1).apply(lambda x: x[1])
@@ -116,11 +116,11 @@ def applyDifferentialExpression(this_proteinDF, alpha):
 
 def applyFoldChange(proteinDF, pept2protCombinationMethod):
 	""" Calculate the fold change for each protein (pept2protCombinationMethod) and apply it to the given protein dataframe """
-	proteinDF['fold change'] = [np.nan, ]*len(proteinDF.index)
+
 	return proteinDF
 
 
-def dataVisualization(DEresults, FCThreshold):
+def dataVisualization(minProteinDF, fullProteinDF, FCThreshold, alpha):
 	# TODO (if paying customer): parameter: intensity matrix on peptide or protein level?
 	# TODO: only include differentials with a fold of >threshold or <1/threshold
 	return None
