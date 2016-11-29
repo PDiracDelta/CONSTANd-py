@@ -241,6 +241,9 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	minProteinDF = applyFoldChange(minProteinDF, params['pept2protCombinationMethod'])
 	fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
 
+	# data visualization
+	viz = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'])  # TODO
+
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
 	handyColumnOrder = ['protein', 'adjusted p-value', 'fold change c1/c2', 'p-value', 'peptides', 'condition 1', 'condition 2']
 	minProteinDF.reset_index(level=0, inplace=True)
@@ -250,10 +253,14 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 
 	""" save results """
 	if writeToDisk:
+		# save the protein-level dataframes
 		exportData(minProteinDF, dataType='df', path_out=params['path_out'],
 		           filename=params['filename_out'] + '_results_minimal', delim_out=params['delim_out'])
 		exportData(fullProteinDF, dataType='df', path_out=params['path_out'],
 		           filename=params['filename_out'] + '_results_full', delim_out=params['delim_out'])
+		# save the visualizations
+		exportData(viz, dataType='viz', path_out=params['path_out'],
+		           filename=params['filename_out'] + '_dataViz')  # TODO
 		# save the metadata
 		exportData(metadata, dataType='df', path_out=params['path_out'],
 		           filename=params['filename_out'] + '_metadata',
@@ -265,13 +272,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 
 def generateReport(minProteinDF, fullProteinDF, metadata, params, writeToDisk):
 	# todo docu
-	# data visualization
-	viz = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'])  # TODO
-
-	""" save visualization and report """
-	if writeToDisk:
-		# save the visualizations
-		exportData(viz, dataType='viz', path_out=params['path_out'], filename=params['filename_out'] + '_dataViz')  # TODO
+	pass
 
 
 def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):

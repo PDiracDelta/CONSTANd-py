@@ -113,3 +113,8 @@ def applyFoldChange(proteinDF, pept2protCombinationMethod):
 		proteinDF['fold change c1/c2'] = proteinDF.apply(lambda x: np.nanmedian(x['condition 1']) / np.nanmedian(x['condition 2']), axis=1)
 	return proteinDF
 
+
+def dataVisualization(minProteinDF, fullProteinDF, FCThreshold, alpha):
+	# TODO (if paying customer): parameter: intensity matrix on peptide or protein level?
+	# TODO: only include differentials with a fold of >threshold or <1/threshold
+	return None
