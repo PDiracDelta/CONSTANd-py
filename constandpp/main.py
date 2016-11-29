@@ -274,7 +274,7 @@ def generateReport(minProteinDF, fullProteinDF, metadata, params, writeToDisk):
 		exportData(viz, dataType='viz', path_out=params['path_out'], filename=params['filename_out'] + '_dataViz')  # TODO
 
 
-def main(doProcessing, doAnalysis, writeToDisk, testing):
+def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
 	start = time()
 	# testing=True # TEST
 	# writeToDisk=False # TEST
@@ -311,11 +311,19 @@ def main(doProcessing, doAnalysis, writeToDisk, testing):
 				raise FileNotFoundError("There is no previously processed data in this path: "+processingResultsDumpFilename)
 
 		""" Data analysis and visualization """
+		analysisResultsDumpFilename = path.relpath(path.join(filepath, path.pardir)) + '/processingResultsDump'
 		if doAnalysis:
-			minProteinDF, fullProteinDF, viz, metadata = analyzeProcessingResult(processingResults, params, writeToDisk)
+			analysisResults = analyzeProcessingResult(processingResults, params, writeToDisk)
+			pickle.dump(processingResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
+		else:
+			try:
+				analysisResults = pickle.load(open(analysisResultsDumpFilename, 'rb'))
+			except FileNotFoundError:
+				raise FileNotFoundError("There is no previously analyzed data in this path: "+analysisResultsDumpFilename)
 
 		""" generate report """
-		generateReport(minProteinDF, fullProteinDF, viz, metadata)  # TODO
+		if doReport:
+			generateReport(analysisResults)  # TODO
 
 	elif testing:
 		devStuff(dfs[0], params)
@@ -324,4 +332,4 @@ def main(doProcessing, doAnalysis, writeToDisk, testing):
 
 
 if __name__ == '__main__':
-	sys.exit(main(doProcessing=False, doAnalysis=True, testing=False, writeToDisk=True))
+	sys.exit(main(doProcessing=False, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
