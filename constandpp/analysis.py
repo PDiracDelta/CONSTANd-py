@@ -4,7 +4,6 @@
 """
 Collection of functions involved in analyzing the data that was processed by dataproc.py and constand.py.
 Performs a differential expression analysis on the normalized intensities as provided by CONSTANd.
-Includes data visualization.
 """
 
 import numpy as np
@@ -107,17 +106,10 @@ def applyDifferentialExpression(this_proteinDF, alpha):
 
 def applyFoldChange(proteinDF, pept2protCombinationMethod):
 	""" Calculate the fold change for each protein (pept2protCombinationMethod) and apply it to the given protein dataframe """
+	# todo proper docu
 	if pept2protCombinationMethod == 'mean':
 		proteinDF['fold change c1/c2'] = proteinDF.apply(lambda x: np.nanmean(x['condition 1'])/np.nanmean(x['condition 2']), axis=1)
 	elif pept2protCombinationMethod == 'median':
 		proteinDF['fold change c1/c2'] = proteinDF.apply(lambda x: np.nanmedian(x['condition 1']) / np.nanmedian(x['condition 2']), axis=1)
 	return proteinDF
-
-
-def dataVisualization(minProteinDF, fullProteinDF, FCThreshold, alpha):
-	# TODO (if paying customer): parameter: intensity matrix on peptide or protein level?
-	# TODO: only include differentials with a fold of >threshold or <1/threshold
-	return None
-
-
 
