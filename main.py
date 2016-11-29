@@ -105,11 +105,30 @@ def testDataComplementarity(df):
 	print(scannrs_final == scannrs_init)
 
 
+def compareIntensitySN():
+	filepath1 = '../data/COON data/PSMs/BR1_a.txt'
+	filepath2 = '../data/COON data/PSMs/BR1_b_SN.txt'
+	df1 = importDataFrame(filepath1, delim='\t', header=0)
+	df2 = importDataFrame(filepath2, delim='\t', header=0)
+	intensityColumns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
+	relIntensities = np.empty((len(df1.index),8), dtype='float')
+	relSNs = np.empty((len(df2.index),8), dtype='float')
+	for col in range(len(intensityColumns)):
+		relIntensities[:, col] = 1/8*df1.loc[:, intensityColumns[col]]/np.nanmean(df1.loc[:, intensityColumns],1)
+		relSNs[:, col] = 1/8*df2.loc[:, intensityColumns[col]]/np.nanmean(df2.loc[:, intensityColumns],1)
+	diff = abs(relIntensities - relSNs)
+	print(np.allclose(relIntensities, relSNs, atol=1e-3, equal_nan=True))
+	print("mean over all values")
+	print(np.nanmean(np.nanmean(diff[:, 0:6], 1)))
+	print("max difference")
+	print(np.nanmax(np.nanmax(diff, 1)))
+
 def devStuff(df, params): # TEST
 	# performanceTest()
 	# isotopicCorrectionsTest(params)
 	# MS2IntensityDoesntMatter(df)
 	# testDataComplementarity(df)
+	compareIntensitySN()
 	pass
 
 
@@ -299,4 +318,4 @@ def main(doProcessing, doAnalysis, writeToDisk, testing):
 
 
 if __name__ == '__main__':
-	sys.exit(main(doProcessing=False, doAnalysis=True, testing=False, writeToDisk=True))
+	sys.exit(main(doProcessing=False, doAnalysis=True, testing=True, writeToDisk=True))
