@@ -304,26 +304,32 @@ def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
 			# process every input dataframe
 			processingResults = [processDf(df, params, writeToDisk) for df in dfs]
 			pickle.dump(processingResults, open(processingResultsDumpFilename, 'wb')) # TEST
-		else:
+		elif doAnalysis:
 			try:
 				processingResults = pickle.load(open(processingResultsDumpFilename, 'rb'))
 			except FileNotFoundError:
 				raise FileNotFoundError("There is no previously processed data in this path: "+processingResultsDumpFilename)
+		else:
+			warn("No processing step performed nor processing file loaded!")
 
 		""" Data analysis and visualization """
 		analysisResultsDumpFilename = path.relpath(path.join(filepath, path.pardir)) + '/processingResultsDump'
 		if doAnalysis:
 			analysisResults = analyzeProcessingResult(processingResults, params, writeToDisk)
 			pickle.dump(processingResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
-		else:
+		elif doReport:
 			try:
 				analysisResults = pickle.load(open(analysisResultsDumpFilename, 'rb'))
 			except FileNotFoundError:
 				raise FileNotFoundError("There is no previously analyzed data in this path: "+analysisResultsDumpFilename)
+		else:
+			warn("No analysis step performed nor analysis file loaded!")
 
 		""" generate report """
 		if doReport:
 			generateReport(analysisResults)  # TODO
+		else:
+			warn("No report generated!")
 
 	elif testing:
 		devStuff(dfs[0], params)
