@@ -24,6 +24,7 @@ from dataIO import *
 from dataproc import *
 from collapse import collapse, setCollapseColumnsToSave
 from analysis import *
+from report import *
 
 
 def performanceTest():  # remove for production # TEST
@@ -240,9 +241,6 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	minProteinDF = applyFoldChange(minProteinDF, params['pept2protCombinationMethod'])
 	fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
 
-	# data visualization
-	viz = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold']) # TODO
-
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
 	handyColumnOrder = ['protein', 'adjusted p-value', 'fold change c1/c2', 'p-value', 'peptides', 'condition 1', 'condition 2']
 	minProteinDF.reset_index(level=0, inplace=True)
@@ -256,16 +254,24 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		           filename=params['filename_out'] + '_results_minimal', delim_out=params['delim_out'])
 		exportData(fullProteinDF, dataType='df', path_out=params['path_out'],
 		           filename=params['filename_out'] + '_results_full', delim_out=params['delim_out'])
-		# save the visualizations
-		exportData(viz, dataType='viz', path_out=params['path_out'], filename=params['filename_out']+'_dataViz') # TODO
 		# save the metadata
 		exportData(metadata, dataType='df', path_out=params['path_out'],
 		           filename=params['filename_out'] + '_metadata',
 		           delim_out=params['delim_out'], inOneFile=False)
 		# generate a report PDF (without the normalized intensities: behind paywall?
 
+	return minProteinDF, fullProteinDF, metadata
 
-	return minProteinDF, fullProteinDF, viz, metadata
+
+def generateReport(minProteinDF, fullProteinDF, metadata, params, writeToDisk):
+	# todo docu
+	# data visualization
+	viz = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'])  # TODO
+
+	""" save visualization and report """
+	if writeToDisk:
+		# save the visualizations
+		exportData(viz, dataType='viz', path_out=params['path_out'], filename=params['filename_out'] + '_dataViz')  # TODO
 
 
 def main(doProcessing, doAnalysis, writeToDisk, testing):
@@ -318,4 +324,4 @@ def main(doProcessing, doAnalysis, writeToDisk, testing):
 
 
 if __name__ == '__main__':
-	sys.exit(main(doProcessing=False, doAnalysis=True, testing=True, writeToDisk=True))
+	sys.exit(main(doProcessing=False, doAnalysis=True, testing=False, writeToDisk=True))
