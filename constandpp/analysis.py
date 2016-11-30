@@ -12,6 +12,7 @@ from warnings import warn
 from collections import defaultdict
 from statsmodels.sandbox.stats.multicomp import multipletests
 from scipy.stats import ttest_ind as ttest
+from matplotlib.mlab import PCA
 
 
 def getRTIsolationInfo(removedData_RT):
@@ -112,6 +113,12 @@ def applyFoldChange(proteinDF, pept2protCombinationMethod):
 	elif pept2protCombinationMethod == 'median':
 		proteinDF['fold change c1/c2'] = proteinDF.apply(lambda x: np.nanmedian(x['condition 1']) / np.nanmedian(x['condition 2']), axis=1)
 	return proteinDF
+
+
+def getPCA(intensities):
+	pcaResult = PCA(intensities)
+	return pcaResult
+
 
 
 def dataVisualization(minProteinDF, fullProteinDF, FCThreshold, alpha):
