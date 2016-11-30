@@ -116,9 +116,13 @@ def applyFoldChange(proteinDF, pept2protCombinationMethod):
 
 
 def getPCA(intensities):
-	pcaResult = PCA(intensities)
-	return pcaResult
-
+	"""
+	Returns a PCA object for the intensities, using the LAPACK implementation of the full SVD or a randomized truncated
+    SVD by the method of Halko et al. 2009, depending on the shape of the input data and the number of components to extract.
+	:param intensities: np.ndarray  MxN ndarray with intensities
+	:return:            PCA object  object containing the attributes of the PCA
+	"""
+	return PCA(intensities)
 
 
 def dataVisualization(minProteinDF, fullProteinDF, FCThreshold, alpha):
