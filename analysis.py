@@ -12,7 +12,7 @@ from warnings import warn
 from collections import defaultdict
 from statsmodels.sandbox.stats.multicomp import multipletests
 from scipy.stats import ttest_ind as ttest
-from matplotlib.mlab import PCA
+from sklearn.decomposition import PCA
 
 
 def getRTIsolationInfo(removedData_RT):
