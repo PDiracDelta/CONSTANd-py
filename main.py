@@ -243,9 +243,6 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# perform hierarchical clustering
 	HCResult = getHC(getIntensities(df))
 
-	# data visualization
-	visualizationsDict = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'], PCAResult,HCResult)
-
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
 	handyColumnOrder = ['protein', 'adjusted p-value', 'fold change c1/c2', 'p-value', 'peptides', 'condition 1', 'condition 2']
 	minProteinDF.reset_index(level=0, inplace=True)
@@ -272,8 +269,19 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	return minProteinDF, fullProteinDF, PCAResult, HCResult, metadata
 
 
-def generateReport(minProteinDF, fullProteinDF, metadata, params, writeToDisk):
+def generateReport(analysisResults, params, writeToDisk):
 	# todo docu
+	# todo multi-experiment support
+	minProteinDF = analysisResults[0]
+	fullProteinDF = analysisResults[1]
+	PCAResult = analysisResults[2]
+	HCResult = analysisResults[3]
+	metadata = analysisResults[4]
+
+	# data visualization
+	visualizationsDict = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'],
+	                                       PCAResult, HCResult)
+
 	pass
 
 
