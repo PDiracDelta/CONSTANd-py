@@ -123,9 +123,11 @@ def getPCA(intensities, nComponents):
 	by Halko et al. (2009) is used for calculating the SVD.
 	:param intensities: np.ndarray  MxN ndarray with intensities
 	:param nComponents: int         number of PC to keep
-	:return:            PCA object  object containing the attributes of the PCA
+	:return pca:        PCA object  object containing the attributes of the PCA
 	"""
-	return PCA(intensities.T, n_components=nComponents, svd_solver='randomized')
+	pca = PCA(n_components=nComponents, svd_solver='randomized')
+	pca.fit(intensities.T)
+	return pca
 
 
 def getHC(intensities):
