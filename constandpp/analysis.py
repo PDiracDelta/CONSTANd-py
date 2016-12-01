@@ -151,10 +151,11 @@ def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult
 
 	# PCA plot
 	PCAPlot = plt.figure(figsize=(6, 5)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
-	plt.title('Hierarchical Clustering Dendrogram', figure=PCAPlot)
-	plt.xlabel('reporter channel', figure=PCAPlot)
-	plt.ylabel('distance', figure=PCAPlot)
-
+	plt.title('Principal Component scores', figure=PCAPlot)
+	plt.xlabel('First PC', figure=PCAPlot)
+	plt.ylabel('Second PC', figure=PCAPlot)
+	plt.plot(PCAResult[:, 0], PCAResult[:, 1], figure=PCAPlot) # plot first two principal components
+	visualizationsDict['pca'] = PCAPlot
 
 	# hierarchical clustering dendrogram
 	HCDendrogram = plt.figure(figsize=(6, 5)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
