@@ -274,7 +274,7 @@ def generateReport(analysisResults, params, writeToDisk):
 
 	# data visualization
 	visualizationsDict = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'],
-	                                       PCAResult, HCResult)
+	                                       PCAResult, HCResult, params['intensityColumnsPerCondition'])
 	if writeToDisk:
 		# save the visualizations
 		exportData(visualizationsDict, dataType='visualizationsDict', path_out=params['path_out'],
