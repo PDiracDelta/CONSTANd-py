@@ -242,10 +242,13 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
 
 	# perform PCA
-	pcaResult = getPCA(getIntensities(df), params['PCA_components'])
+	PCAResult = getPCA(getIntensities(df), params['PCA_components'])
+
+	# perform hierarchical clustering
+	HCResult = getHC(getIntensities(df))
 
 	# data visualization
-	viz = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'])  # TODO
+	viz = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'], PCAResult,HCResult)
 
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
 	handyColumnOrder = ['protein', 'adjusted p-value', 'fold change c1/c2', 'p-value', 'peptides', 'condition 1', 'condition 2']
