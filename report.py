@@ -12,3 +12,5 @@ Functions involved in generating the report that includes:
 """
 import pandas as pd
 from warnings import warn
+
+# save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
