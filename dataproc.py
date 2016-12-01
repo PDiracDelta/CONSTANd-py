@@ -203,7 +203,6 @@ def getIntensities(df, indices=None):
 	if isinstance(df, Series): # this is a dataframe with only 1 entry: indexing [:, cols] doesnt work.
 		return np.asarray(df.loc[intensityColumns])
 	if indices is None:
-		#return np.asarray(df.loc(axis=1)[intensityColumns])
 		return np.asarray(df.loc[:, intensityColumns])
 	else:
 		try: # TEST
