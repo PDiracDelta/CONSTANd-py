@@ -149,6 +149,11 @@ def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult
 	# TODO: only include differentials with a fold of >threshold or <1/threshold
 	visualizationsDict = {'volcano', 'pca', 'hcd'}
 
+	# PCA plot
+	PCAPlot = plt.figure(figsize=(6, 5)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
+	plt.title('Hierarchical Clustering Dendrogram', figure=PCAPlot)
+	plt.xlabel('reporter channel', figure=PCAPlot)
+	plt.ylabel('distance', figure=PCAPlot)
 
 
 	# hierarchical clustering dendrogram
@@ -159,4 +164,4 @@ def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult
 	dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12., figure=HCDendrogram)
 	plt.show(figure=HCDendrogram) # TEST
 	visualizationsDict['hcd'] = HCDendrogram
-	return
+	return visualizationsDict
