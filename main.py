@@ -244,7 +244,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	HCResult = getHC(getIntensities(df))
 
 	# data visualization
-	viz = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'], PCAResult,HCResult)
+	visualizationsDict = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'], PCAResult,HCResult)
 
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
 	handyColumnOrder = ['protein', 'adjusted p-value', 'fold change c1/c2', 'p-value', 'peptides', 'condition 1', 'condition 2']
@@ -261,7 +261,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		exportData(fullProteinDF, dataType='df', path_out=params['path_out'],
 		           filename=params['filename_out'] + '_results_full', delim_out=params['delim_out'])
 		# save the visualizations
-		exportData(viz, dataType='viz', path_out=params['path_out'],
+		exportData(visualizationsDict, dataType='visualizationsDict', path_out=params['path_out'],
 		           filename=params['filename_out'] + '_dataViz')  # TODO
 		# save the metadata
 		exportData(metadata, dataType='df', path_out=params['path_out'],
