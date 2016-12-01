@@ -269,7 +269,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		           delim_out=params['delim_out'], inOneFile=False)
 		# generate a report PDF (without the normalized intensities: behind paywall?
 
-	return minProteinDF, fullProteinDF, metadata
+	return minProteinDF, fullProteinDF, PCAResult, HCResult, metadata
 
 
 def generateReport(minProteinDF, fullProteinDF, metadata, params, writeToDisk):
