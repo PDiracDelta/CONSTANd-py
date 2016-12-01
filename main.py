@@ -135,10 +135,6 @@ def devStuff(df, params): # TEST
 
 def processDf(df, params, writeToDisk):
 	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
-	# define global parameters
-	setProcessingGlobals(intensityColumns=params['intensityColumns'], removalColumnsToSave=params['removalColumnsToSave'],
-	           noMissingValuesColumns=params['noMissingValuesColumns'])
-	setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
 	# remove detections where (essential) data is missing.
 	df, removedData['missing'] = removeMissing(df)
 	if params['removeBadConfidence_bool']:
@@ -303,6 +299,12 @@ def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
 	dfs = []
 	for filepath in params['files_in']:
 			dfs.append(importDataFrame(filepath, delim=params['delim_in'], header=params['header_in']))
+
+	# define global parameters
+	setProcessingGlobals(intensityColumns=params['intensityColumns'],
+	                     removalColumnsToSave=params['removalColumnsToSave'],
+	                     noMissingValuesColumns=params['noMissingValuesColumns'])
+	setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
 
 	if not testing:
 		""" Data processing """

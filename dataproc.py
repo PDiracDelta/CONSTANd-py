@@ -204,6 +204,7 @@ def getIntensities(df, indices=None):
 		return np.asarray(df.loc[intensityColumns])
 	if indices is None:
 		return np.asarray(df.loc[:, intensityColumns])
+
 	else:
 		try: # TEST
 			return np.asarray(df.loc[indices, intensityColumns])
