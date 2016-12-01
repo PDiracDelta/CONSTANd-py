@@ -90,10 +90,6 @@ def MS2IntensityDoesntMatter(df):
 	print(maxdiff)
 
 
-def generateReport(minProteinDF, fullProteinDF, viz, metadata):
-	pass
-
-
 def testDataComplementarity(df):
 	scannrs_init = set(df.groupby('First Scan').groups.keys())
 	main(testing=False, writeToDisk=True)
@@ -123,6 +119,7 @@ def compareIntensitySN():
 	print(np.nanmean(np.nanmean(diff[:, 0:6], 1)))
 	print("max difference")
 	print(np.nanmax(np.nanmax(diff, 1)))
+
 
 def devStuff(df, params): # TEST
 	# performanceTest()
