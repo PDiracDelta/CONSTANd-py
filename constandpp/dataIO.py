@@ -117,6 +117,8 @@ def getInput():
 		raise Exception("Accuracy must be strictly greater than zero.")
 	if not (maxIterations > 0 and isinstance(maxIterations,int)):
 		raise Exception("Maximum number of iterations must be an integer strictly greater than zero.")
+	if PCA_components < 2:
+		raise Exception("Minimum number of principal coponents is 2.")
 	if not path.exists(path_out):
 		raise FileNotFoundError("Path " + path_out + " not found.")
 	if path.exists(path_out+'/'+filename_out):
