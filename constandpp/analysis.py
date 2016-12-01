@@ -13,6 +13,7 @@ from collections import defaultdict
 from statsmodels.sandbox.stats.multicomp import multipletests
 from scipy.stats import ttest_ind as ttest
 from sklearn.decomposition import PCA
+from scipy.cluster.hierarchy import linkage
 
 
 def getRTIsolationInfo(removedData_RT):
@@ -117,8 +118,9 @@ def applyFoldChange(proteinDF, pept2protCombinationMethod):
 
 def getPCA(intensities, nComponents):
 	"""
-	Returns a PCA object for the intensities, with nComponents principal components. The fast randomized method by Halko
-	et al. (2009) is used for calculating the SVD.
+	Returns a PCA object for the transposed intensity matrix, with nComponents principal components. This means the
+	reporter channels are "observations" with each protein intensity as a variable/attribute. The fast randomized method
+	by Halko et al. (2009) is used for calculating the SVD.
 	:param intensities: np.ndarray  MxN ndarray with intensities
 	:param nComponents: int         number of PC to keep
 	:return:            PCA object  object containing the attributes of the PCA
@@ -126,7 +128,19 @@ def getPCA(intensities, nComponents):
 	return PCA(intensities.T, n_components=nComponents, svd_solver='randomized')
 
 
-def dataVisualization(minProteinDF, fullProteinDF, FCThreshold, alpha):
+def getHC(intensities):
+	"""
+	Perform hierarchical clustering on the transposed intensity matrix, with nComponents principal components.
+	This means the reporter channels are "observations" with each protein intensity as a variable/attribute.
+	Returns the (NxN) linkage matrix describing the distances between each observation (reporter channel).
+	:param intensities: np.ndarray  MxN ndarray with intensities
+	:param nClusters:   int         number of clusters we want to find (= number of conditions in the experiment(s))
+	:return:            np.ndarray  NxN linkage matrix
+	"""
+	return linkage(intensities.T, method='ward')
+
+
+def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult, HCResult):
 	# TODO (if paying customer): parameter: intensity matrix on peptide or protein level?
 	# TODO: only include differentials with a fold of >threshold or <1/threshold
 	return None
