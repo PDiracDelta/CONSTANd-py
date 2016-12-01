@@ -332,7 +332,7 @@ def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
 		analysisResultsDumpFilename = path.relpath(path.join(filepath, path.pardir)) + '/processingResultsDump'
 		if doAnalysis:
 			analysisResults = analyzeProcessingResult(processingResults, params, writeToDisk)
-			pickle.dump(processingResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
+			pickle.dump(analysisResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
 		elif doReport:
 			try:
 				analysisResults = pickle.load(open(analysisResultsDumpFilename, 'rb'))
@@ -354,4 +354,4 @@ def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
 
 
 if __name__ == '__main__':
-	sys.exit(main(doProcessing=False, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
+	sys.exit(main(doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=True))
