@@ -257,9 +257,6 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		           filename=params['filename_out'] + '_results_minimal', delim_out=params['delim_out'])
 		exportData(fullProteinDF, dataType='df', path_out=params['path_out'],
 		           filename=params['filename_out'] + '_results_full', delim_out=params['delim_out'])
-		# save the visualizations
-		exportData(visualizationsDict, dataType='visualizationsDict', path_out=params['path_out'],
-		           filename=params['filename_out'] + '_dataViz')  # TODO
 		# save the metadata
 		exportData(metadata, dataType='df', path_out=params['path_out'],
 		           filename=params['filename_out'] + '_metadata',
@@ -281,8 +278,10 @@ def generateReport(analysisResults, params, writeToDisk):
 	# data visualization
 	visualizationsDict = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'],
 	                                       PCAResult, HCResult)
-
-	pass
+	if writeToDisk:
+		# save the visualizations
+		exportData(visualizationsDict, dataType='visualizationsDict', path_out=params['path_out'],
+		           filename=params['filename_out'] + '_dataViz')  # TODO
 
 
 def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
@@ -355,4 +354,4 @@ def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
 
 
 if __name__ == '__main__':
-	sys.exit(main(doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=True))
+	sys.exit(main(doProcessing=False, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
