@@ -242,7 +242,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
 
 	# perform PCA
-	pcaResult = getPCA(getIntensities(df), params['pca'])
+	pcaResult = getPCA(getIntensities(df), params['PCA_components'])
 
 	# data visualization
 	viz = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'])  # TODO
