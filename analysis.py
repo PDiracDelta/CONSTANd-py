@@ -140,7 +140,7 @@ def getHC(intensities):
 	:param nClusters:   int         number of clusters we want to find (= number of conditions in the experiment(s))
 	:return:            np.ndarray  NxN linkage matrix
 	"""
-	return linkage(intensities.T, method='ward')
+	return None #linkage(intensities.T, method='ward')
 
 
 def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult, HCResult):
