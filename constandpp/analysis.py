@@ -13,7 +13,8 @@ from collections import defaultdict
 from statsmodels.sandbox.stats.multicomp import multipletests
 from scipy.stats import ttest_ind as ttest
 from sklearn.decomposition import PCA
-from scipy.cluster.hierarchy import linkage
+from scipy.cluster.hierarchy import linkage, dendrogram
+from matplotlib import pyplot as plt
 
 
 def getRTIsolationInfo(removedData_RT):
@@ -146,4 +147,16 @@ def getHC(intensities):
 def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult, HCResult):
 	# TODO (if paying customer): parameter: intensity matrix on peptide or protein level?
 	# TODO: only include differentials with a fold of >threshold or <1/threshold
-	return None
+	visualizationsDict = {'volcano', 'pca', 'hcd'}
+
+
+
+	# hierarchical clustering dendrogram
+	HCDendrogram = plt.figure(figsize=(6, 5)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
+	plt.title('Hierarchical Clustering Dendrogram', figure=HCDendrogram)
+	plt.xlabel('reporter channel', figure=HCDendrogram)
+	plt.ylabel('distance', figure=HCDendrogram)
+	dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12., figure=HCDendrogram)
+	plt.show(figure=HCDendrogram) # TEST
+	visualizationsDict['hcd'] = HCDendrogram
+	return
