@@ -58,6 +58,7 @@ def getInput():
 	pept2protCombinationMethod = config.get('DEFAULT','pept2protCombinationMethod')
 	alpha = config.getfloat('DEFAULT','alpha')
 	FCThreshold = config.getfloat('DEFAULT','FCThreshold')
+	PCA_components = config.getint('DEFAULT','PCA_components')
 	path_out = config.get('DEFAULT','path_out')
 	filename_out = config.get('DEFAULT','filename_out')
 	delim_out = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
@@ -154,6 +155,7 @@ def getInput():
 		'pept2protCombinationMethod': pept2protCombinationMethod,
 		'alpha': alpha,
 		'FCThreshold': FCThreshold,
+		'PCA_components': PCA_components,
 		'path_out': path_out,
 		'filename_out': filename_out,
 		'delim_out': delim_out

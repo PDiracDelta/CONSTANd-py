@@ -115,14 +115,15 @@ def applyFoldChange(proteinDF, pept2protCombinationMethod):
 	return proteinDF
 
 
-def getPCA(intensities):
+def getPCA(intensities, nComponents):
 	"""
-	Returns a PCA object for the intensities. All dimensions are kept,
+	Returns a PCA object for the intensities, with nComponents principal components. The fast randomized method by Halko
+	et al. (2009) is used for calculating the SVD.
 	:param intensities: np.ndarray  MxN ndarray with intensities
+	:param nComponents: int         number of PC to keep
 	:return:            PCA object  object containing the attributes of the PCA
 	"""
-
-	return PCA(intensities, n_components=intensities.shape[1])
+	return PCA(intensities.T, n_components=nComponents, svd_solver='randomized')
 
 
 def dataVisualization(minProteinDF, fullProteinDF, FCThreshold, alpha):
