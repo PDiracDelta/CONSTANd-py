@@ -58,6 +58,7 @@ def getInput():
 	pept2protCombinationMethod = config.get('DEFAULT','pept2protCombinationMethod')
 	alpha = config.getfloat('DEFAULT','alpha')
 	FCThreshold = config.getfloat('DEFAULT','FCThreshold')
+	labelVolcanoPlotAreas = getList(config.get('DEFAULT','labelVolcanoPlotAreas'))
 	PCA_components = config.getint('DEFAULT','PCA_components')
 	path_out = config.get('DEFAULT','path_out')
 	filename_out = config.get('DEFAULT','filename_out')
@@ -160,6 +161,7 @@ def getInput():
 		'pept2protCombinationMethod': pept2protCombinationMethod,
 		'alpha': alpha,
 		'FCThreshold': FCThreshold,
+		'labelVolcanoPlotAreas': labelVolcanoPlotAreas,
 		'PCA_components': PCA_components,
 		'path_out': path_out,
 		'filename_out': filename_out,
