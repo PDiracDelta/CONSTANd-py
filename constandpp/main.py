@@ -286,6 +286,7 @@ def generateReport(analysisResults, params, writeToDisk):
 	visualizationsDict['pca'] = getPCAPlot(PCAResult, params['intensityColumnsPerCondition'])
 	visualizationsDict['hcd'] = getHCDendrogram(HCResult, params['intensityColumnsPerCondition'])
 
+	writeToDisk = False # TEST
 	if writeToDisk:
 		# save the visualizations
 		exportData(visualizationsDict, dataType='visualizationsDict', path_out=params['path_out'],
