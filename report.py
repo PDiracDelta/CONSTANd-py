@@ -25,6 +25,7 @@ def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult
 	visualizationsDict = {}
 
 	# volcano plot
+	# todo add protein ID labels according to sorted list entry ID
 	volcanoPlot = plt.figure(figsize=(6, 5))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	plt.title(r'Volcano Plot ($FC>$'+str(FCThreshold)+r'; $\alpha=$'+str(alpha)+')', figure=volcanoPlot)
 	plt.xlabel(r'log$_2$(fold change)', figure=volcanoPlot)
@@ -48,9 +49,9 @@ def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult
 	            -np.log10(fullProteinDF.loc[significantIndices_no, 'adjusted p-value']),
 	            color='k', figure=volcanoPlot)
 	visualizationsDict['pca'] = volcanoPlot
-	plt.show()  # TEST
 
 	# PCA plot
+	# todo add experiment labels
 	PCAPlot = plt.figure(figsize=(6, 5)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	plt.title('Principal Component scores', figure=PCAPlot)
 	plt.xlabel('First PC', figure=PCAPlot)
@@ -74,7 +75,8 @@ def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult
 	plt.title('Hierarchical Clustering Dendrogram', figure=HCDendrogram)
 	plt.xlabel('reporter channel', figure=HCDendrogram)
 	plt.ylabel('distance', figure=HCDendrogram)
-	#dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12., figure=HCDendrogram) # TEST
+	dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12.) # TEST
 	visualizationsDict['hcd'] = HCDendrogram
+	plt.show()  # TEST
 
 	return visualizationsDict
