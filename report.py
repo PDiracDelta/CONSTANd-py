@@ -25,9 +25,9 @@ def getSortedDifferentials(df):
 	:param df:  pd.DataFrame    unsorted
 	:return:    pd.DataFrame    sorted according to fold change (and p-value as secondary)
 	"""
-	significantIndices = df[df['significant'] == 'yes'].index + df[df['significant'] == 'p'].index
-	return df.loc[significantIndices, :].sort(columns=['log2 fold change c1/c2', 'adjusted p-value'],
-	                                          ascending=[False, True], axis=0)
+	significantIndices = list(df[df['significant'] == 'yes'].index) + list(df[df['significant'] == 'p'].index)
+	return df.loc[significantIndices, :].sort_values(by=['log2 fold change c1/c2', 'adjusted p-value'],
+	                                                 ascending=[False, True], axis=0)
 
 
 def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult, HCResult, intensityColumnsPerCondition):

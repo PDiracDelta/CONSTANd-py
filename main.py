@@ -349,4 +349,4 @@ def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
 
 
 if __name__ == '__main__':
-	sys.exit(main(doProcessing=False, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
+	sys.exit(main(doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=True))
