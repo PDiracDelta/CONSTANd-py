@@ -234,6 +234,10 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	minProteinDF = applyFoldChange(minProteinDF, params['pept2protCombinationMethod'])
 	fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
 
+	# indicate significance based on given thresholds alpha and FCThreshold
+	minProteinDF = applySignificance(minProteinDF, params['alpha'], params['FCThreshold'])
+	fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
+
 	# perform PCA
 	PCAResult = getPCA(getIntensities(normalizedDf), params['PCA_components'])
 
@@ -241,7 +245,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	HCResult = getHC(getIntensities(normalizedDf))
 
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
-	handyColumnOrder = ['protein', 'adjusted p-value', 'fold change c1/c2', 'p-value', 'peptides', 'condition 1', 'condition 2']
+	handyColumnOrder = ['protein', 'adjusted p-value', 'log2 fold change c1/c2', 'p-value', 'peptides', 'condition 1', 'condition 2']
 	minProteinDF.reset_index(level=0, inplace=True)
 	fullProteinDF.reset_index(level=0, inplace=True)
 	minProteinDF = minProteinDF.reindex_axis(handyColumnOrder, axis=1)
