@@ -110,10 +110,27 @@ def applyFoldChange(proteinDF, pept2protCombinationMethod):
 	""" Calculate the fold change for each protein (pept2protCombinationMethod) and apply it to the given protein dataframe """
 	# todo proper docu
 	if pept2protCombinationMethod == 'mean':
-		proteinDF['fold change c1/c2'] = proteinDF.apply(lambda x: np.nanmean(x['condition 1'])/np.nanmean(x['condition 2']), axis=1)
+		proteinDF['log2 fold change c1/c2'] = proteinDF.apply(lambda x: np.log2(np.nanmean(x['condition 1'])/np.nanmean(x['condition 2'])), axis=1)
 	elif pept2protCombinationMethod == 'median':
-		proteinDF['fold change c1/c2'] = proteinDF.apply(lambda x: np.nanmedian(x['condition 1']) / np.nanmedian(x['condition 2']), axis=1)
+		proteinDF['log2 fold change c1/c2'] = proteinDF.apply(lambda x: np.log2(np.nanmedian(x['condition 1']) / np.nanmedian(x['condition 2'])), axis=1)
 	return proteinDF
+
+
+def applySignificance(df, alpha, FCThreshold):
+	def significant(x):
+		pvalueSignificant = x['adjusted p-value'] < alpha
+		FCSignificant = abs(x['log2 fold change c1/c2']) > FCThreshold
+		if pvalueSignificant & FCSignificant:
+			return 'yes'
+		elif pvalueSignificant:
+			return 'p'
+		elif FCSignificant:
+			return 'fc'
+		else:
+			return 'no'
+
+	df['significant'] = df.apply(significant, axis=1)
+	return df
 
 
 def getPCA(intensities, nComponents):
