@@ -286,22 +286,12 @@ def generateReport(analysisResults, params, writeToDisk):
 
 
 def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
-	start = time()
-	# testing=True # TEST
-	# writeToDisk=False # TEST
 	"""
 	For now this is just stuff for debugging and testing. Later:
 	Contains and explicits the workflow of the program. Using the booleans doProcessing, doAnalysis and writeToDisk one
 	can control	which parts of the workflow to perform.
 	"""
-	""" get all input parameters
-	params:
-	files_in, delim_in, header_in, intensityColumns, wantedColumns, collapseColumnsToSave, undoublePSMAlgo_bool,
-	removeIsolationInterference_bool, collapse_method, collapse_maxRelativeReporterVariance,
-	removeIsolationInterference_master, masterPSMAlgo, undoublePSMAlgo_exclusive_bool, collapseRT_bool,
-	collapseCharge_bool, collapsePTM_bool, isotopicCorrection_bool, isotopicCorrection_matrix, accuracy, maxIterations,
-	DEFoldThreshold, path_out, filename_out, delim_out
-	"""
+	start = time()
 	params = getInput()
 	# get the dataframes
 	dfs = []
