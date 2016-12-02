@@ -282,8 +282,10 @@ def generateReport(analysisResults, params, writeToDisk):
 
 	# data visualization
 	visualizationsDict = {}
-	visualizationsDict['volcano'] = getVolcanoPlot(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'],
+	visualizationsDict['minVolcano'] = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
 	                                               params['labelVolcanoPlotAreas'])
+	visualizationsDict['fullVolcano'] = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
+	                                                  params['labelVolcanoPlotAreas'])
 	visualizationsDict['pca'] = getPCAPlot(PCAResult, params['intensityColumnsPerCondition'])
 	visualizationsDict['hcd'] = getHCDendrogram(HCResult, params['intensityColumnsPerCondition'])
 
