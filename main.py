@@ -184,7 +184,7 @@ def processDf(df, params, writeToDisk):
 		intensities = getIntensities(df)
 	# perform the CONSTANd algorithm; also do NOT include normalized intensities in df --> only for paying users.
 	normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
-	df = setIntensities(df, normalizedIntensities)
+	normalizedDf = setIntensities(df, normalizedIntensities)
 
 	""" save results """
 	if writeToDisk:
@@ -198,7 +198,7 @@ def processDf(df, params, writeToDisk):
 		           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
 		# save the DE analysis results
 
-	return df, normalizedIntensities, removedData, noCorrectionIndices
+	return normalizedDf, normalizedIntensities, removedData, noCorrectionIndices
 
 
 def analyzeProcessingResult(processingResults, params, writeToDisk):
@@ -208,7 +208,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	noCorrectionIndicess = [result[3] for result in processingResults]
 
 	# TODO effectively implement multiple experiment analysis beyond this point
-	df = dfs[0]
+	normalizedDf = dfs[0]
 	normalizedIntensities = normalizedIntensitiess[0]
 	removedData = removedDatas[0]
 	noCorrectionIndices = noCorrectionIndicess[0]
@@ -216,15 +216,15 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# contains statistics and metadata (like the parameters) about the analysis.
 	metadata = {}
 	# record detections without isotopic correction applied applied
-	metadata['noIsotopicCorrection'] = getNoIsotopicCorrection(df, noCorrectionIndices)
+	metadata['noIsotopicCorrection'] = getNoIsotopicCorrection(normalizedDf, noCorrectionIndices)
 	# record RT isolation statistics. Future: flag
 	metadata['RTIsolationInfo'] = getRTIsolationInfo(removedData['RT'])
 
 	# get min and max protein-peptide mappings
-	minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(df)
+	minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(normalizedDf)
 	# execute mappings to get all peptideintensities per protein, over each whole condition
-	minProteinDF = getProteinDF(df, minProteinPeptidesDict, params['intensityColumnsPerCondition'])
-	fullProteinDF = getProteinDF(df, maxProteinPeptidesDict, params['intensityColumnsPerCondition'])
+	minProteinDF = getProteinDF(normalizedDf, minProteinPeptidesDict, params['intensityColumnsPerCondition'])
+	fullProteinDF = getProteinDF(normalizedDf, maxProteinPeptidesDict, params['intensityColumnsPerCondition'])
 
 	# perform differential expression analysis with Benjamini-Hochberg correction.
 	minProteinDF = applyDifferentialExpression(minProteinDF, params['alpha'])
@@ -235,10 +235,10 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
 
 	# perform PCA
-	PCAResult = getPCA(getIntensities(df), params['PCA_components'])
+	PCAResult = getPCA(getIntensities(normalizedDf), params['PCA_components'])
 
 	# perform hierarchical clustering
-	HCResult = getHC(getIntensities(df))
+	HCResult = getHC(getIntensities(normalizedDf))
 
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
 	handyColumnOrder = ['protein', 'adjusted p-value', 'fold change c1/c2', 'p-value', 'peptides', 'condition 1', 'condition 2']
@@ -326,7 +326,7 @@ def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
 			warn("No processing step performed nor processing file loaded!")
 
 		""" Data analysis and visualization """
-		analysisResultsDumpFilename = path.relpath(path.join(filepath, path.pardir)) + '/processingResultsDump'
+		analysisResultsDumpFilename = path.relpath(path.join(filepath, path.pardir)) + '/analysisResultsDump'
 		if doAnalysis:
 			analysisResults = analyzeProcessingResult(processingResults, params, writeToDisk)
 			pickle.dump(analysisResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
@@ -351,4 +351,4 @@ def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
 
 
 if __name__ == '__main__':
-	sys.exit(main(doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=True))
+	sys.exit(main(doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
