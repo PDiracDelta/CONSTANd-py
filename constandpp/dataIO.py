@@ -197,7 +197,7 @@ def importDataFrame(path_in, delim=None, header=0):
 			raise Exception(
 				"Cannot handle data: filetype not recognized and no delimiter specified.")
 
-	if delim=='xlsx':
+	if delim == 'xlsx':
 		df = pd.read_excel(path_in)
 	else:
 		df = pd.read_csv(path_in, delimiter=delim, header=header)
