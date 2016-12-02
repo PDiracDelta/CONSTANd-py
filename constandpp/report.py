@@ -54,23 +54,17 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	xdataP = df.loc[significantIndices_p, 'log2 fold change c1/c2']
 	ydataP = -np.log10(df.loc[significantIndices_p, 'adjusted p-value'])
 	labelsP = df.loc[significantIndices_p, 'protein']
-	plt.scatter(df.loc[significantIndices_p, 'log2 fold change c1/c2'],
-	            -np.log10(df.loc[significantIndices_p, 'adjusted p-value']),
-	            color='b', figure=volcanoPlot)
+	plt.scatter(xdataP, ydataP, color='b', figure=volcanoPlot)
 	# FC
 	xdataFC = df.loc[significantIndices_fc, 'log2 fold change c1/c2']
 	ydataFC = -np.log10(df.loc[significantIndices_fc, 'adjusted p-value'])
 	labelsFC = df.loc[significantIndices_fc, 'protein']
-	plt.scatter(df.loc[significantIndices_fc, 'log2 fold change c1/c2'],
-	            -np.log10(df.loc[significantIndices_fc, 'adjusted p-value']),
-	            color='g', figure=volcanoPlot)
+	plt.scatter(xdataFC, ydataFC, color='b', figure=volcanoPlot)
 	# NO
 	xdataNO = df.loc[significantIndices_no, 'log2 fold change c1/c2']
 	ydataNO = -np.log10(df.loc[significantIndices_no, 'adjusted p-value'])
 	labelsNO = df.loc[significantIndices_no, 'protein']
-	plt.scatter(df.loc[significantIndices_no, 'log2 fold change c1/c2'],
-	            -np.log10(df.loc[significantIndices_no, 'adjusted p-value']),
-	            color='k', figure=volcanoPlot)
+	plt.scatter(xdataNO, ydataNO, color='b', figure=volcanoPlot)
 
 	# annotate where requested
 	for plotBool,xdata,ydata,labels in zip(labelPlot,[xdataYES, xdataP, xdataFC, xdataNO],
