@@ -22,13 +22,15 @@ from adjustText import adjust_text
 
 def getSortedDifferentials(df):
 	"""
-	Sorts the differential protein data according to fold change (and p-value as secondary) and resets the index.
+	Sorts the differential protein data according to absolute fold change and resets the index.
 	:param df:  pd.DataFrame    unsorted
-	:return:    pd.DataFrame    sorted according to fold change (and p-value as secondary)
+	:return:    pd.DataFrame    sorted according to fold change
 	"""
 	significantIndices = list(df[df['significant'] == 'yes'].index) + list(df[df['significant'] == 'p'].index)
-	return df.loc[significantIndices, :].sort_values(by=['log2 fold change c1/c2', 'adjusted p-value'],
-	                                                 ascending=[False, True], axis=0).reset_index(drop=True)
+	significantDf = df.loc[significantIndices, :]
+	return significantDf.reindex(significantDf['log2 fold change c1/c2'].abs().order(ascending=False).index)
+	#return df.loc[significantIndices, :].sort_values(by=['log2 fold change c1/c2', 'adjusted p-value'], ascending=[False, True], axis=0).reset_index(drop=True)
+	#df.reindex(df.b.abs().order().index)
 
 
 def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
@@ -59,18 +61,18 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	xdataFC = df.loc[significantIndices_fc, 'log2 fold change c1/c2']
 	ydataFC = -np.log10(df.loc[significantIndices_fc, 'adjusted p-value'])
 	labelsFC = df.loc[significantIndices_fc, 'protein']
-	plt.scatter(xdataFC, ydataFC, color='b', figure=volcanoPlot)
+	plt.scatter(xdataFC, ydataFC, color='g', figure=volcanoPlot)
 	# NO
 	xdataNO = df.loc[significantIndices_no, 'log2 fold change c1/c2']
 	ydataNO = -np.log10(df.loc[significantIndices_no, 'adjusted p-value'])
 	labelsNO = df.loc[significantIndices_no, 'protein']
-	plt.scatter(xdataNO, ydataNO, color='b', figure=volcanoPlot)
+	plt.scatter(xdataNO, ydataNO, color='k', figure=volcanoPlot)
 
 	# annotate where requested
-	for plotBool,xdata,ydata,labels in zip(labelPlot,[xdataYES, xdataP, xdataFC, xdataNO],
+	for labelPlotBool,xdata,ydata,labels in zip(labelPlot,[xdataYES, xdataP, xdataFC, xdataNO],
 	                              [ydataYES, ydataP, ydataFC, ydataNO],
 	                              [labelsYES, labelsP, labelsFC, labelsNO]):
-		if plotBool:
+		if labelPlotBool:
 			for x, y, label in zip(xdata, ydata, labels):
 				plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points', ha='right', va='bottom')
 
