@@ -281,8 +281,11 @@ def generateReport(analysisResults, params, writeToDisk):
 	fullSortedDifferentials = getSortedDifferentials(fullProteinDF)
 
 	# data visualization
-	visualizationsDict = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'],
-	                                       PCAResult, HCResult, params['intensityColumnsPerCondition'])
+	visualizationsDict = {}
+	visualizationsDict['volcano'] = getVolcanoPlot(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'])
+	visualizationsDict['pca'] = getPCAPlot(PCAResult, params['intensityColumnsPerCondition'])
+	visualizationsDict['hcd'] = getHCDendrogram(HCResult, params['intensityColumnsPerCondition'])
+
 	if writeToDisk:
 		# save the visualizations
 		exportData(visualizationsDict, dataType='visualizationsDict', path_out=params['path_out'],
@@ -349,4 +352,4 @@ def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
 
 
 if __name__ == '__main__':
-	sys.exit(main(doProcessing=False, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
+	sys.exit(main(doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=True))
