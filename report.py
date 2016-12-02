@@ -22,34 +22,33 @@ from adjustText import adjust_text
 
 def getSortedDifferentials(df):
 	"""
-	Sorts the differential protein data according to fold change (and p-value as secondary).
+	Sorts the differential protein data according to fold change (and p-value as secondary) and resets the index.
 	:param df:  pd.DataFrame    unsorted
 	:return:    pd.DataFrame    sorted according to fold change (and p-value as secondary)
 	"""
 	significantIndices = list(df[df['significant'] == 'yes'].index) + list(df[df['significant'] == 'p'].index)
 	return df.loc[significantIndices, :].sort_values(by=['log2 fold change c1/c2', 'adjusted p-value'],
-	                                                 ascending=[False, True], axis=0)
+	                                                 ascending=[False, True], axis=0).reset_index(drop=True)
 
 
-def getVolcanoPlot(minProteinDF, fullProteinDF, alpha, FCThreshold, labelPlot=[False,]*4):
+def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	# todo docu
-	# todo add minProteinDF and combine into one plot
 	# todo add protein ID labels according to sorted list entry ID
 	volcanoPlot = plt.figure(figsize=(6, 5))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	plt.title(r'Volcano Plot ($FC>$' + str(FCThreshold) + r'; $\alpha=$' + str(alpha) + ')', figure=volcanoPlot)
 	plt.xlabel(r'log$_2$(fold change)', figure=volcanoPlot)
 	plt.ylabel(r'-log$_{10}$(p-value) ', figure=volcanoPlot)
 	# get indices of different levels of significance
-	significantIndices_yes = fullProteinDF[fullProteinDF['significant'] == 'yes'].index
-	significantIndices_p = fullProteinDF[fullProteinDF['significant'] == 'p'].index
-	significantIndices_fc = fullProteinDF[fullProteinDF['significant'] == 'fc'].index
-	significantIndices_no = fullProteinDF[fullProteinDF['significant'] == 'no'].index
+	significantIndices_yes = df[df['significant'] == 'yes'].index
+	significantIndices_p = df[df['significant'] == 'p'].index
+	significantIndices_fc = df[df['significant'] == 'fc'].index
+	significantIndices_no = df[df['significant'] == 'no'].index
 
 	# produce scatterplot for each category of significance
 	# YES (also annotate with sorted list ID)
-	xdataYES = fullProteinDF.loc[significantIndices_yes, 'log2 fold change c1/c2']
-	ydataYES = -np.log10(fullProteinDF.loc[significantIndices_yes, 'adjusted p-value'])
-	labelsYES = fullProteinDF.loc[significantIndices_yes, 'protein']
+	xdataYES = df.loc[significantIndices_yes, 'log2 fold change c1/c2']
+	ydataYES = -np.log10(df.loc[significantIndices_yes, 'adjusted p-value'])
+	labelsYES = df.loc[significantIndices_yes, 'protein']
 	plt.scatter(xdataYES, ydataYES, color='r', figure=volcanoPlot)
 	if labelPlot[0]:
 		#textsYES = []
@@ -58,31 +57,31 @@ def getVolcanoPlot(minProteinDF, fullProteinDF, alpha, FCThreshold, labelPlot=[F
 			#textsYES.append(plt.text(x, y, label))
 			#adjust_text(xdataYES, ydataYES, textsYES, arrowprops=dict(arrowstyle="-", color='k', lw=0.5))
 	# P (also annotate with sorted list ID)
-	xdataP = fullProteinDF.loc[significantIndices_p, 'log2 fold change c1/c2']
-	ydataP = -np.log10(fullProteinDF.loc[significantIndices_p, 'adjusted p-value'])
-	labelsP = fullProteinDF.loc[significantIndices_p, 'protein']
-	plt.scatter(fullProteinDF.loc[significantIndices_p, 'log2 fold change c1/c2'],
-	            -np.log10(fullProteinDF.loc[significantIndices_p, 'adjusted p-value']),
+	xdataP = df.loc[significantIndices_p, 'log2 fold change c1/c2']
+	ydataP = -np.log10(df.loc[significantIndices_p, 'adjusted p-value'])
+	labelsP = df.loc[significantIndices_p, 'protein']
+	plt.scatter(df.loc[significantIndices_p, 'log2 fold change c1/c2'],
+	            -np.log10(df.loc[significantIndices_p, 'adjusted p-value']),
 	            color='b', figure=volcanoPlot)
 	if labelPlot[1]:
 		for x,y,label in zip(xdataP, ydataP, labelsP):
 			plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points', ha='right', va='bottom')
 	# FC
-	xdataFC = fullProteinDF.loc[significantIndices_fc, 'log2 fold change c1/c2']
-	ydataFC = -np.log10(fullProteinDF.loc[significantIndices_fc, 'adjusted p-value'])
-	labelsFC = fullProteinDF.loc[significantIndices_fc, 'protein']
-	plt.scatter(fullProteinDF.loc[significantIndices_fc, 'log2 fold change c1/c2'],
-	            -np.log10(fullProteinDF.loc[significantIndices_fc, 'adjusted p-value']),
+	xdataFC = df.loc[significantIndices_fc, 'log2 fold change c1/c2']
+	ydataFC = -np.log10(df.loc[significantIndices_fc, 'adjusted p-value'])
+	labelsFC = df.loc[significantIndices_fc, 'protein']
+	plt.scatter(df.loc[significantIndices_fc, 'log2 fold change c1/c2'],
+	            -np.log10(df.loc[significantIndices_fc, 'adjusted p-value']),
 	            color='g', figure=volcanoPlot)
 	if labelPlot[2]:
 		for x,y,label in zip(xdataFC, ydataFC, labelsFC):
 			plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points', ha='right', va='bottom')
 	# NO
-	xdataNO = fullProteinDF.loc[significantIndices_no, 'log2 fold change c1/c2']
-	ydataNO = -np.log10(fullProteinDF.loc[significantIndices_no, 'adjusted p-value'])
-	labelsNO = fullProteinDF.loc[significantIndices_no, 'protein']
-	plt.scatter(fullProteinDF.loc[significantIndices_no, 'log2 fold change c1/c2'],
-	            -np.log10(fullProteinDF.loc[significantIndices_no, 'adjusted p-value']),
+	xdataNO = df.loc[significantIndices_no, 'log2 fold change c1/c2']
+	ydataNO = -np.log10(df.loc[significantIndices_no, 'adjusted p-value'])
+	labelsNO = df.loc[significantIndices_no, 'protein']
+	plt.scatter(df.loc[significantIndices_no, 'log2 fold change c1/c2'],
+	            -np.log10(df.loc[significantIndices_no, 'adjusted p-value']),
 	            color='k', figure=volcanoPlot)
 	if labelPlot[3]:
 		for x,y,label in zip(xdataNO, ydataNO, labelsNO):
