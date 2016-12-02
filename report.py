@@ -75,9 +75,14 @@ def getPCAPlot(PCAResult, intensityColumnsPerCondition):
 	for condition in range(nConditions):  # for each condition a different color
 		for i in range(len(intensityColumnsPerCondition[condition])):  # add the color for each channel per condition
 			colors.append(distinguishableColors[condition])
-	# produce scatterplot
-	for (x, y, color) in zip(PCAResult[:, 0], PCAResult[:, 1], colors):
+	# labels for annotation
+	intensityColumns = [item for sublist in intensityColumnsPerCondition for item in sublist]
+	# produce scatterplot and annotate
+	for (x, y, color, label) in zip(PCAResult[:, 0], PCAResult[:, 1], colors, intensityColumns):
 		plt.scatter(x, y, color=color, figure=PCAPlot)  # plot first two principal components
+		plt.annotate(label, xy=(x, y), xytext=(-2, 2),
+			textcoords='offset points', ha='right', va='bottom')
+	plt.show()
 	return PCAPlot
 
 
