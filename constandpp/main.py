@@ -276,6 +276,10 @@ def generateReport(analysisResults, params, writeToDisk):
 	HCResult = analysisResults[3]
 	metadata = analysisResults[4]
 
+	# generate sorted (on FC) list of differentials
+	minSortedDifferentials = getSortedDifferentials(minProteinDF)
+	fullSortedDifferentials = getSortedDifferentials(fullProteinDF)
+
 	# data visualization
 	visualizationsDict = dataVisualization(minProteinDF, fullProteinDF, params['alpha'], params['FCThreshold'],
 	                                       PCAResult, HCResult, params['intensityColumnsPerCondition'])
