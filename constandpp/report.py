@@ -30,14 +30,12 @@ def getSortedDifferentials(df):
 	                                                 ascending=[False, True], axis=0)
 
 
-def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult, HCResult, intensityColumnsPerCondition):
-	visualizationsDict = {}
-
-	# volcano plot
+def getVolcanoPlot(minProteinDF, fullProteinDF, alpha, FCThreshold):
+	# todo docu
 	# todo add minProteinDF and combine into one plot
 	# todo add protein ID labels according to sorted list entry ID
 	volcanoPlot = plt.figure(figsize=(6, 5))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
-	plt.title(r'Volcano Plot ($FC>$'+str(FCThreshold)+r'; $\alpha=$'+str(alpha)+')', figure=volcanoPlot)
+	plt.title(r'Volcano Plot ($FC>$' + str(FCThreshold) + r'; $\alpha=$' + str(alpha) + ')', figure=volcanoPlot)
 	plt.xlabel(r'log$_2$(fold change)', figure=volcanoPlot)
 	plt.ylabel(r'-log$_{10}$(p-value) ', figure=volcanoPlot)
 	# get indices of different levels of significance
@@ -58,28 +56,33 @@ def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult
 	plt.scatter(fullProteinDF.loc[significantIndices_no, 'log2 fold change c1/c2'],
 	            -np.log10(fullProteinDF.loc[significantIndices_no, 'adjusted p-value']),
 	            color='k', figure=volcanoPlot)
-	visualizationsDict['pca'] = volcanoPlot
+	return volcanoPlot
 
-	# PCA plot
+
+def getPCAPlot(PCAResult, intensityColumnsPerCondition):
+	# todo docu
 	# todo add experiment labels
-	PCAPlot = plt.figure(figsize=(6, 5)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
+	PCAPlot = plt.figure(figsize=(6, 5))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	plt.title('Principal Component scores', figure=PCAPlot)
 	plt.xlabel('First PC', figure=PCAPlot)
 	plt.ylabel('Second PC', figure=PCAPlot)
 	# get distinguishable colours
-	cmap = plt.get_cmap('prism') # brg, jet
-	nConditions = len(intensityColumnsPerCondition) # number of TMT channels
+	cmap = plt.get_cmap('prism')  # brg, jet
+	nConditions = len(intensityColumnsPerCondition)  # number of TMT channels
 	distinguishableColors = cmap(np.linspace(0, 1.0, nConditions))
 	# generate colors vector so that the channels of the same condition have the same colour
 	colors = []
-	for condition in range(nConditions): # for each condition a different color
-		for i in range(len(intensityColumnsPerCondition[condition])): # add the color for each channel per condition
+	for condition in range(nConditions):  # for each condition a different color
+		for i in range(len(intensityColumnsPerCondition[condition])):  # add the color for each channel per condition
 			colors.append(distinguishableColors[condition])
 	# produce scatterplot
-	for (x,y,color) in zip(PCAResult[:, 0], PCAResult[:, 1], colors):
-		plt.scatter(x, y, color=color, figure=PCAPlot) # plot first two principal components
-	visualizationsDict['pca'] = PCAPlot
+	for (x, y, color) in zip(PCAResult[:, 0], PCAResult[:, 1], colors):
+		plt.scatter(x, y, color=color, figure=PCAPlot)  # plot first two principal components
+	return PCAPlot
 
+
+def getHCDendrogram(HCResult, intensityColumnsPerCondition):
+	# todo docu
 	# hierarchical clustering dendrogram
 	intensityColumns = [item for sublist in intensityColumnsPerCondition for item in sublist]
 	HCDendrogram = plt.figure(figsize=(6, 5)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
@@ -87,7 +90,5 @@ def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult
 	plt.xlabel('reporter channel', figure=HCDendrogram)
 	plt.ylabel('distance', figure=HCDendrogram)
 	dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12., labels=intensityColumns)
-	visualizationsDict['hcd'] = HCDendrogram
+	return HCDendrogram
 	plt.show()  # TEST
-
-	return visualizationsDict
