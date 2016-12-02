@@ -34,7 +34,8 @@ def getInput():
 	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
 	header_in = config.getint('DEFAULT','header_in')
 	removedDataInOneFile_bool = config.getboolean('DEFAULT','removedDataInOneFile_bool')
-	intensityColumns = getList(config.get('DEFAULT', 'intensityColumns'))
+	#intensityColumns = getList(config.get('DEFAULT', 'intensityColumns'))
+	intensityColumnsPerCondition = getList(config.get('DEFAULT', 'intensityColumnsPerCondition'))
 	wantedColumns = getList(config.get('DEFAULT', 'wantedColumns'))
 	noMissingValuesColumns = getList(config.get('DEFAULT', 'noMissingValuesColumns'))
 	removalColumnsToSave = getList(config.get('DEFAULT', 'removalColumnsToSave'))
@@ -54,7 +55,6 @@ def getInput():
 	isotopicCorrection_matrix = getIsotopicCorrectionsMatrix(config.get('DEFAULT','isotopicCorrection_matrix'))
 	accuracy = config.getfloat('DEFAULT','accuracy')
 	maxIterations = config.getint('DEFAULT','maxIterations')
-	intensityColumnsPerCondition = getList(config.get('DEFAULT', 'intensityColumnsPerCondition'))
 	pept2protCombinationMethod = config.get('DEFAULT','pept2protCombinationMethod')
 	alpha = config.getfloat('DEFAULT','alpha')
 	FCThreshold = config.getfloat('DEFAULT','FCThreshold')
@@ -72,7 +72,7 @@ def getInput():
 		raise Exception("Delimiter of input file must be a character (string of length one).")
 	if not ((isinstance(header_in, int) and header_in >= 0) or header_in is None):
 		raise Exception("Header parameter of the input file must be a non-negative integer or of type None.")
-	if intensityColumns is None:
+	if intensityColumnsPerCondition is None:
 		raise Exception("Please indicate which columns contain the MS2 reporter intensities.")
 	if wantedColumns is None:
 		raise Exception("Please indicate which columns (in addition to the intensities) you would like to have output for.")
@@ -127,12 +127,16 @@ def getInput():
 		raise Exception("Delimiter of output file must be a character (string of length one).")
 
 	# assign the TYPOGRAPHICALLY CORRECT values to the params dict and modify them if necessary.
+	# modify
+	intensityColumns = [item for sublist in intensityColumnsPerCondition for item in sublist]
+	# assign
 	params = {
 		'date': date,
 		'files_in': files_in,
 		'delim_in': delim_in,
 		'header_in': header_in,
 		'removedDataInOneFile_bool': removedDataInOneFile_bool,
+		'intensityColumnsPerCondition': intensityColumnsPerCondition,
 		'intensityColumns': intensityColumns,
 		'wantedColumns': wantedColumns+intensityColumns, # needs to include intensitycolumns
 		'noMissingValuesColumns': noMissingValuesColumns,
@@ -153,7 +157,6 @@ def getInput():
 		'isotopicCorrection_matrix': isotopicCorrection_matrix,
 		'accuracy': accuracy,
 		'maxIterations': maxIterations,
-		'intensityColumnsPerCondition': intensityColumnsPerCondition,
 		'pept2protCombinationMethod': pept2protCombinationMethod,
 		'alpha': alpha,
 		'FCThreshold': FCThreshold,
