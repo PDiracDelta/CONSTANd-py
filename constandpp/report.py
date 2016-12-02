@@ -81,11 +81,12 @@ def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult
 	visualizationsDict['pca'] = PCAPlot
 
 	# hierarchical clustering dendrogram
+	intensityColumns = [item for sublist in intensityColumnsPerCondition for item in sublist]
 	HCDendrogram = plt.figure(figsize=(6, 5)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	plt.title('Hierarchical Clustering Dendrogram', figure=HCDendrogram)
 	plt.xlabel('reporter channel', figure=HCDendrogram)
 	plt.ylabel('distance', figure=HCDendrogram)
-	dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12.) # TEST
+	dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12., labels=intensityColumns)
 	visualizationsDict['hcd'] = HCDendrogram
 	plt.show()  # TEST
 
