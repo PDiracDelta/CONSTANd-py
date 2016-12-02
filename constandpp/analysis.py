@@ -13,6 +13,7 @@ from collections import defaultdict
 from statsmodels.sandbox.stats.multicomp import multipletests
 from scipy.stats import ttest_ind as ttest
 from sklearn.decomposition import PCA
+from scipy.spatial.distance import pdist
 from scipy.cluster.hierarchy import linkage
 
 
@@ -163,9 +164,10 @@ def getHC(intensities):
 	Perform hierarchical clustering on the transposed intensity matrix, with nComponents principal components.
 	This means the reporter channels are "observations" with each protein intensity as a variable/attribute.
 	Returns the (NxN) linkage matrix describing the distances between each observation (reporter channel) according to
-	the "nearest point algorithm".
+	the UPGMA algorithm.
 	:param intensities: np.ndarray  MxN ndarray with intensities
 	:param nClusters:   int         number of clusters we want to find (= number of conditions in the experiment(s))
 	:return:            np.ndarray  NxN linkage matrix
 	"""
-	return linkage(intensities.T, method='single')  # method 'single' = nearest point algorithm
+	condensedDistanceMatrix = pdist(intensities.T)
+	return linkage(condensedDistanceMatrix, method='average') # 'average'=UPGMA
