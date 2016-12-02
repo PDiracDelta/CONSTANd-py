@@ -164,10 +164,11 @@ def getHC(intensities):
 	Perform hierarchical clustering on the transposed intensity matrix, with nComponents principal components.
 	This means the reporter channels are "observations" with each protein intensity as a variable/attribute.
 	Returns the (NxN) linkage matrix describing the distances between each observation (reporter channel) according to
-	the UPGMA algorithm.
+	the UPGMA algorithm. Peptides with NaN values are removed from the data!!!
+	See https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html for more information.
 	:param intensities: np.ndarray  MxN ndarray with intensities
 	:param nClusters:   int         number of clusters we want to find (= number of conditions in the experiment(s))
-	:return:            np.ndarray  NxN linkage matrix
+	:return:            np.ndarray  Nx4 linkage matrix
 	"""
-	condensedDistanceMatrix = pdist(intensities.T)
+	condensedDistanceMatrix = pdist(intensities[~np.isnan(intensities).any(axis=1)].T) # remove nans and transpose
 	return linkage(condensedDistanceMatrix, method='average') # 'average'=UPGMA
