@@ -15,6 +15,7 @@ import numpy as np
 from warnings import warn
 from scipy.cluster.hierarchy import dendrogram
 from matplotlib import pyplot as plt
+from adjustText import adjust_text
 
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
 
@@ -30,7 +31,7 @@ def getSortedDifferentials(df):
 	                                                 ascending=[False, True], axis=0)
 
 
-def getVolcanoPlot(minProteinDF, fullProteinDF, alpha, FCThreshold):
+def getVolcanoPlot(minProteinDF, fullProteinDF, alpha, FCThreshold, labelPlot=[False,]*4):
 	# todo docu
 	# todo add minProteinDF and combine into one plot
 	# todo add protein ID labels according to sorted list entry ID
@@ -43,19 +44,50 @@ def getVolcanoPlot(minProteinDF, fullProteinDF, alpha, FCThreshold):
 	significantIndices_p = fullProteinDF[fullProteinDF['significant'] == 'p'].index
 	significantIndices_fc = fullProteinDF[fullProteinDF['significant'] == 'fc'].index
 	significantIndices_no = fullProteinDF[fullProteinDF['significant'] == 'no'].index
+
 	# produce scatterplot for each category of significance
-	plt.scatter(fullProteinDF.loc[significantIndices_yes, 'log2 fold change c1/c2'],
-	            -np.log10(fullProteinDF.loc[significantIndices_yes, 'adjusted p-value']),
-	            color='r', figure=volcanoPlot)
+	# YES (also annotate with sorted list ID)
+	xdataYES = fullProteinDF.loc[significantIndices_yes, 'log2 fold change c1/c2']
+	ydataYES = -np.log10(fullProteinDF.loc[significantIndices_yes, 'adjusted p-value'])
+	labelsYES = fullProteinDF.loc[significantIndices_yes, 'protein']
+	plt.scatter(xdataYES, ydataYES, color='r', figure=volcanoPlot)
+	if labelPlot[0]:
+		#textsYES = []
+		for x,y,label in zip(xdataYES, ydataYES, labelsYES):
+			plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points', ha='right', va='bottom')
+			#textsYES.append(plt.text(x, y, label))
+			#adjust_text(xdataYES, ydataYES, textsYES, arrowprops=dict(arrowstyle="-", color='k', lw=0.5))
+	# P (also annotate with sorted list ID)
+	xdataP = fullProteinDF.loc[significantIndices_p, 'log2 fold change c1/c2']
+	ydataP = -np.log10(fullProteinDF.loc[significantIndices_p, 'adjusted p-value'])
+	labelsP = fullProteinDF.loc[significantIndices_p, 'protein']
 	plt.scatter(fullProteinDF.loc[significantIndices_p, 'log2 fold change c1/c2'],
 	            -np.log10(fullProteinDF.loc[significantIndices_p, 'adjusted p-value']),
 	            color='b', figure=volcanoPlot)
+	if labelPlot[1]:
+		for x,y,label in zip(xdataP, ydataP, labelsP):
+			plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points', ha='right', va='bottom')
+	# FC
+	xdataFC = fullProteinDF.loc[significantIndices_fc, 'log2 fold change c1/c2']
+	ydataFC = -np.log10(fullProteinDF.loc[significantIndices_fc, 'adjusted p-value'])
+	labelsFC = fullProteinDF.loc[significantIndices_fc, 'protein']
 	plt.scatter(fullProteinDF.loc[significantIndices_fc, 'log2 fold change c1/c2'],
 	            -np.log10(fullProteinDF.loc[significantIndices_fc, 'adjusted p-value']),
 	            color='g', figure=volcanoPlot)
+	if labelPlot[2]:
+		for x,y,label in zip(xdataFC, ydataFC, labelsFC):
+			plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points', ha='right', va='bottom')
+	# NO
+	xdataNO = fullProteinDF.loc[significantIndices_no, 'log2 fold change c1/c2']
+	ydataNO = -np.log10(fullProteinDF.loc[significantIndices_no, 'adjusted p-value'])
+	labelsNO = fullProteinDF.loc[significantIndices_no, 'protein']
 	plt.scatter(fullProteinDF.loc[significantIndices_no, 'log2 fold change c1/c2'],
 	            -np.log10(fullProteinDF.loc[significantIndices_no, 'adjusted p-value']),
 	            color='k', figure=volcanoPlot)
+	if labelPlot[3]:
+		for x,y,label in zip(xdataNO, ydataNO, labelsNO):
+			plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points', ha='right', va='bottom')
+	plt.show()
 	return volcanoPlot
 
 
@@ -80,9 +112,8 @@ def getPCAPlot(PCAResult, intensityColumnsPerCondition):
 	# produce scatterplot and annotate
 	for (x, y, color, label) in zip(PCAResult[:, 0], PCAResult[:, 1], colors, intensityColumns):
 		plt.scatter(x, y, color=color, figure=PCAPlot)  # plot first two principal components
-		plt.annotate(label, xy=(x, y), xytext=(-2, 2),
+		plt.annotate(label, xy=(x, y), xytext=(-1, 1),
 			textcoords='offset points', ha='right', va='bottom')
-	plt.show()
 	return PCAPlot
 
 
