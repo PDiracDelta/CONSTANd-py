@@ -152,9 +152,10 @@ def getHC(intensities):
 	"""
 	Perform hierarchical clustering on the transposed intensity matrix, with nComponents principal components.
 	This means the reporter channels are "observations" with each protein intensity as a variable/attribute.
-	Returns the (NxN) linkage matrix describing the distances between each observation (reporter channel).
+	Returns the (NxN) linkage matrix describing the distances between each observation (reporter channel) according to
+	the "nearest point algorithm".
 	:param intensities: np.ndarray  MxN ndarray with intensities
 	:param nClusters:   int         number of clusters we want to find (= number of conditions in the experiment(s))
 	:return:            np.ndarray  NxN linkage matrix
 	"""
-	return None #linkage(intensities.T, method='ward')
+	return linkage(intensities.T, method='single')  # method 'single' = nearest point algorithm
