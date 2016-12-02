@@ -25,7 +25,20 @@ def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult
 	visualizationsDict = {}
 
 	# volcano plot
-	volcano = plt.figure(figsize=(6, 5)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
+	fullProteinDF
+	full_pvalstoolarge =
+	volcanoPlot = plt.figure(figsize=(3, 5))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
+	plt.title('Volcano Plot', figure=volcanoPlot)
+	plt.xlabel(r'log$_2$(fold change)', figure=volcanoPlot)
+	plt.ylabel(r'-log$_10$(p-value) ', figure=volcanoPlot)
+	# get distinguishable colours
+	cmap = plt.get_cmap('prism')  # brg, jet
+	distinguishableColors = cmap(np.linspace(0, 1.0, 4)) # 4 different areas in a volcano plot
+	# generate colors vector so that the channels of the same condition have the same colour
+	# produce scatterplot
+	for (x, y, color) in zip(PCAResult[:, 0], PCAResult[:, 1], distinguishableColors):
+		plt.scatter(x, y, color=color, figure=volcanoPlot)  # plot first two principal components
+	visualizationsDict['pca'] = volcanoPlot
 
 	# PCA plot
 	PCAPlot = plt.figure(figsize=(6, 5)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
