@@ -19,12 +19,22 @@ from matplotlib import pyplot as plt
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
 
 
+def getSortedDifferentials(df):
+	"""
+	Sorts the differential protein data according to fold change (and p-value as secondary).
+	:param df:  pd.DataFrame    unsorted
+	:return:    pd.DataFrame    sorted according to fold change (and p-value as secondary)
+	"""
+	significantIndices = df[df['significant'] == 'yes'].index + df[df['significant'] == 'p'].index
+	return df.loc[significantIndices, :].sort(columns=['log2 fold change c1/c2', 'adjusted p-value'],
+	                                          ascending=[False, True], axis=0)
+
+
 def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult, HCResult, intensityColumnsPerCondition):
-	# TODO (if paying customer): parameter: intensity matrix on peptide or protein level?
-	# TODO: only include differentials with a fold of >threshold or <1/threshold
 	visualizationsDict = {}
 
 	# volcano plot
+	# todo add minProteinDF and combine into one plot
 	# todo add protein ID labels according to sorted list entry ID
 	volcanoPlot = plt.figure(figsize=(6, 5))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	plt.title(r'Volcano Plot ($FC>$'+str(FCThreshold)+r'; $\alpha=$'+str(alpha)+')', figure=volcanoPlot)
