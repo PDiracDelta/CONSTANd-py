@@ -117,6 +117,14 @@ def applyFoldChange(proteinDF, pept2protCombinationMethod):
 
 
 def applySignificance(df, alpha, FCThreshold):
+	"""
+	Adds a column with the significance level to the dataframe of proteins; specifies whether the DEA or fold change
+	results or both were significant.
+	:param df:          pd.DataFrame    proteins with their DEA and FC results.
+	:param alpha:       float           significance level
+	:param FCThreshold: float           fold change threshold
+	:return:            pd.DataFrame    protein data with significance levels 'yes', 'no', 'p' or 'fc'.
+	"""
 	def significant(x):
 		pvalueSignificant = x['adjusted p-value'] < alpha
 		FCSignificant = abs(x['log2 fold change c1/c2']) > FCThreshold
