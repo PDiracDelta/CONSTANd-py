@@ -33,17 +33,18 @@ def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult
 	plt.xlabel('First PC', figure=PCAPlot)
 	plt.ylabel('Second PC', figure=PCAPlot)
 	# get distinguishable colours
-	hsv = plt.get_cmap('hsv')
+	cmap = plt.get_cmap('prism') # brg, jet
 	nConditions = len(intensityColumnsPerCondition) # number of TMT channels
-	distinguishableColors = hsv(np.linspace(0, 1.0, nConditions))
+	distinguishableColors = cmap(np.linspace(0, 1.0, nConditions))
 	# generate colors vector so that the channels of the same condition have the same colour
 	colors = []
-	for condition in range(nConditions):
-		colors.append([distinguishableColors[condition],]*len(intensityColumnsPerCondition[condition]))
+	for condition in range(nConditions): # for each condition a different color
+		for i in range(len(intensityColumnsPerCondition[condition])): # add the color for each channel per condition
+			colors.append(distinguishableColors[condition])
 	# produce scatterplot
-	plt.scatter(PCAResult[:, 0], PCAResult[:, 1], c=colors, figure=PCAPlot) # plot first two principal components
+	for (x,y,color) in zip(PCAResult[:, 0], PCAResult[:, 1], colors):
+		plt.scatter(x, y, color=color, figure=PCAPlot) # plot first two principal components
 	visualizationsDict['pca'] = PCAPlot
-	plt.show() # TEST
 
 	# hierarchical clustering dendrogram
 	HCDendrogram = plt.figure(figsize=(6, 5)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
@@ -52,4 +53,6 @@ def dataVisualization(minProteinDF, fullProteinDF, alpha, FCThreshold, PCAResult
 	plt.ylabel('distance', figure=HCDendrogram)
 	#dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12., figure=HCDendrogram) # TEST
 	visualizationsDict['hcd'] = HCDendrogram
+
+	plt.show()  # TEST
 	return visualizationsDict
