@@ -279,6 +279,9 @@ def generateReport(analysisResults, params, writeToDisk):
 	# generate sorted (on FC) list of differentials
 	minSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(minProteinDF)
 	fullSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(fullProteinDF)
+	minSet = set(minSortedDifferentialProteinsDF['protein'])
+	fullSet = set(fullSortedDifferentialProteinsDF['protein'])
+	diffMinFullProteins = [list(minSet.difference(fullSet)), list(fullSet.difference(minSet))]
 	# todo combine into one
 
 	# data visualization
