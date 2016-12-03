@@ -281,7 +281,8 @@ def generateReport(analysisResults, params, writeToDisk):
 	fullSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(fullProteinDF)
 	minSet = set(minSortedDifferentialProteinsDF['protein'])
 	fullSet = set(fullSortedDifferentialProteinsDF['protein'])
-	diffMinFullProteins = [list(minSet.difference(fullSet)), list(fullSet.difference(minSet))]
+	# list( [in min but not in full], [in full but not in min] )
+	metadata['diffMinFullProteins'] = [list(minSet.difference(fullSet)), list(fullSet.difference(minSet))]
 	# todo combine into one
 
 	# data visualization
@@ -292,6 +293,11 @@ def generateReport(analysisResults, params, writeToDisk):
 	                                                  params['labelVolcanoPlotAreas'])
 	visualizationsDict['pca'] = getPCAPlot(PCAResult, params['intensityColumnsPerCondition'])
 	visualizationsDict['hcd'] = getHCDendrogram(HCResult, params['intensityColumnsPerCondition'])
+
+	# generate HTML and PDF reports
+	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, diffMinFullProteins,
+	                      visualizationsDict, metadata)
+	pdfReport = HTMLtoPDF(htmlReport)
 
 	writeToDisk = False # TEST
 	if writeToDisk:
