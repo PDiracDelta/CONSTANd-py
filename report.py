@@ -22,15 +22,15 @@ from adjustText import adjust_text
 
 def getSortedDifferentials(df):
 	"""
-	Sorts the differential protein data according to absolute fold change and resets the index.
+	Sorts the differential protein data according to absolute fold change and resets the index. Returns only the columns
+	specified.
 	:param df:  pd.DataFrame    unsorted
-	:return:    pd.DataFrame    sorted according to fold change
+	:return:    pd.DataFrame    sorted according to fold change and only specified columns
 	"""
+	reportColumns = ['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value']
 	significantIndices = list(df[df['significant'] == 'yes'].index) + list(df[df['significant'] == 'p'].index)
 	significantDf = df.loc[significantIndices, :]
-	return significantDf.reindex(significantDf['log2 fold change c1/c2'].abs().order(ascending=False).index)
-	#return df.loc[significantIndices, :].sort_values(by=['log2 fold change c1/c2', 'adjusted p-value'], ascending=[False, True], axis=0).reset_index(drop=True)
-	#df.reindex(df.b.abs().order().index)
+	return significantDf.reindex(significantDf['log2 fold change c1/c2'].abs().sort_values(ascending=False).index).loc[:, reportColumns]
 
 
 def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
