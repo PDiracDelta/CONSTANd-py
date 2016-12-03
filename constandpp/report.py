@@ -117,3 +117,25 @@ def getHCDendrogram(HCResult, intensityColumnsPerCondition):
 	dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12., labels=intensityColumns)
 	return HCDendrogram
 	plt.show()  # TEST
+
+
+def makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, diffMinFullProteins,
+	                      visualizationsDict, metadata):
+	"""
+	Pour all report ingredients into an HTML file.
+	:param minSortedDifferentialProteinsDF:     pd.DataFrame
+	:param fullSortedDifferentialProteinsDF:    pd.DataFrame
+	:param diffMinFullProteins:                 nested list
+	:param visualizationsDict:                  dict
+	:param metadata:                            dict
+	:return:
+	"""
+	# todo docu
+	htmlReport = None
+	return htmlReport
+
+
+def HTMLtoPDF(htmlReport):
+	# todo docu
+	pdfReport = htmlReport
+	return pdfReport
