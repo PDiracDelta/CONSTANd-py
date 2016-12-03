@@ -277,8 +277,8 @@ def generateReport(analysisResults, params, writeToDisk):
 	metadata = analysisResults[4]
 
 	# generate sorted (on FC) list of differentials
-	minSortedDifferentials = getSortedDifferentials(minProteinDF)
-	fullSortedDifferentials = getSortedDifferentials(fullProteinDF)
+	minSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(minProteinDF)
+	fullSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(fullProteinDF)
 	# todo combine into one
 
 	# data visualization

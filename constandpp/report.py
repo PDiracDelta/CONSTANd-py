@@ -20,7 +20,7 @@ from adjustText import adjust_text
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
 
 
-def getSortedDifferentials(df):
+def getSortedDifferentialProteinsDF(df):
 	"""
 	Sorts the differential protein data according to absolute fold change and resets the index. Returns only the columns
 	specified.
