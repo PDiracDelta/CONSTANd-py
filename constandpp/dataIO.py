@@ -34,7 +34,6 @@ def getInput():
 	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
 	header_in = config.getint('DEFAULT','header_in')
 	removedDataInOneFile_bool = config.getboolean('DEFAULT','removedDataInOneFile_bool')
-	#intensityColumns = getList(config.get('DEFAULT', 'intensityColumns'))
 	intensityColumnsPerCondition = getList(config.get('DEFAULT', 'intensityColumnsPerCondition'))
 	wantedColumns = getList(config.get('DEFAULT', 'wantedColumns'))
 	noMissingValuesColumns = getList(config.get('DEFAULT', 'noMissingValuesColumns'))
