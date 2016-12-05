@@ -10,7 +10,7 @@ import numpy as np
 from os import path
 from json import loads as parseExpression
 from codecs import getdecoder as gd
-from dataIO import parseSchema, getIsotopicCorrectionsMatrix
+from dataIO import getIsotopicCorrectionsMatrix
 from warnings import warn
 
 
@@ -60,8 +60,8 @@ def getInput(configFilePath):
 	# perform checks on the validity of the parameters and raise exceptions if necessary
 	# DO NOT change the value of variables here!
 	# TODO the 'is None' checks are obsolete. remove them (keep the error messages for later, now).
-	if not path.exists(files_in[0]): # TODO for all files
-		raise FileNotFoundError("File "+files_in+" not found.")
+	if not path.exists(file_in[0]): # TODO for all files
+		raise FileNotFoundError("File "+file_in+" not found.")
 	if not (len(delim_in) == 1 and isinstance(delim_in, str)):
 		raise Exception("Delimiter of input file must be a character (string of length one).")
 	if not ((isinstance(header_in, int) and header_in >= 0) or header_in is None):
@@ -159,9 +159,6 @@ def getMasterInput(masterConfigFilePath):
 	                                   inline_comment_prefixes='@')
 	config.optionxform = str  # so that strings dont automatically get .lower()-ed
 	config.read(masterConfigFilePath, encoding='utf-8')
-	configFiles = config._sections['DEFAULT']
-	configFiles.pop('__name__', None) # config has built-in dictionary with extra entry __name__
-	masterParams = config._sections['DEFAULT'].pop('__name__', None) # config has built-in dictionary with extra entry __name__
 
 	# get variables from config in correct typography
 	schema = parseExpression(config.get('DEFAULT', 'schema'))
