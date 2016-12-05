@@ -15,8 +15,7 @@ __email__ = "vanhoutvenjoris@gmail.com"
 __status__ = "Development"
 
 import sys
-# import matplotlib as mpl
-# import matplotlib.pyplot as plt
+from getInput import getInput
 from constand import constand
 from os import path
 from time import time
@@ -336,7 +335,7 @@ def generateReport(analysisResults, params, writeToDisk):
 		           filename=params['filename_out'] + '_dataViz')  # TODO
 
 
-def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
+def main(configFilePath, doProcessing, doAnalysis, doReport, writeToDisk, testing):
 	"""
 	For now this is just stuff for debugging and testing. Later:
 	Contains and explicits the workflow of the program. Using the booleans doProcessing, doAnalysis and writeToDisk one
@@ -344,7 +343,7 @@ def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
 	"""
 	start = time()
 	# get all input parameters
-	params = getInput()
+	params = getInput(configFilePath)
 	# get the dataframes
 	dfs = []
 	for filepath in params['files_in']:
@@ -397,4 +396,4 @@ def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
 
 
 if __name__ == '__main__':
-	sys.exit(main(doProcessing=False, doAnalysis=False, doReport=True, testing=True, writeToDisk=True))
+	sys.exit(main('config.ini', doProcessing=False, doAnalysis=False, doReport=True, testing=True, writeToDisk=True))
