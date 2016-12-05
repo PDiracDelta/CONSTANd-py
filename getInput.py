@@ -8,7 +8,7 @@ Get the input parameters from the config file.
 import configparser
 import numpy as np
 from os import path
-from json import loads as getList
+from json import loads as parseExpression
 from codecs import getdecoder as gd
 from dataIO import parseSchema, getIsotopicCorrectionsMatrix
 from warnings import warn
@@ -23,7 +23,7 @@ def getInput(configFilePath):
 
 	# read the config file to obtain the defaults
 	config = configparser.ConfigParser(allow_no_value=True, comment_prefixes=';',
-	                                   inline_comment_prefixes='@')  # TODO split up CONFIG and PARAMS (user input files vs workflow params)
+	                                   inline_comment_prefixes='@')  # TODO split up CONFIG and DEFAULT (user input files vs workflow params)
 	config.optionxform = str # so that strings dont automatically get .lower()-ed
 	config.read(configFilePath, encoding='utf-8')
 
@@ -33,18 +33,18 @@ def getInput(configFilePath):
 	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
 	header_in = config.getint('DEFAULT','header_in')
 	removedDataInOneFile_bool = config.getboolean('DEFAULT','removedDataInOneFile_bool')
-	intensityColumnsPerCondition = getList(config.get('DEFAULT', 'intensityColumnsPerCondition'))
-	wantedColumns = getList(config.get('DEFAULT', 'wantedColumns'))
-	noMissingValuesColumns = getList(config.get('DEFAULT', 'noMissingValuesColumns'))
-	removalColumnsToSave = getList(config.get('DEFAULT', 'removalColumnsToSave'))
-	collapseColumnsToSave = getList(config.get('DEFAULT', 'collapseColumnsToSave'))
+	intensityColumnsPerCondition = parseExpression(config.get('DEFAULT', 'intensityColumnsPerCondition'))
+	wantedColumns = parseExpression(config.get('DEFAULT', 'wantedColumns'))
+	noMissingValuesColumns = parseExpression(config.get('DEFAULT', 'noMissingValuesColumns'))
+	removalColumnsToSave = parseExpression(config.get('DEFAULT', 'removalColumnsToSave'))
+	collapseColumnsToSave = parseExpression(config.get('DEFAULT', 'collapseColumnsToSave'))
 	removeBadConfidence_bool = config.getboolean('DEFAULT','removeBadConfidence_bool')
 	removeBadConfidence_minimum = config.get('DEFAULT','removeBadConfidence_minimum')
 	removeIsolationInterference_bool = config.getboolean('DEFAULT','removeIsolationInterference_bool')
 	removeIsolationInterference_threshold = config.getfloat('DEFAULT','removeIsolationInterference_threshold')
 	collapse_method = config.get('DEFAULT', 'collapse_method')
 	collapse_maxRelativeReporterVariance = config.getfloat('DEFAULT', 'collapse_maxRelativeReporterVariance')
-	identifyingNodes = getList(config.get('DEFAULT', 'identifyingNodes'))
+	identifyingNodes = parseExpression(config.get('DEFAULT', 'identifyingNodes'))
 	undoublePSMAlgo_bool = config.getboolean('DEFAULT','undoublePSMAlgo_bool')
 	undoublePSMAlgo_exclusive_bool = config.getboolean('DEFAULT','undoublePSMAlgo_exclusive_bool')
 	collapseCharge_bool = config.getboolean('DEFAULT','collapseCharge_bool')
@@ -159,20 +159,20 @@ def getMasterInput(masterConfigFilePath):
 	                                   inline_comment_prefixes='@')
 	config.optionxform = str  # so that strings dont automatically get .lower()-ed
 	config.read(masterConfigFilePath, encoding='utf-8')
-	configFiles = config._sections['CONFIGS']
+	configFiles = config._sections['DEFAULT']
 	configFiles.pop('__name__', None) # config has built-in dictionary with extra entry __name__
-	masterParams = config._sections['PARAMS'].pop('__name__', None) # config has built-in dictionary with extra entry __name__
+	masterParams = config._sections['DEFAULT'].pop('__name__', None) # config has built-in dictionary with extra entry __name__
 
 	# get variables from config in correct typography
-	schema = parseSchema(config.get('PARAMS', 'schema'))
-	pept2protCombinationMethod = config.get('PARAMS', 'pept2protCombinationMethod')
-	alpha = config.getfloat('PARAMS', 'alpha')
-	FCThreshold = config.getfloat('PARAMS', 'FCThreshold')
-	labelVolcanoPlotAreas = getList(config.get('PARAMS', 'labelVolcanoPlotAreas'))
-	PCA_components = config.getint('PARAMS', 'PCA_components')
-	path_out = config.get('PARAMS', 'path_out')
-	filename_out = config.get('PARAMS', 'filename_out')
-	delim_out = gd("unicode_escape")(config.get('PARAMS', 'delim_out'))[0]  # treat delimiters correctly: ignore first escape
+	schema = parseExpression(config.get('DEFAULT', 'schema'))
+	pept2protCombinationMethod = config.get('DEFAULT', 'pept2protCombinationMethod')
+	alpha = config.getfloat('DEFAULT', 'alpha')
+	FCThreshold = config.getfloat('DEFAULT', 'FCThreshold')
+	labelVolcanoPlotAreas = parseExpression(config.get('DEFAULT', 'labelVolcanoPlotAreas'))
+	PCA_components = config.getint('DEFAULT', 'PCA_components')
+	path_out = config.get('DEFAULT', 'path_out')
+	filename_out = config.get('DEFAULT', 'filename_out')
+	delim_out = gd("unicode_escape")(config.get('DEFAULT', 'delim_out'))[0]  # treat delimiters correctly: ignore first escape
 
 	if PCA_components < 2:
 		raise Exception("Minimum number of principal coponents is 2.")
