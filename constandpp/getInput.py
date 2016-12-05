@@ -6,8 +6,11 @@ Get the input parameters from the config file.
 """
 
 import configparser
+import numpy as np
+from os import path
 from json import loads as getList
 from codecs import getdecoder as gd
+from dataIO import getIsotopicCorrectionsMatrix
 from warnings import warn
 
 
