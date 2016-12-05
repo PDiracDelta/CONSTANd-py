@@ -10,7 +10,7 @@ import numpy as np
 from os import path
 from json import loads as getList
 from codecs import getdecoder as gd
-from dataIO import getIsotopicCorrectionsMatrix
+from dataIO import parseSchema, getIsotopicCorrectionsMatrix
 from warnings import warn
 
 
@@ -29,7 +29,7 @@ def getInput(configFilePath):
 
 	# get variables from config in correct typography
 	date = config.get('DEFAULT','date')
-	files_in = getList(config.get('DEFAULT','files_in'))
+	file_in = config.get('DEFAULT','file_in')
 	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
 	header_in = config.getint('DEFAULT','header_in')
 	removedDataInOneFile_bool = config.getboolean('DEFAULT','removedDataInOneFile_bool')
@@ -53,14 +53,9 @@ def getInput(configFilePath):
 	isotopicCorrection_matrix = getIsotopicCorrectionsMatrix(config.get('DEFAULT','isotopicCorrection_matrix'))
 	accuracy = config.getfloat('DEFAULT','accuracy')
 	maxIterations = config.getint('DEFAULT','maxIterations')
-	pept2protCombinationMethod = config.get('DEFAULT','pept2protCombinationMethod')
-	alpha = config.getfloat('DEFAULT','alpha')
-	FCThreshold = config.getfloat('DEFAULT','FCThreshold')
-	labelVolcanoPlotAreas = getList(config.get('DEFAULT','labelVolcanoPlotAreas'))
-	PCA_components = config.getint('DEFAULT','PCA_components')
 	path_out = config.get('DEFAULT','path_out')
 	filename_out = config.get('DEFAULT','filename_out')
-	delim_out = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
+	delim_out = gd("unicode_escape")(config.get('DEFAULT','delim_out'))[0] # treat delimiters correctly: ignore first escape
 
 	# perform checks on the validity of the parameters and raise exceptions if necessary
 	# DO NOT change the value of variables here!
@@ -111,8 +106,6 @@ def getInput(configFilePath):
 		raise Exception("Accuracy must be strictly greater than zero.")
 	if not (maxIterations > 0 and isinstance(maxIterations,int)):
 		raise Exception("Maximum number of iterations must be an integer strictly greater than zero.")
-	if PCA_components < 2:
-		raise Exception("Minimum number of principal coponents is 2.")
 	if not path.exists(path_out):
 		raise FileNotFoundError("Path " + path_out + " not found.")
 	if path.exists(path_out+'/'+filename_out):
@@ -126,7 +119,7 @@ def getInput(configFilePath):
 	# assign
 	params = {
 		'date': date,
-		'files_in': files_in,
+		'file_in': file_in,
 		'delim_in': delim_in,
 		'header_in': header_in,
 		'removedDataInOneFile_bool': removedDataInOneFile_bool,
@@ -150,7 +143,45 @@ def getInput(configFilePath):
 		'isotopicCorrection_bool': isotopicCorrection_bool,
 		'isotopicCorrection_matrix': isotopicCorrection_matrix,
 		'accuracy': accuracy,
-		'maxIterations': maxIterations,
+		'maxIterations': maxIterations
+	}
+
+	# check if you forgot to hardcode new parameters
+	for param in config._defaults.keys():
+		if param not in params.keys():
+			raise Exception("You forgot to include "+param+" in the params dictionary.")
+
+	return params
+
+
+def getMasterInput(masterConfigFilePath):
+	config = configparser.ConfigParser(allow_no_value=True, comment_prefixes=';',
+	                                   inline_comment_prefixes='@')
+	config.optionxform = str  # so that strings dont automatically get .lower()-ed
+	config.read(masterConfigFilePath, encoding='utf-8')
+	configFiles = config._sections['CONFIGS']
+	configFiles.pop('__name__', None) # config has built-in dictionary with extra entry __name__
+	masterParams = config._sections['PARAMS'].pop('__name__', None) # config has built-in dictionary with extra entry __name__
+
+	# get variables from config in correct typography
+	schema = parseSchema(config.get('PARAMS', 'schema'))
+	pept2protCombinationMethod = config.get('PARAMS', 'pept2protCombinationMethod')
+	alpha = config.getfloat('PARAMS', 'alpha')
+	FCThreshold = config.getfloat('PARAMS', 'FCThreshold')
+	labelVolcanoPlotAreas = getList(config.get('PARAMS', 'labelVolcanoPlotAreas'))
+	PCA_components = config.getint('PARAMS', 'PCA_components')
+	path_out = config.get('PARAMS', 'path_out')
+	filename_out = config.get('PARAMS', 'filename_out')
+	delim_out = gd("unicode_escape")(config.get('PARAMS', 'delim_out'))[
+		0]  # treat delimiters correctly: ignore first escape
+
+	if PCA_components < 2:
+		raise Exception("Minimum number of principal coponents is 2.")
+
+	# assign the TYPOGRAPHICALLY CORRECT values to the params dict and modify them if necessary.
+	# assign
+	masterParams = {
+		'schema': schema,
 		'pept2protCombinationMethod': pept2protCombinationMethod,
 		'alpha': alpha,
 		'FCThreshold': FCThreshold,
@@ -161,9 +192,4 @@ def getInput(configFilePath):
 		'delim_out': delim_out
 	}
 
-	# check if you forgot to hardcode new parameters
-	for param in config._defaults.keys():
-		if param not in params.keys():
-			raise Exception("You forgot to include "+param+" in the params dictionary.")
-
-	return params
+	return configFiles.values(), masterParams
