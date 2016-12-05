@@ -343,11 +343,12 @@ def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
 	can control	which parts of the workflow to perform.
 	"""
 	start = time()
+	# get all input parameters
 	params = getInput()
 	# get the dataframes
 	dfs = []
 	for filepath in params['files_in']:
-			dfs.append(importDataFrame(filepath, delim=params['delim_in'], header=params['header_in']))
+		dfs.append(getDataFrame(filepath, delim=params['delim_in'], header=params['header_in'], wrapper=params['wrapper']))
 
 	# define global parameters
 	setProcessingGlobals(intensityColumns=params['intensityColumns'],
