@@ -350,7 +350,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	experimentNames = masterParams['schema'].keys()
 	for eName in experimentNames:
 		# get all input parameters
-		specificParams[eName] = getInput(masterParams['schema'][''])
+		specificParams[eName] = getInput(masterParams['schema'][eName]['config'])
 		# get the dataframes
 		dfs[eName] = getDataFrame(specificParams[eName]['file_in'], delim=specificParams[eName]['delim_in'], header=specificParams[eName]['header_in'], wrapper=None)#specificParams[eName]['wrapper']) # todo
 

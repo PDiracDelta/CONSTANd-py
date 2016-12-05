@@ -143,7 +143,10 @@ def getInput(configFilePath):
 		'isotopicCorrection_bool': isotopicCorrection_bool,
 		'isotopicCorrection_matrix': isotopicCorrection_matrix,
 		'accuracy': accuracy,
-		'maxIterations': maxIterations
+		'maxIterations': maxIterations,
+		'path_out': path_out,
+		'filename_out': filename_out,
+		'delim_out': delim_out
 	}
 
 	# check if you forgot to hardcode new parameters
