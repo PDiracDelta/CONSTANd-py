@@ -219,6 +219,28 @@ def importDataFrame(path_in, delim=None, header=0):
 	return df
 
 
+def fixFixableFormatMistakes(df):
+	return df
+
+
+def applyWrapper(df, wrapper):
+	return df
+
+
+def getDataFrame(path_in, delim=None, header=0, wrapper=None):
+	"""
+	Gets the dataframe specified by path_in from disk, applies a wrapper (optional) and fixes common format mistakes.
+	:param path_in:     string          existing path to input file
+	:param delim:       char            delimiter of the data
+	:param header:      int             row that contains the header of the data (None if no header)
+	:return:            pd.DataFrame    ready-to-use data
+	"""
+	df = importDataFrame(path_in, delim=delim, header=header)
+	df = applyWrapper(df, wrapper) #todo
+	df = fixFixableFormatMistakes(df)
+	return df
+
+
 def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=False):
 	"""
 	Save the results (normalized intensities) to disk.
