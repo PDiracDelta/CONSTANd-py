@@ -326,8 +326,7 @@ def generateReport(analysisResults, params, writeToDisk):
 	visualizationsDict['hcd'] = getHCDendrogram(HCResult, params['intensityColumnsPerCondition'])
 
 	# generate HTML and PDF reports
-	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, diffMinFullProteins,
-	                      visualizationsDict, metadata)
+	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, visualizationsDict, metadata)
 	pdfReport = HTMLtoPDF(htmlReport)
 
 	writeToDisk = False # TEST
