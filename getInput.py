@@ -172,8 +172,7 @@ def getMasterInput(masterConfigFilePath):
 	PCA_components = config.getint('PARAMS', 'PCA_components')
 	path_out = config.get('PARAMS', 'path_out')
 	filename_out = config.get('PARAMS', 'filename_out')
-	delim_out = gd("unicode_escape")(config.get('PARAMS', 'delim_out'))[
-		0]  # treat delimiters correctly: ignore first escape
+	delim_out = gd("unicode_escape")(config.get('PARAMS', 'delim_out'))[0]  # treat delimiters correctly: ignore first escape
 
 	if PCA_components < 2:
 		raise Exception("Minimum number of principal coponents is 2.")
@@ -192,4 +191,4 @@ def getMasterInput(masterConfigFilePath):
 		'delim_out': delim_out
 	}
 
-	return configFiles.values(), masterParams
+	return schema, masterParams
