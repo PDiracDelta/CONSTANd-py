@@ -17,7 +17,6 @@ __status__ = "Development"
 import sys
 from getInput import getInput
 from constand import constand
-from os import path
 from time import time
 from dataIO import *
 from dataproc import *
@@ -227,7 +226,10 @@ def processDf(df, params, writeToDisk):
 		           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
 		# save the DE analysis results
 
-	return normalizedDf, normalizedIntensities, removedData, noCorrectionIndices
+	if params['isotopicCorrection_bool']:
+		return normalizedDf, normalizedIntensities, removedData, noCorrectionIndices
+	else:
+		return normalizedDf, normalizedIntensities, removedData
 
 
 def analyzeProcessingResult(processingResults, params, writeToDisk):
