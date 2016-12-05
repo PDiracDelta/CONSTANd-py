@@ -174,7 +174,7 @@ def processDf(df, params, writeToDisk):
 	df = setMasterProteinDescriptions(df)
 	if params['undoublePSMAlgo_bool']:
 		# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
-		df, removedData['PSMAlgo'] = undoublePSMAlgo(df, master=params['masterPSMAlgo'],
+		df, removedData['PSMAlgo'] = undoublePSMAlgo(df, identifyingNodes=params['identifyingNodes'],
 		                                             exclusive=params['undoublePSMAlgo_exclusive_bool'])
 		# SANITY CHECK: no detections with the same scan number may exist after undoublePSMAlgo()
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
@@ -183,20 +183,20 @@ def processDf(df, params, writeToDisk):
 	# TEST here the intensity columns are alraedy lost
 	df, removedData['RT'] = collapse('RT', df, method=params['collapse_method'],
 	                                 maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
-	                                 masterPSMAlgo=params['masterPSMAlgo'],
+	                                 identifyingNodes=params['identifyingNodes'],
 	                                 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
 	if params['collapseCharge_bool']:
 		# collapse peptide list redundancy due to different charges (optional)
 		df, removedData['charge'] = collapse('Charge', df, method=params['collapse_method'],
 		                                     maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
-		                                     masterPSMAlgo=params['masterPSMAlgo'],
+		                                     identifyingNodes=params['identifyingNodes'],
 		                                     undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
 	if params['collapsePTM_bool']:
 		# collapse peptide list redundancy due to different charges (optional)
 		df, removedData['modifications'] = collapse('PTM', df, method=params['collapse_method'],
 		                                            maxRelativeReporterVariance=params[
 			                                            'collapse_maxRelativeReporterVariance'],
-		                                            masterPSMAlgo=params['masterPSMAlgo'],
+		                                            identifyingNodes=params['identifyingNodes'],
 		                                            undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
 
 	# SANITY CHECK: there should be no more duplicates if all collapses have been applied.
@@ -349,7 +349,7 @@ def main(configFilePath, doProcessing, doAnalysis, doReport, writeToDisk, testin
 	# get the dataframes
 	dfs = []
 	for filepath in params['files_in']:
-		dfs.append(getDataFrame(filepath, delim=params['delim_in'], header=params['header_in'], wrapper=params['wrapper']))
+		dfs.append(getDataFrame(filepath, delim=params['delim_in'], header=params['header_in'], wrapper=None))#params['wrapper'])) # todo
 
 	# define global parameters
 	setProcessingGlobals(intensityColumns=params['intensityColumns'],
@@ -398,4 +398,4 @@ def main(configFilePath, doProcessing, doAnalysis, doReport, writeToDisk, testin
 
 
 if __name__ == '__main__':
-	sys.exit(main('config.ini', doProcessing=False, doAnalysis=False, doReport=True, testing=True, writeToDisk=True))
+	sys.exit(main('config.ini', doProcessing=True, doAnalysis=False, doReport=True, testing=False, writeToDisk=False))

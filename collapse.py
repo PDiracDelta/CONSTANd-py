@@ -62,7 +62,7 @@ def geometricMedian(X, eps=1e-5):
 		y = y1
 
 
-def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo, undoublePSMAlgo_bool):  #
+def collapse(toCollapse, df, method, maxRelativeReporterVariance, identifyingNodes, undoublePSMAlgo_bool):  #
 	"""
 	Generic collapse function. Looks for duplicate 'Annotated Sequence' values in the dataFrame and verifies
 	true duplication using checkTrueDuplicates function. Modifies df according to true duplicates and newly acquired
@@ -72,13 +72,14 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 	Returns removedData according to the columnsToSave list.
 	:param toCollapse:              str             variable of which true duplicates are to be collapsed.
 	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
-	:param columnsToSave:               list            list of variables to be saved for detections that ought to be removed
 	:param method:                      str             defines how the new detection is to be selected/constructed
+	:param identifyingNodes:
 	:param maxRelativeReporterVariance: float           UNUSED value that restricts reporter variance
+	:param undoublePSMAlgo_bool:
 	:return df:                         pd.dataFrame    without sequence duplicates according to to checkTrueDuplicates.
 	:return removedData:                pd.dataFrame    [PARENT INDEX, and, values, to, be, saved]
 	"""
-
+	# todo docu
 	def getDuplicates():
 		"""
 		Takes the dataFrame df and returns a nested list of duplicates per category according to the toCollapse variable.
@@ -186,12 +187,8 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, masterPSMAlgo,
 		isNanWarnedYet = False
 		noSlavePSMAlgoWarnedYet = False
 		this_bestIndicesDict = {}
-		if masterPSMAlgo == 'mascot':
-			masterScoreName = 'Ions Score'
-			slaveScoreName = 'XCorr'
-		elif masterPSMAlgo == 'sequest':
-			masterScoreName = 'XCorr'
-			slaveScoreName = 'Ions Score'
+		masterScoreName = identifyingNodes['master'][1]
+		slaveScoreName = identifyingNodes['slaves'][0][1]
 
 		for this_duplicatesList in this_duplicateLists:
 			bestIndex = df.loc[this_duplicatesList, masterScoreName].idxmax(axis=0, skipna=True)

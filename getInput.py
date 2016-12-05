@@ -44,8 +44,8 @@ def getInput(configFilePath):
 	removeIsolationInterference_threshold = config.getfloat('DEFAULT','removeIsolationInterference_threshold')
 	collapse_method = config.get('DEFAULT', 'collapse_method')
 	collapse_maxRelativeReporterVariance = config.getfloat('DEFAULT', 'collapse_maxRelativeReporterVariance')
+	identifyingNodes = getList(config.get('DEFAULT', 'identifyingNodes'))
 	undoublePSMAlgo_bool = config.getboolean('DEFAULT','undoublePSMAlgo_bool')
-	masterPSMAlgo = config.get('DEFAULT','masterPSMAlgo')
 	undoublePSMAlgo_exclusive_bool = config.getboolean('DEFAULT','undoublePSMAlgo_exclusive_bool')
 	collapseCharge_bool = config.getboolean('DEFAULT','collapseCharge_bool')
 	collapsePTM_bool = config.getboolean('DEFAULT','collapsePTM_bool')
@@ -93,11 +93,6 @@ def getInput(configFilePath):
 			raise Exception("maxRelativeChannelVariance should be either 'None' or greater than zero.")
 	if undoublePSMAlgo_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PSM Algorithms.")
-	if masterPSMAlgo is None:
-		raise Exception("You have to enter a masterPSMAlgo -- even if you don't want to undouble the PSMs -- in order to "
-		                "choose the best matching representative when collapsing")
-	if masterPSMAlgo not in ('mascot', 'sequest'):
-		raise Exception("Invalid master PSM algorithm: '"+masterPSMAlgo+"'. Please pick 'mascot' or 'sequest'.")
 	if undoublePSMAlgo_exclusive_bool is None:
 		raise Exception("Please indicate whether PSM Algorithm redundancy removal should be exclusive or not.")
 	if collapseCharge_bool is None:
@@ -145,7 +140,7 @@ def getInput(configFilePath):
 		'removeBadConfidence_minimum': removeBadConfidence_minimum,
 		'removeIsolationInterference_bool': removeIsolationInterference_bool,
 		'removeIsolationInterference_threshold': removeIsolationInterference_threshold,
-		'masterPSMAlgo': masterPSMAlgo,
+		'identifyingNodes': identifyingNodes,
 		'undoublePSMAlgo_bool': undoublePSMAlgo_bool,
 		'undoublePSMAlgo_exclusive_bool': undoublePSMAlgo_exclusive_bool,
 		'collapse_method': collapse_method,
