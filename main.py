@@ -344,39 +344,38 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	can control	which parts of the workflow to perform.
 	"""
 	start = time()
-	configFiles, masterParams = getMasterInput(masterConfigFilePath) # config filenames + params for the combination of experiments
-	numExperiments = len(configFiles) # total number of experiments to combine
-	specificParams = [] # specific params for each experiment
-	dfs = []
-	processingResults = []
-	for i in range(numExperiments):
+	masterParams = getMasterInput(masterConfigFilePath) # config filenames + params for the combination of experiments
+	specificParams = {} # specific params for each experiment
+	dfs = {}
+	processingResults = {}
+	experimentNames = masterParams['schema'].keys()
+	for eName in experimentNames:
 		# get all input parameters
-		specificParams[i] = getInput(configFiles[i])
+		specificParams[eName] = getInput(masterParams['schema'][''])
 		# get the dataframes
-		dfs[i] = getDataFrame(specificParams[i]['file_in'], delim=specificParams[i]['delim_in'], header=specificParams[i]['header_in'], wrapper=None)#specificParams[i]['wrapper']) # todo
+		dfs[eName] = getDataFrame(specificParams[eName]['file_in'], delim=specificParams[eName]['delim_in'], header=specificParams[eName]['header_in'], wrapper=None)#specificParams[eName]['wrapper']) # todo
 
 		# define global parameters
-		setProcessingGlobals(intensityColumns=specificParams[i]['intensityColumns'],
-		                     removalColumnsToSave=specificParams[i]['removalColumnsToSave'],
-		                     noMissingValuesColumns=specificParams[i]['noMissingValuesColumns'])
+		setProcessingGlobals(intensityColumns=specificParams[eName]['intensityColumns'],
+		                     removalColumnsToSave=specificParams[eName]['removalColumnsToSave'],
+		                     noMissingValuesColumns=specificParams[eName]['noMissingValuesColumns'])
 		setCollapseColumnsToSave(
-			specificParams[i]['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
-	intensityColumnsPerConditionPerExperiment # todo
+			specificParams[eName]['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
 	if not testing:
-		for i in range(numExperiments):
+		for eName in experimentNames:
 			""" Data processing """
-			processingResultsDumpFilename = path.relpath(path.join(specificParams[i]['file_in'], path.pardir))+'/processingResultsDump'+str(i)
+			processingResultsDumpFilename = path.relpath(path.join(specificParams[eName]['file_in'], path.pardir))+'/processingResultsDump_'+str(eName)
 			if doProcessing:
 				# process every input dataframe
-				processingResults[i] = processDf(dfs[i], specificParams[i], writeToDisk)
-				pickle.dump(processingResults[i], open(processingResultsDumpFilename, 'wb')) # TEST
+				processingResults[eName] = processDf(dfs[eName], specificParams[eName], writeToDisk)
+				pickle.dump(processingResults[eName], open(processingResultsDumpFilename, 'wb')) # TEST
 			elif doAnalysis:
 				try:
-					processingResults[i] = pickle.load(open(processingResultsDumpFilename, 'rb'))
+					processingResults[eName] = pickle.load(open(processingResultsDumpFilename, 'rb'))
 				except FileNotFoundError:
 					raise FileNotFoundError("There is no previously processed data in this path: "+processingResultsDumpFilename)
 			else:
-				warn("No processing step performed nor processing file loaded for experiment "+str(i)+"!")
+				warn("No processing step performed nor processing file loaded for experiment "+str(eName)+"!")
 
 		""" Data analysis and visualization """
 		analysisResultsDumpFilename = path.relpath(path.join(specificParams['file_in'], path.pardir)) + '/analysisResultsDump'

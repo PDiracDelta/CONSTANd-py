@@ -191,4 +191,4 @@ def getMasterInput(masterConfigFilePath):
 		'delim_out': delim_out
 	}
 
-	return schema, masterParams
+	return masterParams
