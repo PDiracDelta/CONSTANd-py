@@ -11,15 +11,6 @@ import pickle
 from os import path
 
 
-def getIsotopicCorrectionsMatrix(path_in='ICM_default.tsv'):
-	"""
-	Reads the isotopic corrections matrix from a file on disk through importDataFrame, and returns it as a matrix.
-	:param path_in: str         path of the isotopic corrections matrix file
-	:return icm:    pd.ndarray  isotopic corrections matrix
-	"""
-	return np.asmatrix(importDataFrame(path_in,delim='\t', header=None)).astype('float64') # make sure its float64
-
-
 def importDataFrame(path_in, delim=None, header=0):
 	"""
 	Get the data from disk as a Pandas DataFrame.
@@ -45,14 +36,27 @@ def importDataFrame(path_in, delim=None, header=0):
 	if delim is None:
 		raise Exception(
 			"I don't know how to handle this data: the filetype was not recognized and no delimiter was specified.")
-
-	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(10, 6)), columns=list('ABCDEF'))  # TEST
-	# df = pd.read_csv('../data/MB_Bon_tmt_TargetPeptideSpectrumMatch.txt', delim='\t') # TEST
-	# df = pd.DataFrame(np.arange(10*6).reshape(10,6),columns=list('ABCDEF')) # TEST
-	# df['B'][0]=np.nan # TEST
-	# df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(2*10**3, 6)), columns=list('ABCDEF'))  # TEST
-
 	return df
+
+
+def getIsotopicCorrectionsMatrix(path_in='ICM_default.tsv'):
+	"""
+	Reads the isotopic corrections matrix from a file on disk through importDataFrame, and returns it as a matrix.
+	:param path_in: str         path of the isotopic corrections matrix file
+	:return icm:    pd.ndarray  isotopic corrections matrix
+	"""
+	return np.asmatrix(importDataFrame(path_in,delim='\t', header=None)).astype('float64') # make sure its float64
+
+
+def parseSchema(schemaPath):
+	"""
+	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment
+	:param schemaPath:
+	:return:
+	"""
+	schemaDF = importDataFrame(schemaPath, delim='\t', header=None)
+	schemaDict = None
+	return schemaDict
 
 
 def fixFixableFormatMistakes(df):

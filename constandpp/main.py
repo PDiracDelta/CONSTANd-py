@@ -15,7 +15,7 @@ __email__ = "vanhoutvenjoris@gmail.com"
 __status__ = "Development"
 
 import sys
-from getInput import getInput
+from getInput import getInput, getMasterInput
 from constand import constand
 from time import time
 from dataIO import *
@@ -227,7 +227,7 @@ def processDf(df, params, writeToDisk):
 		# save the DE analysis results
 
 	if params['isotopicCorrection_bool']:
-		return normalizedDf, normalizedIntensities, removedData, noCorrectionIndices
+		return normalizedDf, normalizedIntensities, removedData, noCorrectionIndices # todo find better solution than 2 returns
 	else:
 		return normalizedDf, normalizedIntensities, removedData
 
@@ -254,8 +254,8 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# get min and max protein-peptide mappings
 	minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(normalizedDf)
 	# execute mappings to get all peptideintensities per protein, over each whole condition
-	minProteinDF = getProteinDF(normalizedDf, minProteinPeptidesDict, params['intensityColumnsPerCondition'])
-	fullProteinDF = getProteinDF(normalizedDf, maxProteinPeptidesDict, params['intensityColumnsPerCondition'])
+	minProteinDF = getProteinDF(normalizedDf, minProteinPeptidesDict, params['schema']['intensityColumnsPerCondition'])
+	fullProteinDF = getProteinDF(normalizedDf, maxProteinPeptidesDict, params['schema']['intensityColumnsPerCondition'])
 
 	# perform differential expression analysis with Benjamini-Hochberg correction.
 	minProteinDF = applyDifferentialExpression(minProteinDF, params['alpha'])
@@ -337,45 +337,51 @@ def generateReport(analysisResults, params, writeToDisk):
 		           filename=params['filename_out'] + '_dataViz')  # TODO
 
 
-def main(configFilePath, doProcessing, doAnalysis, doReport, writeToDisk, testing):
+def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, testing):
 	"""
 	For now this is just stuff for debugging and testing. Later:
 	Contains and explicits the workflow of the program. Using the booleans doProcessing, doAnalysis and writeToDisk one
 	can control	which parts of the workflow to perform.
 	"""
 	start = time()
-	# get all input parameters
-	params = getInput(configFilePath)
-	# get the dataframes
+	configFiles, masterParams = getMasterInput(masterConfigFilePath) # config filenames + params for the combination of experiments
+	numExperiments = len(configFiles) # total number of experiments to combine
+	specificParams = [] # specific params for each experiment
 	dfs = []
-	for filepath in params['files_in']:
-		dfs.append(getDataFrame(filepath, delim=params['delim_in'], header=params['header_in'], wrapper=None))#params['wrapper'])) # todo
+	processingResults = []
+	for i in range(numExperiments):
+		# get all input parameters
+		specificParams[i] = getInput(configFiles[i])
+		# get the dataframes
+		dfs[i] = getDataFrame(specificParams[i]['file_in'], delim=specificParams[i]['delim_in'], header=specificParams[i]['header_in'], wrapper=None)#specificParams[i]['wrapper']) # todo
 
-	# define global parameters
-	setProcessingGlobals(intensityColumns=params['intensityColumns'],
-	                     removalColumnsToSave=params['removalColumnsToSave'],
-	                     noMissingValuesColumns=params['noMissingValuesColumns'])
-	setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
-
+		# define global parameters
+		setProcessingGlobals(intensityColumns=specificParams[i]['intensityColumns'],
+		                     removalColumnsToSave=specificParams[i]['removalColumnsToSave'],
+		                     noMissingValuesColumns=specificParams[i]['noMissingValuesColumns'])
+		setCollapseColumnsToSave(
+			specificParams[i]['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
+	intensityColumnsPerConditionPerExperiment # todo
 	if not testing:
-		""" Data processing """
-		processingResultsDumpFilename = path.relpath(path.join(filepath, path.pardir))+'/processingResultsDump'
-		if doProcessing:
-			# process every input dataframe
-			processingResults = [processDf(df, params, writeToDisk) for df in dfs]
-			pickle.dump(processingResults, open(processingResultsDumpFilename, 'wb')) # TEST
-		elif doAnalysis:
-			try:
-				processingResults = pickle.load(open(processingResultsDumpFilename, 'rb'))
-			except FileNotFoundError:
-				raise FileNotFoundError("There is no previously processed data in this path: "+processingResultsDumpFilename)
-		else:
-			warn("No processing step performed nor processing file loaded!")
+		for i in range(numExperiments):
+			""" Data processing """
+			processingResultsDumpFilename = path.relpath(path.join(specificParams[i]['file_in'], path.pardir))+'/processingResultsDump'+str(i)
+			if doProcessing:
+				# process every input dataframe
+				processingResults[i] = processDf(dfs[i], specificParams[i], writeToDisk)
+				pickle.dump(processingResults[i], open(processingResultsDumpFilename, 'wb')) # TEST
+			elif doAnalysis:
+				try:
+					processingResults[i] = pickle.load(open(processingResultsDumpFilename, 'rb'))
+				except FileNotFoundError:
+					raise FileNotFoundError("There is no previously processed data in this path: "+processingResultsDumpFilename)
+			else:
+				warn("No processing step performed nor processing file loaded for experiment "+str(i)+"!")
 
 		""" Data analysis and visualization """
-		analysisResultsDumpFilename = path.relpath(path.join(filepath, path.pardir)) + '/analysisResultsDump'
+		analysisResultsDumpFilename = path.relpath(path.join(specificParams['file_in'], path.pardir)) + '/analysisResultsDump'
 		if doAnalysis:
-			analysisResults = analyzeProcessingResult(processingResults, params, writeToDisk)
+			analysisResults = analyzeProcessingResult(processingResults, masterParams, writeToDisk)
 			pickle.dump(analysisResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
 		elif doReport:
 			try:
@@ -387,15 +393,15 @@ def main(configFilePath, doProcessing, doAnalysis, doReport, writeToDisk, testin
 
 		""" generate report """
 		if doReport:
-			generateReport(analysisResults, params, writeToDisk)  # TODO
+			generateReport(analysisResults, specificParams, writeToDisk)  # TODO
 		else:
 			warn("No report generated!")
 
 	elif testing:
-		devStuff(dfs[0], params)
+		devStuff(dfs[0], specificParams[0])
 	stop = time()
 	print(stop - start)
 
 
 if __name__ == '__main__':
-	sys.exit(main('config.ini', doProcessing=True, doAnalysis=False, doReport=True, testing=False, writeToDisk=False))
+	sys.exit(main(masterConfigFilePath='masterConfig.ini', doProcessing=True, doAnalysis=False, doReport=True, testing=False, writeToDisk=False))
