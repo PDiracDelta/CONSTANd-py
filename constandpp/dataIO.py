@@ -62,7 +62,7 @@ def fixFixableFormatMistakes(df):
 	:return df: pd.DataFrame    data without recognized format mistakes.
 	"""
 	# you've enabled "show flanking amino acids": DIRk --> [L].DIRk.[m]
-	if df.sample(axis='Annotated Sequence', n=1).count('.') == 2: # sequence contains 2 dots
+	if df.sample(n=1)['Annotated Sequence'].item().count('.') == 2: # sequence contains 2 dots
 		df['Annotated Sequence'] = df['Annotated Sequence'].apply(lambda x: x.split('.')[1]) # select part between dots
 
 	return df

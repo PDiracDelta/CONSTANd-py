@@ -133,24 +133,20 @@ def setMasterProteinDescriptions(df):
 	return df
 
 
-def undoublePSMAlgo(df, master, exclusive):
+def undoublePSMAlgo(df, identifyingNodes, exclusive):
 	"""
 	Removes redundant data due to different PSM algorithms producing the same peptide match. The 'master' algorithm
 	values are preferred over the 'slave' algorithm values, the latter whom are removed and have their basic information
 	saved in removedData. If exclusive=true, this function only keeps master data (and saves slave(s) basic info).
 	:param df:              pd.dataFrame    data with double First Scan numbers due to PSMAlgo redundancy
-	:param master:          string          master PSM algorithm (master/slave relation)
+	:param identifyingNodes:dict            master-slave PSM algorithm specifier
 	:param exclusive:       bool            save master data exclusively or include slave data where necessary?
 	:return df:             pd.dataFrame    data without double First Scan numbers due to PSMAlgo redundancy
 	:return removedData:    pd.dataFrame    basic info about the removed entries
 	"""
 	byIdentifyingNodeDict = df.groupby('Identifying Node').groups # {Identifying Node : [list of indices]}
-	if master == 'mascot':
-		masterName = 'Mascot (A6)'
-		slaveScoreName = 'XCorr'
-	elif master == 'sequest':
-		masterName = 'Sequest HT (A2)'
-		slaveScoreName = 'Ions Score'
+	masterName = identifyingNodes['master'][0]
+	slaveScoreName = identifyingNodes['slaves'][0][1]
 	columnsToSave = [slaveScoreName] + removalColumnsToSave
 	masterIndices = set(byIdentifyingNodeDict[masterName])
 	toDelete = set(df.index.values).difference(masterIndices)  # all indices of detections not done by MASTER
