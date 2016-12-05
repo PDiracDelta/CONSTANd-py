@@ -107,9 +107,9 @@ def getInput():
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PTMs.")
 	if isotopicCorrection_bool is None:
 		raise Exception("Please indicate whether you would like to correct for isotopic impurities.")
-	if not (isotopicCorrection_matrix.shape == (6,6)):
-		raise Exception("Isotopic corrections matrix must have shape (6,6).")
-	if not (np.allclose(np.sum(isotopicCorrection_matrix,0),np.ones(6),atol=1e-9)): # absolute tolerance: intensities known up to ~1e-10
+	if not (isotopicCorrection_matrix.shape[0] == isotopicCorrection_matrix.shape[1]):
+		raise Exception("Isotopic corrections matrix must have square shape. AND EQUAL TO NUMBER OF CHANNELS")
+	if not (np.allclose(np.sum(isotopicCorrection_matrix,0),np.ones(isotopicCorrection_matrix.shape[0]),atol=1e-9)): # absolute tolerance: intensities known up to ~1e-10
 		raise Exception("Isotopic corrections matrix row values do not add up to 1.")
 	if np.linalg.det(isotopicCorrection_matrix) == 0: # if Det(cM) = 0 no solution can be found.
 		raise Exception("Determinant of isotopic corrections matrix is zero; cannot solve the linear system.")

@@ -102,23 +102,53 @@ def testDataComplementarity(df):
 	print(scannrs_final == scannrs_init)
 
 
+def MAPlot(x,y):
+	from matplotlib import pyplot as plt
+	logx = np.log2(x)
+	logy = np.log2(y)
+	plt.scatter((logx+logy)*0.5, logx-logy)
+	plt.title('PD2.1 Intensities versus S/N values (scaled relatively within each row/peptide)')
+	plt.xlabel('A')
+	plt.ylabel('M')
+	plt.show()
+
+
 def compareIntensitySN():
-	filepath1 = '../data/COON data/PSMs/BR1_a.txt'
-	filepath2 = '../data/COON data/PSMs/BR1_b_SN.txt'
-	df1 = importDataFrame(filepath1, delim='\t', header=0)
-	df2 = importDataFrame(filepath2, delim='\t', header=0)
-	intensityColumns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
-	relIntensities = np.empty((len(df1.index),8), dtype='float')
-	relSNs = np.empty((len(df2.index),8), dtype='float')
-	for col in range(len(intensityColumns)):
-		relIntensities[:, col] = 1/8*df1.loc[:, intensityColumns[col]]/np.nanmean(df1.loc[:, intensityColumns],1)
-		relSNs[:, col] = 1/8*df2.loc[:, intensityColumns[col]]/np.nanmean(df2.loc[:, intensityColumns],1)
+	filepath1 = '../data/COON data/PSMs/fixed_BR1_a.txt'
+	filepath2 = '../data/COON data/PSMs/fixed_BR1_b_SN.txt'
+	constandnorm=True
+	if constandnorm:
+		if path.exists('../data/compareIntensitySNProcessingResults'):
+			processingResults = pickle.load(open('../data/compareIntensitySNProcessingResults', 'rb'))
+		else:
+			params=getInput()
+			setProcessingGlobals(intensityColumns=params['intensityColumns'],
+								 removalColumnsToSave=params['removalColumnsToSave'],
+								 noMissingValuesColumns=params['noMissingValuesColumns'])
+			setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
+			dfs = []
+			for filepath in [filepath1, filepath2]:
+				dfs.append(importDataFrame(filepath, delim=params['delim_in'], header=params['header_in']))
+			processingResults = [processDf(df, params, writeToDisk=False) for df in dfs]
+			pickle.dump(processingResults, open('../data/compareIntensitySNProcessingResults', 'wb'))
+		relIntensities = getIntensities(processingResults[0][0])
+		relSNs = getIntensities(processingResults[1][0])
+	else:
+		df1 = importDataFrame(filepath1, delim='\t', header=0)
+		df2 = importDataFrame(filepath2, delim='\t', header=0)
+		intensityColumns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
+		relIntensities = np.empty((len(df1.index),8), dtype='float')
+		relSNs = np.empty((len(df2.index),8), dtype='float')
+		for col in range(len(intensityColumns)):
+			relIntensities[:, col] = 1/8*df1.loc[:, intensityColumns[col]]/np.nanmean(df1.loc[:, intensityColumns],1)
+			relSNs[:, col] = 1/8*df2.loc[:, intensityColumns[col]]/np.nanmean(df2.loc[:, intensityColumns],1)
 	diff = abs(relIntensities - relSNs)
 	print(np.allclose(relIntensities, relSNs, atol=1e-3, equal_nan=True))
 	print("mean over all values")
 	print(np.nanmean(np.nanmean(diff[:, 0:6], 1)))
 	print("max difference")
 	print(np.nanmax(np.nanmax(diff, 1)))
+	MAPlot(relIntensities.reshape(relIntensities.size, 1), relSNs.reshape(relSNs.size, 1))
 
 
 def devStuff(df, params): # TEST
@@ -366,4 +396,4 @@ def main(doProcessing, doAnalysis, doReport, writeToDisk, testing):
 
 
 if __name__ == '__main__':
-	sys.exit(main(doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=True))
+	sys.exit(main(doProcessing=False, doAnalysis=False, doReport=True, testing=True, writeToDisk=True))

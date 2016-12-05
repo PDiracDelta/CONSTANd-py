@@ -15,7 +15,7 @@ import numpy as np
 from warnings import warn
 from scipy.cluster.hierarchy import dendrogram
 from matplotlib import pyplot as plt
-from adjustText import adjust_text
+#from adjustText import adjust_text
 
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
 
