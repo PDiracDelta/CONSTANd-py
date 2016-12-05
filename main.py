@@ -233,10 +233,10 @@ def processDf(df, params, writeToDisk):
 
 
 def analyzeProcessingResult(processingResults, params, writeToDisk):
-	dfs = [result[0] for result in processingResults]
-	normalizedIntensitiess = [result[1] for result in processingResults]
-	removedDatas = [result[2] for result in processingResults]
-	noCorrectionIndicess = [result[3] for result in processingResults]
+	dfs = dict((eName, result[0]) for eName, result in processingResults)
+	normalizedIntensitiess = dict((eName, result[1]) for eName, result in processingResults)
+	removedDatas = dict((eName, result[2]) for eName, result in processingResults)
+	noCorrectionIndicess = dict((eName, result[2]) for eName, result in processingResults)
 
 	# TODO effectively implement multiple experiment analysis beyond this point
 	normalizedDf = dfs[0]
@@ -391,7 +391,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 		""" generate report """
 		if doReport:
-			generateReport(analysisResults, specificParams, writeToDisk)  # TODO
+			generateReport(analysisResults, masterParams, writeToDisk)  # TODO
 		else:
 			warn("No report generated!")
 
@@ -402,4 +402,4 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 
 if __name__ == '__main__':
-	sys.exit(main(masterConfigFilePath='masterConfig.ini', doProcessing=True, doAnalysis=False, doReport=True, testing=False, writeToDisk=False))
+	sys.exit(main(masterConfigFilePath='masterConfig.ini', doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=False))
