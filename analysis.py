@@ -42,6 +42,18 @@ def getNoIsotopicCorrection(df, noCorrectionIndices):
 	return df.loc[noCorrectionIndices, ['First Scan', 'Identifying Node', 'Annotated Sequence', 'Master Protein Accessions']]
 
 
+# def combineExperimentDFs(dfs):
+# 	pd.concat(dfs, keys=[])
+# 	firstLevel = []
+# 	secondLevel = []
+# 	allExperimentsDF = pd.DataFrame()
+# 	for eName,df in dfs.items():
+# 		firstLevel.extend(df.index)
+# 		secondLevel.extend(len(df.index)*[eName, ])
+# 	multiIndex = zip([oldIndexes.extend(oldIndex)])
+# 	return allExperimentsDF
+
+
 def getProteinPeptidesDicts(df):
 	"""
 	Returns two dicts with the peptide indices (w.r.t. dataframe df) associated with each protein in the df as a

@@ -233,17 +233,18 @@ def processDf(df, params, writeToDisk):
 
 
 def analyzeProcessingResult(processingResults, params, writeToDisk):
-	experimentNames = processingResults.keys()
-	dfs = dict((eName, result[0]) for eName, result in experimentNames)
-	normalizedIntensitiess = dict((eName, result[1]) for eName, result in experimentNames)
-	removedDatas = dict((eName, result[2]) for eName, result in experimentNames)
-	noCorrectionIndicess = dict((eName, result[2]) for eName, result in experimentNames)
+	processingResultsItems = processingResults.items()
+	dfs = dict((eName, result[0]) for eName, result in processingResultsItems)
+	normalizedIntensitiess = dict((eName, result[1]) for eName, result in processingResultsItems)
+	removedDatas = dict((eName, result[2]) for eName, result in processingResultsItems)
+	noCorrectionIndicess = dict((eName, result[2]) for eName, result in processingResultsItems)
 
 	# normalizedDf = dfs[0]
 	# normalizedIntensities = normalizedIntensitiess[0]
 	# removedData = removedDatas[0]
 	# noCorrectionIndices = noCorrectionIndicess[0]
 
+	experimentNames = processingResults.keys()
 	# contains statistics and metadata (like the parameters) about the analysis.
 	metadata = {}
 	# record detections without isotopic correction applied applied
@@ -251,11 +252,14 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# record RT isolation statistics. Future: flag
 	metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for eName in experimentNames]) # todo add experiment column
 	# TODO effectively implement multiple experiment analysis beyond this point
+	# merge all experiments together in a dataframe which is multi-indexed: (eName, oldIndex)
+	allExperimentsDF = pd.concat(dfs.values(), keys=experimentNames)
 	# get min and max protein-peptide mappings
-	minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(normalizedDf)
+	minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF)
 	# execute mappings to get all peptideintensities per protein, over each whole condition
-	minProteinDF = getProteinDF(normalizedDf, minProteinPeptidesDict, params['schema']['intensityColumnsPerCondition'])
-	fullProteinDF = getProteinDF(normalizedDf, maxProteinPeptidesDict, params['schema']['intensityColumnsPerCondition'])
+	hier moet ik oppassen want die intensitycolumns van ALLE experimenten moeten nu meegegeven worden
+	minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema']['intensityColumnsPerCondition'])
+	fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema']['intensityColumnsPerCondition'])
 
 	# perform differential expression analysis with Benjamini-Hochberg correction.
 	minProteinDF = applyDifferentialExpression(minProteinDF, params['alpha'])
