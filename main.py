@@ -233,24 +233,24 @@ def processDf(df, params, writeToDisk):
 
 
 def analyzeProcessingResult(processingResults, params, writeToDisk):
-	dfs = dict((eName, result[0]) for eName, result in processingResults)
-	normalizedIntensitiess = dict((eName, result[1]) for eName, result in processingResults)
-	removedDatas = dict((eName, result[2]) for eName, result in processingResults)
-	noCorrectionIndicess = dict((eName, result[2]) for eName, result in processingResults)
+	experimentNames = processingResults.keys()
+	dfs = dict((eName, result[0]) for eName, result in experimentNames)
+	normalizedIntensitiess = dict((eName, result[1]) for eName, result in experimentNames)
+	removedDatas = dict((eName, result[2]) for eName, result in experimentNames)
+	noCorrectionIndicess = dict((eName, result[2]) for eName, result in experimentNames)
 
-	# TODO effectively implement multiple experiment analysis beyond this point
-	normalizedDf = dfs[0]
-	normalizedIntensities = normalizedIntensitiess[0]
-	removedData = removedDatas[0]
-	noCorrectionIndices = noCorrectionIndicess[0]
+	# normalizedDf = dfs[0]
+	# normalizedIntensities = normalizedIntensitiess[0]
+	# removedData = removedDatas[0]
+	# noCorrectionIndices = noCorrectionIndicess[0]
 
 	# contains statistics and metadata (like the parameters) about the analysis.
 	metadata = {}
 	# record detections without isotopic correction applied applied
-	metadata['noIsotopicCorrection'] = getNoIsotopicCorrection(normalizedDf, noCorrectionIndices)
+	metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for eName in experimentNames]) # todo add experiment column
 	# record RT isolation statistics. Future: flag
-	metadata['RTIsolationInfo'] = getRTIsolationInfo(removedData['RT'])
-
+	metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for eName in experimentNames]) # todo add experiment column
+	# TODO effectively implement multiple experiment analysis beyond this point
 	# get min and max protein-peptide mappings
 	minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(normalizedDf)
 	# execute mappings to get all peptideintensities per protein, over each whole condition
