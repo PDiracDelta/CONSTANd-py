@@ -220,10 +220,20 @@ def importDataFrame(path_in, delim=None, header=0):
 
 
 def fixFixableFormatMistakes(df):
+	"""
+	Takes a dataframe and fixes format mistakes frequently present in PD2.1 output.
+	:param df:  pd.DataFrame    possibly containing a multitude of mistakes.
+	:return df: pd.DataFrame    data without recognized format mistakes.
+	"""
+	# you've enabled "show flanking amino acids": DIRk --> [L].DIRk.[m]
+	if df.sample(axis='Annotated Sequence', n=1).count('.') == 2: # sequence contains 2 dots
+		df['Annotated Sequence'] = df['Annotated Sequence'].apply(lambda x: x.split('.')[1]) # select part between dots
+
 	return df
 
 
 def applyWrapper(df, wrapper):
+	# todo
 	return df
 
 
