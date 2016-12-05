@@ -47,16 +47,16 @@ def getIsotopicCorrectionsMatrix(path_in='ICM_default.tsv'):
 	"""
 	return np.asmatrix(importDataFrame(path_in,delim='\t', header=None)).astype('float64') # make sure its float64
 
-
-def parseSchema(schemaPath):
-	"""
-	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment
-	:param schemaPath:
-	:return:
-	"""
-	schemaDF = importDataFrame(schemaPath, delim='\t', header=None)
-	schemaDict = None
-	return schemaDict
+#
+# def parseSchema(schemaPath):
+# 	"""
+# 	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment
+# 	:param schemaPath:
+# 	:return:
+# 	"""
+# 	schemaDF = importDataFrame(schemaPath, delim='\t', header=None)
+# 	schemaDict = None
+# 	return schemaDict
 
 
 def fixFixableFormatMistakes(df):
