@@ -363,7 +363,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	if not testing:
 		for eName in experimentNames:
 			""" Data processing """
-			processingResultsDumpFilename = path.relpath(path.join(specificParams[eName]['file_in'], path.pardir))+'/processingResultsDump_'+str(eName)
+			processingResultsDumpFilename = path.relpath(path.join(specificParams[eName]['path_out'], path.pardir))+'/processingResultsDump_'+str(eName)
 			if doProcessing:
 				# process every input dataframe
 				processingResults[eName] = processDf(dfs[eName], specificParams[eName], writeToDisk)
@@ -377,7 +377,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 				warn("No processing step performed nor processing file loaded for experiment "+str(eName)+"!")
 
 		""" Data analysis and visualization """
-		analysisResultsDumpFilename = path.relpath(path.join(specificParams['file_in'], path.pardir)) + '/analysisResultsDump'
+		analysisResultsDumpFilename = masterParams['path_out'] + '/analysisResultsDump'
 		if doAnalysis:
 			analysisResults = analyzeProcessingResult(processingResults, masterParams, writeToDisk)
 			pickle.dump(analysisResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
