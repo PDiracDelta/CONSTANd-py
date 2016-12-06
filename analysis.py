@@ -42,21 +42,21 @@ def getNoIsotopicCorrection(df, noCorrectionIndices):
 	return df.loc[noCorrectionIndices, ['First Scan', 'Identifying Node', 'Annotated Sequence', 'Master Protein Accessions']]
 
 
-def combineExperimentDFs(dfs, schema):
-	"""
-	All dataframes first have their intensityColumns replaced by their aliases so that they remain distinguishable after
-	the merge. Then the dataframes are merged and attain a multi-index (experimentName, oldIndex).
-	:param dfs:     dict of pd.DataFrames   data to be merged
-	:param schema:  dict of dicts           schema describing the hierarchy of experiments and conditions and channels
-	:return:        pd.DataFrame            data of ALL experiments, with distinguishable channels and multi-indexed on
-											experiment name and old index
-	"""
-	for eName in schema:
-		channelAliases = [channel for condition in schema[eName]['channelAliasesPerCondition'] for channel in condition]
-		channels = [channel for condition in schema[eName]['intensityColumnsPerCondition'] for channel in condition]
-		for channel,alias in zip(channels,channelAliases):
-			# replace each old intensityColumn name by its new alias
-			dfs[eName].columns[dfs[eName].columns.index(channel)] = alias
+def combineExperimentDFs(dfs): #, schema):
+	# """
+	# All dataframes first have their intensityColumns replaced by their aliases so that they remain distinguishable after
+	# the merge. Then the dataframes are merged and attain a multi-index (experimentName, oldIndex).
+	# :param dfs:     dict of pd.DataFrames   data to be merged
+	# :param schema:  dict of dicts           schema describing the hierarchy of experiments and conditions and channels
+	# :return:        pd.DataFrame            data of ALL experiments, with distinguishable channels and multi-indexed on
+	# 										experiment name and old index
+	# """
+	# for eName in schema:
+	# 	channelAliases = [channel for condition in schema[eName]['channelAliasesPerCondition'] for channel in condition]
+	# 	channels = [channel for condition in schema[eName]['intensityColumnsPerCondition'] for channel in condition]
+	# 	for channel,alias in zip(channels,channelAliases):
+	# 		# replace each old intensityColumn name by its new alias
+	# 		dfs[eName].columns[dfs[eName].columns.index(channel)] = alias
 	return pd.concat(dfs.values(), keys=dfs.keys())
 
 
