@@ -253,15 +253,15 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for eName in experimentNames]) # todo add experiment column
 	# TODO effectively implement multiple experiment analysis beyond this point
 
-	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe and intensityColumns are unique and distinguishable
-	allExperimentsDF = combineExperimentDFs(dfs, params['schema'])
+	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe # and intensityColumns are unique and distinguishable
+	allExperimentsDF = combineExperimentDFs(dfs) #, params['schema'])
 
 	# get min and max protein-peptide mappings
 	minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF)
 	# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
-	hier moet ik oppassen want die intensitycolumns van ALLE experimenten moeten nu meegegeven worden
-	minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema']['intensityColumnsPerCondition'])
-	fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema']['intensityColumnsPerCondition'])
+
+	minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema']['channelAliasesPerCondition'])
+	fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema']['channelAliasesPerCondition'])
 
 	# perform differential expression analysis with Benjamini-Hochberg correction.
 	minProteinDF = applyDifferentialExpression(minProteinDF, params['alpha'])
@@ -276,10 +276,10 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
 
 	# perform PCA
-	PCAResult = getPCA(getIntensities(normalizedDf), params['PCA_components'])
+	PCAResult = getPCA(getIntensities(allExperimentsDF), params['PCA_components'])
 
 	# perform hierarchical clustering
-	HCResult = getHC(getIntensities(normalizedDf))
+	HCResult = getHC(getIntensities(allExperimentsDF))
 
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
 	handyColumnOrder = ['protein', 'significant', 'adjusted p-value', 'log2 fold change c1/c2', 'description', 'p-value', 'peptides', 'condition 1', 'condition 2']
@@ -328,8 +328,8 @@ def generateReport(analysisResults, params, writeToDisk):
 	                                               params['labelVolcanoPlotAreas'])
 	visualizationsDict['fullVolcano'] = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
 	                                                  params['labelVolcanoPlotAreas'])
-	visualizationsDict['pca'] = getPCAPlot(PCAResult, params['intensityColumnsPerCondition'])
-	visualizationsDict['hcd'] = getHCDendrogram(HCResult, params['intensityColumnsPerCondition'])
+	visualizationsDict['pca'] = getPCAPlot(PCAResult, params['channelAliasesPerCondition'])
+	visualizationsDict['hcd'] = getHCDendrogram(HCResult, params['channelAliasesPerCondition'])
 
 	# generate HTML and PDF reports
 	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, visualizationsDict, metadata)
