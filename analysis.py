@@ -96,17 +96,19 @@ def getProteinPeptidesDicts(df):
 	return minProteinPeptidesDict, maxProteinPeptidesDict, df.loc[noMasterProteinAccession, ['First Scan', 'Annotated Sequence']]
 
 
-def getProteinDF(df, proteinPeptidesDict, intensityColumnsPerCondition):
+def getProteinDF(df, proteinPeptidesDict, schema):
 	# todo docu
 	#proteinDF = pd.DataFrame([list(proteinPeptidesDict.keys())].extend([[None, ]*len(proteinPeptidesDict.keys()), ]*3),
 	proteinDF = pd.DataFrame(list(proteinPeptidesDict.keys()),
 	                         columns=['protein', 'peptides', 'description', 'condition 1', 'condition 2']).set_index('protein')
+	# define intensityColumnsPerConditionDict so that it contains the channels of ALL experiments
+	channelAliasesPerConditionDict = dict((eName, experiment['channelAliasesPerCondition']) for eName, experiment in schema.items())
 	for protein, peptideIndices in proteinPeptidesDict.items():
-		# combine all channels into one channel per condition
+		# combine all channels into one channel per condition. peptideIndices[0] = experimentName
 		condition1Intensities = pd.concat([df.loc[peptideIndices, channel] for channel in
-										   intensityColumnsPerCondition[0]], axis=0, ignore_index=True).tolist()
+		                                   channelAliasesPerConditionDict[peptideIndices[0]][0]], axis=0, ignore_index=True).tolist()
 		condition2Intensities = pd.concat([df.loc[peptideIndices, channel] for channel in
-										   intensityColumnsPerCondition[1]], axis=0, ignore_index=True).tolist()
+		                                   channelAliasesPerConditionDict[peptideIndices[0]][1]], axis=0, ignore_index=True).tolist()
 		# fill new dataframe on protein level, per condition
 		proteinDF.loc[protein, :] = [df.loc[peptideIndices, 'Annotated Sequence'].tolist(),
 		                             df.loc[peptideIndices, 'Protein Descriptions'].tolist(),
