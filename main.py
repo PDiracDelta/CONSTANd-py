@@ -364,7 +364,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 		# get all input parameters
 		specificParams[eName] = getInput(masterParams['schema'][eName]['config'])
 		# get the dataframes
-		wrapper = zip(unnest(specificParams[eName]['intensityColumnsPerCondition']), unnest(masterParams['schema'][eName]['channelAliasesPerCondition'])) # TEST # todo
+		wrapper = zip(unnest(masterParams['schema'][eName]['intensityColumnsPerCondition']), unnest(masterParams['schema'][eName]['channelAliasesPerCondition'])) # TEST # todo
 		dfs[eName] = getDataFrame(specificParams[eName]['file_in'], delim=specificParams[eName]['delim_in'], header=specificParams[eName]['header_in'], wrapper=wrapper)#specificParams[eName]['wrapper']) # todo
 
 	if not testing:
