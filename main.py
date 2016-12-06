@@ -252,11 +252,13 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# record RT isolation statistics. Future: flag
 	metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for eName in experimentNames]) # todo add experiment column
 	# TODO effectively implement multiple experiment analysis beyond this point
-	# merge all experiments together in a dataframe which is multi-indexed: (eName, oldIndex)
-	allExperimentsDF = pd.concat(dfs.values(), keys=experimentNames)
+
+	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe and intensityColumns are unique and distinguishable
+	allExperimentsDF = combineExperimentDFs(dfs, params['schema'])
+
 	# get min and max protein-peptide mappings
 	minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF)
-	# execute mappings to get all peptideintensities per protein, over each whole condition
+	# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
 	hier moet ik oppassen want die intensitycolumns van ALLE experimenten moeten nu meegegeven worden
 	minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema']['intensityColumnsPerCondition'])
 	fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema']['intensityColumnsPerCondition'])
