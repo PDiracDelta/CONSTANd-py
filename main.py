@@ -158,6 +158,11 @@ def devStuff(df, params): # TEST
 	pass
 
 
+def unnest(x):
+	""" returns un-nested version of level 1 nested list x."""
+	return [e for sublist in x for e in sublist]
+
+
 def processDf(df, params, writeToDisk):
 	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
 	# remove detections where (essential) data is missing.
@@ -277,6 +282,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
 
 	# perform PCA # todo multiple experiments
+	allChannelAliases = [alias for ]
 	PCAResult = getPCA(getIntensities(allExperimentsDF, intensityColumns=), params['PCA_components'])
 
 	# perform hierarchical clustering # todo multiple experiments
