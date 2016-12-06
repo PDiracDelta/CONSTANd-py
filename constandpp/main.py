@@ -313,7 +313,6 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 
 def generateReport(analysisResults, params, writeToDisk):
 	# todo docu
-	# todo multi-experiment support
 	minProteinDF = analysisResults[0]
 	fullProteinDF = analysisResults[1]
 	PCAResult = analysisResults[2]
@@ -335,18 +334,18 @@ def generateReport(analysisResults, params, writeToDisk):
 	                                               params['labelVolcanoPlotAreas'])
 	visualizationsDict['fullVolcano'] = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
 	                                                  params['labelVolcanoPlotAreas'])
-	visualizationsDict['pca'] = getPCAPlot(PCAResult, params['channelAliasesPerCondition'])
-	visualizationsDict['hcd'] = getHCDendrogram(HCResult, params['channelAliasesPerCondition'])
+	visualizationsDict['pca'] = getPCAPlot(PCAResult, params['channelAliasesPerCondition']) # todo multiple experimenst
+	visualizationsDict['hcd'] = getHCDendrogram(HCResult, params['channelAliasesPerCondition']) # todo multiple experimenst
 
-	# generate HTML and PDF reports
+	# generate HTML and PDF reports # todo
 	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, visualizationsDict, metadata)
 	pdfReport = HTMLtoPDF(htmlReport)
 
 	writeToDisk = False # TEST
 	if writeToDisk:
 		# save the visualizations
-		exportData(visualizationsDict, dataType='visualizationsDict', path_out=params['path_out'],
-		           filename=params['filename_out'] + '_dataViz')  # TODO
+		exportData(visualizationsDict, dataType='viz', path_out=params['path_out'],
+		           filename=params['filename_out'] + '_dataViz') # TODO
 
 
 def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, testing):
@@ -404,7 +403,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 		""" generate report """
 		if doReport:
-			generateReport(analysisResults, masterParams, writeToDisk)  # TODO
+			generateReport(analysisResults, masterParams, writeToDisk)
 		else:
 			warn("No report generated!")
 
