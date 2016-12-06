@@ -281,12 +281,12 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	minProteinDF = applySignificance(minProteinDF, params['alpha'], params['FCThreshold'])
 	fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
 
-	# perform PCA # todo multiple experiments
-	allChannelAliases = [alias for ]
-	PCAResult = getPCA(getIntensities(allExperimentsDF, intensityColumns=), params['PCA_components'])
+	# perform PCA # todo multiple experiments (its now inter-experimental only?)
+	allChannelAliases = [unnest(experiments['channelAliasesPerCondition']) for experiments in params['schema'].values()]
+	PCAResult = getPCA(getIntensities(allExperimentsDF, intensityColumns=allChannelAliases), params['PCA_components'])
 
-	# perform hierarchical clustering # todo multiple experiments
-	HCResult = getHC(getIntensities(allExperimentsDF))
+	# perform hierarchical clustering # todo multiple experiments (its now inter-experimental only?)
+	HCResult = getHC(getIntensities(allExperimentsDF, intensityColumns=allChannelAliases))
 
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
 	handyColumnOrder = ['protein', 'significant', 'adjusted p-value', 'log2 fold change c1/c2', 'description', 'p-value', 'peptides', 'condition 1', 'condition 2']
