@@ -108,8 +108,8 @@ def getProteinDF(df, proteinPeptidesDict, schema):
 		# interpret as multi index so that you can call .levels and .get_level_values()
 		peptideIndices = pd.MultiIndex.from_tuples(peptideIndices)
 		# combine all channels into one channel per condition.
-		condition1Intensities = pd.DataFrame()
-		condition2Intensities = pd.DataFrame()
+		condition1Intensities = pd.Series()
+		condition2Intensities = pd.Series()
 		# per experiment, get the a list of indices per channel for both conditions, and concatenate the corresponding df values.
 		for eName in peptideIndices.levels[0]: # peptideIndices.levels[0] is the experimentName part of the index.
 			# get the indices of the current experiment
