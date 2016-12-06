@@ -260,8 +260,8 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF)
 	# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
 
-	minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema']['channelAliasesPerCondition'])
-	fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema']['channelAliasesPerCondition'])
+	minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema'])
+	fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema'])
 
 	# perform differential expression analysis with Benjamini-Hochberg correction.
 	minProteinDF = applyDifferentialExpression(minProteinDF, params['alpha'])
@@ -276,7 +276,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
 
 	# perform PCA
-	PCAResult = getPCA(getIntensities(allExperimentsDF), params['PCA_components'])
+	PCAResult = getPCA(getIntensities(allExperimentsDF, intensityColumns=), params['PCA_components'])
 
 	# perform hierarchical clustering
 	HCResult = getHC(getIntensities(allExperimentsDF))
