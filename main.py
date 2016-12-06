@@ -20,7 +20,7 @@ from constand import constand
 from time import time
 from dataIO import *
 from dataproc import *
-from collapse import collapse, setCollapseColumnsToSave
+from collapse import collapse#, setCollapseColumnsToSave
 from analysis import *
 from report import *
 
@@ -120,10 +120,10 @@ def compareIntensitySN():
 			processingResults = pickle.load(open('../data/compareIntensitySNProcessingResults', 'rb'))
 		else:
 			params=getInput()
-			setProcessingGlobals(intensityColumns=params['intensityColumns'],
-								 removalColumnsToSave=params['removalColumnsToSave'],
-								 noMissingValuesColumns=params['noMissingValuesColumns'])
-			setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
+			# setProcessingGlobals(intensityColumns=params['intensityColumns'],
+			# 					 removalColumnsToSave=params['removalColumnsToSave'],
+			# 					 noMissingValuesColumns=params['noMissingValuesColumns'])
+			# setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
 			dfs = []
 			for filepath in [filepath1, filepath2]:
 				dfs.append(importDataFrame(filepath, delim=params['delim_in'], header=params['header_in']))
@@ -166,43 +166,45 @@ def unnest(x):
 def processDf(df, params, writeToDisk):
 	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
 	# remove detections where (essential) data is missing.
-	df, removedData['missing'] = removeMissing(df)
+	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'])
 	if params['removeBadConfidence_bool']:
-		df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'])
+		df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'], params['removalColumnsToSave'])
 	# remove all useless columns from the dataFrame
 	df = removeObsoleteColumns(df, wantedColumns=params['wantedColumns'])
 	if params['removeIsolationInterference_bool']:
 		# remove all data with too high isolation interference
 		df, removedData['isolationInterference'] = removeIsolationInterference(df, params[
-			'removeIsolationInterference_threshold'])
+			'removeIsolationInterference_threshold'], params['removalColumnsToSave'])
 	# remove all non-master protein accessions (entire column) and descriptions (selective).
 	df = setMasterProteinDescriptions(df)
 	if params['undoublePSMAlgo_bool']:
 		# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
 		df, removedData['PSMAlgo'] = undoublePSMAlgo(df, identifyingNodes=params['identifyingNodes'],
-		                                             exclusive=params['undoublePSMAlgo_exclusive_bool'])
+		                                             exclusive=params['undoublePSMAlgo_exclusive_bool'],
+		                                             intensityColumns=params['intensityColumns'],
+		                                             removalColumnsToSave=params['removalColumnsToSave'])
 		# SANITY CHECK: no detections with the same scan number may exist after undoublePSMAlgo()
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
 
 	# collapse peptide list redundancy due to multiple detections at different RT
 	# TEST here the intensity columns are alraedy lost
-	df, removedData['RT'] = collapse('RT', df, method=params['collapse_method'],
+	df, removedData['RT'] = collapse('RT', df, intensityColumns=params['intensityColumns'], method=params['collapse_method'],
 	                                 maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
 	                                 identifyingNodes=params['identifyingNodes'],
-	                                 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
+	                                 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
 	if params['collapseCharge_bool']:
 		# collapse peptide list redundancy due to different charges (optional)
-		df, removedData['charge'] = collapse('Charge', df, method=params['collapse_method'],
+		df, removedData['charge'] = collapse('Charge', df, intensityColumns=params['intensityColumns'], method=params['collapse_method'],
 		                                     maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
 		                                     identifyingNodes=params['identifyingNodes'],
-		                                     undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
+		                                     undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
 	if params['collapsePTM_bool']:
 		# collapse peptide list redundancy due to different charges (optional)
-		df, removedData['modifications'] = collapse('PTM', df, method=params['collapse_method'],
+		df, removedData['modifications'] = collapse('PTM', df, intensityColumns=params['intensityColumns'], method=params['collapse_method'],
 		                                            maxRelativeReporterVariance=params[
 			                                            'collapse_maxRelativeReporterVariance'],
 		                                            identifyingNodes=params['identifyingNodes'],
-		                                            undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'])
+		                                            undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
 
 	# SANITY CHECK: there should be no more duplicates if all collapses have been applied.
 	if params['undoublePSMAlgo_bool'] and params['collapseCharge_bool']:  # TEST
@@ -211,13 +213,13 @@ def processDf(df, params, writeToDisk):
 
 	if params['isotopicCorrection_bool']:
 		# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
-		intensities, noCorrectionIndices = isotopicCorrection(getIntensities(df),
+		intensities, noCorrectionIndices = isotopicCorrection(getIntensities(df, intensityColumns=params['intensityColumns']),
 		                                                      correctionsMatrix=params['isotopicCorrection_matrix'])
 	else:
 		intensities = getIntensities(df)
 	# perform the CONSTANd algorithm; also do NOT include normalized intensities in df --> only for paying users.
 	normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
-	normalizedDf = setIntensities(df, normalizedIntensities)
+	normalizedDf = setIntensities(df, intensities=normalizedIntensities, intensityColumns=params['intensityColumns'])
 
 	""" save results """
 	if writeToDisk:
