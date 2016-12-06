@@ -113,7 +113,7 @@ def getProteinDF(df, proteinPeptidesDict, schema):
 		# per experiment, get the a list of indices per channel for both conditions, and concatenate the corresponding df values.
 		for eName in peptideIndices.levels[0]: # peptideIndices.levels[0] is the experimentName part of the index.
 			# get the indices of the current experiment
-			peptideIndicesPerExperiment = peptideIndices.values[peptideIndices.index.get_level_values(0) == eName]
+			peptideIndicesPerExperiment = peptideIndices.values[peptideIndices.get_level_values(0) == eName]
 			# get a list of dfs, to sort the intensities per channel.
 			condition1intensitiesPerChannel = [df.loc[peptideIndicesPerExperiment, channel] for channel in
 			                                   channelAliasesPerConditionDict[eName][0]]
