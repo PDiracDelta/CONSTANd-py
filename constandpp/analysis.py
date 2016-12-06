@@ -105,15 +105,26 @@ def getProteinDF(df, proteinPeptidesDict, schema):
 	# define intensityColumnsPerConditionDict so that it contains the channels of ALL experiments
 	channelAliasesPerConditionDict = dict((eName, experiment['channelAliasesPerCondition']) for eName, experiment in schema.items())
 	for protein, peptideIndices in proteinPeptidesDict.items():
-		# combine all channels into one channel per condition. peptideIndices[0] = experimentName
-		condition1Intensities = pd.concat([df.loc[peptideIndices, channel] for channel in
-		                                   channelAliasesPerConditionDict[peptideIndices[0]][0]], axis=0, ignore_index=True).tolist()
-		condition2Intensities = pd.concat([df.loc[peptideIndices, channel] for channel in
-		                                   channelAliasesPerConditionDict[peptideIndices[0]][1]], axis=0, ignore_index=True).tolist()
+		# combine all channels into one channel per condition.
+		condition1Intensities = pd.DataFrame()
+		condition2Intensities = pd.DataFrame()
+		# per experiment, get the a list of indices per channel for both conditions, and concatenate the corresponding df values.
+		for eName in peptideIndices.levels[0]: # peptideIndices.levels[0] is the experimentName part of the index.
+			# get the indices of the current experiment
+			peptideIndicesPerExperiment = peptideIndices.index.values[peptideIndices.index.get_level_values(0) == eName]
+			# get a list of dfs, to sort the intensities per channel.
+			condition1intensitiesPerChannel = [df.loc[peptideIndicesPerExperiment, channel] for channel in
+			                                   channelAliasesPerConditionDict[eName][0]]
+			condition2intensitiesPerChannel = [df.loc[peptideIndicesPerExperiment, channel] for channel in
+			                                   channelAliasesPerConditionDict[eName][1]]
+			condition1Intensities = pd.concat([condition1Intensities].extend(condition1intensitiesPerChannel), axis=0,
+			                                  ignore_index=True)
+			condition2Intensities = pd.concat([condition2Intensities].extend(condition2intensitiesPerChannel), axis=0,
+			                                  ignore_index=True)
 		# fill new dataframe on protein level, per condition
 		proteinDF.loc[protein, :] = [df.loc[peptideIndices, 'Annotated Sequence'].tolist(),
 		                             df.loc[peptideIndices, 'Protein Descriptions'].tolist(),
-		                             condition1Intensities, condition2Intensities]
+		                             condition1Intensities.tolist(), condition2Intensities.tolist()]
 	return proteinDF
 
 

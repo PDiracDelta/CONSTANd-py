@@ -417,4 +417,4 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 
 if __name__ == '__main__':
-	sys.exit(main(masterConfigFilePath='masterConfig.ini', doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
+	sys.exit(main(masterConfigFilePath='masterConfig.ini', doProcessing=False, doAnalysis=True, doReport=True, testing=False, writeToDisk=False))
