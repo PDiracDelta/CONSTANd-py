@@ -364,16 +364,18 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 		# get all input parameters
 		specificParams[eName] = getInput(masterParams['schema'][eName]['config'])
 		# get the dataframes
-		dfs[eName] = getDataFrame(specificParams[eName]['file_in'], delim=specificParams[eName]['delim_in'], header=specificParams[eName]['header_in'], wrapper=None)#specificParams[eName]['wrapper']) # todo
+		wrapper = zip(unnest(specificParams[eName]['intensityColumnsPerCondition']), unnest(masterParams[eName]['channelAliasesPerCondition'])) # TEST # todo
+		dfs[eName] = getDataFrame(specificParams[eName]['file_in'], delim=specificParams[eName]['delim_in'], header=specificParams[eName]['header_in'], wrapper=wrapper)#specificParams[eName]['wrapper']) # todo
 
-		# define global parameters
-		setProcessingGlobals(intensityColumns=specificParams[eName]['intensityColumns'],
-		                     removalColumnsToSave=specificParams[eName]['removalColumnsToSave'],
-		                     noMissingValuesColumns=specificParams[eName]['noMissingValuesColumns'])
-		setCollapseColumnsToSave(
-			specificParams[eName]['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
 	if not testing:
 		for eName in experimentNames:
+			# define global parameters
+			setProcessingGlobals(intensityColumns=specificParams[eName]['intensityColumns'],  # TEST # todo
+			                     # intensityColumns=specificParams[eName]['intensityColumns'],
+			                     removalColumnsToSave=specificParams[eName]['removalColumnsToSave'],
+			                     noMissingValuesColumns=specificParams[eName]['noMissingValuesColumns'])
+			setCollapseColumnsToSave(
+				specificParams[eName]['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
 			""" Data processing """
 			processingResultsDumpFilename = path.relpath(path.join(specificParams[eName]['path_out'], path.pardir))+'/processingResultsDump_'+str(eName)
 			if doProcessing:
