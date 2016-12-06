@@ -370,11 +370,11 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	if not testing:
 		for eName in experimentNames:
 			# define global parameters
-			setProcessingGlobals(intensityColumns=specificParams[eName]['intensityColumns'],
-			                     removalColumnsToSave=specificParams[eName]['removalColumnsToSave'],
-			                     noMissingValuesColumns=specificParams[eName]['noMissingValuesColumns'])
-			setCollapseColumnsToSave(
-				specificParams[eName]['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
+			# setProcessingGlobals(intensityColumns=specificParams[eName]['intensityColumns'],
+			#                      removalColumnsToSave=specificParams[eName]['removalColumnsToSave'],
+			#                      noMissingValuesColumns=specificParams[eName]['noMissingValuesColumns'])
+			# setCollapseColumnsToSave(
+			# 	specificParams[eName]['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
 			""" Data processing """
 			processingResultsDumpFilename = path.relpath(path.join(specificParams[eName]['path_out'], path.pardir))+'/processingResultsDump_'+str(eName)
 			if doProcessing:

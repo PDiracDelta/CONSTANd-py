@@ -22,19 +22,19 @@ import numpy as np
 from warnings import warn
 from pandas import Series
 
-intensityColumns = None
-removalColumnsToSave = None
-noMissingValuesColumns = None
-
-
-def setProcessingGlobals(intensityColumns, removalColumnsToSave, noMissingValuesColumns):
-	"""
-	Sets the value of the global variable intensityColumns for use in the module functions.
-	:param intensityColumns: list   names of the columns that contain the MS2 intensities
-	"""
-	globals()['intensityColumns'] = intensityColumns
-	globals()['removalColumnsToSave'] = removalColumnsToSave
-	globals()['noMissingValuesColumns'] = noMissingValuesColumns
+# intensityColumns = None
+# removalColumnsToSave = None
+# noMissingValuesColumns = None
+#
+#
+# def setProcessingGlobals(intensityColumns, removalColumnsToSave, noMissingValuesColumns):
+# 	"""
+# 	Sets the value of the global variable intensityColumns for use in the module functions.
+# 	:param intensityColumns: list   names of the columns that contain the MS2 intensities
+# 	"""
+# 	globals()['intensityColumns'] = intensityColumns
+# 	globals()['removalColumnsToSave'] = removalColumnsToSave
+# 	globals()['noMissingValuesColumns'] = noMissingValuesColumns
 
 
 def removeObsoleteColumns(df, wantedColumns):
@@ -147,7 +147,7 @@ def undoublePSMAlgo(df, identifyingNodes, exclusive):
 	byIdentifyingNodeDict = df.groupby('Identifying Node').groups # {Identifying Node : [list of indices]}
 	masterName = identifyingNodes['master'][0]
 	slaveScoreName = identifyingNodes['slaves'][0][1]
-	columnsToSave = [slaveScoreName] + removalColumnsToSave
+	columnsToSave = [slaveScoreName] + removalColumnsToSaveintensityColumns
 	masterIndices = set(byIdentifyingNodeDict[masterName])
 	toDelete = set(df.index.values).difference(masterIndices)  # all indices of detections not done by MASTER
 	if not exclusive:  # remove unique SLAVE scans from the toDelete list
