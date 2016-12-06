@@ -244,7 +244,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	dfs = dict((eName, result[0]) for eName, result in processingResultsItems)
 	normalizedIntensitiess = dict((eName, result[1]) for eName, result in processingResultsItems)
 	removedDatas = dict((eName, result[2]) for eName, result in processingResultsItems)
-	noCorrectionIndicess = dict((eName, result[2]) for eName, result in processingResultsItems)
+	noCorrectionIndicess = dict((eName, result[3]) for eName, result in processingResultsItems)
 
 	# normalizedDf = dfs[0]
 	# normalizedIntensities = normalizedIntensitiess[0]
