@@ -99,8 +99,9 @@ def getProteinPeptidesDicts(df):
 def getProteinDF(df, proteinPeptidesDict, schema):
 	# todo docu
 	#proteinDF = pd.DataFrame([list(proteinPeptidesDict.keys())].extend([[None, ]*len(proteinPeptidesDict.keys()), ]*3),
-	proteinDF = pd.DataFrame(list(proteinPeptidesDict.keys()),
-	                         columns=['protein', 'peptides', 'description', 'condition 1', 'condition 2']).set_index('protein')
+	proteinDFColumns = ['protein', 'peptides', 'description', 'condition 1', 'condition 2']
+	proteinDF = pd.DataFrame([list(proteinPeptidesDict.keys())].extend([[None], ]*len(proteinDFColumns)),
+	                         columns=proteinDFColumns).set_index('protein')
 	# define intensityColumnsPerConditionDict so that it contains the channels of ALL experiments
 	channelAliasesPerConditionDict = dict((eName, experiment['channelAliasesPerCondition']) for eName, experiment in schema.items())
 	for protein, peptideIndices in proteinPeptidesDict.items():
