@@ -169,15 +169,15 @@ def getPCA(intensities, nComponents):
 	"""
 	Returns the nComponents Principal scores for the transposed intensity matrix. This means the reporter channels
 	are "observations" with each protein intensity as a variable/attribute. The fast randomized method by Halko et al.
-	(2009) is used for calculating the SVD. Missing values are imputed to be 1/N.
+	(2009) is used for calculating the SVD. Missing values are thrown away.
 	:param intensities: np.ndarray  MxN ndarray with intensities
 	:param nComponents: int         number of PC to keep
 	:return:            np.ndarray  principal component scores of the input intensities
 	"""
 	pca = PCA(n_components=nComponents, svd_solver='randomized')
-	imputedTransposedIntensities = np.asarray(pd.DataFrame(intensities).fillna(1/intensities.shape[1])).T
-	pca.fit(imputedTransposedIntensities)
-	return pca.transform(imputedTransposedIntensities)
+	transposedIntensitiesNoNaN = intensities[~np.isnan(intensities).any(axis=1)].T
+	pca.fit(transposedIntensitiesNoNaN)
+	return pca.transform(transposedIntensitiesNoNaN)
 
 
 def getHC(intensities):
