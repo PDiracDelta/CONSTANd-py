@@ -48,7 +48,7 @@ def removeObsoleteColumns(df, wantedColumns):
 	return df.drop(list(obsolete), axis=1)
 
 
-def removeMissing(df):
+def removeMissing(df, noMissingValuesColumns):
 	"""
 	Removes detections for which entries in essential columns is missing, or which have no quan values or labels.
 	:param df:  pd.dataFrame    with missing values
@@ -71,7 +71,7 @@ def removeMissing(df):
 	return df, removedData
 
 
-def removeBadConfidence(df, minimum):
+def removeBadConfidence(df, minimum, removalColumnsToSave):
 	"""
 	Removes detections from the input dataFrame if they have a confidence level worse than the given minimum. Saves some
 	info about data with lower than minimum confidence levels in removedData.
@@ -93,7 +93,7 @@ def removeBadConfidence(df, minimum):
 	return df, removedData
 
 
-def removeIsolationInterference(df, threshold):
+def removeIsolationInterference(df, threshold, removalColumnsToSave):
 	"""
 	Remove the data where there is too much isolation interference (above threshold) and return the remaining dataFrame
 	along with info about the deletions.
@@ -133,7 +133,7 @@ def setMasterProteinDescriptions(df):
 	return df
 
 
-def undoublePSMAlgo(df, identifyingNodes, exclusive):
+def undoublePSMAlgo(df, identifyingNodes, exclusive, intensityColumns, removalColumnsToSave):
 	"""
 	Removes redundant data due to different PSM algorithms producing the same peptide match. The 'master' algorithm
 	values are preferred over the 'slave' algorithm values, the latter whom are removed and have their basic information
@@ -147,7 +147,7 @@ def undoublePSMAlgo(df, identifyingNodes, exclusive):
 	byIdentifyingNodeDict = df.groupby('Identifying Node').groups # {Identifying Node : [list of indices]}
 	masterName = identifyingNodes['master'][0]
 	slaveScoreName = identifyingNodes['slaves'][0][1]
-	columnsToSave = [slaveScoreName] + removalColumnsToSaveintensityColumns
+	columnsToSave = [slaveScoreName] + removalColumnsToSave + intensityColumns
 	masterIndices = set(byIdentifyingNodeDict[masterName])
 	toDelete = set(df.index.values).difference(masterIndices)  # all indices of detections not done by MASTER
 	if not exclusive:  # remove unique SLAVE scans from the toDelete list
@@ -189,7 +189,7 @@ def isotopicCorrection(intensities, correctionsMatrix):
 	return np.asarray(correctedIntensities), noCorrectionIndices
 
 
-def getIntensities(df, indices=None, intensityColumns=globals()['intensityColumns']):
+def getIntensities(df, intensityColumns, indices=None):
 	"""
 	Extracts the (absolute) intensity matrix from the dataFrame.
 	:param df:              pd.dataFrame or pd.Series   Pandas dataFrame/Series from which to extract the intensities
@@ -206,13 +206,14 @@ def getIntensities(df, indices=None, intensityColumns=globals()['intensityColumn
 		return np.asarray(df.loc[indices, intensityColumns])
 
 
-def setIntensities(df, intensities):
+def setIntensities(df, intensities, intensityColumns):
 	"""
 	Sets the intensities of the dataFrame at the specified location equal to the array of given intensities, at the
 	specified locations if a dict is provided instead of an array.
 	:param df:              pd.dataFrame    input dataFrame
 	:param intensities:     np.ndarray      matrix with MS2 intensities
 							dict            dict {index:[values]} with index and values of all df entries to be modified
+	:param intensityColumns:list            the columns of the df that contain the intensities
 	:return df:             pd.dataFrame    output dataFrame with updated intensities
 	"""
 	if isinstance(intensities, np.ndarray):
