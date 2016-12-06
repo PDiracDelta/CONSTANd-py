@@ -370,8 +370,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	if not testing:
 		for eName in experimentNames:
 			# define global parameters
-			setProcessingGlobals(intensityColumns=specificParams[eName]['intensityColumns'],  # TEST # todo
-			                     # intensityColumns=specificParams[eName]['intensityColumns'],
+			setProcessingGlobals(intensityColumns=specificParams[eName]['intensityColumns'],
 			                     removalColumnsToSave=specificParams[eName]['removalColumnsToSave'],
 			                     noMissingValuesColumns=specificParams[eName]['noMissingValuesColumns'])
 			setCollapseColumnsToSave(
