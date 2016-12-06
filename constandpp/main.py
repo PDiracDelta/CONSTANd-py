@@ -247,11 +247,12 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	experimentNames = processingResults.keys()
 	# contains statistics and metadata (like the parameters) about the analysis.
 	metadata = {}
-	# record detections without isotopic correction applied applied
-	metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for eName in experimentNames]) # todo add experiment column
-	# record RT isolation statistics. Future: flag
-	metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for eName in experimentNames]) # todo add experiment column
-	# TODO effectively implement multiple experiment analysis beyond this point
+	# record detections without isotopic correction applied applied. Multi-indexed on experiment names and old indices!
+	metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for
+	                                              eName in experimentNames], keys=experimentNames)
+	# record RT isolation statistics. Future: flag. Multi-indexed on experiment names and old indices!
+	metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for
+	                                         eName in experimentNames], keys=experimentNames)
 
 	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe # and intensityColumns are unique and distinguishable
 	allExperimentsDF = combineExperimentDFs(dfs) #, params['schema'])
@@ -275,10 +276,10 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	minProteinDF = applySignificance(minProteinDF, params['alpha'], params['FCThreshold'])
 	fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
 
-	# perform PCA
+	# perform PCA # todo multiple experiments
 	PCAResult = getPCA(getIntensities(allExperimentsDF, intensityColumns=), params['PCA_components'])
 
-	# perform hierarchical clustering
+	# perform hierarchical clustering # todo multiple experiments
 	HCResult = getHC(getIntensities(allExperimentsDF))
 
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
