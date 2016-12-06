@@ -359,7 +359,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	specificParams = {} # specific params for each experiment
 	dfs = {}
 	processingResults = {}
-	experimentNames = masterParams['schema'].keys()
+	experimentNames = list(masterParams['schema'].keys())
 	for eName in experimentNames:
 		# get all input parameters
 		specificParams[eName] = getInput(masterParams['schema'][eName]['config'])
