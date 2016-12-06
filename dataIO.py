@@ -75,9 +75,18 @@ def fixFixableFormatMistakes(df):
 	return df
 
 
-def applyWrapper(df, wrapper):
-	# todo
-	return df
+def applyWrapper(columns, wrapper):
+	"""
+	Takes a Nx2 tuple wrapper and transforms the columns in the dataframe df specified by the first column entries
+	in wrapper into the new column name specified by the second colmumn entries in wrapper.
+	:param columns:     pd.Index        old column names
+	:param wrapper:     list(tuples)    [(oldName, newName) for some columns]
+	:return newColumns: pd.Index        transformed column names
+	"""
+	newColumns = list(columns.values)
+	for (old, new) in wrapper:
+		newColumns[newColumns.index(old)] = new
+	return newColumns
 
 
 def getDataFrame(path_in, delim=None, header=0, wrapper=None):
@@ -89,7 +98,7 @@ def getDataFrame(path_in, delim=None, header=0, wrapper=None):
 	:return:            pd.DataFrame    ready-to-use data
 	"""
 	df = importDataFrame(path_in, delim=delim, header=header)
-	df = applyWrapper(df, wrapper) #todo
+	df.columns = applyWrapper(df.columns, wrapper) #todo
 	df = fixFixableFormatMistakes(df)
 	return df
 
