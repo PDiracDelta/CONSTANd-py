@@ -145,15 +145,18 @@ def collapse(toCollapse, df, method, maxRelativeReporterVariance, identifyingNod
 		dataFrame df --	for each sublist into one new row of intensities for the representative that is to be their
 		replacement. This function should also flag cases where the variance between the intensities (calculated per
 		reporter channel) exceeds a maxRelativeReporterVariance.
-		:param this_duplicateLists: list    { bestIndex : [group of duplicate indices}
-		:param centerMeasure:       str     specifies the method of combination
-		:return newIntensitiesDict: dict    { bestIndex : new intensities of the representative detection }
+		:param this2_bestIndicesDict:   list    { bestIndex : [group of duplicate indices}
+		:param centerMeasure:           str     specifies the method of combination
+		:return newIntensitiesDict:     dict    { bestIndex : new intensities of the representative detection }
 		"""
 		flagMaxRelativeReporterVariance = False
 		newIntensitiesDict = {}
 		for bestIndex, this_duplicatesList in this2_bestIndicesDict.items():
 			# calculate the total MS2 intensities for each duplicate
 			allMS2Intensities = getIntensities(df, this_duplicatesList)
+
+			if allMS2Intensities is None: # TEST
+				print('hoi')
 
 			if flagMaxRelativeReporterVariance:  # TODO flag when maxRelativeReporterVariance is exceeded
 				# this can only be consistent if executed on RELATIVE intensities.
