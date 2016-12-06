@@ -284,7 +284,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
 
 	# perform PCA # todo multiple experiments (its now inter-experimental only?)
-	allChannelAliases = [unnest(experiments['channelAliasesPerCondition']) for experiments in params['schema'].values()]
+	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in params['schema'].values()])
 	PCAResult = getPCA(getIntensities(allExperimentsDF, intensityColumns=allChannelAliases), params['PCA_components'])
 
 	# perform hierarchical clustering # todo multiple experiments (its now inter-experimental only?)
