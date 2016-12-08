@@ -34,9 +34,20 @@ def distinguishableColours(n, type='prism'):
 
 
 def getColours(schema):
-	channelsPerConditionForAllExperiments = [len(condition) for experiment in schema.values() for condition in experiment['intensityColumnsPerCondition']]
-	distColours = distinguishableColours(len(channelsPerConditionForAllExperiments))
-	return unnest([[c] * n for c, n in zip(distColours, channelsPerConditionForAllExperiments)])
+	"""
+	Returns list of colours for all the channels in all experiments (based on schema) so that the channels of the same
+	condition have the same marker.
+	:param schema:  dict    schema of the experiments
+	:return:        list    colours per condition (markers differ only across conditions)
+	"""
+	channelsPerConditionForAllExperiments = [[len(condition) for condition in experiment['intensityColumnsPerCondition']]
+	                                         for experiment in schema.values()]
+
+	numConditions = len(schema[schema.values()[0]]['intensityColumnsPerCondition'])
+	distColours = distinguishableColours(numConditions)
+
+	colours = [np.repeat(distColours, numChannelsPerCondition) for numChannelsPerCondition in channelsPerConditionForAllExperiments]
+	return colours
 
 
 def distinguishableMarkers(n):
@@ -149,8 +160,8 @@ def getPCAPlot(PCAResult, schema):
 	plt.ylabel('Second PC', figure=PCAPlot)
 
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
-
-
+	colors = getColours(schema)
+	markers = getMarkers(schema)
 	# labels for annotation
 	intensityColumns = [item for sublist in schema for item in sublist]
 	# produce scatterplot and annotate
