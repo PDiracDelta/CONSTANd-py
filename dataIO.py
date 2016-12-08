@@ -49,6 +49,15 @@ def getIsotopicCorrectionsMatrix(path_in='ICM_default.tsv'):
 	return np.asmatrix(importDataFrame(path_in,delim='\t', header=None)).astype('float64') # make sure its float64
 
 
+def getWrapper(path_in='wrapper.tsv'):
+	"""
+	Reads the wrapper from a file on disk through importDataFrame, and returns it as a list of tuples.
+	:param path_in: str            path of the wrapper file
+	:return :       nested list    wrapper specifying column name transformations
+	"""
+	return list(importDataFrame(path_in, header=None).values)
+
+
 def parseSchema(schemaPath):
 	"""
 	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment
