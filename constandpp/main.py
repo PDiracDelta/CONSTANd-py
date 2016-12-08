@@ -146,6 +146,8 @@ def compareIntensitySN():
 	print(np.nanmean(np.nanmean(diff[:, 0:6], 1)))
 	print("max difference")
 	print(np.nanmax(np.nanmax(diff, 1)))
+
+	# TODO nakijken of hier geen fout gebeurt
 	MAPlot(relIntensities.reshape(relIntensities.size, 1), relSNs.reshape(relSNs.size, 1))
 
 
@@ -366,7 +368,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 		# get all input parameters
 		specificParams[eName] = getInput(masterParams['schema'][eName]['config'])
 		# get the dataframes
-		wrapper = zip(unnest(masterParams['schema'][eName]['intensityColumnsPerCondition']), unnest(masterParams['schema'][eName]['channelAliasesPerCondition'])) # TEST # todo
+		wrapper = list(zip(unnest(masterParams['schema'][eName]['intensityColumnsPerCondition']), unnest(masterParams['schema'][eName]['channelAliasesPerCondition']))) # TEST # todo
 		dfs[eName] = getDataFrame(specificParams[eName]['file_in'], delim=specificParams[eName]['delim_in'], header=specificParams[eName]['header_in'], wrapper=wrapper)#specificParams[eName]['wrapper']) # todo
 
 	if not testing:
@@ -417,4 +419,4 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 
 if __name__ == '__main__':
-	sys.exit(main(masterConfigFilePath='masterConfig.ini', doProcessing=False, doAnalysis=True, doReport=True, testing=False, writeToDisk=False))
+	sys.exit(main(masterConfigFilePath='masterConfig.ini', doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=False))
