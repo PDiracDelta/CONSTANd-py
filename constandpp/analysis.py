@@ -183,22 +183,25 @@ def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 	"""
 	Takes a list of dataframes and selects only the sequence and intensities, then inner joins them on sequence.
 	The result is the intensity matrix with ALL experiment channels per peptide, for only the COMMON peptides i.e. those
-	peptides detected in ALL experiments.
+	peptides detected in ALL experiments. Also returns list of peptides that are not common for all experiments.
 	:param dfs:     list(pd.DataFrame)  data of the experiments
 	:param schema:  dict                schema of the experiments
 	:return:        np.ndarray          [e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN] for all COMMON peptides.
 	"""
 	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
-	pcadf = pd.DataFrame()
+	peptidesDf = pd.DataFrame()
 	# join all dataframes together on the Annotated Sequence: you get ALL channels from ALL experiments as columns per peptide.
 	# [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
+	allPeptides = []
 	for eName in dfs.keys():
-		if pcadf.empty:
-			pcadf = dfs[eName].loc[:, ['Annotated Sequence'] + allChannelAliases]
+		if peptidesDf.empty:
+			peptidesDf = dfs[eName].loc[:, ['Annotated Sequence'] + allChannelAliases]
+			allPeptides.extend(peptidesDf.loc[:, 'Annotated Sequence'])
 		else:
-			pcadf = pd.merge(pcadf, dfs[eName].loc[:, ['Annotated Sequence'] + allChannelAliases],
+			peptidesDf = pd.merge(peptidesDf, dfs[eName].loc[:, ['Annotated Sequence'] + allChannelAliases],
 			                 on='Annotated Sequence')
-	return getIntensities(pcadf, intensityColumns=allChannelAliases)
+	uncommon = dfs
+	return getIntensities(peptidesDf, intensityColumns=allChannelAliases) --> overzicht van #NaNs per channel! en hoeveel peptides er weggegooid worden.
 
 
 def getPCA(intensities, nComponents):
