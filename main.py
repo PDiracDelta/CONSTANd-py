@@ -338,8 +338,8 @@ def generateReport(analysisResults, params, writeToDisk):
 	                                               params['labelVolcanoPlotAreas'])
 	visualizationsDict['fullVolcano'] = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
 	                                                  params['labelVolcanoPlotAreas'])
-	visualizationsDict['pca'] = getPCAPlot(PCAResult, params['channelAliasesPerCondition']) # todo multiple experimenst
-	visualizationsDict['hcd'] = getHCDendrogram(HCResult, params['channelAliasesPerCondition']) # todo multiple experimenst
+	visualizationsDict['pca'] = getPCAPlot(PCAResult, params['schema']) # todo multiple experimenst
+	visualizationsDict['hcd'] = getHCDendrogram(HCResult, params['schema']) # todo multiple experimenst
 
 	# generate HTML and PDF reports # todo
 	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, visualizationsDict, metadata)
