@@ -369,7 +369,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 		specificParams[eName] = getInput(masterParams['schema'][eName]['config'])
 		# get the dataframes
 		# wrapper = list(zip(unnest(masterParams['schema'][eName]['intensityColumnsPerCondition']), unnest(masterParams['schema'][eName]['channelAliasesPerCondition']))) # TEST # todo
-		dfs[eName] = getDataFrame(specificParams[eName]['file_in'], delim=specificParams[eName]['delim_in'], header=specificParams[eName]['header_in'], wrapper=specificParams[eName]['wrapper'])#specificParams[eName]['wrapper']) # todo
+		dfs[eName] = getDataFrame(specificParams[eName]['file_in'], delim=specificParams[eName]['delim_in'], header=specificParams[eName]['header_in'], wrapper=specificParams[eName]['wrapper'])
 
 	if not testing:
 		for eName in experimentNames:
@@ -393,7 +393,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			else:
 				warn("No processing step performed nor processing file loaded for experiment "+str(eName)+"!")
 
-		""" Data analysis and visualization """
+		""" Data analysis """
 		analysisResultsDumpFilename = masterParams['path_out'] + '/analysisResultsDump'
 		if doAnalysis:
 			analysisResults = analyzeProcessingResult(processingResults, masterParams, writeToDisk)
@@ -406,7 +406,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 		else:
 			warn("No analysis step performed nor analysis file loaded!")
 
-		""" generate report """
+		""" Visualize and generate report """
 		if doReport:
 			generateReport(analysisResults, masterParams, writeToDisk)
 		else:
@@ -419,4 +419,4 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 
 if __name__ == '__main__':
-	sys.exit(main(masterConfigFilePath='masterConfig.ini', doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=False))
+	sys.exit(main(masterConfigFilePath='masterConfig.ini', doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=False))
