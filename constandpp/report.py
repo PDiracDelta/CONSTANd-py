@@ -80,7 +80,7 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	return volcanoPlot
 
 
-def getPCAPlot(PCAResult, intensityColumnsPerCondition):
+def getPCAPlot(PCAResult, schema):
 	# todo docu
 	# todo add experiment labels
 	PCAPlot = plt.figure(figsize=(6, 5))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
@@ -89,15 +89,15 @@ def getPCAPlot(PCAResult, intensityColumnsPerCondition):
 	plt.ylabel('Second PC', figure=PCAPlot)
 	# get distinguishable colours
 	cmap = plt.get_cmap('prism')  # brg, jet
-	nConditions = len(intensityColumnsPerCondition)  # number of TMT channels
+	nConditions = len(schema)  # number of TMT channels
 	distinguishableColors = cmap(np.linspace(0, 1.0, nConditions))
 	# generate colors vector so that the channels of the same condition have the same colour
 	colors = []
 	for condition in range(nConditions):  # for each condition a different color
-		for i in range(len(intensityColumnsPerCondition[condition])):  # add the color for each channel per condition
+		for i in range(len(schema[condition])):  # add the color for each channel per condition
 			colors.append(distinguishableColors[condition])
 	# labels for annotation
-	intensityColumns = [item for sublist in intensityColumnsPerCondition for item in sublist]
+	intensityColumns = [item for sublist in schema for item in sublist]
 	# produce scatterplot and annotate
 	for (x, y, color, label) in zip(PCAResult[:, 0], PCAResult[:, 1], colors, intensityColumns):
 		plt.scatter(x, y, color=color, figure=PCAPlot)  # plot first two principal components
