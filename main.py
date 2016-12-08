@@ -286,7 +286,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
 
 	# dataframe with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
-	allExperimentsIntensitiesPerCommonPeptide = getAllExperimentsIntensitiesPerCommonPeptide(dfs, params['schema'])
+	allExperimentsIntensitiesPerCommonPeptide, metadata['uncommonPeptides'] = getAllExperimentsIntensitiesPerCommonPeptide(dfs, params['schema'])
 	# perform PCA
 	PCAResult = getPCA(allExperimentsIntensitiesPerCommonPeptide, params['PCA_components'])
 	# perform hierarchical clustering
