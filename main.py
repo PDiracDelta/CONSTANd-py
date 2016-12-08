@@ -285,12 +285,12 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	minProteinDF = applySignificance(minProteinDF, params['alpha'], params['FCThreshold'])
 	fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
 
+	# dataframe with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
+	allExperimentsIntensitiesPerPeptideDF = getAllExperimentIntensitiesPerPeptide(dfs, params['schema'])
 	# perform PCA # todo multiple experiments (its now inter-experimental only?)
-	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in params['schema'].values()])
-	PCAResult = getPCA(getIntensities(allExperimentsDF, intensityColumns=allChannelAliases), params['PCA_components'])
-
+	PCAResult = getPCA(allExperimentsIntensitiesPerPeptideDF, params['PCA_components'])
 	# perform hierarchical clustering # todo multiple experiments (its now inter-experimental only?)
-	HCResult = getHC(getIntensities(allExperimentsDF, intensityColumns=allChannelAliases))
+	HCResult = getHC(allExperimentsIntensitiesPerPeptideDF)
 
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
 	handyColumnOrder = ['protein', 'significant', 'adjusted p-value', 'log2 fold change c1/c2', 'description', 'p-value', 'peptides', 'condition 1', 'condition 2']

@@ -8,6 +8,8 @@ Performs a differential expression analysis on the normalized intensities as pro
 
 import numpy as np
 import pandas as pd
+from main import unnest
+from dataproc import getIntensities
 from warnings import warn
 from collections import defaultdict
 from statsmodels.sandbox.stats.multicomp import multipletests
@@ -175,6 +177,28 @@ def applySignificance(df, alpha, FCThreshold):
 
 	df['significant'] = df.apply(significant, axis=1)
 	return df
+
+
+def getAllExperimentIntensitiesPerPeptide(dfs, schema):
+	"""
+	Takes a list of dataframes and selects only the sequence and intensities, then inner joins them on sequence.
+	The result is the intensity matrix with ALL experiment channels per peptide, for only the COMMON peptides i.e. those
+	peptides detected in ALL experiments.
+	:param dfs:     list(pd.DataFrame)  data of the experiments
+	:param schema:  dict                schema of the experiments
+	:return:        np.ndarray          [e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN] for all COMMON peptides.
+	"""
+	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
+	pcadf = pd.DataFrame()
+	# join all dataframes together on the Annotated Sequence: you get ALL channels from ALL experiments as columns per peptide.
+	# [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
+	for eName in dfs.keys():
+		if pcadf.empty:
+			pcadf = dfs[eName].loc[:, ['Annotated Sequence'] + allChannelAliases]
+		else:
+			pcadf = pd.merge(pcadf, dfs[eName].loc[:, ['Annotated Sequence'] + allChannelAliases],
+			                 on='Annotated Sequence')
+	return getIntensities(pcadf, intensityColumns=allChannelAliases)
 
 
 def getPCA(intensities, nComponents):
