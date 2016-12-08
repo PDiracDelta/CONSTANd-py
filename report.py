@@ -12,6 +12,7 @@ Functions involved in generating the report that includes:
 """
 import pandas as pd
 import numpy as np
+from main import unnest
 from warnings import warn
 from scipy.cluster.hierarchy import dendrogram
 from matplotlib import pyplot as plt
@@ -21,7 +22,7 @@ from matplotlib import markers
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
 
 
-def distColours(n, type='prism'):
+def distinguishableColours(n, type='prism'):
 	"""
 	Generates distinguishable colours in the format of a nConditionsx4 array.
 	:param nConditions: int         number of colours
@@ -32,7 +33,28 @@ def distColours(n, type='prism'):
 	return cmap(np.linspace(0, 1.0, n))
 
 
-def distMarkers(n):
+def getColours(schema):
+	experiments = list(schema.keys())  # names of experiments
+	nConditions = len(schema[experiments[0]]['intensityColumnsPerCondition'])  # number of conditions
+	# get distinguishable colours
+	distColours = distinguishableColours(nConditions * len(experiments))
+
+	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
+	colors = []
+	markers = []
+	colourCounter = 0
+	markerCounter = 0
+	for eName in experiments:
+		for c in range(nConditions):  # for each condition a different color
+			# add color #colourCounter as many times as there are channels for this condition in this experiment
+			colors.extend([distColours[colourCounter]] * len(schema[eName][c]))
+			colourCounter += 1
+			# add marker #markerCounter as many times as there are conditions in this experiment
+			markers.extend([distMarkers[markerCounter]])
+		markerCounter += 1
+
+
+def distinguishableMarkers(n):
 	"""
 	Returns a list of n (easily) distinguishable markers, or just visible markers if n is too large. If n is extremely
 	large, starts repeating markers.
@@ -58,6 +80,18 @@ def distMarkers(n):
 			return list(visibleMarkers.keys())*nRepetitions + list(visibleMarkers.keys())[0:nResidual]
 	else:
 		return [visibleMarkers[i] for i in easilyDistinguishable[0:n]]
+
+
+def getMarkers(schema):
+	"""
+	Returns list of markers for the channels in all experiments (based on schema) so that the channels of the same
+	experiment have the same marker.
+	:param schema:  dict    schema of the experiments
+	:return:        list    markers per channel (markers differ only across experiments)
+	"""
+	channelsPerExperiment = [len(unnest(experiment['intensityColumnsPerCondition'])) for experiment in schema.values()]
+	distMarkers = distinguishableMarkers(len(channelsPerExperiment))
+	return [[m]*n for m, n in zip(distMarkers, channelsPerExperiment)]
 
 
 def getSortedDifferentialProteinsDF(df):
@@ -123,24 +157,12 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 def getPCAPlot(PCAResult, schema):
 	# todo docu
 	# todo add experiment labels
+	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
 	PCAPlot = plt.figure(figsize=(6, 5))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	plt.title('Principal Component scores', figure=PCAPlot)
 	plt.xlabel('First PC', figure=PCAPlot)
 	plt.ylabel('Second PC', figure=PCAPlot)
-	experiments = list(schema.keys()) # names of experiments
-	nConditions = len(schema[experiments[0]]['intensityColumnsPerCondition'])  # number of conditions
-	# get distinguishable colours
-	distinguishableColors = distColours(nConditions)
-	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
-	colors = {}
-	markers = {}
-	for eName in range(len(experiments)): # todo implement multi experiment
-		markers[eName] = []
-		colors[eName] = []
-		for condition in range(nConditions):  # for each condition a different color
-			for i in range(len(schema[eName][condition])):  # add the color for each channel per condition
-				colors[eName].append(distinguishableColors[condition])
-				markers[eName].append(iets)
+
 
 	# labels for annotation
 	intensityColumns = [item for sublist in schema for item in sublist]
