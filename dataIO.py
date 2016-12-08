@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import pickle
 from os import path
+import re
 
 
 def importDataFrame(path_in, delim=None, header=0):
@@ -71,6 +72,11 @@ def fixFixableFormatMistakes(df):
 	# you've enabled "show flanking amino acids": DIRk --> [L].DIRk.[m]
 	if df.sample(n=1)['Annotated Sequence'].item().count('.') == 2: # sequence contains 2 dots
 		df['Annotated Sequence'] = df['Annotated Sequence'].apply(lambda x: x.split('.')[1]) # select part between dots
+
+	# you're using "Identifying Node" instead of "Identifying Node Type"
+	if 'Identifying Node' in df.columns.values and 'Identifying Node Type' not in df.columns.values:
+		# strip the everything after the last space (=node number between parentheses) + the last space.
+		df['Identifying Node Type'] = df['Identifying Node'].apply(lambda s: s.rsplit(' ', 1)[0])
 
 	return df
 
