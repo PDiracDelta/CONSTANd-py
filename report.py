@@ -36,7 +36,7 @@ def distinguishableColours(n, type='prism'):
 def getColours(schema):
 	channelsPerConditionForAllExperiments = [len(condition) for experiment in schema.values() for condition in experiment['intensityColumnsPerCondition']]
 	distColours = distinguishableColours(len(channelsPerConditionForAllExperiments))
-	return [[c] * n for c, n in zip(distColours, channelsPerConditionForAllExperiments)]
+	return unnest([[c] * n for c, n in zip(distColours, channelsPerConditionForAllExperiments)])
 
 
 def distinguishableMarkers(n):
@@ -76,7 +76,7 @@ def getMarkers(schema):
 	"""
 	channelsPerExperiment = [len(unnest(experiment['intensityColumnsPerCondition'])) for experiment in schema.values()]
 	distMarkers = distinguishableMarkers(len(channelsPerExperiment))
-	return [[m]*n for m, n in zip(distMarkers, channelsPerExperiment)]
+	return unnest([[m]*n for m, n in zip(distMarkers, channelsPerExperiment)])
 
 
 def getSortedDifferentialProteinsDF(df):
