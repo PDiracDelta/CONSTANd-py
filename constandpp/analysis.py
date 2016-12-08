@@ -37,9 +37,9 @@ def getNoIsotopicCorrection(df, noCorrectionIndices):
 	Given a dataframe and indices of detections that received no corrections, returns some basic info about them.
 	:param df:                  pd.dataFrame
 	:param noCorrectionIndices: list            indices of detections that received no isotopic correction
-	:return:                    pd.dataFrame    ['First Scan', 'Identifying Node', 'Annotated Sequence', 'Master Protein Accessions']
+	:return:                    pd.dataFrame    ['First Scan', 'Identifying Node Type', 'Annotated Sequence', 'Master Protein Accessions']
 	"""
-	return df.loc[noCorrectionIndices, ['First Scan', 'Identifying Node', 'Annotated Sequence', 'Master Protein Accessions']]
+	return df.loc[noCorrectionIndices, ['First Scan', 'Identifying Node Type', 'Annotated Sequence', 'Master Protein Accessions']]
 
 
 def combineExperimentDFs(dfs): #, schema):
