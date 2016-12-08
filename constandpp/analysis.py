@@ -211,9 +211,12 @@ def getPCA(intensities, nComponents):
 	:return:            np.ndarray  principal component scores of the input intensities
 	"""
 	pca = PCA(n_components=nComponents, svd_solver='randomized')
-	transposedIntensitiesNoNaN = intensities[~np.isnan(intensities).any(axis=1)].T
-	pca.fit(transposedIntensitiesNoNaN)
-	return pca.transform(transposedIntensitiesNoNaN)
+	# assign zero so that the PCA doesn't fail! This is OK, because NaN means that either the intensity was so low that
+	# it could not be detected, or it just wasn't present at all. Both cases: close to zero.
+	# ALSO this doesn't affect the row sums.
+	intensities[np.isnan(intensities)] = 0
+	pca.fit(intensities.T)
+	return pca.transform(intensities.T)
 
 
 def getHC(intensities):
