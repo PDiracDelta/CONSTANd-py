@@ -34,24 +34,9 @@ def distinguishableColours(n, type='prism'):
 
 
 def getColours(schema):
-	experiments = list(schema.keys())  # names of experiments
-	nConditions = len(schema[experiments[0]]['intensityColumnsPerCondition'])  # number of conditions
-	# get distinguishable colours
-	distColours = distinguishableColours(nConditions * len(experiments))
-
-	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
-	colors = []
-	markers = []
-	colourCounter = 0
-	markerCounter = 0
-	for eName in experiments:
-		for c in range(nConditions):  # for each condition a different color
-			# add color #colourCounter as many times as there are channels for this condition in this experiment
-			colors.extend([distColours[colourCounter]] * len(schema[eName][c]))
-			colourCounter += 1
-			# add marker #markerCounter as many times as there are conditions in this experiment
-			markers.extend([distMarkers[markerCounter]])
-		markerCounter += 1
+	channelsPerConditionForAllExperiments = [len(condition) for experiment in schema.values() for condition in experiment['intensityColumnsPerCondition']]
+	distColours = distinguishableColours(len(channelsPerConditionForAllExperiments))
+	return [[c] * n for c, n in zip(distColours, channelsPerConditionForAllExperiments)]
 
 
 def distinguishableMarkers(n):
@@ -162,6 +147,8 @@ def getPCAPlot(PCAResult, schema):
 	plt.title('Principal Component scores', figure=PCAPlot)
 	plt.xlabel('First PC', figure=PCAPlot)
 	plt.ylabel('Second PC', figure=PCAPlot)
+
+	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
 
 
 	# labels for annotation
