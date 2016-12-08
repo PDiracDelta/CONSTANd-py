@@ -15,6 +15,7 @@ import numpy as np
 from warnings import warn
 from scipy.cluster.hierarchy import dendrogram
 from matplotlib import pyplot as plt
+from matplotlib import markers
 #from adjustText import adjust_text
 
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
@@ -29,6 +30,34 @@ def distColours(n, type='prism'):
 	"""
 	cmap = plt.get_cmap(type)  # brg, jet
 	return cmap(np.linspace(0, 1.0, n))
+
+
+def distMarkers(n):
+	"""
+	Returns a list of n (easily) distinguishable markers, or just visible markers if n is too large. If n is extremely
+	large, starts repeating markers.
+	:param n:   int     number of distinguishable markers
+	:return:    list    (easily) (distinguishable) markers
+	"""
+	easilyDistinguishable = ['o','s','x','*','v','d','+','^']
+	allMarkers = markers.MarkerStyle.markers
+	visibleMarkers = allMarkers
+	for k,v in allMarkers.items():
+		if v == 'nothing':
+			del visibleMarkers[k]
+
+	if n > len(easilyDistinguishable):
+		if n < len(visibleMarkers):
+			warn("More experiments than easily distinguishable markers; using all (visible) markers.")
+			return [visibleMarkers[list(allMarkers.keys())[i]] for i in range(n)]
+		else:
+			warn("More experiments than markers. Using all (visible) markers with possible repetitions!")
+			#number of times to re-use ALL visible markers
+			nRepetitions = np.mod(len(visibleMarkers), n)
+			nResidual = len(visibleMarkers) - n
+			return list(visibleMarkers.keys())*nRepetitions + list(visibleMarkers.keys())[0:nResidual]
+	else:
+		return [visibleMarkers[i] for i in easilyDistinguishable[0:n]]
 
 
 def getSortedDifferentialProteinsDF(df):
@@ -102,20 +131,22 @@ def getPCAPlot(PCAResult, schema):
 	nConditions = len(schema[experiments[0]]['intensityColumnsPerCondition'])  # number of conditions
 	# get distinguishable colours
 	distinguishableColors = distColours(nConditions)
-	# generate colors/shapes so that the channels of the same condition/experiment have the same colour/shape
+	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
 	colors = {}
-	shapes = {}
-	for experiment in range(len(experiments)):
-		shapes[experiment] = []
+	markers = {}
+	for eName in range(len(experiments)):
+		markers[eName] = []
+		colors[eName] = []
 		for condition in range(nConditions):  # for each condition a different color
-			for i in range(len(schema[experiment][condition])):  # add the color for each channel per condition
-				colors.append(distinguishableColors[condition])
+			for i in range(len(schema[eName][condition])):  # add the color for each channel per condition
+				colors[eName].append(distinguishableColors[condition])
+				markers[eName].append(eits)
 
 	# labels for annotation
 	intensityColumns = [item for sublist in schema for item in sublist]
 	# produce scatterplot and annotate
-	for (x, y, color, label) in zip(PCAResult[:, 0], PCAResult[:, 1], colors, intensityColumns):
-		plt.scatter(x, y, color=color, figure=PCAPlot)  # plot first two principal components
+	for (x, y, color, marker, label) in zip(PCAResult[:, 0], PCAResult[:, 1], colors[eName], markers[eName], intensityColumns):
+		plt.scatter(x, y, color=color, marker=marker, figure=PCAPlot)  # plot first two principal components
 		plt.annotate(label, xy=(x, y), xytext=(-1, 1),
 			textcoords='offset points', ha='right', va='bottom')
 	plt.show() # TEST
