@@ -168,7 +168,7 @@ def unnest(x):
 def processDf(df, params, writeToDisk):
 	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
 	# remove detections where (essential) data is missing.
-	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'])
+	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['intensityColumns'])
 	if params['removeBadConfidence_bool']:
 		df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'], params['removalColumnsToSave'])
 	# remove all useless columns from the dataFrame

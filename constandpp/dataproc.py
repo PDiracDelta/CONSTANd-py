@@ -48,7 +48,7 @@ def removeObsoleteColumns(df, wantedColumns):
 	return df.drop(list(obsolete), axis=1)
 
 
-def removeMissing(df, noMissingValuesColumns):
+def removeMissing(df, noMissingValuesColumns, intensityColumns):
 	"""
 	Removes detections for which entries in essential columns is missing, or which have no quan values or labels.
 	:param df:  pd.dataFrame    with missing values
@@ -60,9 +60,10 @@ def removeMissing(df, noMissingValuesColumns):
 		toDelete.extend(df.loc[df.loc[:, column].isnull(), :].index)
 	# delete all detections that have a missing value in both columns: XCorr and Ions Score
 	toDelete.extend(df.loc[[x and y for x, y in zip(df['XCorr'].isnull(), df['Ions Score'].isnull())]].index)
-	# delete all detections which have no quan values or no quan labels
-	toDelete.extend(df.loc[df['Quan Info'] == 'NoQuanValues'].index)
-	toDelete.extend(df.loc[df['Quan Info'] == 'NoQuanLabels'].index)
+	# get the indices of all detections which have no quan values at all (those have their nansum equal to zero)
+	noIntensitiesBool = np.nansum(getIntensities(df=df, intensityColumns=intensityColumns), axis=1) == 0.
+	toDelete.extend(df.index[noIntensitiesBool])
+
 	toDelete = np.unique(toDelete)
 	removedData = df.loc[toDelete]
 	if toDelete.size > 0:
