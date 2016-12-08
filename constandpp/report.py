@@ -20,6 +20,17 @@ from matplotlib import pyplot as plt
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
 
 
+def distColours(n, type='prism'):
+	"""
+	Generates distinguishable colours in the format of a nConditionsx4 array.
+	:param nConditions: int         number of colours
+	:param type:        str         specifier of which colourmap to use
+	:return:            np.ndarray  nConditionsx4 array
+	"""
+	cmap = plt.get_cmap(type)  # brg, jet
+	return cmap(np.linspace(0, 1.0, n))
+
+
 def getSortedDifferentialProteinsDF(df):
 	"""
 	Sorts the differential protein data according to absolute fold change and resets the index. Returns only the columns
@@ -87,15 +98,19 @@ def getPCAPlot(PCAResult, schema):
 	plt.title('Principal Component scores', figure=PCAPlot)
 	plt.xlabel('First PC', figure=PCAPlot)
 	plt.ylabel('Second PC', figure=PCAPlot)
+	experiments = list(schema.keys()) # names of experiments
+	nConditions = len(schema[experiments[0]]['intensityColumnsPerCondition'])  # number of conditions
 	# get distinguishable colours
-	cmap = plt.get_cmap('prism')  # brg, jet
-	nConditions = len(schema)  # number of TMT channels
-	distinguishableColors = cmap(np.linspace(0, 1.0, nConditions))
-	# generate colors vector so that the channels of the same condition have the same colour
-	colors = []
-	for condition in range(nConditions):  # for each condition a different color
-		for i in range(len(schema[condition])):  # add the color for each channel per condition
-			colors.append(distinguishableColors[condition])
+	distinguishableColors = distColours(nConditions)
+	# generate colors/shapes so that the channels of the same condition/experiment have the same colour/shape
+	colors = {}
+	shapes = {}
+	for experiment in range(len(experiments)):
+		shapes[experiment] = []
+		for condition in range(nConditions):  # for each condition a different color
+			for i in range(len(schema[experiment][condition])):  # add the color for each channel per condition
+				colors.append(distinguishableColors[condition])
+
 	# labels for annotation
 	intensityColumns = [item for sublist in schema for item in sublist]
 	# produce scatterplot and annotate
