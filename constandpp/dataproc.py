@@ -39,7 +39,7 @@ from pandas import Series
 
 def removeObsoleteColumns(df, wantedColumns):
 	"""
-	Returns a dataFrame with only the specified columns of the input dataFrame.
+	Returns a dataFrame with only the specified columns of the input dataFrame, IF they exist.
 	:param df:                  pd.dataFrame    input dataFrame
 	:param wantedColumns:       list            specified columns
 	:return:                    pd.dataFrame    dataFrame with only the specified columns of the input dataFrame
