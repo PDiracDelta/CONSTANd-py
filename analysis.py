@@ -179,7 +179,7 @@ def applySignificance(df, alpha, FCThreshold):
 	return df
 
 
-def getAllExperimentIntensitiesPerPeptide(dfs, schema):
+def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 	"""
 	Takes a list of dataframes and selects only the sequence and intensities, then inner joins them on sequence.
 	The result is the intensity matrix with ALL experiment channels per peptide, for only the COMMON peptides i.e. those
@@ -205,7 +205,7 @@ def getPCA(intensities, nComponents):
 	"""
 	Returns the nComponents Principal Component scores for the transposed intensity matrix. This means the reporter
 	channels are "observations" with each protein intensity as a variable/attribute. The fast randomized method by Halko
-	et al. (2009) is used for calculating the SVD. Missing values are thrown away.
+	et al. (2009) is used for calculating the SVD. NaN values are converted to zero!!!
 	:param intensities: np.ndarray  MxN ndarray with intensities
 	:param nComponents: int         number of PC to keep
 	:return:            np.ndarray  principal component scores of the input intensities
@@ -224,11 +224,15 @@ def getHC(intensities):
 	Perform hierarchical clustering on the transposed intensity matrix, with nComponents principal components.
 	This means the reporter channels are "observations" with each protein intensity as a variable/attribute.
 	Returns the (NxN) linkage matrix describing the distances between each observation (reporter channel) according to
-	the UPGMA algorithm. Peptides with NaN values are removed from the data!!!
+	the UPGMA algorithm. NaN values are converted to zero!!!
 	See https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html for more information.
 	:param intensities: np.ndarray  MxN ndarray with intensities
 	:param nClusters:   int         number of clusters we want to find (= number of conditions in the experiment(s))
 	:return:            np.ndarray  Nx4 linkage matrix
 	"""
-	condensedDistanceMatrix = pdist(intensities[~np.isnan(intensities).any(axis=1)].T) # remove nans and transpose
+	# assign zero so that the PCA doesn't fail! This is OK, because NaN means that either the intensity was so low that
+	# it could not be detected, or it just wasn't present at all. Both cases: close to zero.
+	# ALSO this doesn't affect the row sums.
+	intensities[np.isnan(intensities)] = 0
+	condensedDistanceMatrix = pdist(intensities.T) # remove nans and transpose
 	return linkage(condensedDistanceMatrix, method='average') # 'average'=UPGMA
