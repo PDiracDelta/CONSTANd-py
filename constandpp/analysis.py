@@ -203,9 +203,9 @@ def getAllExperimentIntensitiesPerPeptide(dfs, schema):
 
 def getPCA(intensities, nComponents):
 	"""
-	Returns the nComponents Principal scores for the transposed intensity matrix. This means the reporter channels
-	are "observations" with each protein intensity as a variable/attribute. The fast randomized method by Halko et al.
-	(2009) is used for calculating the SVD. Missing values are thrown away.
+	Returns the nComponents Principal Component scores for the transposed intensity matrix. This means the reporter
+	channels are "observations" with each protein intensity as a variable/attribute. The fast randomized method by Halko
+	et al. (2009) is used for calculating the SVD. Missing values are thrown away.
 	:param intensities: np.ndarray  MxN ndarray with intensities
 	:param nComponents: int         number of PC to keep
 	:return:            np.ndarray  principal component scores of the input intensities
