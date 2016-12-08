@@ -134,13 +134,13 @@ def getPCAPlot(PCAResult, schema):
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
 	colors = {}
 	markers = {}
-	for eName in range(len(experiments)):
+	for eName in range(len(experiments)): # todo implement multi experiment
 		markers[eName] = []
 		colors[eName] = []
 		for condition in range(nConditions):  # for each condition a different color
 			for i in range(len(schema[eName][condition])):  # add the color for each channel per condition
 				colors[eName].append(distinguishableColors[condition])
-				markers[eName].append(eits)
+				markers[eName].append(iets)
 
 	# labels for annotation
 	intensityColumns = [item for sublist in schema for item in sublist]
