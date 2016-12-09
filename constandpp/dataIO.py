@@ -109,7 +109,11 @@ def constructMasterConfigContents(schemaDict, otherMasterParams): # todo move to
 	contents['schema'] = dumps(schemaDict)
 	for k, v in otherMasterParams.items():
 		if isinstance(v, str) or isNumeric(v):
-			contents[k] = v
+			if k.split('_')[0] == 'delim': # delimiters should be saved in a visible format
+				from codecs import getencoder as ge
+				contents[k] = ge("unicode_escape")(v)[0]
+			else: # not a delimiter
+				contents[k] = v
 		else:
 			contents[k] = dumps(v)
 
@@ -120,10 +124,10 @@ def writeConfig(filePath, contents):
 	file = open(filePath, 'w')
 	config = configparser.ConfigParser()
 	section = 'DEFAULT'
-	config.add_section(section)
+	# config.add_section(section)
 	for k, v in contents.items():
 		config.set(section, k, v)
-	config.write()
+	config.write(file)
 	file.close()
 
 
