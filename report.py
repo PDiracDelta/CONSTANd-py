@@ -60,7 +60,7 @@ def distinguishableMarkers(n):
 	easilyDistinguishable = ['o','s','x','*','v','d','+','^']
 	allMarkers = markers.MarkerStyle.markers
 	visibleMarkers = allMarkers
-	for k,v in allMarkers.items():
+	for k,v in list(allMarkers.items()):
 		if v == 'nothing':
 			del visibleMarkers[k]
 
