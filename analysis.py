@@ -8,7 +8,7 @@ Performs a differential expression analysis on the normalized intensities as pro
 
 import numpy as np
 import pandas as pd
-from main import unnest
+from dataIO import unnest
 from dataproc import getIntensities
 from warnings import warn
 from collections import defaultdict
