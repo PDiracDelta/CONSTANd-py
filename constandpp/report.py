@@ -64,18 +64,18 @@ def distinguishableMarkers(n):
 		if v == 'nothing':
 			del visibleMarkers[k]
 
-	if n > len(easilyDistinguishable):
-		if n < len(visibleMarkers):
+	if n > len(easilyDistinguishable): # not enough distinguishable markers
+		if n < len(visibleMarkers): # enough visible markers
 			warn("More experiments than easily distinguishable markers; using all (visible) markers.")
-			return [visibleMarkers[list(allMarkers.keys())[i]] for i in range(n)]
-		else:
+			return [list(allMarkers.keys())[i] for i in range(n)]
+		else: # not enough markers at all
 			warn("More experiments than markers. Using all (visible) markers with possible repetitions!")
 			#number of times to re-use ALL visible markers
 			nRepetitions = np.mod(len(visibleMarkers), n)
 			nResidual = len(visibleMarkers) - n
 			return list(visibleMarkers.keys())*nRepetitions + list(visibleMarkers.keys())[0:nResidual]
-	else:
-		return [visibleMarkers[i] for i in easilyDistinguishable[0:n]]
+	else: # have enough distinguishable markers for the n experiments
+		return easilyDistinguishable[0:n]
 
 
 def getMarkers(schema):
