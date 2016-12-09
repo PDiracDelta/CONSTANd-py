@@ -357,6 +357,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	"""
 	start = time()
 	masterParams = getMasterInput(masterConfigFilePath) # config filenames + params for the combination of experiments
+	masterParams['schema'] = parseSchemaFile('../web/schemaTemplate6.tsv') # TEST
 	specificParams = {} # specific params for each experiment
 	dfs = {}
 	processingResults = {}
