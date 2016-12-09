@@ -8,7 +8,7 @@ Handle all I/O of data files and parameters to and from both the workflow and th
 import pandas as pd
 import numpy as np
 import pickle
-import configParser
+import configparser
 from json import dumps
 from os import path
 import re
@@ -118,7 +118,7 @@ def constructMasterConfigContents(schemaDict, otherMasterParams): # todo move to
 
 def writeConfig(filePath, contents):
 	file = open(filePath, 'w')
-	config = configParser.ConfigParser()
+	config = configparser.ConfigParser()
 	section = 'DEFAULT'
 	config.add_section(section)
 	for k, v in contents.items():
