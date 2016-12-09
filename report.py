@@ -146,13 +146,12 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 			for x, y, label in zip(xdata, ydata, labels):
 				plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points', ha='right', va='bottom')
 
-	plt.show() # TEST
+	#plt.show() # TEST
 	return volcanoPlot
 
 
 def getPCAPlot(PCAResult, schema):
 	# todo docu
-	# todo add experiment labels
 	PCAPlot = plt.figure(figsize=(6, 5))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	plt.title('Principal Component scores', figure=PCAPlot)
 	plt.xlabel('First PC', figure=PCAPlot)
@@ -163,24 +162,26 @@ def getPCAPlot(PCAResult, schema):
 	markersPerExperiment = getMarkers(schema)
 	# labels for annotation
 	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
-	# produce scatterplot of two first principal components and annotate
+	#xmin, xmax, ymin, ymax = min(PCAResult[:, 0]), max(PCAResult[:, 0]), min(PCAResult[:, 1]), max(PCAResult[:, 1])
 	for (x, y, color, marker, label) in zip(PCAResult[:, 0], PCAResult[:, 1], colorsPerCondition, markersPerExperiment, allChannelAliases):
+		# produce scatterplot of two first principal components and annotate
 		plt.scatter(x, y, color=color, marker=marker, figure=PCAPlot)
 		plt.annotate(label, xy=(x, y), xytext=(-1, 1),
 			textcoords='offset points', ha='right', va='bottom')
+	#plt.axhspan(xmin=xmin-0.1(xmax-xmin), ymax=ymax+0.05*(ymax-ymin))
 	plt.show() # TEST
 	return PCAPlot
 
 
-def getHCDendrogram(HCResult, intensityColumnsPerCondition):
+def getHCDendrogram(HCResult, schema):
 	# todo docu
 	# hierarchical clustering dendrogram
-	intensityColumns = [item for sublist in intensityColumnsPerCondition for item in sublist]
+	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
 	HCDendrogram = plt.figure(figsize=(6, 5)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	plt.title('Hierarchical Clustering Dendrogram', figure=HCDendrogram)
 	plt.xlabel('reporter channel', figure=HCDendrogram)
 	plt.ylabel('distance', figure=HCDendrogram)
-	dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12, labels=intensityColumns)
+	dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12, labels=allChannelAliases)
 	plt.show()  # TEST
 	return HCDendrogram
 
