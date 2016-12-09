@@ -144,9 +144,9 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	                              [labelsYES, labelsP, labelsFC, labelsNO]):
 		if labelPlotBool:
 			for x, y, label in zip(xdata, ydata, labels):
-				plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points [visibleMarkers[i] for i in', ha='right', va='bottom')
+				plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points', ha='right', va='bottom')
 
-	# plt.show() # TEST
+	plt.show() # TEST
 	return volcanoPlot
 
 
@@ -181,8 +181,8 @@ def getHCDendrogram(HCResult, intensityColumnsPerCondition):
 	plt.xlabel('reporter channel', figure=HCDendrogram)
 	plt.ylabel('distance', figure=HCDendrogram)
 	dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12, labels=intensityColumns)
+	plt.show()  # TEST
 	return HCDendrogram
-	plt.show() # TEST
 
 
 def makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, diffMinFullProteins,
