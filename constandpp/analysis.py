@@ -194,10 +194,11 @@ def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 	# [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
 	allPeptides = []
 	for eName in dfs.keys():
+		eChannelAliases = unnest(schema[eName]['channelAliasesPerCondition'])
 		if peptidesDf.empty:
-			peptidesDf = dfs[eName].loc[:, ['Annotated Sequence'] + allChannelAliases]
+			peptidesDf = dfs[eName].loc[:, ['Annotated Sequence'] + eChannelAliases]
 		else:
-			peptidesDf = pd.merge(peptidesDf, dfs[eName].loc[:, ['Annotated Sequence'] + allChannelAliases],
+			peptidesDf = pd.merge(peptidesDf, dfs[eName].loc[:, ['Annotated Sequence'] + eChannelAliases],
 			                 on='Annotated Sequence')
 		allPeptides.extend(dfs[eName].loc[:, 'Annotated Sequence'])
 	uncommonPeptides = pd.DataFrame(list(set(allPeptides).difference(set(peptidesDf.loc[:, 'Annotated Sequence']))))

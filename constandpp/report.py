@@ -169,7 +169,7 @@ def getPCAPlot(PCAResult, schema):
 		plt.annotate(label, xy=(x, y), xytext=(-1, 1),
 			textcoords='offset points', ha='right', va='bottom')
 	#plt.axhspan(xmin=xmin-0.1(xmax-xmin), ymax=ymax+0.05*(ymax-ymin))
-	plt.show() # TEST
+	#plt.show() # TEST
 	return PCAPlot
 
 
