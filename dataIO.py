@@ -60,18 +60,19 @@ def getWrapper(path_in='wrapper.tsv'):
 
 def parseSchemaFile(schemaPath):
 	"""
-	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment.
+	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment. The
+	wrapper and config entries are set to None for now.
 	!!! the schema is NEVER to be changed after it has been first used !!!
 		" Keys and values are iterated over in an arbitrary order which is non-random, varies across Python implementations,
 		and depends on the dictionary’s history of insertions and deletions. If keys, values and items views are iterated
 		over with no intervening modifications to the dictionary, the order of items will directly correspond."
-	:param schemaPath:
-	:return:
+	:param schemaPath:              str     path to the schema file that the user uploaded
+	:return incompleteSchemaDict:   dict    schema in dict format, without config and wrapper information, in the format
+											{ experiment: { channels: [[channels] per condition], aliases: [[channels] per condition] }
 	"""
-	# todo proper docu
 	# import schema file as dataframe and replace nan values by empty strings
 	schemaDF = importDataFrame(schemaPath, delim='\t', header=None).replace(np.nan, '', regex=True)
-	schemaDict = {}
+	incompleteSchemaDict = {}
 	assert np.mod(len(schemaDF), 2) == 0 # schema must have even number of lines
 	for i in range(int(len(schemaDF)/2)):
 		thisRow = schemaDF.loc[2*i, :]
@@ -83,13 +84,14 @@ def parseSchemaFile(schemaPath):
 		if len(nextRow) == len(thisRow) and np.sum(nextRow == '') == 0:
 			channelAliasesPerCondition = [str(nextRow[c]).split(',') for c in range(1, numConditions+1)]
 		else: # aliases not (properly) provided
-			channelAliasesPerCondition = [[str(nextRow[0]) + '_' + channelName for channelName in condition]
+			shortExperimentName = str(nextRow[0])
+			channelAliasesPerCondition = [[shortExperimentName + '_' + channelName for channelName in condition]
 			                              for condition in intensityColumnsPerCondition]
 
-		schemaDict[experimentName] = {'intensityColumnsPerCondition': intensityColumnsPerCondition,
+		incompleteSchemaDict[experimentName] = {'intensityColumnsPerCondition': intensityColumnsPerCondition,
 		                              'channelAliasesPerCondition': channelAliasesPerCondition,
 		                              'config': None, 'wrapper': None}
-	return schemaDict
+	return incompleteSchemaDict
 
 
 def fixFixableFormatMistakes(df):
