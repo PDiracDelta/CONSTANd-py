@@ -111,7 +111,7 @@ def constructMasterConfigContents(schemaDict, otherMasterParams): # todo move to
 		if isinstance(v, str) or isNumeric(v):
 			if k.split('_')[0] == 'delim': # delimiters should be saved in a visible format
 				from codecs import getencoder as ge
-				contents[k] = ge("unicode_escape")(v)[0]
+				contents[k] = ge("unicode_escape")("\\"+v) # todo doesnt work
 			else: # not a delimiter
 				contents[k] = v
 		else:
