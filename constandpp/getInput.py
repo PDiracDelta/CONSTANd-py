@@ -171,6 +171,7 @@ def getMasterInput(masterConfigFilePath):
 
 	# get variables from config in correct typography
 	schema = parseExpression(config.get('DEFAULT', 'schema'))
+	path_in = config.get('DEFAULT', 'path_in')
 	pept2protCombinationMethod = config.get('DEFAULT', 'pept2protCombinationMethod')
 	alpha = config.getfloat('DEFAULT', 'alpha')
 	FCThreshold = config.getfloat('DEFAULT', 'FCThreshold')
@@ -187,6 +188,7 @@ def getMasterInput(masterConfigFilePath):
 	# assign
 	masterParams = {
 		'schema': schema,
+		'path_in': path_in,
 		'pept2protCombinationMethod': pept2protCombinationMethod,
 		'alpha': alpha,
 		'FCThreshold': FCThreshold,
