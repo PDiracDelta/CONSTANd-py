@@ -153,7 +153,6 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 def getPCAPlot(PCAResult, schema):
 	# todo docu
 	# todo add experiment labels
-	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
 	PCAPlot = plt.figure(figsize=(6, 5))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	plt.title('Principal Component scores', figure=PCAPlot)
 	plt.xlabel('First PC', figure=PCAPlot)
@@ -163,9 +162,9 @@ def getPCAPlot(PCAResult, schema):
 	colors = getColours(schema)
 	markers = getMarkers(schema)
 	# labels for annotation
-	intensityColumns = [item for sublist in schema for item in sublist]
+	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
 	# produce scatterplot and annotate
-	for (x, y, color, marker, label) in zip(PCAResult[:, 0], PCAResult[:, 1], colors[eName], markers[eName], intensityColumns):
+	for (x, y, color, marker, label) in zip(PCAResult[:, 0], PCAResult[:, 1], colors, markers, allChannelAliases):
 		plt.scatter(x, y, color=color, marker=marker, figure=PCAPlot)  # plot first two principal components
 		plt.annotate(label, xy=(x, y), xytext=(-1, 1),
 			textcoords='offset points', ha='right', va='bottom')
