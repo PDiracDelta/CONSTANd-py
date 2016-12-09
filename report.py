@@ -40,14 +40,14 @@ def getColours(schema):
 	:param schema:  dict    schema of the experiments
 	:return:        list    colours per condition (markers differ only across conditions)
 	"""
-	channelsPerConditionForAllExperiments = [[len(condition) for condition in experiment['intensityColumnsPerCondition']]
-	                                         for experiment in schema.values()]
-
 	numConditions = len(list(schema.values())[0]['intensityColumnsPerCondition'])
 	distColours = distinguishableColours(numConditions)
-
-	colours = [np.repeat(distColours, numChannelsPerCondition) for numChannelsPerCondition in channelsPerConditionForAllExperiments]
-	return colours
+	colours = []
+	for experiment in schema.values():
+		# repeat each channel's distColour as many times as there are channels in the current condition, and repeat for each experiment
+		conditions = experiment['channelAliasesPerCondition']
+		colours.append([np.tile(distColours[c], (len(conditions[c]),1)).tolist() for c in range(numConditions)])
+	return unnest(unnest(colours))
 
 
 def distinguishableMarkers(n):
@@ -146,7 +146,7 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 			for x, y, label in zip(xdata, ydata, labels):
 				plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points', ha='right', va='bottom')
 
-	plt.show() # TEST
+	# plt.show() # TEST
 	return volcanoPlot
 
 
