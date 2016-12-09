@@ -14,7 +14,7 @@ __maintainer__ = "Joris Van Houtven"
 __email__ = "vanhoutvenjoris@gmail.com"
 __status__ = "Development"
 
-import sys
+import sys, os, datetime
 from getInput import getInput, getMasterInput
 from constand import constand
 from time import time
@@ -416,5 +416,48 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	print(stop - start)
 
 
+def webFlow():
+	from shutil import copyfile
+	def newJobDir():
+		jobPath = os.path.join('../jobs', str(datetime.datetime.now()))
+		os.makedirs(jobPath)
+		return jobPath
+	def uploadSchema(this_job_path):
+		destination = os.path.join(this_job_path, os.path.basename('../web/schemaTemplate6.tsv'))
+		copyfile('../web/schemaTemplate6.tsv', destination)
+		return destination
+	def uploadFiles(this_job_path, incompleteSchema):
+		sourceFilePath = '../data/MB_noapostrophes.tsv'
+		destination = os.path.join(this_job_path, os.path.basename(sourceFilePath))
+		copyfile(sourceFilePath, destination)
+		sourceFilePath2 = '../data/MB_noapostrophes.tsv'
+		destination2 = os.path.join(this_job_path, os.path.basename(sourceFilePath2[0:-4]+'_bis'+sourceFilePath2[-4:0]))
+		return {incompleteSchema['human'].update({''})}
+
+	### STEP 1: get schema and create new job
+	job_path = newJobDir()
+	schemaPath = uploadSchema(job_path)
+	try:
+		incompleteSchema = parseSchemaFile(schemaPath)
+	except Exception as e: # remove file if something went wrong
+		os.remove(schemaPath)
+		raise e
+
+	### STEP 2: upload files and wrappers
+	dataFiles = uploadFiles(path_in, incompleteSchema)
+	removeBadConfidence_bool = false
+	removeBadConfidence_minimum = High
+	removeIsolationInterference_bool = false
+	removeIsolationInterference_threshold = 70
+	identifyingNodes = {"master": ["Mascot", "Ions Score"], "slaves": [["Sequest HT", "XCorr"]]}
+	undoublePSMAlgo_exclusive_bool = false
+	collapse_method = mean @ bestMatch / mostIntense / mean / geometricMedian( / weighted)
+	isotopicCorrection_bool = true
+	collapseCharge_bool = true
+	accuracy = 1e-5
+	maxIterations = 50
+
+
 if __name__ == '__main__':
+	webFlow()
 	sys.exit(main(masterConfigFilePath='masterConfig.ini', doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=False))
