@@ -8,6 +8,8 @@ Handle all I/O of data files and parameters to and from both the workflow and th
 import pandas as pd
 import numpy as np
 import pickle
+import configParser
+from json import dumps
 from os import path
 import re
 
@@ -58,7 +60,7 @@ def getWrapper(path_in='wrapper.tsv'):
 	return list(importDataFrame(path_in, header=None).values)
 
 
-def parseSchemaFile(schemaPath):
+def parseSchemaFile(schemaPath): #todo move to web
 	"""
 	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment. The
 	wrapper and config entries are set to None for now.
@@ -92,6 +94,37 @@ def parseSchemaFile(schemaPath):
 		                              'channelAliasesPerCondition': channelAliasesPerCondition,
 		                              'config': None, 'wrapper': None}
 	return incompleteSchemaDict
+
+
+def constructMasterConfigContents(schemaDict, otherMasterParams): # todo move to web
+	# todo docu
+	def isNumeric(s):
+		""" Returns whether or not the argument is numeric """
+		try:
+			float(s)
+			return True
+		except ValueError:
+			return False
+	contents = {}
+	contents['schema'] = dumps(schemaDict)
+	for k, v in otherMasterParams.items():
+		if isinstance(v, str) or isNumeric(v):
+			contents[k] = v
+		else:
+			contents[k] = dumps(v)
+
+	return contents
+
+
+def writeConfig(filePath, contents):
+	file = open(filePath, 'w')
+	config = configParser.ConfigParser()
+	section = 'DEFAULT'
+	config.add_section(section)
+	for k, v in contents.items():
+		config.set(section, k, v)
+	config.write()
+	file.close()
 
 
 def fixFixableFormatMistakes(df):
