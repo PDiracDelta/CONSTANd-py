@@ -43,7 +43,7 @@ def getColours(schema):
 	channelsPerConditionForAllExperiments = [[len(condition) for condition in experiment['intensityColumnsPerCondition']]
 	                                         for experiment in schema.values()]
 
-	numConditions = len(schema[schema.values()[0]]['intensityColumnsPerCondition'])
+	numConditions = len(list(schema.values())[0]['intensityColumnsPerCondition'])
 	distColours = distinguishableColours(numConditions)
 
 	colours = [np.repeat(distColours, numChannelsPerCondition) for numChannelsPerCondition in channelsPerConditionForAllExperiments]
