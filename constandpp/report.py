@@ -57,9 +57,9 @@ def distinguishableMarkers(n):
 	:param n:   int     number of distinguishable markers
 	:return:    list    (easily) (distinguishable) markers
 	"""
-	easilyDistinguishable = ['o','s','x','*','v','d','+','^']
+	easilyDistinguishable = ['o', 's', 'x', '*', 'v', 'd', '+', '^']
 	allMarkers = markers.MarkerStyle.markers
-	visibleMarkers = allMarkers
+	visibleMarkers = allMarkers.copy()
 	for k,v in list(allMarkers.items()):
 		if v == 'nothing':
 			del visibleMarkers[k]
@@ -144,7 +144,7 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	                              [labelsYES, labelsP, labelsFC, labelsNO]):
 		if labelPlotBool:
 			for x, y, label in zip(xdata, ydata, labels):
-				plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points', ha='right', va='bottom')
+				plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points [visibleMarkers[i] for i in', ha='right', va='bottom')
 
 	# plt.show() # TEST
 	return volcanoPlot
@@ -159,13 +159,13 @@ def getPCAPlot(PCAResult, schema):
 	plt.ylabel('Second PC', figure=PCAPlot)
 
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
-	colors = getColours(schema)
-	markers = getMarkers(schema)
+	colorsPerCondition = getColours(schema)
+	markersPerExperiment = getMarkers(schema)
 	# labels for annotation
 	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
-	# produce scatterplot and annotate
-	for (x, y, color, marker, label) in zip(PCAResult[:, 0], PCAResult[:, 1], colors, markers, allChannelAliases):
-		plt.scatter(x, y, color=color, marker=marker, figure=PCAPlot)  # plot first two principal components
+	# produce scatterplot of two first principal components and annotate
+	for (x, y, color, marker, label) in zip(PCAResult[:, 0], PCAResult[:, 1], colorsPerCondition, markersPerExperiment, allChannelAliases):
+		plt.scatter(x, y, color=color, marker=marker, figure=PCAPlot)
 		plt.annotate(label, xy=(x, y), xytext=(-1, 1),
 			textcoords='offset points', ha='right', va='bottom')
 	plt.show() # TEST
@@ -180,7 +180,7 @@ def getHCDendrogram(HCResult, intensityColumnsPerCondition):
 	plt.title('Hierarchical Clustering Dendrogram', figure=HCDendrogram)
 	plt.xlabel('reporter channel', figure=HCDendrogram)
 	plt.ylabel('distance', figure=HCDendrogram)
-	dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12., labels=intensityColumns)
+	dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12, labels=intensityColumns)
 	return HCDendrogram
 	plt.show() # TEST
 
