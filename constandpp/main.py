@@ -183,24 +183,20 @@ def processDf(df, params, writeToDisk):
 		                                             removalColumnsToSave=params['removalColumnsToSave'])
 		# SANITY CHECK: no detections with the same scan number may exist after undoublePSMAlgo()
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
-
+	# todo find mean of empty slices warning flood source (ABOVE this line)
 	# collapse peptide list redundancy due to multiple detections at different RT
 	# TEST here the intensity columns are alraedy lost
 	df, removedData['RT'] = collapse('RT', df, intensityColumns=params['intensityColumns'], method=params['collapse_method'],
-	                                 maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
 	                                 identifyingNodes=params['identifyingNodes'],
 	                                 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
 	if params['collapseCharge_bool']:
 		# collapse peptide list redundancy due to different charges (optional)
 		df, removedData['charge'] = collapse('Charge', df, intensityColumns=params['intensityColumns'], method=params['collapse_method'],
-		                                     maxRelativeReporterVariance=params['collapse_maxRelativeReporterVariance'],
 		                                     identifyingNodes=params['identifyingNodes'],
 		                                     undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
 	if params['collapsePTM_bool']:
 		# collapse peptide list redundancy due to different charges (optional)
 		df, removedData['modifications'] = collapse('PTM', df, intensityColumns=params['intensityColumns'], method=params['collapse_method'],
-		                                            maxRelativeReporterVariance=params[
-			                                            'collapse_maxRelativeReporterVariance'],
 		                                            identifyingNodes=params['identifyingNodes'],
 		                                            undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
 
@@ -215,6 +211,7 @@ def processDf(df, params, writeToDisk):
 		                                                      correctionsMatrix=params['isotopicCorrection_matrix'])
 	else:
 		intensities = getIntensities(df)
+
 	# perform the CONSTANd algorithm; also do NOT include normalized intensities in df --> only for paying users.
 	normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
 	normalizedDf = setIntensities(df, intensities=normalizedIntensities, intensityColumns=params['intensityColumns'])
@@ -369,7 +366,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 		specificParams[eName] = getInput(masterParams['schema'][eName]['config'])
 		# get the dataframes
 		dfs[eName] = getData(specificParams[eName]['data'], delim=specificParams[eName]['delim_in'], header=specificParams[eName]['header_in'], wrapper=specificParams[eName]['wrapper'])
-	# todo find mean of empty slices warning flood source (ABOVE this line)
+
 	if not testing:
 		for eName in experimentNames:
 			# define global parameters

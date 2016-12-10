@@ -51,7 +51,6 @@ def getInput(configFilePath):
 	removeIsolationInterference_bool = config.getboolean('DEFAULT','removeIsolationInterference_bool')
 	removeIsolationInterference_threshold = config.getfloat('DEFAULT','removeIsolationInterference_threshold')
 	collapse_method = config.get('DEFAULT', 'collapse_method')
-	collapse_maxRelativeReporterVariance = config.getfloat('DEFAULT', 'collapse_maxRelativeReporterVariance')
 	identifyingNodes = parseExpression(config.get('DEFAULT', 'identifyingNodes'))
 	undoublePSMAlgo_bool = config.getboolean('DEFAULT','undoublePSMAlgo_bool')
 	undoublePSMAlgo_exclusive_bool = config.getboolean('DEFAULT','undoublePSMAlgo_exclusive_bool')
@@ -148,7 +147,6 @@ def getInput(configFilePath):
 		'undoublePSMAlgo_bool': undoublePSMAlgo_bool,
 		'undoublePSMAlgo_exclusive_bool': undoublePSMAlgo_exclusive_bool,
 		'collapse_method': collapse_method,
-		'collapse_maxRelativeReporterVariance': collapse_maxRelativeReporterVariance,
 		'collapseCharge_bool': collapseCharge_bool,
 		'collapsePTM_bool': collapsePTM_bool,
 		'isotopicCorrection_bool': isotopicCorrection_bool,
