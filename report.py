@@ -182,7 +182,7 @@ def getHCDendrogram(HCResult, schema):
 	plt.xlabel('reporter channel', figure=HCDendrogram)
 	plt.ylabel('distance', figure=HCDendrogram)
 	dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12, labels=allChannelAliases)
-	plt.show()  # TEST
+	#plt.show()  # TEST
 	return HCDendrogram
 
 
