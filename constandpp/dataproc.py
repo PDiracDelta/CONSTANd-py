@@ -19,7 +19,7 @@ Removed data is always saved into a removedData dataFrame.
 """
 
 import numpy as np
-from warnings import warn
+import logging
 from pandas import Series
 
 # intensityColumns = None
@@ -130,7 +130,7 @@ def setMasterProteinDescriptions(df):
 		df.loc[:, 'Protein Descriptions'] = ['; '.join([descriptionsList[i] for i in correctIndices]) for (descriptionsList, correctIndices) in zip(descriptionsLists, correctIndicesLists)]
 		df.drop('Protein Accessions', axis=1, inplace=True)
 	else:
-		warn("No 'Protein Accessions' column found; leaving all 'Protein Descriptions' intact.")
+		logging.warning("No 'Protein Accessions' column found; leaving all 'Protein Descriptions' intact.")
 	return df
 
 

@@ -8,9 +8,9 @@ Performs a differential expression analysis on the normalized intensities as pro
 
 import numpy as np
 import pandas as pd
+import logging
 from dataIO import unnest
 from dataproc import getIntensities
-from warnings import warn
 from collections import defaultdict
 from statsmodels.sandbox.stats.multicomp import multipletests
 from scipy.stats import ttest_ind as ttest
@@ -79,7 +79,7 @@ def getProteinPeptidesDicts(df):
 	noMasterProteinAccession = []
 	for numGroups, peptideIndices in numProteinGroupsDict.items():
 		if numGroups == 0:
-			warn("Peptides without Master Protein Accession detected. Omitting them in the analysis.")
+			logging.warning("Peptides without Master Protein Accession detected. Omitting them in the analysis.")
 			noMasterProteinAccession.extend(peptideIndices)
 		elif numGroups == 1:  # these have only 1 master protein accession
 			# { protein : indices }
