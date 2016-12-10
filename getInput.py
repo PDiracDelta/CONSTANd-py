@@ -64,8 +64,9 @@ def getInput(configFilePath):
 		raise FileNotFoundError("File "+data+" not found.")
 	if not path.exists(wrapper): # TODO for all files
 		raise FileNotFoundError("File "+wrapper+" not found.")
-	if not (len(delim_in) == 1 and isinstance(delim_in, str)):
-		raise Exception("Delimiter of input file must be a character (string of length one).")
+	if delim_in is not None:
+		if not (len(delim_in) == 1 and isinstance(delim_in, str)):
+			raise Exception("Delimiter of input file must be a character (string of length one).")
 	if not ((isinstance(header_in, int) and header_in >= 0) or header_in is None):
 		raise Exception("Header parameter of the input file must be a non-negative integer or of type None.")
 	if intensityColumnsPerCondition is None:
