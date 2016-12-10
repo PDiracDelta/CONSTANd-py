@@ -310,7 +310,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	return minProteinDF, fullProteinDF, PCAResult, HCResult, metadata
 
 
-def generateReport(analysisResults, params, writeToDisk):
+def generateReport(analysisResults, params, logFilePath, writeToDisk):
 	# todo docu
 	minProteinDF = analysisResults[0]
 	fullProteinDF = analysisResults[1]
@@ -337,7 +337,8 @@ def generateReport(analysisResults, params, writeToDisk):
 	visualizationsDict['hcd'] = getHCDendrogram(HCResult, params['schema']) # todo multiple experimenst
 
 	# generate HTML and PDF reports # todo
-	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, visualizationsDict, metadata)
+	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, visualizationsDict,
+	                      metadata, logFilePath)
 	pdfReport = HTMLtoPDF(htmlReport)
 
 	writeToDisk = False # TEST
