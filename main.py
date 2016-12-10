@@ -497,9 +497,9 @@ def webFlow():
 	job_path = newJobDir()
 	schemaPath = uploadSchema(job_path)
 	try:
-		incompleteSchema = parseSchemaFile(schemaPath)
+		incompleteSchema = parseSchemaFile(os.path.join(job_path, schemaPath))
 	except Exception as e: # remove file and job dir if something went wrong
-		os.remove(schemaPath)
+		os.remove(os.path.join(job_path, schemaPath))
 		os.removedirs(job_path)
 		raise e
 
