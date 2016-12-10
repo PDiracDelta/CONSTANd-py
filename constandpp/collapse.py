@@ -11,6 +11,7 @@ and replaces the duplicates with one representative detection and a combination/
 
 import numpy as np
 import logging
+from warnings import filterwarnings
 from dataproc import setIntensities, getIntensities
 from scipy.spatial.distance import cdist, euclidean
 
@@ -159,10 +160,8 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 				print('hoi')
 
 			if centerMeasure == 'mean':
-				try:
-					newIntensitiesDict[bestIndex] = np.nanmean(allMS2Intensities, 0)
-				except RuntimeWarning:
-					pass # ignore mean of empty slice when certain channel doesn't have values for any of the detections
+				filterwarnings('ignore', 'Mean of empty slice') # catch warnings about empty slices
+				newIntensitiesDict[bestIndex] = np.nanmean(allMS2Intensities, 0)
 			elif centerMeasure == 'geometricMedian':
 				# first normalize the row sums because otherwise the Median norm isn't conserved. (set it to 1 now)
 				Ri = 1 / allMS2Intensities.shape[1] * np.asarray(1 / np.nanmean(allMS2Intensities, 1)).reshape(
@@ -194,10 +193,10 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 					bestIndex = df.loc[this_duplicatesList, slaveScoreName].idxmax(axis=0, skipna=True)
 				except KeyError: # if no slave score column is present in the data set
 					if not noSlavePSMAlgoWarnedYet:
-						warn("No slave PSMAlgo score column ('"+slaveScoreName+"') present in data set. ")
+						logging.warning("No slave PSMAlgo score column ('"+slaveScoreName+"') present in data set. ")
 						noSlavePSMAlgoWarnedYet = True
 				if np.isnan(bestIndex) and not isNanWarnedYet:
-					warn("No best PSM score found for some lists of duplicates; first duplicate arbitrarily chosen. "
+					logging.warning("No best PSM score found for some lists of duplicates; first duplicate arbitrarily chosen. "
 					     "First Scan numbers of first list encountered: "+str(df.loc[this_duplicatesList, 'First Scan']))
 					isNanWarnedYet = True
 					bestIndex = this_duplicatesList[0]
