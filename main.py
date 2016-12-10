@@ -400,7 +400,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 				logging.warning("No processing step performed nor processing file loaded for experiment "+str(eName)+"!")
 
 		""" Data analysis """
-		analysis_path_out = masterParams[eName]['path_out']
+		analysis_path_out = masterParams['path_out']
 		analysisResultsDumpFilename = analysis_path_out + '/analysisResultsDump'
 		if doAnalysis:
 			# prepare the output directories
@@ -420,7 +420,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			logging.warning("No analysis step performed nor analysis file loaded!")
 
 		""" Visualize and generate report """
-		results_path_out = masterParams[eName]['path_results']
+		results_path_out = masterParams['path_results']
 
 		if doReport:
 			# prepare the output directories
