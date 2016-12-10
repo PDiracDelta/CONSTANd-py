@@ -422,7 +422,7 @@ def webFlow():
 	def newJobDir():
 		jobPath = os.path.join('../jobs', str(datetime.datetime.now()))
 		os.makedirs(jobPath)
-		return jobPath
+		return os.path.abspath(jobPath)
 	def uploadSchema(this_job_path):
 		this_schemaPath = '../jobs/schema6.tsv'
 		destination = os.path.join(this_job_path, os.path.basename(this_schemaPath))
