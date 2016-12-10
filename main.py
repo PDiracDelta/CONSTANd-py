@@ -14,7 +14,7 @@ __maintainer__ = "Joris Van Houtven"
 __email__ = "vanhoutvenjoris@gmail.com"
 __status__ = "Development"
 
-import sys
+import sys, os
 from webFlow import webFlow
 from getInput import getInput, getMasterInput
 from constand import constand
@@ -347,8 +347,8 @@ def generateReport(analysisResults, params, writeToDisk):
 	writeToDisk = False # TEST
 	if writeToDisk:
 		# save the visualizations
-		exportData(visualizationsDict, dataType='viz', path_out=params['path_out'],
-		           filename=params['filename_out'] + '_dataViz') # TODO
+		exportData(visualizationsDict, dataType='viz', path_out=params['path_results'],
+		           filename=params['jobname'] + '_dataViz') # TODO
 
 
 def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, testing):
@@ -379,8 +379,15 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			# setCollapseColumnsToSave(
 			# 	specificParams[eName]['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
 			""" Data processing """
-			processingResultsDumpFilename = path.relpath(path.join(specificParams[eName]['path_out'], path.pardir))+'/processingResultsDump_'+str(eName)
+			processing_path_out = specificParams[eName]['path_out']
+			processingResultsDumpFilename = path.relpath(path.join(processing_path_out, path.pardir))+'/processingResultsDump_'+str(eName)
 			if doProcessing:
+				# prepare the output directory
+				assert not os.path.exists(processing_path_out)  # write to empty dir
+				assert os.path.exists(
+					path.relpath(path.join(processing_path_out, path.pardir)))  # parent dir must exist
+				os.makedirs(processing_path_out)
+
 				# process every input dataframe
 				processingResults[eName] = processDf(dfs[eName], specificParams[eName], writeToDisk)
 				pickle.dump(processingResults[eName], open(processingResultsDumpFilename, 'wb')) # TEST
@@ -393,8 +400,15 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 				warn("No processing step performed nor processing file loaded for experiment "+str(eName)+"!")
 
 		""" Data analysis """
-		analysisResultsDumpFilename = masterParams['path_out'] + '/analysisResultsDump'
+		analysis_path_out = masterParams[eName]['path_out']
+		analysisResultsDumpFilename = analysis_path_out + '/analysisResultsDump'
 		if doAnalysis:
+			# prepare the output directory
+			assert not os.path.exists(analysis_path_out)  # write to empty dir
+			assert os.path.exists(path.relpath(path.join(analysis_path_out, path.pardir)))  # parent dir must exist
+			os.makedirs(analysis_path_out)
+
+			# perform analysis
 			analysisResults = analyzeProcessingResult(processingResults, masterParams, writeToDisk)
 			pickle.dump(analysisResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
 		elif doReport:
@@ -407,6 +421,13 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 		""" Visualize and generate report """
 		if doReport:
+			# prepare the output directory
+			results_path_out = masterParams[eName]['path_results']
+			assert not os.path.exists(results_path_out)  # write to empty dir
+			assert os.path.exists(path.relpath(path.join(results_path_out, path.pardir)))  # parent dir must exist
+			os.makedirs(results_path_out)
+
+			# visualize and make a report
 			generateReport(analysisResults, masterParams, writeToDisk)
 		else:
 			warn("No report generated!")
