@@ -39,7 +39,7 @@ def importDataFrame(path_in, delim=None, header=0):
 	if delim is None:
 		raise Exception(
 			"I don't know how to handle this data: the filetype was not recognized and no delimiter was specified.")
-	return df
+	return df.dropna(how="all") # drop empty lines
 
 
 def getIsotopicCorrectionsMatrix(path_in='ICM_default.tsv'):
