@@ -14,7 +14,7 @@ __maintainer__ = "Joris Van Houtven"
 __email__ = "vanhoutvenjoris@gmail.com"
 __status__ = "Development"
 
-import sys, os
+import sys, os, logging
 from webFlow import webFlow
 from getInput import getInput, getMasterInput
 from constand import constand
@@ -252,7 +252,6 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	experimentNames = processingResults.keys()
 	# contains statistics and metadata (like the parameters) about the analysis.
 	metadata = {}
-	metadata['date'] = params['date']
 	# record detections without isotopic correction applied applied. Multi-indexed on experiment names and old indices!
 	metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for
 	                                              eName in experimentNames], keys=experimentNames)
@@ -357,6 +356,8 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	Contains and explicits the workflow of the program. Using the booleans doProcessing, doAnalysis and writeToDisk one
 	can control	which parts of the workflow to perform.
 	"""
+	logFilePath = os.path.relpath(os.path.join(masterConfigFilePath, os.path.join(os.pardir, '/log.txt')))
+	logging.basicConfig(filename=logFilePath, level=logging.INFO)
 	start = time()
 	masterParams = getMasterInput(masterConfigFilePath) # config filenames + params for the combination of experiments
 	specificParams = {} # specific params for each experiment
@@ -397,7 +398,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 				except FileNotFoundError:
 					raise FileNotFoundError("There is no previously processed data in this path: "+processingResultsDumpFilename)
 			else:
-				warn("No processing step performed nor processing file loaded for experiment "+str(eName)+"!")
+				logging.warning("No processing step performed nor processing file loaded for experiment "+str(eName)+"!")
 
 		""" Data analysis """
 		analysis_path_out = masterParams[eName]['path_out']
@@ -417,7 +418,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			except FileNotFoundError:
 				raise FileNotFoundError("There is no previously analyzed data in this path: "+analysisResultsDumpFilename)
 		else:
-			warn("No analysis step performed nor analysis file loaded!")
+			logging.warning("No analysis step performed nor analysis file loaded!")
 
 		""" Visualize and generate report """
 		if doReport:
@@ -428,9 +429,9 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			os.makedirs(results_path_out)
 
 			# visualize and make a report
-			generateReport(analysisResults, masterParams, writeToDisk)
+			generateReport(analysisResults, masterParams, logFilePath, writeToDisk)
 		else:
-			warn("No report generated!")
+			logging.warning("No report generated!")
 
 	elif testing:
 		devStuff(dfs[0], specificParams[0])

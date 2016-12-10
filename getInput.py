@@ -11,7 +11,6 @@ from os import path
 from json import loads as parseExpression
 from codecs import getdecoder as gd
 from dataIO import getIsotopicCorrectionsMatrix, getWrapper
-from warnings import warn
 
 
 def parseDelimiter(d):
