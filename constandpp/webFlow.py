@@ -6,21 +6,24 @@ Collection of functions that simulates the web interface.
 """
 
 import os, datetime
-from dataIO import parseSchemaFile
+from dataIO import parseSchemaFile, unnest
 from json import dumps
 
 
 def webFlow():
 	from shutil import copyfile
+
 	def newJobDir():
 		jobPath = os.path.join('../jobs', str(datetime.datetime.now()))
 		os.makedirs(jobPath)
 		return os.path.abspath(jobPath)
+
 	def uploadSchema(this_job_path):
 		this_schemaPath = '../jobs/schema6.tsv'
 		destination = os.path.join(this_job_path, os.path.basename(this_schemaPath))
 		copyfile(this_schemaPath, destination)
 		return os.path.abspath(destination)
+
 	def uploadFile(this_job_path, sourceDataPath, prefix):
 		if sourceDataPath is None:
 			return None
@@ -28,6 +31,7 @@ def webFlow():
 			destinationData = os.path.join(this_job_path, prefix+os.path.basename(sourceDataPath))
 			copyfile(sourceDataPath, destinationData)
 			return os.path.abspath(destinationData)
+
 	def updateSchema(this_job_path, incompleteSchema):
 		for eName in incompleteSchema:
 			if eName == 'human':
@@ -49,8 +53,10 @@ def webFlow():
 				incompleteSchema[eName]['icm'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
 				                                            prefix=eName+'_')
 		return incompleteSchema
+
 	def getBaseConfigFile():
 		return 'baseConfig.ini'
+
 	def updateConfigs(this_job_path, schema):
 		import fileinput
 		for eName in schema:
@@ -70,10 +76,25 @@ def webFlow():
 				# write output parameters
 				fout.write('path_out = '+dumps(os.path.join(this_job_path, 'output/'))+'\n')
 				fout.write('filename_out = '+dumps(eName)+'\n')
+
+	def updateWrappers(this_job_path, schema):
+		# write the channel aliases to the wrapper
+		for eName in schema:
+			experiment = schema[eName]
+			channelNames = unnest(experiment['intensityColumnsPerCondition'])
+			channelAliases = unnest(experiment['channelAliasesPerCondition'])
+			wrapperFile = experiment['wrapper']
+			# open user config parameters
+			with open(wrapperFile, 'a') as fout:
+				fout.write('\n') # so you dont accidentally append to the last line
+				for n, a in zip(channelNames, channelAliases):
+					fout.write(n+'\t'+a+'\n')
+
 	def getMasterConfig(this_job_path):
 		this_masterConfigFile = uploadFile(this_job_path, sourceDataPath='../jobs/masterConfig.ini',
 		                                             prefix='')
 		return this_masterConfigFile
+
 	def updateMasterConfig(this_job_path, this_masterConfigFile, schema):
 		with open(this_masterConfigFile, 'a') as fout:
 			fout.write('\n')  # so you dont accidentally append to the last line
@@ -94,8 +115,9 @@ def webFlow():
 	### STEP 2: upload data files, wrapper files, ICM files and config (files), while updating schema with their locations.
 	schema = updateSchema(job_path, incompleteSchema)
 
-	### STEP 3: update config files
+	### STEP 3: update config files and wrapper files
 	updateConfigs(job_path, schema)
+	updateWrappers(job_path, schema)
 
 	### STEP 4: get masterConfig from web and update it (add schema, date)
 	masterConfigFile = getMasterConfig(job_path)
