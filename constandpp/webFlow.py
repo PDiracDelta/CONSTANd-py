@@ -91,13 +91,13 @@ def webFlow():
 		os.removedirs(job_path)
 		raise e
 
-	### STEP 2: upload data files, wrapper files, ICM files and config (files).
+	### STEP 2: upload data files, wrapper files, ICM files and config (files), while updating schema with their locations.
 	schema = updateSchema(job_path, incompleteSchema)
 
 	### STEP 3: update config files
 	updateConfigs(job_path, schema)
 
-	### STEP 4: get masterConfig from web and update it
+	### STEP 4: get masterConfig from web and update it (add schema, date)
 	masterConfigFile = getMasterConfig(job_path)
 	updateMasterConfig(job_path, masterConfigFile, schema)
 
