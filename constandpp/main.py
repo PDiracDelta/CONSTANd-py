@@ -447,7 +447,7 @@ def webFlow():
 				incompleteSchema[eName]['icm'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
 				                                               prefix=eName+'_')
 			elif eName == 'mouse':
-				incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath='../dajobsta/MB_noapostrophes_bis.tsv',
+				incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath='../jobs/MB_noapostrophes_bis.tsv',
 				                                             prefix=eName+'_')
 				incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath='../jobs/wrapper6_bis.tsv',
 				                                                prefix=eName+'_')
@@ -470,7 +470,7 @@ def webFlow():
 					if line != '[DEFAULTS]':
 						fout.write(line)
 				# write schema parameters
-				for parameter, value in experiment:
+				for parameter, value in experiment.items():
 					if parameter != 'config':
 						fout.write(dumps(parameter, value))
 				# write output parameters
