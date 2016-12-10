@@ -368,7 +368,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 		specificParams[eName] = getInput(masterParams['schema'][eName]['config'])
 		# get the dataframes
 		# wrapper = list(zip(unnest(masterParams['schema'][eName]['intensityColumnsPerCondition']), unnest(masterParams['schema'][eName]['channelAliasesPerCondition']))) # TEST # todo
-		dfs[eName] = getDataFrame(specificParams[eName]['file_in'], delim=specificParams[eName]['delim_in'], header=specificParams[eName]['header_in'], wrapper=specificParams[eName]['wrapper'])
+		dfs[eName] = getDataFrame(specificParams[eName]['data'], delim=specificParams[eName]['delim_in'], header=specificParams[eName]['header_in'], wrapper=specificParams[eName]['wrapper'])
 
 	if not testing:
 		for eName in experimentNames:

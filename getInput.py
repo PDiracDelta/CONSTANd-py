@@ -28,7 +28,7 @@ def getInput(configFilePath):
 	config.read(configFilePath, encoding='utf-8')
 
 	# get variables from config
-	file_in = config.get('DEFAULT','file_in')
+	data = config.get('DEFAULT','data')
 	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
 	header_in = config.getint('DEFAULT','header_in')
 	wrapper = config.get('DEFAULT','wrapper')
@@ -60,8 +60,8 @@ def getInput(configFilePath):
 	# perform checks on the validity of the parameters and raise exceptions if necessary
 	# DO NOT change the value of variables here!
 	# TODO the 'is None' checks are obsolete. remove them (keep the error messages for later, now).
-	if not path.exists(file_in): # TODO for all files
-		raise FileNotFoundError("File "+file_in+" not found.")
+	if not path.exists(data): # TODO for all files
+		raise FileNotFoundError("File "+data+" not found.")
 	if not path.exists(wrapper): # TODO for all files
 		raise FileNotFoundError("File "+wrapper+" not found.")
 	if not (len(delim_in) == 1 and isinstance(delim_in, str)):
@@ -122,7 +122,7 @@ def getInput(configFilePath):
 	isotopicCorrection_matrix = getIsotopicCorrectionsMatrix(isotopicCorrection_matrix)
 	# assign
 	params = {
-		'file_in': file_in,
+		'data': data,
 		'delim_in': delim_in,
 		'header_in': header_in,
 		'wrapper': wrapper,
