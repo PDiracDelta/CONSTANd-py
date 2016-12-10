@@ -60,7 +60,7 @@ def getWrapper(path_in='wrapper.tsv'):
 	:param path_in: str            path of the wrapper file
 	:return :       nested list    wrapper specifying column name transformations
 	"""
-	return list(importDataFrame(path_in, header=None).values)
+	return list(importDataFrame(path_in, header=None).astype(str).values)
 
 
 def parseSchemaFile(schemaPath): #todo move to web
