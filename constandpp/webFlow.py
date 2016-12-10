@@ -41,7 +41,7 @@ def webFlow():
 				                                                     prefix=eName+'_')
 				this_incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath='../jobs/config.ini',
 				                                                    prefix=eName+'_')
-				this_incompleteSchema[eName]['icm'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
+				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
 				                                                 prefix=eName+'_')
 			elif eName == 'mouse':
 				this_incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath='../jobs/MB_noapostrophes_bis.tsv',
@@ -50,7 +50,7 @@ def webFlow():
 				                                                     prefix=eName+'_')
 				this_incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath='../jobs/config_bis.ini',
 				                                                    prefix=eName+'_')
-				this_incompleteSchema[eName]['icm'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
+				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
 				                                                 prefix=eName+'_')
 			# in case no wrapper was uploaded
 			if this_incompleteSchema[eName]['wrapper'] is None:
