@@ -83,7 +83,7 @@ def webFlow():
 					else: # value must be dumps-ed into a string
 						fout.write(str(parameter) + ' = ' + dumps(value) + '\n')
 				# write output parameters
-				fout.write('path_out = '+str(os.path.join(this_job_path, 'output/'))+'\n')
+				fout.write('path_out = '+str(os.path.join(this_job_path, 'output_processing/'))+'\n')
 				fout.write('filename_out = '+str(eName)+'\n')
 
 	def updateWrappers(this_schema):
@@ -107,6 +107,8 @@ def webFlow():
 	def updateMasterConfig(this_job_path, this_masterConfigFile, this_schema):
 		with open(this_masterConfigFile, 'a') as fout:
 			fout.write('\n')  # so you dont accidentally append to the last line
+			fout.write('path_out = ' + os.path.join(this_job_path, 'output_analysis') + '\n')
+			fout.write('path_results = ' + os.path.join(this_job_path, 'results') + '\n')
 			fout.write('schema = '+dumps(this_schema)+'\n')
 			fout.write('date = ' + str(os.path.basename(this_job_path).split('.')[0]) + '\n')
 
@@ -128,7 +130,7 @@ def webFlow():
 	updateConfigs(job_path, schema)
 	updateWrappers(schema)
 
-	### STEP 4: get masterConfig from web and update it (add schema, date)
+	### STEP 4: get masterConfig from web and update it (add schema, date, path_out, path_results)
 	masterConfigFile = getMasterConfig(job_path)
 	updateMasterConfig(job_path, masterConfigFile, schema)
 

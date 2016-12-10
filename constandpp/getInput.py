@@ -118,10 +118,8 @@ def getInput(configFilePath):
 		raise Exception("Accuracy must be strictly greater than zero.")
 	if not (maxIterations > 0 and isinstance(maxIterations,int)):
 		raise Exception("Maximum number of iterations must be an integer strictly greater than zero.")
-	if not path.exists(path_out):
-		raise FileNotFoundError("Path " + path_out + " not found.")
-	if path.exists(path_out+'/'+filename_out):
-		warn("Will overwrite file "+path.basename(path.normpath(path_out)))
+	if path.exists(path_out):
+		raise FileNotFoundError("Path " + path_out + " already exists!")
 	if not (len(delim_out) == 1 and isinstance(delim_out, str)):
 		raise Exception("Delimiter of output file must be a character (string of length one).")
 
@@ -186,7 +184,8 @@ def getMasterInput(masterConfigFilePath):
 	labelVolcanoPlotAreas = parseExpression(config.get('DEFAULT', 'labelVolcanoPlotAreas'))
 	PCA_components = config.getint('DEFAULT', 'PCA_components')
 	path_out = config.get('DEFAULT', 'path_out')
-	filename_out = config.get('DEFAULT', 'filename_out')
+	path_results = config.get('DEFAULT', 'path_results')
+	jobname = config.get('DEFAULT', 'jobname')
 	delim_out = gd("unicode_escape")(config.get('DEFAULT', 'delim_out'))[0]  # treat delimiters correctly: ignore first escape
 
 	if PCA_components < 2:
@@ -203,7 +202,8 @@ def getMasterInput(masterConfigFilePath):
 		'labelVolcanoPlotAreas': labelVolcanoPlotAreas,
 		'PCA_components': PCA_components,
 		'path_out': path_out,
-		'filename_out': filename_out,
+		'path_results': path_results,
+		'jobname': jobname,
 		'delim_out': delim_out
 	}
 
