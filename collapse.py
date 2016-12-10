@@ -159,7 +159,10 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 				print('hoi')
 
 			if centerMeasure == 'mean':
-				newIntensitiesDict[bestIndex] = np.nanmean(allMS2Intensities, 0)
+				try:
+					newIntensitiesDict[bestIndex] = np.nanmean(allMS2Intensities, 0)
+				except RuntimeWarning:
+					pass # ignore mean of empty slice when certain channel doesn't have values for any of the detections
 			elif centerMeasure == 'geometricMedian':
 				# first normalize the row sums because otherwise the Median norm isn't conserved. (set it to 1 now)
 				Ri = 1 / allMS2Intensities.shape[1] * np.asarray(1 / np.nanmean(allMS2Intensities, 1)).reshape(
