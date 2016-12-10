@@ -52,6 +52,11 @@ def webFlow():
 				                                               prefix=eName+'_')
 				incompleteSchema[eName]['icm'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
 				                                            prefix=eName+'_')
+			# in case no wrapper was uploaded
+			if incompleteSchema[eName]['wrapper'] is None:
+				wrapperFileName = os.path.join(this_job_path, eName+'_wrapper.tsv')
+				open(wrapperFileName, 'w').close()
+				incompleteSchema[eName]['wrapper'] = wrapperFileName
 		return incompleteSchema
 
 	def getBaseConfigFile():
