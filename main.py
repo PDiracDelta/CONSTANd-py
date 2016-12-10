@@ -423,28 +423,64 @@ def webFlow():
 		os.makedirs(jobPath)
 		return jobPath
 	def uploadSchema(this_job_path):
-		destination = os.path.join(this_job_path, os.path.basename('../web/schemaTemplate6.tsv'))
-		copyfile('../web/schemaTemplate6.tsv', destination)
-		return destination
-	def uploadFiles(this_job_path, incompleteSchema):
-		sourceFilePath = '../data/MB_noapostrophes.tsv'
-		destination = os.path.join(this_job_path, os.path.basename(sourceFilePath))
-		copyfile(sourceFilePath, destination)
-		sourceFilePath2 = '../data/MB_noapostrophes.tsv'
-		destination2 = os.path.join(this_job_path, os.path.basename(sourceFilePath2[0:-4]+'_bis'+sourceFilePath2[-4:0]))
-		return {incompleteSchema['human'].update({''})}
+		this_schemaPath = '../jobs/schema6.tsv'
+		destination = os.path.join(this_job_path, os.path.basename(this_schemaPath))
+		copyfile(this_schemaPath, destination)
+		return os.path.basename(destination)
+	def uploadFile(this_job_path, sourceDataPath, prefix):
+		if sourceDataPath is None:
+			return None
+		else:
+			destinationData = os.path.join(this_job_path, prefix+os.path.basename(sourceDataPath))
+			copyfile(sourceDataPath, destinationData)
+			return os.path.basename(destinationData)
+	def updateSchema(this_job_path, incompleteSchema):
+		for eName in incompleteSchema:
+			if eName == 'human':
+				incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath='../jobs/MB_noapostrophes.tsv', prefix=eName)
+				incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=None,
+				                                                prefix=eName)
+				incompleteSchema[eName]['config'] = uploadFile(this_job_path,
+				                                               sourceDataPath='../jobs/config.ini',
+				                                               prefix=eName)
+			elif eName == 'mouse':
+				incompleteSchema[eName]['data'] = uploadFile(this_job_path,
+				                                             sourceDataPath='../dajobsta/MB_noapostrophes_bis.tsv',
+				                                             prefix=eName)
+				incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath='../jobs/wrapper6_bis.tsv',
+				                                                prefix=eName)
+				incompleteSchema[eName]['config'] = uploadFile(this_job_path,
+				                                               sourceDataPath='../jobs/config_bis.ini',
+				                                               prefix=eName)
+		return incompleteSchema
+	def getBaseConfigFile():
+		return 'baseConfig.ini'
+	def updateConfigs():
+		JUST APPEND FILES
+
+		from configparser import ConfigParser
+		cp = ConfigParser(allow_no_value=True, comment_prefixes=';',
+	                                   inline_comment_prefixes='@')
+		cp.optionxform = str  # so that strings dont automatically get .lower()-ed
+		cp.read(getBaseConfigFile(), encoding='utf-8')
+
 
 	### STEP 1: get schema and create new job
 	job_path = newJobDir()
 	schemaPath = uploadSchema(job_path)
 	try:
 		incompleteSchema = parseSchemaFile(schemaPath)
-	except Exception as e: # remove file if something went wrong
+	except Exception as e: # remove file and job dir if something went wrong
 		os.remove(schemaPath)
+		os.removedirs(job_path)
 		raise e
 
-	### STEP 2: upload files and wrappers
-	dataFiles = uploadFiles(path_in, incompleteSchema)
+	### STEP 2: upload data files, wrapper files and config (files).
+	schema = updateSchema(job_path, incompleteSchema)
+
+	### STEP 3: update config files
+	updateConfigs(schema)
+
 	removeBadConfidence_bool = false
 	removeBadConfidence_minimum = High
 	removeIsolationInterference_bool = false
