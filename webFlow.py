@@ -61,15 +61,15 @@ def webFlow():
 				fout.write('\n') # so you dont accidentally append to the last line
 				# write baseConfig parameters
 				for line in fin:
-					if line != '[DEFAULTS]':
+					if '[DEFAULT]' not in line:
 						fout.write(line)
 				# write schema parameters
 				for parameter, value in experiment.items():
 					if parameter != 'config':
 						fout.write(dumps(parameter, value))
 				# write output parameters
-					fout.write('path_out = '+dumps(os.path.join(this_job_path, 'output/'))+'\n')
-					fout.write('filename_out = '+dumps(eName)+'\n')
+				fout.write('path_out = '+dumps(os.path.join(this_job_path, 'output/'))+'\n')
+				fout.write('filename_out = '+dumps(eName)+'\n')
 	def getMasterConfig(this_job_path):
 		this_masterConfigFile = uploadFile(this_job_path, sourceDataPath='../jobs/masterConfig.ini',
 		                                             prefix='')
