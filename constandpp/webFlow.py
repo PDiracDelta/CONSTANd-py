@@ -128,4 +128,4 @@ def webFlow():
 	masterConfigFile = getMasterConfig(job_path)
 	updateMasterConfig(job_path, masterConfigFile, schema)
 
-	return os.path.join(job_path, masterConfigFile)
+	return masterConfigFile
