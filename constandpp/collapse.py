@@ -10,9 +10,9 @@ and replaces the duplicates with one representative detection and a combination/
 """
 
 import numpy as np
+import logging
 from dataproc import setIntensities, getIntensities
 from scipy.spatial.distance import cdist, euclidean
-from warnings import warn
 
 columnsToSave = None
 
@@ -164,7 +164,7 @@ def collapse(toCollapse, df, intensityColumns, method, maxRelativeReporterVarian
 					allMS2Intensities.shape[0], )
 				relativeIntensities = (allMS2Intensities.T * Ri).T
 				if np.any(np.var(relativeIntensities, axis=0) > maxRelativeReporterVariance):
-					warn("maxRelativeReporterVariance too high for duplicates with indices: " + str(
+					logging.warning("maxRelativeReporterVariance too high for duplicates with indices: " + str(
 						this_duplicatesList) + ".")
 
 			if centerMeasure == 'mean':

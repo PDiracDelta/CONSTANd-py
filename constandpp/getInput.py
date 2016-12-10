@@ -11,7 +11,6 @@ from os import path
 from json import loads as parseExpression
 from codecs import getdecoder as gd
 from dataIO import getIsotopicCorrectionsMatrix, getWrapper
-from warnings import warn
 
 
 def getInput(configFilePath):
@@ -111,8 +110,6 @@ def getInput(configFilePath):
 		raise Exception("Maximum number of iterations must be an integer strictly greater than zero.")
 	if not path.exists(path_out):
 		raise FileNotFoundError("Path " + path_out + " not found.")
-	if path.exists(path_out+'/'+filename_out):
-		warn("Will overwrite file "+path.basename(path.normpath(path_out)))
 	if not (len(delim_out) == 1 and isinstance(delim_out, str)):
 		raise Exception("Delimiter of output file must be a character (string of length one).")
 

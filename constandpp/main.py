@@ -14,7 +14,7 @@ __maintainer__ = "Joris Van Houtven"
 __email__ = "vanhoutvenjoris@gmail.com"
 __status__ = "Development"
 
-import sys
+import os, sys, logging
 from getInput import getInput, getMasterInput
 from constand import constand
 from time import time
@@ -355,6 +355,8 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	Contains and explicits the workflow of the program. Using the booleans doProcessing, doAnalysis and writeToDisk one
 	can control	which parts of the workflow to perform.
 	"""
+	logFilePath = os.path.relpath(os.path.join(masterConfigFilePath, os.path.join(os.pardir, '/log.txt')))
+	logging.basicConfig(filename=logFilePath, level=logging.INFO)
 	start = time()
 	masterParams = getMasterInput(masterConfigFilePath) # config filenames + params for the combination of experiments
 	masterParams['schema'] = parseSchemaFile('../web/schemaTemplate6.tsv') # TEST
@@ -389,7 +391,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 				except FileNotFoundError:
 					raise FileNotFoundError("There is no previously processed data in this path: "+processingResultsDumpFilename)
 			else:
-				warn("No processing step performed nor processing file loaded for experiment "+str(eName)+"!")
+				logging.warning("No processing step performed nor processing file loaded for experiment "+str(eName)+"!")
 
 		""" Data analysis """
 		analysisResultsDumpFilename = masterParams['path_out'] + '/analysisResultsDump'
@@ -402,13 +404,13 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			except FileNotFoundError:
 				raise FileNotFoundError("There is no previously analyzed data in this path: "+analysisResultsDumpFilename)
 		else:
-			warn("No analysis step performed nor analysis file loaded!")
+			logging.warning("No analysis step performed nor analysis file loaded!")
 
 		""" Visualize and generate report """
 		if doReport:
-			generateReport(analysisResults, masterParams, writeToDisk)
+			generateReport(analysisResults, masterParams, logFilePath, writeToDisk)
 		else:
-			warn("No report generated!")
+			logging.warning("No report generated!")
 
 	elif testing:
 		devStuff(dfs[0], specificParams[0])
