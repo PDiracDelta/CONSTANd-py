@@ -67,7 +67,7 @@ def removeMissing(df, noMissingValuesColumns, intensityColumns):
 	toDelete = np.unique(toDelete)
 	removedData = df.loc[toDelete]
 	if toDelete.size > 0:
-		warn("Some detections have been removed from the workflow due to missing values: see removedData['missing'].")
+		logging.warning(("Some detections have been removed from the workflow due to missing values: see removedData['missing'].")
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 
@@ -176,17 +176,14 @@ def isotopicCorrection(intensities, correctionsMatrix):
 	correctedIntensities = []
 	noCorrectionIndices = []
 	warnedYet = False
-	try:
-		for row in intensities:
-			if not np.isnan(row).any():
-				correctedIntensities.append(np.linalg.solve(correctionsMatrix, row))
-			else:
-				correctedIntensities.append(row)
-				noCorrectionIndices.append(np.where(intensities == row)[0][0]) # np.where()[0][0] is numpy equivalent van .index()
-				if not warnedYet:
-					warn("Cannot correct isotope impurities for detections with NaN reporter intensities; skipping those.")
-	except TypeError:
-		pass
+	for row in intensities:
+		if not np.isnan(row).any():
+			correctedIntensities.append(np.linalg.solve(correctionsMatrix, row))
+		else:
+			correctedIntensities.append(row)
+			noCorrectionIndices.append(np.where(intensities == row)[0][0]) # np.where()[0][0] is numpy equivalent van .index()
+			if not warnedYet:
+				logging.warning("Cannot correct isotope impurities for detections with NaN reporter intensities; skipping those.")
 	return np.asarray(correctedIntensities), noCorrectionIndices
 
 
