@@ -371,6 +371,21 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 		dfs[eName] = getData(specificParams[eName]['data'], delim=specificParams[eName]['delim_in'], header=specificParams[eName]['header_in'], wrapper=specificParams[eName]['wrapper'])
 	# todo find mean of empty slices warning flood source (ABOVE this line)
 	if not testing:
+		processing_path_out = specificParams[eName]['path_out']
+		analysis_path_out = masterParams[eName]['path_out']
+		results_path_out = masterParams[eName]['path_results']
+
+		# prepare the output directories
+		if not os.path.exists(processing_path_out): # do not overwrite dir
+			assert os.path.exists(path.relpath(path.join(processing_path_out, path.pardir)))  # parent dir must exist
+			os.makedirs(processing_path_out)
+		if not os.path.exists(analysis_path_out):  # do not overwrite dir
+			assert os.path.exists(path.relpath(path.join(analysis_path_out, path.pardir)))  # parent dir must exist
+			os.makedirs(analysis_path_out)
+		if not os.path.exists(results_path_out):  # do not overwrite dir
+			assert os.path.exists(path.relpath(path.join(results_path_out, path.pardir)))  # parent dir must exist
+			os.makedirs(results_path_out)
+
 		for eName in experimentNames:
 			# define global parameters
 			# setProcessingGlobals(intensityColumns=specificParams[eName]['intensityColumns'],
@@ -379,15 +394,9 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			# setCollapseColumnsToSave(
 			# 	specificParams[eName]['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
 			""" Data processing """
-			processing_path_out = specificParams[eName]['path_out']
+
 			processingResultsDumpFilename = path.relpath(path.join(processing_path_out, path.pardir))+'/processingResultsDump_'+str(eName)
 			if doProcessing:
-				# prepare the output directory
-				assert not os.path.exists(processing_path_out)  # write to empty dir
-				assert os.path.exists(
-					path.relpath(path.join(processing_path_out, path.pardir)))  # parent dir must exist
-				os.makedirs(processing_path_out)
-
 				# process every input dataframe
 				processingResults[eName] = processDf(dfs[eName], specificParams[eName], writeToDisk)
 				pickle.dump(processingResults[eName], open(processingResultsDumpFilename, 'wb')) # TEST
@@ -400,14 +409,8 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 				logging.warning("No processing step performed nor processing file loaded for experiment "+str(eName)+"!")
 
 		""" Data analysis """
-		analysis_path_out = masterParams[eName]['path_out']
 		analysisResultsDumpFilename = analysis_path_out + '/analysisResultsDump'
 		if doAnalysis:
-			# prepare the output directory
-			assert not os.path.exists(analysis_path_out)  # write to empty dir
-			assert os.path.exists(path.relpath(path.join(analysis_path_out, path.pardir)))  # parent dir must exist
-			os.makedirs(analysis_path_out)
-
 			# perform analysis
 			analysisResults = analyzeProcessingResult(processingResults, masterParams, writeToDisk)
 			pickle.dump(analysisResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
@@ -421,12 +424,6 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 		""" Visualize and generate report """
 		if doReport:
-			# prepare the output directory
-			results_path_out = masterParams[eName]['path_results']
-			assert not os.path.exists(results_path_out)  # write to empty dir
-			assert os.path.exists(path.relpath(path.join(results_path_out, path.pardir)))  # parent dir must exist
-			os.makedirs(results_path_out)
-
 			# visualize and make a report
 			generateReport(analysisResults, masterParams, logFilePath, writeToDisk)
 		else:
