@@ -32,40 +32,40 @@ def webFlow():
 			copyfile(sourceDataPath, destinationData)
 			return os.path.abspath(destinationData)
 
-	def updateSchema(this_job_path, incompleteSchema):
-		for eName in incompleteSchema:
+	def updateSchema(this_job_path, this_incompleteSchema):
+		for eName in this_incompleteSchema:
 			if eName == 'human':
-				incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath='../jobs/MB_noapostrophes.tsv',
-				                                             prefix=eName+'_')
-				incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=None,
-				                                                prefix=eName+'_')
-				incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath='../jobs/config.ini',
-				                                               prefix=eName+'_')
-				incompleteSchema[eName]['icm'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
-				                                               prefix=eName+'_')
+				this_incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath='../jobs/MB_noapostrophes.tsv',
+				                                                  prefix=eName+'_')
+				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=None,
+				                                                     prefix=eName+'_')
+				this_incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath='../jobs/config.ini',
+				                                                    prefix=eName+'_')
+				this_incompleteSchema[eName]['icm'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
+				                                                 prefix=eName+'_')
 			elif eName == 'mouse':
-				incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath='../jobs/MB_noapostrophes_bis.tsv',
-				                                             prefix=eName+'_')
-				incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath='../jobs/wrapper6_bis.tsv',
-				                                                prefix=eName+'_')
-				incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath='../jobs/config_bis.ini',
-				                                               prefix=eName+'_')
-				incompleteSchema[eName]['icm'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
-				                                            prefix=eName+'_')
+				this_incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath='../jobs/MB_noapostrophes_bis.tsv',
+				                                                  prefix=eName+'_')
+				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath='../jobs/wrapper6_bis.tsv',
+				                                                     prefix=eName+'_')
+				this_incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath='../jobs/config_bis.ini',
+				                                                    prefix=eName+'_')
+				this_incompleteSchema[eName]['icm'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
+				                                                 prefix=eName+'_')
 			# in case no wrapper was uploaded
-			if incompleteSchema[eName]['wrapper'] is None:
+			if this_incompleteSchema[eName]['wrapper'] is None:
 				wrapperFileName = os.path.join(this_job_path, eName+'_wrapper.tsv')
 				open(wrapperFileName, 'w').close()
-				incompleteSchema[eName]['wrapper'] = wrapperFileName
-		return incompleteSchema
+				this_incompleteSchema[eName]['wrapper'] = wrapperFileName
+		return this_incompleteSchema
 
 	def getBaseConfigFile():
 		return 'baseConfig.ini'
 
-	def updateConfigs(this_job_path, schema):
+	def updateConfigs(this_job_path, this_schema):
 		import fileinput
-		for eName in schema:
-			experiment = schema[eName]
+		for eName in this_schema:
+			experiment = this_schema[eName]
 			configFile = experiment['config']
 			# open user config parameters
 			with open(configFile, 'a') as fout, fileinput.input(getBaseConfigFile()) as fin:
@@ -82,10 +82,10 @@ def webFlow():
 				fout.write('path_out = '+dumps(os.path.join(this_job_path, 'output/'))+'\n')
 				fout.write('filename_out = '+dumps(eName)+'\n')
 
-	def updateWrappers(this_job_path, schema):
+	def updateWrappers(this_schema):
 		# write the channel aliases to the wrapper
-		for eName in schema:
-			experiment = schema[eName]
+		for eName in this_schema:
+			experiment = this_schema[eName]
 			channelNames = unnest(experiment['intensityColumnsPerCondition'])
 			channelAliases = unnest(experiment['channelAliasesPerCondition'])
 			wrapperFile = experiment['wrapper']
@@ -100,10 +100,10 @@ def webFlow():
 		                                             prefix='')
 		return this_masterConfigFile
 
-	def updateMasterConfig(this_job_path, this_masterConfigFile, schema):
+	def updateMasterConfig(this_job_path, this_masterConfigFile, this_schema):
 		with open(this_masterConfigFile, 'a') as fout:
 			fout.write('\n')  # so you dont accidentally append to the last line
-			fout.write('schema = '+dumps(schema)+'\n')
+			fout.write('schema = '+dumps(this_schema)+'\n')
 			fout.write('date = ' + dumps(os.path.basename(this_job_path).split('.')[0]) + '\n')
 
 
@@ -122,7 +122,7 @@ def webFlow():
 
 	### STEP 3: update config files and wrapper files
 	updateConfigs(job_path, schema)
-	updateWrappers(job_path, schema)
+	updateWrappers(schema)
 
 	### STEP 4: get masterConfig from web and update it (add schema, date)
 	masterConfigFile = getMasterConfig(job_path)
