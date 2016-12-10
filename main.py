@@ -251,6 +251,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	experimentNames = processingResults.keys()
 	# contains statistics and metadata (like the parameters) about the analysis.
 	metadata = {}
+	metadata['date'] = params['date']
 	# record detections without isotopic correction applied applied. Multi-indexed on experiment names and old indices!
 	metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for
 	                                              eName in experimentNames], keys=experimentNames)
@@ -437,32 +438,59 @@ def webFlow():
 	def updateSchema(this_job_path, incompleteSchema):
 		for eName in incompleteSchema:
 			if eName == 'human':
-				incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath='../jobs/MB_noapostrophes.tsv', prefix=eName)
+				incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath='../jobs/MB_noapostrophes.tsv',
+				                                             prefix=eName+'_')
 				incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=None,
-				                                                prefix=eName)
-				incompleteSchema[eName]['config'] = uploadFile(this_job_path,
-				                                               sourceDataPath='../jobs/config.ini',
-				                                               prefix=eName)
+				                                                prefix=eName+'_')
+				incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath='../jobs/config.ini',
+				                                               prefix=eName+'_')
+				incompleteSchema[eName]['icm'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
+				                                               prefix=eName+'_')
 			elif eName == 'mouse':
-				incompleteSchema[eName]['data'] = uploadFile(this_job_path,
-				                                             sourceDataPath='../dajobsta/MB_noapostrophes_bis.tsv',
-				                                             prefix=eName)
+				incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath='../dajobsta/MB_noapostrophes_bis.tsv',
+				                                             prefix=eName+'_')
 				incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath='../jobs/wrapper6_bis.tsv',
-				                                                prefix=eName)
-				incompleteSchema[eName]['config'] = uploadFile(this_job_path,
-				                                               sourceDataPath='../jobs/config_bis.ini',
-				                                               prefix=eName)
+				                                                prefix=eName+'_')
+				incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath='../jobs/config_bis.ini',
+				                                               prefix=eName+'_')
+				incompleteSchema[eName]['icm'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
+				                                            prefix=eName+'_')
 		return incompleteSchema
 	def getBaseConfigFile():
 		return 'baseConfig.ini'
-	def updateConfigs():
-		JUST APPEND FILES
+	def updateConfigs(this_job_path, schema):
+		import fileinput
+		for eName in schema:
+			experiment = schema[eName]
+			configFile = os.path.join(this_job_path, experiment['config'])
+			# open user config parameters
+			with open(configFile, 'w') as fout, fileinput.input(getBaseConfigFile()) as fin:
+				# write baseConfig parameters
+				for line in fin:
+					if line != '[DEFAULTS]':
+						fout.write(line)
+				# write schema parameters
+				for parameter, value in experiment:
+					if parameter != 'config':
+						fout.write(dumps(parameter, value))
+				# write output parameters
+					fout.write(dumps('path_out', os.path.join(this_job_path, 'output/')))
+					fout.write(dumps('filename_out', eName))
 
 		from configparser import ConfigParser
 		cp = ConfigParser(allow_no_value=True, comment_prefixes=';',
 	                                   inline_comment_prefixes='@')
 		cp.optionxform = str  # so that strings dont automatically get .lower()-ed
 		cp.read(getBaseConfigFile(), encoding='utf-8')
+	def getMasterConfig(this_job_path):
+		this_masterConfigFile = uploadFile(this_job_path, sourceDataPath='../jobs/masterConfig.ini',
+		                                             prefix='')
+		return this_masterConfigFile
+	def updateMasterConfig(this_job_path, this_masterConfigFile, schema):
+		masterConfig = os.path.join(this_job_path, this_masterConfigFile)
+		with open(masterConfig, 'w') as fout:
+			fout.write(dumps('schema', schema))
+			fout.write(dumps('date', this_job_path.split('.')[0]))
 
 
 	### STEP 1: get schema and create new job
@@ -475,25 +503,20 @@ def webFlow():
 		os.removedirs(job_path)
 		raise e
 
-	### STEP 2: upload data files, wrapper files and config (files).
+	### STEP 2: upload data files, wrapper files, ICM files and config (files).
 	schema = updateSchema(job_path, incompleteSchema)
 
 	### STEP 3: update config files
-	updateConfigs(schema)
+	updateConfigs(job_path, schema)
 
-	removeBadConfidence_bool = false
-	removeBadConfidence_minimum = High
-	removeIsolationInterference_bool = false
-	removeIsolationInterference_threshold = 70
-	identifyingNodes = {"master": ["Mascot", "Ions Score"], "slaves": [["Sequest HT", "XCorr"]]}
-	undoublePSMAlgo_exclusive_bool = false
-	collapse_method = mean @ bestMatch / mostIntense / mean / geometricMedian( / weighted)
-	isotopicCorrection_bool = true
-	collapseCharge_bool = true
-	accuracy = 1e-5
-	maxIterations = 50
+	### STEP 4: get masterConfig from web and update it
+	masterConfigFile = getMasterConfig(job_path)
+	updateMasterConfig(job_path, masterConfigFile, schema)
+
+	return os.path.join(job_path, masterConfigFile)
 
 
 if __name__ == '__main__':
-	webFlow()
-	sys.exit(main(masterConfigFilePath='masterConfig.ini', doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=False))
+	masterConfigFilePath = 'masterConfig.ini'
+	masterConfigFilePath = webFlow()
+	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=False))

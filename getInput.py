@@ -28,7 +28,6 @@ def getInput(configFilePath):
 	config.read(configFilePath, encoding='utf-8')
 
 	# get variables from config
-	date = config.get('DEFAULT','date')
 	file_in = config.get('DEFAULT','file_in')
 	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
 	header_in = config.getint('DEFAULT','header_in')
@@ -123,7 +122,6 @@ def getInput(configFilePath):
 	isotopicCorrection_matrix = getIsotopicCorrectionsMatrix(isotopicCorrection_matrix)
 	# assign
 	params = {
-		'date': date,
 		'file_in': file_in,
 		'delim_in': delim_in,
 		'header_in': header_in,
@@ -170,6 +168,7 @@ def getMasterInput(masterConfigFilePath):
 	config.read(masterConfigFilePath, encoding='utf-8')
 
 	# get variables from config in correct typography
+	date = config.get('DEFAULT', 'date')
 	schema = parseExpression(config.get('DEFAULT', 'schema'))
 	path_in = config.get('DEFAULT', 'path_in')
 	pept2protCombinationMethod = config.get('DEFAULT', 'pept2protCombinationMethod')
@@ -187,6 +186,7 @@ def getMasterInput(masterConfigFilePath):
 	# assign the TYPOGRAPHICALLY CORRECT values to the params dict and modify them if necessary.
 	# assign
 	masterParams = {
+		'date': date,
 		'schema': schema,
 		'path_in': path_in,
 		'pept2protCombinationMethod': pept2protCombinationMethod,
