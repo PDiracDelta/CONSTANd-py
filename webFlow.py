@@ -76,12 +76,11 @@ def webFlow():
 						fout.write(line)
 				# write schema parameters
 				fout.write('\n')  # so you dont accidentally append to the last line
-				for parameter, value in experiment.items():
-					if isinstance(value, str): # already a string
-						if parameter != 'config':
-							fout.write(str(parameter)+' = '+value+'\n')
-					else: # value must be dumps-ed into a string
-						fout.write(str(parameter) + ' = ' + dumps(value) + '\n')
+				fout.write('data = ' + experiment['data'] + '\n')
+				fout.write('wrapper = ' + experiment['wrapper'] + '\n')
+					# caution! use the ALIASES, and NOT the original names (they are rewritten by the wrapper)
+				fout.write('intensityColumnsPerCondition = ' + experiment['channelAliasesPerCondition'] + '\n')
+				fout.write('isotopicCorrection_matrix = ' + experiment['isotopicCorrection_matrix'] + '\n')
 				# write output parameters
 				fout.write('path_out = '+str(os.path.join(this_job_path, 'output_processing/'))+'\n')
 				fout.write('filename_out = '+str(eName)+'\n')
