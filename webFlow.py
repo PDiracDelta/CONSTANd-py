@@ -78,7 +78,7 @@ def webFlow():
 				fout.write('\n')  # so you dont accidentally append to the last line
 				for parameter, value in experiment.items():
 					if parameter != 'config':
-						fout.write(dumps(parameter, value)+'\n')
+						fout.write(str(parameter)+' = '+dumps(value)+'\n')
 				# write output parameters
 				fout.write('path_out = '+dumps(os.path.join(this_job_path, 'output/'))+'\n')
 				fout.write('filename_out = '+dumps(eName)+'\n')
