@@ -474,14 +474,8 @@ def webFlow():
 					if parameter != 'config':
 						fout.write(dumps(parameter, value))
 				# write output parameters
-					fout.write(dumps('path_out', os.path.join(this_job_path, 'output/')))
-					fout.write(dumps('filename_out', eName))
-
-		from configparser import ConfigParser
-		cp = ConfigParser(allow_no_value=True, comment_prefixes=';',
-	                                   inline_comment_prefixes='@')
-		cp.optionxform = str  # so that strings dont automatically get .lower()-ed
-		cp.read(getBaseConfigFile(), encoding='utf-8')
+					fout.write('path_out = '+dumps(os.path.join(this_job_path, 'output/'))+'\n')
+					fout.write('filename_out = '+dumps(eName)+'\n')
 	def getMasterConfig(this_job_path):
 		this_masterConfigFile = uploadFile(this_job_path, sourceDataPath='../jobs/masterConfig.ini',
 		                                             prefix='')
@@ -489,8 +483,8 @@ def webFlow():
 	def updateMasterConfig(this_job_path, this_masterConfigFile, schema):
 		masterConfig = os.path.join(this_job_path, this_masterConfigFile)
 		with open(masterConfig, 'w') as fout:
-			fout.write(dumps('schema', schema))
-			fout.write(dumps('date', this_job_path.split('.')[0]))
+			fout.write('schema = '+dumps(schema)+'\n')
+			fout.write('date = ' + dumps(this_job_path.split('.')[0]) + '\n')
 
 
 	### STEP 1: get schema and create new job
