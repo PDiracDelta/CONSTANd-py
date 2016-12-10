@@ -93,9 +93,6 @@ def getInput(configFilePath):
 		raise Exception("Isolation Interference Threshold should be either 'None' or between 0 and 100 (percentage).")
 	if collapse_method not in ('bestMatch', 'mostIntense', 'mean', 'geometricMedian', 'weighted'):
 		raise Exception("Invalid collapse method: '"+collapse_method+"'. Please pick 'max', 'mean' or 'median'.")
-	if collapse_maxRelativeReporterVariance is not None:
-		if not collapse_maxRelativeReporterVariance > 0:
-			raise Exception("maxRelativeChannelVariance should be either 'None' or greater than zero.")
 	if undoublePSMAlgo_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PSM Algorithms.")
 	if undoublePSMAlgo_exclusive_bool is None:
