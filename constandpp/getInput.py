@@ -42,7 +42,6 @@ def getInput(configFilePath):
 	wrapper = config.get('DEFAULT','wrapper')
 	removedDataInOneFile_bool = config.getboolean('DEFAULT','removedDataInOneFile_bool')
 	intensityColumnsPerCondition = parseExpression(config.get('DEFAULT', 'intensityColumnsPerCondition'))
-	channelAliasesPerCondition = parseExpression(config.get('DEFAULT', 'channelAliasesPerCondition'))
 	wantedColumns = parseExpression(config.get('DEFAULT', 'wantedColumns'))
 	noMissingValuesColumns = parseExpression(config.get('DEFAULT', 'noMissingValuesColumns'))
 	removalColumnsToSave = parseExpression(config.get('DEFAULT', 'removalColumnsToSave'))
@@ -137,7 +136,6 @@ def getInput(configFilePath):
 		'removedDataInOneFile_bool': removedDataInOneFile_bool,
 		'intensityColumnsPerCondition': intensityColumnsPerCondition,
 		'intensityColumns': intensityColumns,
-		'channelAliasesPerCondition': channelAliasesPerCondition,
 		'wantedColumns': wantedColumns+intensityColumns, # needs to include intensitycolumns
 		'noMissingValuesColumns': noMissingValuesColumns,
 		'removalColumnsToSave': removalColumnsToSave+intensityColumns, # needs to include intensitycolumns
