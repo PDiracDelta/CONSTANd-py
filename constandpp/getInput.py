@@ -14,6 +14,15 @@ from dataIO import getIsotopicCorrectionsMatrix, getWrapper
 from warnings import warn
 
 
+def parseDelimiter(d):
+	""" Returns a real delimiter without unicode-escaped backslash if it had one. Turns '\\t' into '\t'.
+	Returns None if the delimiter was None. """
+	if d is None:
+		return d
+	else:
+		return gd("unicode_escape")(d)[0] # treat delimiters correctly: ignore first escape
+
+
 def getInput(configFilePath):
 	"""
 	Get mass spec data and CONSTANd parameters from the user or from the web interface as a dict.
@@ -29,7 +38,7 @@ def getInput(configFilePath):
 
 	# get variables from config
 	data = config.get('DEFAULT','data')
-	delim_in = gd("unicode_escape")(config.get('DEFAULT','delim_in'))[0] # treat delimiters correctly: ignore first escape
+	delim_in = parseDelimiter(config.get('DEFAULT', 'delim_in')) # treat delimiters correctly: ignore first escape
 	header_in = config.getint('DEFAULT','header_in')
 	wrapper = config.get('DEFAULT','wrapper')
 	removedDataInOneFile_bool = config.getboolean('DEFAULT','removedDataInOneFile_bool')
@@ -55,7 +64,7 @@ def getInput(configFilePath):
 	maxIterations = config.getint('DEFAULT','maxIterations')
 	path_out = config.get('DEFAULT','path_out')
 	filename_out = config.get('DEFAULT','filename_out')
-	delim_out = gd("unicode_escape")(config.get('DEFAULT','delim_out'))[0] # treat delimiters correctly: ignore first escape
+	delim_out = parseDelimiter(config.get('DEFAULT', 'delim_out')) # treat delimiters correctly: ignore first escape
 
 	# perform checks on the validity of the parameters and raise exceptions if necessary
 	# DO NOT change the value of variables here!
