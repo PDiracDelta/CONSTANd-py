@@ -484,7 +484,7 @@ def webFlow():
 		masterConfig = os.path.join(this_job_path, this_masterConfigFile)
 		with open(masterConfig, 'w') as fout:
 			fout.write('schema = '+dumps(schema)+'\n')
-			fout.write('date = ' + dumps(this_job_path.split('.')[0]) + '\n')
+			fout.write('date = ' + dumps(os.path.basename(this_job_path).split('.')[0]) + '\n')
 
 
 	### STEP 1: get schema and create new job
