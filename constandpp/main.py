@@ -48,7 +48,7 @@ def isotopicImpuritiesTest(): # TEST
 	normalizedIntensities, convergenceTrail, R, S = constand(correctedIntensities, params['accuracy'],
 	                                                         params['maxIterations'])
 	# exportData(normalizedIntensities, 'txt', path_out=params['path_out'],
-	#            filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
+	#            filename=params['jobname'] + '_normalizedIntensities', delim_out=params['delim_out'])
 	# test "impure data"
 	correctedIntensities_impure = correctedIntensities
 	spillover = correctedIntensities_impure[0, :] * 0.1
@@ -298,12 +298,12 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	if writeToDisk:
 		# save the protein-level dataframes
 		exportData(minProteinDF, dataType='df', path_out=params['path_out'],
-		           filename=params['filename_out'] + '_results_minimal', delim_out=params['delim_out'])
+		           filename=params['jobname'] + '_results_minimal', delim_out=params['delim_out'])
 		exportData(fullProteinDF, dataType='df', path_out=params['path_out'],
-		           filename=params['filename_out'] + '_results_full', delim_out=params['delim_out'])
+		           filename=params['jobname'] + '_results_full', delim_out=params['delim_out'])
 		# save the metadata
 		exportData(metadata, dataType='df', path_out=params['path_out'],
-		           filename=params['filename_out'] + '_metadata',
+		           filename=params['jobname'] + '_metadata',
 		           delim_out=params['delim_out'], inOneFile=False)
 		# generate a report PDF (without the normalized intensities: behind paywall?
 
