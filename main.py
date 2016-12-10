@@ -356,7 +356,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	Contains and explicits the workflow of the program. Using the booleans doProcessing, doAnalysis and writeToDisk one
 	can control	which parts of the workflow to perform.
 	"""
-	logFilePath = os.path.relpath(os.path.join(masterConfigFilePath, os.path.join(os.pardir, '/log.txt')))
+	logFilePath = os.path.relpath(os.path.join(masterConfigFilePath, os.path.join(os.pardir, 'log.txt')))
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
 	start = time()
 	masterParams = getMasterInput(masterConfigFilePath) # config filenames + params for the combination of experiments
