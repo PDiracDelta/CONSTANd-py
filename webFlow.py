@@ -20,14 +20,14 @@ def webFlow():
 		this_schemaPath = '../jobs/schema6.tsv'
 		destination = os.path.join(this_job_path, os.path.basename(this_schemaPath))
 		copyfile(this_schemaPath, destination)
-		return os.path.basename(destination)
+		return os.path.abspath(destination)
 	def uploadFile(this_job_path, sourceDataPath, prefix):
 		if sourceDataPath is None:
 			return None
 		else:
 			destinationData = os.path.join(this_job_path, prefix+os.path.basename(sourceDataPath))
 			copyfile(sourceDataPath, destinationData)
-			return os.path.basename(destinationData)
+			return os.path.abspath(destinationData)
 	def updateSchema(this_job_path, incompleteSchema):
 		for eName in incompleteSchema:
 			if eName == 'human':
@@ -55,7 +55,7 @@ def webFlow():
 		import fileinput
 		for eName in schema:
 			experiment = schema[eName]
-			configFile = os.path.join(this_job_path, experiment['config'])
+			configFile = experiment['config']
 			# open user config parameters
 			with open(configFile, 'a') as fout, fileinput.input(getBaseConfigFile()) as fin:
 				fout.write('\n') # so you dont accidentally append to the last line
@@ -75,8 +75,7 @@ def webFlow():
 		                                             prefix='')
 		return this_masterConfigFile
 	def updateMasterConfig(this_job_path, this_masterConfigFile, schema):
-		masterConfig = os.path.join(this_job_path, this_masterConfigFile)
-		with open(masterConfig, 'a') as fout:
+		with open(this_masterConfigFile, 'a') as fout:
 			fout.write('\n')  # so you dont accidentally append to the last line
 			fout.write('schema = '+dumps(schema)+'\n')
 			fout.write('date = ' + dumps(os.path.basename(this_job_path).split('.')[0]) + '\n')
@@ -86,9 +85,9 @@ def webFlow():
 	job_path = newJobDir()
 	schemaPath = uploadSchema(job_path)
 	try:
-		incompleteSchema = parseSchemaFile(os.path.join(job_path, schemaPath))
+		incompleteSchema = parseSchemaFile(schemaPath)
 	except Exception as e: # remove file and job dir if something went wrong
-		os.remove(os.path.join(job_path, schemaPath))
+		os.remove(schemaPath)
 		os.removedirs(job_path)
 		raise e
 
