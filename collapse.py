@@ -62,7 +62,7 @@ def geometricMedian(X, eps=1e-5):
 		y = y1
 
 
-def collapse(toCollapse, df, intensityColumns, method, maxRelativeReporterVariance, identifyingNodes, undoublePSMAlgo_bool, columnsToSave):  #
+def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoublePSMAlgo_bool, columnsToSave):  #
 	"""
 	Generic collapse function. Looks for duplicate 'Annotated Sequence' values in the dataFrame and verifies
 	true duplication using checkTrueDuplicates function. Modifies df according to true duplicates and newly acquired
@@ -157,15 +157,6 @@ def collapse(toCollapse, df, intensityColumns, method, maxRelativeReporterVarian
 
 			if allMS2Intensities is None: # TEST
 				print('hoi')
-
-			if flagMaxRelativeReporterVariance:  # TODO flag when maxRelativeReporterVariance is exceeded
-				# this can only be consistent if executed on RELATIVE intensities.
-				Ri = 1 / allMS2Intensities.shape[1] * np.asarray(1 / np.nanmean(allMS2Intensities, 1)).reshape(
-					allMS2Intensities.shape[0], )
-				relativeIntensities = (allMS2Intensities.T * Ri).T
-				if np.any(np.var(relativeIntensities, axis=0) > maxRelativeReporterVariance):
-					logging.warning("maxRelativeReporterVariance too high for duplicates with indices: " + str(
-						this_duplicatesList) + ".")
 
 			if centerMeasure == 'mean':
 				newIntensitiesDict[bestIndex] = np.nanmean(allMS2Intensities, 0)
