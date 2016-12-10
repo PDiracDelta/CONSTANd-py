@@ -369,7 +369,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 		specificParams[eName] = getInput(masterParams['schema'][eName]['config'])
 		# get the dataframes
 		dfs[eName] = getData(specificParams[eName]['data'], delim=specificParams[eName]['delim_in'], header=specificParams[eName]['header_in'], wrapper=specificParams[eName]['wrapper'])
-
+	# todo find mean of empty slices warning flood source (ABOVE this line)
 	if not testing:
 		for eName in experimentNames:
 			# define global parameters
@@ -439,6 +439,6 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 
 if __name__ == '__main__':
-	masterConfigFilePath = 'masterConfig.ini'
+	masterConfigFilePath = 'masterConfig.ini' # TEST
 	masterConfigFilePath = webFlow()
 	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=False))
