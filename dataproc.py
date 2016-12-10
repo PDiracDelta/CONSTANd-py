@@ -184,6 +184,7 @@ def isotopicCorrection(intensities, correctionsMatrix):
 			noCorrectionIndices.append(np.where(intensities == row)[0][0]) # np.where()[0][0] is numpy equivalent van .index()
 			if not warnedYet:
 				logging.warning("Cannot correct isotope impurities for detections with NaN reporter intensities; skipping those.")
+				warnedYet = True
 	return np.asarray(correctedIntensities), noCorrectionIndices
 
 

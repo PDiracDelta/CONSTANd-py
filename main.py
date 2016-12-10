@@ -14,7 +14,7 @@ __maintainer__ = "Joris Van Houtven"
 __email__ = "vanhoutvenjoris@gmail.com"
 __status__ = "Development"
 
-import sys, os, logging
+import sys, os, logging, datetime
 from webFlow import webFlow
 from getInput import getInput, getMasterInput
 from constand import constand
@@ -387,7 +387,11 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 					os.makedirs(processing_path_out)
 
 				# process every input dataframe
+				logging.info("Starting processing of experiment '" + eName + "' of job '" + masterParams['jobname'] + "' at " +
+			             str(datetime.datetime.now()).split('.')[0])
 				processingResults[eName] = processDf(dfs[eName], specificParams[eName], writeToDisk)
+				logging.info("Finished processing of experiment '" + eName + "' of job '" + masterParams['jobname'] + "' at " +
+			             str(datetime.datetime.now()).split('.')[0])
 				pickle.dump(processingResults[eName], open(processingResultsDumpFilename, 'wb')) # TEST
 			elif doAnalysis:
 				try:
@@ -407,7 +411,11 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 				os.makedirs(analysis_path_out)
 
 			# perform analysis
+			logging.info("Starting analysis of job: " + masterParams['jobname'] + "at " +
+			             str(datetime.datetime.now()).split('.')[0])
 			analysisResults = analyzeProcessingResult(processingResults, masterParams, writeToDisk)
+			logging.info("Finished analysis of job: " + masterParams['jobname'] + "at " +
+			             str(datetime.datetime.now()).split('.')[0])
 			pickle.dump(analysisResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
 		elif doReport:
 			try:
@@ -427,7 +435,11 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 				os.makedirs(results_path_out)
 
 			# visualize and make a report
+			logging.info("Starting visualization end report generation of job: " + masterParams['jobname'] + "at " +
+			             str(datetime.datetime.now()).split('.')[0])
 			generateReport(analysisResults, masterParams, logFilePath, writeToDisk)
+			logging.info("Finished visualization end report generation of job: " + masterParams['jobname'] + "at " +
+			             str(datetime.datetime.now()).split('.')[0])
 		else:
 			logging.warning("No report generated!")
 
@@ -440,4 +452,4 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 if __name__ == '__main__':
 	masterConfigFilePath = 'masterConfig.ini' # TEST
 	masterConfigFilePath = webFlow()
-	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=False))
+	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
