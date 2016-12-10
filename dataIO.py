@@ -167,7 +167,7 @@ def applyWrapper(columns, wrapper):
 	return newColumns
 
 
-def getDataFrame(path_in, delim=None, header=0, wrapper=None):
+def getData(path_in, delim=None, header=0, wrapper=None):
 	"""
 	Gets the dataframe specified by path_in from disk, applies a wrapper (optional) and fixes common format mistakes.
 	:param path_in:     string          existing path to input file
