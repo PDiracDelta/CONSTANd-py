@@ -11,7 +11,7 @@ import pickle
 import configparser
 from json import dumps
 from os import path
-import re
+from warnings import warn
 
 
 def importDataFrame(path_in, delim=None, header=0):
@@ -25,20 +25,23 @@ def importDataFrame(path_in, delim=None, header=0):
 	assert path.exists(path_in)
 
 	if delim is None:
-		extension = path_in.split('.')[-1] # set extension equal to the file extension (can return None)
-		delim = ext2delim(extension)
-		if delim is None:
-			raise Exception(
-				"Cannot handle data: filetype not recognized and no delimiter specified.")
+		if '.' in path_in: # file has an extension
+			extension = path_in.split('.')[-1] # set extension equal to the file extension (can return None)
+			delim = ext2delim(extension)
+		else:
+			warn("No file extension nor delimiter specified; Pandas will try to automatically detect the delimiter.")
 
 	if delim == 'xlsx':
 		df = pd.read_excel(path_in)
-	else:
-		df = pd.read_csv(path_in, delimiter=delim, header=header)
+	else: # delim is something else OR None.
+		try:
+			df = pd.read_csv(path_in, delimiter=delim, header=header)
+		except:
+			if delim is None:
+				raise Exception("Data cannot be read: no delimiter specified and Pandas failed automatic recognition.")
+			else:
+				raise Exception("Data cannot be read: the delimiter "+str(delim)+" is not right for this file.")
 
-	if delim is None:
-		raise Exception(
-			"I don't know how to handle this data: the filetype was not recognized and no delimiter was specified.")
 	return df.dropna(how="all") # drop empty lines
 
 
