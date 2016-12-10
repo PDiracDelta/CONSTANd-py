@@ -14,13 +14,14 @@ __maintainer__ = "Joris Van Houtven"
 __email__ = "vanhoutvenjoris@gmail.com"
 __status__ = "Development"
 
-import sys, os, datetime
+import sys
+from webFlow import webFlow
 from getInput import getInput, getMasterInput
 from constand import constand
 from time import time
 from dataIO import *
 from dataproc import *
-from collapse import collapse#, setCollapseColumnsToSave
+from collapse import collapse
 from analysis import *
 from report import *
 
@@ -415,101 +416,6 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 		devStuff(dfs[0], specificParams[0])
 	stop = time()
 	print(stop - start)
-
-
-def webFlow():
-	from shutil import copyfile
-	def newJobDir():
-		jobPath = os.path.join('../jobs', str(datetime.datetime.now()))
-		os.makedirs(jobPath)
-		return os.path.abspath(jobPath)
-	def uploadSchema(this_job_path):
-		this_schemaPath = '../jobs/schema6.tsv'
-		destination = os.path.join(this_job_path, os.path.basename(this_schemaPath))
-		copyfile(this_schemaPath, destination)
-		return os.path.basename(destination)
-	def uploadFile(this_job_path, sourceDataPath, prefix):
-		if sourceDataPath is None:
-			return None
-		else:
-			destinationData = os.path.join(this_job_path, prefix+os.path.basename(sourceDataPath))
-			copyfile(sourceDataPath, destinationData)
-			return os.path.basename(destinationData)
-	def updateSchema(this_job_path, incompleteSchema):
-		for eName in incompleteSchema:
-			if eName == 'human':
-				incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath='../jobs/MB_noapostrophes.tsv',
-				                                             prefix=eName+'_')
-				incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=None,
-				                                                prefix=eName+'_')
-				incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath='../jobs/config.ini',
-				                                               prefix=eName+'_')
-				incompleteSchema[eName]['icm'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
-				                                               prefix=eName+'_')
-			elif eName == 'mouse':
-				incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath='../jobs/MB_noapostrophes_bis.tsv',
-				                                             prefix=eName+'_')
-				incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath='../jobs/wrapper6_bis.tsv',
-				                                                prefix=eName+'_')
-				incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath='../jobs/config_bis.ini',
-				                                               prefix=eName+'_')
-				incompleteSchema[eName]['icm'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
-				                                            prefix=eName+'_')
-		return incompleteSchema
-	def getBaseConfigFile():
-		return 'baseConfig.ini'
-	def updateConfigs(this_job_path, schema):
-		import fileinput
-		for eName in schema:
-			experiment = schema[eName]
-			configFile = os.path.join(this_job_path, experiment['config'])
-			# open user config parameters
-			with open(configFile, 'a') as fout, fileinput.input(getBaseConfigFile()) as fin:
-				fout.write('\n') # so you dont accidentally append to the last line
-				# write baseConfig parameters
-				for line in fin:
-					if line != '[DEFAULTS]':
-						fout.write(line)
-				# write schema parameters
-				for parameter, value in experiment.items():
-					if parameter != 'config':
-						fout.write(dumps(parameter, value))
-				# write output parameters
-					fout.write('path_out = '+dumps(os.path.join(this_job_path, 'output/'))+'\n')
-					fout.write('filename_out = '+dumps(eName)+'\n')
-	def getMasterConfig(this_job_path):
-		this_masterConfigFile = uploadFile(this_job_path, sourceDataPath='../jobs/masterConfig.ini',
-		                                             prefix='')
-		return this_masterConfigFile
-	def updateMasterConfig(this_job_path, this_masterConfigFile, schema):
-		masterConfig = os.path.join(this_job_path, this_masterConfigFile)
-		with open(masterConfig, 'a') as fout:
-			fout.write('\n')  # so you dont accidentally append to the last line
-			fout.write('schema = '+dumps(schema)+'\n')
-			fout.write('date = ' + dumps(os.path.basename(this_job_path).split('.')[0]) + '\n')
-
-
-	### STEP 1: get schema and create new job
-	job_path = newJobDir()
-	schemaPath = uploadSchema(job_path)
-	try:
-		incompleteSchema = parseSchemaFile(os.path.join(job_path, schemaPath))
-	except Exception as e: # remove file and job dir if something went wrong
-		os.remove(os.path.join(job_path, schemaPath))
-		os.removedirs(job_path)
-		raise e
-
-	### STEP 2: upload data files, wrapper files, ICM files and config (files).
-	schema = updateSchema(job_path, incompleteSchema)
-
-	### STEP 3: update config files
-	updateConfigs(job_path, schema)
-
-	### STEP 4: get masterConfig from web and update it
-	masterConfigFile = getMasterConfig(job_path)
-	updateMasterConfig(job_path, masterConfigFile, schema)
-
-	return os.path.join(job_path, masterConfigFile)
 
 
 if __name__ == '__main__':
