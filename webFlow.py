@@ -77,11 +77,14 @@ def webFlow():
 				# write schema parameters
 				fout.write('\n')  # so you dont accidentally append to the last line
 				for parameter, value in experiment.items():
-					if parameter != 'config':
-						fout.write(str(parameter)+' = '+dumps(value)+'\n')
+					if isinstance(value, str): # already a string
+						if parameter != 'config':
+							fout.write(str(parameter)+' = '+value+'\n')
+					else: # value must be dumps-ed into a string
+						fout.write(str(parameter) + ' = ' + dumps(value) + '\n')
 				# write output parameters
-				fout.write('path_out = '+dumps(os.path.join(this_job_path, 'output/'))+'\n')
-				fout.write('filename_out = '+dumps(eName)+'\n')
+				fout.write('path_out = '+str(os.path.join(this_job_path, 'output/'))+'\n')
+				fout.write('filename_out = '+str(eName)+'\n')
 
 	def updateWrappers(this_schema):
 		# write the channel aliases to the wrapper
@@ -105,7 +108,7 @@ def webFlow():
 		with open(this_masterConfigFile, 'a') as fout:
 			fout.write('\n')  # so you dont accidentally append to the last line
 			fout.write('schema = '+dumps(this_schema)+'\n')
-			fout.write('date = ' + dumps(os.path.basename(this_job_path).split('.')[0]) + '\n')
+			fout.write('date = ' + str(os.path.basename(this_job_path).split('.')[0]) + '\n')
 
 
 	### STEP 1: get schema and create new job
