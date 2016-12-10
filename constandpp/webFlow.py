@@ -82,7 +82,7 @@ def webFlow():
 				fout.write('intensityColumnsPerCondition = ' + dumps(experiment['channelAliasesPerCondition']) + '\n')
 				fout.write('isotopicCorrection_matrix = ' + experiment['isotopicCorrection_matrix'] + '\n')
 				# write output parameters
-				fout.write('path_out = '+str(os.path.join(this_job_path, 'output_processing/'))+'\n')
+				fout.write('path_out = '+str(os.path.join(this_job_path, eName+'_output_processing/'))+'\n')
 				fout.write('filename_out = '+str(eName)+'\n')
 
 	def updateWrappers(this_schema):
