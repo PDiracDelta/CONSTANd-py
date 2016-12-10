@@ -464,7 +464,7 @@ def webFlow():
 			experiment = schema[eName]
 			configFile = os.path.join(this_job_path, experiment['config'])
 			# open user config parameters
-			with open(configFile, 'w') as fout, fileinput.input(getBaseConfigFile()) as fin:
+			with open(configFile, 'a') as fout, fileinput.input(getBaseConfigFile()) as fin:
 				# write baseConfig parameters
 				for line in fin:
 					if line != '[DEFAULTS]':
@@ -482,7 +482,7 @@ def webFlow():
 		return this_masterConfigFile
 	def updateMasterConfig(this_job_path, this_masterConfigFile, schema):
 		masterConfig = os.path.join(this_job_path, this_masterConfigFile)
-		with open(masterConfig, 'w') as fout:
+		with open(masterConfig, 'a') as fout:
 			fout.write('schema = '+dumps(schema)+'\n')
 			fout.write('date = ' + dumps(os.path.basename(this_job_path).split('.')[0]) + '\n')
 
