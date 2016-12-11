@@ -55,7 +55,7 @@ def combineExperimentDFs(dfs): #, schema):
 	# """
 	# for eName in schema:
 	# 	channelAliases = [channel for condition in schema[eName]['channelAliasesPerCondition'] for channel in condition]
-	# 	channels = [channel for condition in schema[eName]['intensityColumnsPerCondition'] for channel in condition]
+	# 	channels = [channel for condition in schema[eName]['channelNamesPerCondition'] for channel in condition]
 	# 	for channel,alias in zip(channels,channelAliases):
 	# 		# replace each old intensityColumn name by its new alias
 	# 		dfs[eName].columns[dfs[eName].columns.index(channel)] = alias
@@ -104,7 +104,7 @@ def getProteinDF(df, proteinPeptidesDict, schema):
 	proteinDFColumns = ['protein', 'peptides', 'description', 'condition 1', 'condition 2']
 	proteinDF = pd.DataFrame([list(proteinPeptidesDict.keys())].extend([[None], ]*len(proteinDFColumns)),
 	                         columns=proteinDFColumns).set_index('protein')
-	# define intensityColumnsPerConditionDict so that it contains the channels of ALL experiments
+	# define channelNamesPerConditionDict so that it contains the channels of ALL experiments
 	channelAliasesPerConditionDict = dict((eName, experiment['channelAliasesPerCondition']) for eName, experiment in schema.items())
 	for protein, peptideIndices in proteinPeptidesDict.items():
 		# interpret as multi index so that you can call .levels and .get_level_values()

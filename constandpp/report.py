@@ -40,7 +40,7 @@ def getColours(schema):
 	:param schema:  dict    schema of the experiments
 	:return:        list    colours per condition (markers differ only across conditions)
 	"""
-	numConditions = len(list(schema.values())[0]['intensityColumnsPerCondition'])
+	numConditions = len(list(schema.values())[0]['channelNamesPerCondition'])
 	distColours = distinguishableColours(numConditions)
 	colours = []
 	for experiment in schema.values():
@@ -85,7 +85,7 @@ def getMarkers(schema):
 	:param schema:  dict    schema of the experiments
 	:return:        list    markers per channel (markers differ only across experiments)
 	"""
-	channelsPerExperiment = [len(unnest(experiment['intensityColumnsPerCondition'])) for experiment in schema.values()]
+	channelsPerExperiment = [len(unnest(experiment['channelNamesPerCondition'])) for experiment in schema.values()]
 	distMarkers = distinguishableMarkers(len(channelsPerExperiment))
 	return unnest([[m]*n for m, n in zip(distMarkers, channelsPerExperiment)])
 

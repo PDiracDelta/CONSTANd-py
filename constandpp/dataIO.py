@@ -83,7 +83,7 @@ def parseSchemaFile(schemaPath): #todo move to web
 		thisRow = schemaDF.loc[2*i, :]
 		experimentName = str(thisRow[0])
 		numConditions = len(thisRow)-1
-		intensityColumnsPerCondition = [str(thisRow[c]).split(',') for c in range(1, numConditions+1)]
+		channelNamesPerCondition = [str(thisRow[c]).split(',') for c in range(1, numConditions+1)]
 		nextRow = schemaDF.loc[2*i+1, :]
 		# if the next row contains just as many values (that are not empty); aliases are provided
 		if len(nextRow) == len(thisRow) and np.sum(nextRow == '') == 0:
@@ -91,9 +91,9 @@ def parseSchemaFile(schemaPath): #todo move to web
 		else: # aliases not (properly) provided
 			shortExperimentName = str(nextRow[0])
 			channelAliasesPerCondition = [[shortExperimentName + '_' + channelName for channelName in condition]
-			                              for condition in intensityColumnsPerCondition]
+			                              for condition in channelNamesPerCondition]
 
-		incompleteSchemaDict[experimentName] = {'intensityColumnsPerCondition': intensityColumnsPerCondition,
+		incompleteSchemaDict[experimentName] = {'channelNamesPerCondition': channelNamesPerCondition,
 		                              'channelAliasesPerCondition': channelAliasesPerCondition,
 		                              'config': None, 'wrapper': None}
 	return incompleteSchemaDict
