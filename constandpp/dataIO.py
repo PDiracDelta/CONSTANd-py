@@ -5,12 +5,12 @@
 Handle all I/O of data files and parameters to and from both the workflow and the main dataFrame.
 """
 
+import os
 import pandas as pd
 import numpy as np
 import pickle
 import configparser
 from json import dumps
-from os import path
 from warnings import warn
 
 
@@ -23,7 +23,7 @@ def importDataFrame(path_in, delim=None, header=0, dtype=None):
 	:param dtype:       dict/object     specifies as which type each column should be interpreted
 	:return df:         pd.dataFrame    Pandas dataFrame of the file contents
 	"""
-	assert path.exists(path_in)
+	assert os.path.exists(path_in)
 
 	if delim is None:
 		if '.' in path_in: # file has an extension
@@ -224,7 +224,7 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 	:param filename:    string  filename for the data
 	:param delim_out:       char    delimiter of the data
 	"""
-	assert path.exists(path_out)
+	assert os.path.exists(path_out)
 
 	extension = delim2ext(delim_out)
 	fullPath = path_out + '/' + filename + extension
@@ -246,8 +246,15 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 		else:
 			assert isinstance(data, pd.DataFrame)
 			data.to_csv(fullPath, sep=delim_out, index=False)
-	elif dataType == 'viz': # TODO
-		pass # plt.savefig('foo.png', bbox_inches='tight')
+	elif dataType == 'viz':
+		for fig in data: # should be a dict
+			outFileName = os.path.join(path_out, filename+'_'+fig)
+			with open(outFileName+'.pkl', "wb") as fout:
+				# save as pickle. Load again later as: ax = pickle.load(file('myplot.pickle')); then plt.show()
+				pickle.dump(fig, fout, protocol=4)
+			from matplotlib import pyplot as plt
+			ax = data[fig]
+			plt.savefig(outFileName+'.png', format='png', bbox_inches='tight')
 
 
 def delim2ext(delim):
