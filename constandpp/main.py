@@ -452,6 +452,6 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 
 if __name__ == '__main__':
-	masterConfigFilePath = 'masterConfig.ini' # TEST
-	#masterConfigFilePath = webFlow()
+	masterConfigFilePath = 'jobConfig.ini' # TEST
+	masterConfigFilePath = webFlow()
 	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))

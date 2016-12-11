@@ -17,11 +17,11 @@ def webFlow():
 	HC_DATA2 = '../jobs/MB_noapostrophes_bis.tsv'
 	HC_WRAPPER1 = None
 	HC_WRAPPER2 = '../jobs/wrapper6_bis.tsv'
-	HC_CONFIG1 = '../jobs/config.ini'
-	HC_CONFIG2 = '../jobs/config_bis.ini'
+	HC_CONFIG1 = '../jobs/processingConfig.ini'
+	HC_CONFIG2 = '../jobs/processingConfig_bis.ini'
 	HC_ICM1 = '../jobs/ICM6_default.tsv'
 	HC_ICM2 = '../jobs/ICM6_default.tsv'
-	HC_MASTERCONFIG = '../jobs/masterConfig.ini'
+	HC_MASTERCONFIG = '../jobs/jobConfig.ini'
 
 	from shutil import copyfile
 
@@ -72,7 +72,7 @@ def webFlow():
 		return this_incompleteSchema
 
 	def getBaseConfigFile():
-		return 'baseConfig.ini'
+		return 'baseProcessingConfig.ini'
 
 	def updateConfigs(this_job_path, this_schema):
 		import fileinput
