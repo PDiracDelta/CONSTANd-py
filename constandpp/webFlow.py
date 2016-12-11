@@ -11,6 +11,17 @@ from json import dumps
 
 
 def webFlow():
+	# HARDCODED FILE LOCATIONS
+	HC_SCHEMA = '../jobs/schema6.tsv'
+	HC_DATA1 = '../jobs/MB_noapostrophes.tsv'
+	HC_DATA2 = '../jobs/MB_noapostrophes_bis.tsv'
+	HC_WRAPPER1 = None
+	HC_WRAPPER2 = '../jobs/wrapper6_bis.tsv'
+	HC_CONFIG1 = '../jobs/config.ini'
+	HC_CONFIG2 = '../jobs/config_bis.ini'
+	HC_ICM1 = '../jobs/ICM6_default.tsv'
+	HC_ICM2 = '../jobs/ICM6_default.tsv'
+
 	from shutil import copyfile
 
 	def newJobDir():
@@ -19,7 +30,7 @@ def webFlow():
 		return os.path.abspath(jobPath)
 
 	def uploadSchema(this_job_path):
-		this_schemaPath = '../jobs/schema6.tsv'
+		this_schemaPath = HC_SCHEMA
 		destination = os.path.join(this_job_path, os.path.basename(this_schemaPath))
 		copyfile(this_schemaPath, destination)
 		return os.path.abspath(destination)
@@ -30,27 +41,27 @@ def webFlow():
 		else:
 			destinationData = os.path.join(this_job_path, prefix+os.path.basename(sourceDataPath))
 			copyfile(sourceDataPath, destinationData)
-			return os.path.abspath(destinationData)
+			return os.path.basename(destinationData)
 
 	def updateSchema(this_job_path, this_incompleteSchema):
 		for eName in this_incompleteSchema:
 			if eName == 'human':
-				this_incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath='../jobs/MB_noapostrophes.tsv',
+				this_incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath=HC_DATA1,
 				                                                  prefix=eName+'_')
-				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=None,
+				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=HC_WRAPPER1,
 				                                                     prefix=eName+'_')
-				this_incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath='../jobs/config.ini',
+				this_incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath=HC_CONFIG1,
 				                                                    prefix=eName+'_')
-				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
+				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path, sourceDataPath=HC_ICM1,
 				                                                 prefix=eName+'_')
 			elif eName == 'mouse':
-				this_incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath='../jobs/MB_noapostrophes_bis.tsv',
+				this_incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath=HC_DATA2,
 				                                                  prefix=eName+'_')
-				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath='../jobs/wrapper6_bis.tsv',
+				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=HC_WRAPPER2,
 				                                                     prefix=eName+'_')
-				this_incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath='../jobs/config_bis.ini',
+				this_incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath=HC_CONFIG2,
 				                                                    prefix=eName+'_')
-				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path, sourceDataPath='../jobs/ICM6_default.tsv',
+				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path, sourceDataPath=HC_ICM2,
 				                                                 prefix=eName+'_')
 			# in case no wrapper was uploaded
 			if this_incompleteSchema[eName]['wrapper'] is None:
