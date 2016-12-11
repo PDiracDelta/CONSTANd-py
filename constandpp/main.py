@@ -383,6 +383,8 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 					assert os.path.exists(
 						path.abspath(path.join(processing_path_out, path.pardir)))  # parent dir must exist
 					os.makedirs(processing_path_out)
+				else:
+					raise Exception("Output path "+processing_path_out+" already exists! Aborting.")
 
 				# process every input dataframe
 				logging.info("Starting processing of experiment '" + eName + "' of job '" + jobParams['jobname'] + "' at " +
