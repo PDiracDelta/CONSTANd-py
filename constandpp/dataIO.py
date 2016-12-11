@@ -14,12 +14,13 @@ from os import path
 from warnings import warn
 
 
-def importDataFrame(path_in, delim=None, header=0):
+def importDataFrame(path_in, delim=None, header=0, dtype=None):
 	"""
 	Get the data from disk as a Pandas DataFrame.
 	:param path_in:     string          existing path to input file
 	:param delim:       char            delimiter of the data
 	:param header:      int             row that contains the header of the data (None if no header)
+	:param dtype:       dict/object     specifies as which type each column should be interpreted
 	:return df:         pd.dataFrame    Pandas dataFrame of the file contents
 	"""
 	assert path.exists(path_in)
@@ -35,7 +36,7 @@ def importDataFrame(path_in, delim=None, header=0):
 		df = pd.read_excel(path_in)
 	else: # delim is something else OR None.
 		try:
-			df = pd.read_csv(path_in, delimiter=delim, header=header)
+			df = pd.read_csv(path_in, delimiter=delim, header=header, dtype=dtype)
 		except:
 			if delim is None:
 				raise Exception("Data cannot be read: no delimiter specified and Pandas failed automatic recognition.")
@@ -60,7 +61,7 @@ def getWrapper(path_in='wrapper.tsv'):
 	:param path_in: str            path of the wrapper file
 	:return :       nested list    wrapper specifying column name transformations
 	"""
-	return list(importDataFrame(path_in, header=None).astype(str).values)
+	return list(importDataFrame(path_in, header=None, dtype=str).values)
 
 
 def TMT2ICM(TMTImpuritiesDF): # todo move to web
@@ -96,7 +97,6 @@ def TMT2ICM(TMTImpuritiesDF): # todo move to web
 			extraIsotope = label[4]
 
 
-
 def parseSchemaFile(schemaPath): #todo move to web
 	"""
 	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment. The
@@ -110,7 +110,7 @@ def parseSchemaFile(schemaPath): #todo move to web
 											{ experiment: { channels: [[channels] per condition], aliases: [[channels] per condition] }
 	"""
 	# import schema file as dataframe and replace nan values by empty strings
-	schemaDF = importDataFrame(schemaPath, delim='\t', header=None).replace(np.nan, '', regex=True)
+	schemaDF = importDataFrame(schemaPath, delim='\t', header=None, dtype=str).replace(np.nan, '', regex=True)
 	incompleteSchemaDict = {}
 	assert np.mod(len(schemaDF), 2) == 0 # schema must have even number of lines
 	for i in range(int(len(schemaDF)/2)):
