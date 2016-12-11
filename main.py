@@ -162,6 +162,7 @@ def devStuff(df, params): # TEST
 
 
 def processDf(df, params, writeToDisk):
+	# todo docu
 	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
 	# remove detections where (essential) data is missing.
 	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['intensityColumns'])
@@ -235,6 +236,7 @@ def processDf(df, params, writeToDisk):
 
 
 def analyzeProcessingResult(processingResults, params, writeToDisk):
+	# todo docu
 	processingResultsItems = processingResults.items()
 	dfs = dict((eName, result[0]) for eName, result in processingResultsItems)
 	normalizedIntensitiess = dict((eName, result[1]) for eName, result in processingResultsItems)
@@ -333,8 +335,8 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 	                                               params['labelVolcanoPlotAreas'])
 	visualizationsDict['fullVolcano'] = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
 	                                                  params['labelVolcanoPlotAreas'])
-	visualizationsDict['pca'] = getPCAPlot(PCAResult, params['schema']) # todo multiple experimenst
-	visualizationsDict['hcd'] = getHCDendrogram(HCResult, params['schema']) # todo multiple experimenst
+	visualizationsDict['pca'] = getPCAPlot(PCAResult, params['schema'])
+	visualizationsDict['hcd'] = getHCDendrogram(HCResult, params['schema'])
 
 	# generate HTML and PDF reports # todo
 	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, visualizationsDict,
