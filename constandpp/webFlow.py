@@ -13,6 +13,7 @@ from json import dumps
 def webFlow(exptype='dummy'):
 	# HARDCODED FILE LOCATIONS
 	if exptype == 'dummy':
+		HC_JOBNAME = 'dummy'
 		HC_SCHEMA = '../jobs/schema6.tsv'
 		HC_ENAME1 = 'human'
 		HC_ENAME2 = 'mouse'
@@ -31,6 +32,7 @@ def webFlow(exptype='dummy'):
 		coonconfig = '../jobs/coonProcessingConfig.ini'
 		coonwrapper = None #'../jobs/coonWrapper.tsv'
 		coonICM = None
+		HC_JOBNAME = 'COON'
 		HC_SCHEMA = '../jobs/coonSchema.tsv'
 		HC_ENAME1 = 'BR1'
 		HC_ENAME2 = 'BR2'
@@ -56,8 +58,11 @@ def webFlow(exptype='dummy'):
 
 	from shutil import copyfile
 
-	def newJobDir():
-		jobPath = os.path.join('../jobs', str(datetime.datetime.now()))
+	def getJobName():
+		return HC_JOBNAME
+
+	def newJobDir(job_name):
+		jobPath = os.path.join('../jobs', str(datetime.datetime.now())+'_'+job_name)
 		os.makedirs(jobPath)
 		return os.path.abspath(jobPath)
 
@@ -165,9 +170,10 @@ def webFlow(exptype='dummy'):
 		                                             prefix='')
 		return os.path.join(this_job_path, this_masterConfigFile)
 
-	def updateMasterConfig(this_job_path, this_masterConfigFileAbsPath, this_schema):
+	def updateMasterConfig(this_job_path, this_masterConfigFileAbsPath, this_schema, this_jobname):
 		with open(this_masterConfigFileAbsPath, 'a') as fout:
 			fout.write('\n')  # so you dont accidentally append to the last line
+			fout.write('jobname = ' + this_jobname+ '\n')
 			fout.write('path_out = output_analysis\n')
 			fout.write('path_results = results\n')
 			fout.write('schema = '+dumps(this_schema)+'\n')
@@ -175,7 +181,8 @@ def webFlow(exptype='dummy'):
 
 
 	### STEP 1: get schema and create new job
-	job_path = newJobDir()
+	job_name = getJobName()
+	job_path = newJobDir(job_name)
 	schemaPath = uploadSchema(job_path)
 	try:
 		incompleteSchema = parseSchemaFile(schemaPath)
@@ -193,6 +200,6 @@ def webFlow(exptype='dummy'):
 
 	### STEP 4: get masterConfig from web and update it (add schema, date, path_out, path_results)
 	masterConfigFileAbsPath = getMasterConfig(job_path)
-	updateMasterConfig(job_path, masterConfigFileAbsPath, schema)
+	updateMasterConfig(job_path, masterConfigFileAbsPath, schema, job_name)
 
 	return masterConfigFileAbsPath
