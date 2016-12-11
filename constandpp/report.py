@@ -22,7 +22,7 @@ from matplotlib import markers
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
 
 
-def distinguishableColours(n, type='prism'):
+def distinguishableColours(n, type='jet'):
 	"""
 	Generates distinguishable colours in the format of a nConditionsx4 array.
 	:param nConditions: int         number of colours
@@ -181,13 +181,17 @@ def getHCDendrogram(HCResult, schema):
 	plt.title('Hierarchical Clustering Dendrogram', figure=HCDendrogram)
 	plt.xlabel('reporter channel', figure=HCDendrogram)
 	plt.ylabel('distance', figure=HCDendrogram)
-	dendrogram(HCResult, orientation='right', leaf_rotation=0., leaf_font_size=12, labels=allChannelAliases)
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
 	colorsPerCondition = getColours(schema)
+	# channelColorsDict = dict(zip(allChannelAliases, colorsPerCondition)) # { channel : color }
+	dendrogram(HCResult, orientation='right', leaf_rotation=0., leaf_font_size=12, labels=allChannelAliases,
+	           link_color_func=lambda x: colorsPerCondition[x] if x < len(colorsPerCondition) else 'k',
+	           above_threshold_color='k')
 	ax = plt.gca()
-	xlbls = ax.get_xmajorticklabels()
-	for i in range(len(xlbls)):
-		xlbls[i].set_color(label_colors[xlbls[i].get_text()])
+	ylbls = ax.get_ymajorticklabels()
+	for i in range(len(ylbls)):
+		#ylbls[i].set_color(channelColorsDict[ylbls[i].get_text()])
+		ylbls[i].set_color(colorsPerCondition[i])
 	plt.show()  # TEST
 	return HCDendrogram
 
