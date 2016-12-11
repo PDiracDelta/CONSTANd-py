@@ -68,9 +68,9 @@ def getInput(configFilePath):
 	# perform checks on the validity of the parameters and raise exceptions if necessary
 	# DO NOT change the value of variables here!
 	# TODO the 'is None' checks are obsolete. remove them (keep the error messages for later, now).
-	if not os.path.exists(data): # TODO for all files
+	if not os.path.exists(os.path.join(jobdir, data)): # TODO for all files
 		raise FileNotFoundError("File "+data+" not found.")
-	if not os.path.exists(wrapper): # TODO for all files
+	if not os.path.exists(os.path.join(jobdir, wrapper)): # TODO for all files
 		raise FileNotFoundError("File "+wrapper+" not found.")
 	if delim_in is not None:
 		if not (len(delim_in) == 1 and isinstance(delim_in, str)):
@@ -114,7 +114,7 @@ def getInput(configFilePath):
 		raise Exception("Accuracy must be strictly greater than zero.")
 	if not (maxIterations > 0 and isinstance(maxIterations,int)):
 		raise Exception("Maximum number of iterations must be an integer strictly greater than zero.")
-	if os.path.exists(path_out):
+	if os.path.exists(os.path.join(jobdir, path_out)):
 		raise FileNotFoundError("Path " + path_out + " already exists!")
 	if not (len(delim_out) == 1 and isinstance(delim_out, str)):
 		raise Exception("Delimiter of output file must be a character (string of length one).")
