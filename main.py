@@ -453,5 +453,5 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 if __name__ == '__main__':
 	masterConfigFilePath = 'jobConfig.ini' # TEST
-	masterConfigFilePath = webFlow()
+	masterConfigFilePath = webFlow('COON')
 	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
