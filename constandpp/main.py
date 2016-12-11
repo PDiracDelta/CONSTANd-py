@@ -380,7 +380,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			# 	specificParams[eName]['collapseColumnsToSave'])  # define the intensityColumns for use in processing.py
 			""" Data processing """
 			processing_path_out = specificParams[eName]['path_out']
-			processingResultsDumpFilename = path.abspath(path.join(processing_path_out, path.pardir))+'/processingResultsDump_'+str(eName)
+			processingResultsDumpFilename = path.join(processing_path_out, 'processingResultsDump_'+str(eName))
 			if doProcessing:
 				# prepare the output directories
 				if not os.path.exists(processing_path_out):  # do not overwrite dir
@@ -405,7 +405,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 		""" Data analysis """
 		analysis_path_out = masterParams['path_out']
-		analysisResultsDumpFilename = analysis_path_out + '/analysisResultsDump'
+		analysisResultsDumpFilename = os.path.join(analysis_path_out, 'analysisResultsDump')
 		if doAnalysis:
 			# prepare the output directories
 			if not os.path.exists(analysis_path_out):  # do not overwrite dir
