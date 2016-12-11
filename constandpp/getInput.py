@@ -42,7 +42,8 @@ def getProcessingInput(configFilePath):
 	header_in = config.getint('DEFAULT','header_in')
 	wrapper = config.get('DEFAULT','wrapper')
 	removedDataInOneFile_bool = config.getboolean('DEFAULT','removedDataInOneFile_bool')
-	intensityColumnsPerCondition = parseExpression(config.get('DEFAULT', 'intensityColumnsPerCondition'))
+	# intensityColumnsPerCondition = parseExpression(config.get('DEFAULT', 'intensityColumnsPerCondition'))
+	intensityColumns = parseExpression(config.get('DEFAULT', 'intensityColumns'))
 	wantedColumns = parseExpression(config.get('DEFAULT', 'wantedColumns'))
 	noMissingValuesColumns = parseExpression(config.get('DEFAULT', 'noMissingValuesColumns'))
 	removalColumnsToSave = parseExpression(config.get('DEFAULT', 'removalColumnsToSave'))
@@ -77,7 +78,7 @@ def getProcessingInput(configFilePath):
 			raise Exception("Delimiter of input file must be a character (string of length one).")
 	if not ((isinstance(header_in, int) and header_in >= 0) or header_in is None):
 		raise Exception("Header parameter of the input file must be a non-negative integer or of type None.")
-	if intensityColumnsPerCondition is None:
+	if intensityColumns is None:
 		raise Exception("Please indicate which columns contain the MS2 reporter intensities.")
 	if wantedColumns is None:
 		raise Exception("Please indicate which columns (in addition to the intensities) you would like to have output for.")
@@ -121,7 +122,7 @@ def getProcessingInput(configFilePath):
 
 	# assign the TYPOGRAPHICALLY CORRECT values to the params dict and modify them if necessary.
 	# modify
-	intensityColumns = [item for sublist in intensityColumnsPerCondition for item in sublist]
+	#intensityColumns = [item for sublist in intensityColumnsPerCondition for item in sublist]
 	wrapper = getWrapper(os.path.join(jobdir, wrapper))
 	isotopicCorrection_matrix = getIsotopicCorrectionsMatrix(os.path.join(jobdir, isotopicCorrection_matrix))
 	path_out = os.path.join(jobdir, path_out)
@@ -133,7 +134,7 @@ def getProcessingInput(configFilePath):
 		'header_in': header_in,
 		'wrapper': wrapper,
 		'removedDataInOneFile_bool': removedDataInOneFile_bool,
-		'intensityColumnsPerCondition': intensityColumnsPerCondition,
+		'intensityColumnsPerCondition': intensityColumns,
 		'intensityColumns': intensityColumns,
 		'wantedColumns': wantedColumns+intensityColumns, # needs to include intensitycolumns
 		'noMissingValuesColumns': noMissingValuesColumns,
