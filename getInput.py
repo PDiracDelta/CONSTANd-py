@@ -7,7 +7,7 @@ Get the input parameters from the config file.
 
 import configparser
 # import numpy as np
-from os import path
+import os
 from json import loads as parseExpression
 from codecs import getdecoder as gd
 from dataIO import getIsotopicCorrectionsMatrix, getWrapper
@@ -27,7 +27,8 @@ def getInput(configFilePath):
 	Get mass spec data and CONSTANd parameters from the user or from the web interface as a dict.
 	"""
 	# TODO add all parameters in docstring
-	# TODO add .lower() to all string input except requiredColumns and intensityColumns
+	# add this prefix to all file paths
+	jobdir = os.path.abspath(os.path.join(configFilePath, os.pardir))
 
 	# read the config file to obtain the defaults
 	config = configparser.ConfigParser(allow_no_value=True, comment_prefixes=';',
@@ -67,9 +68,9 @@ def getInput(configFilePath):
 	# perform checks on the validity of the parameters and raise exceptions if necessary
 	# DO NOT change the value of variables here!
 	# TODO the 'is None' checks are obsolete. remove them (keep the error messages for later, now).
-	if not path.exists(data): # TODO for all files
+	if not os.path.exists(data): # TODO for all files
 		raise FileNotFoundError("File "+data+" not found.")
-	if not path.exists(wrapper): # TODO for all files
+	if not os.path.exists(wrapper): # TODO for all files
 		raise FileNotFoundError("File "+wrapper+" not found.")
 	if delim_in is not None:
 		if not (len(delim_in) == 1 and isinstance(delim_in, str)):
@@ -113,7 +114,7 @@ def getInput(configFilePath):
 		raise Exception("Accuracy must be strictly greater than zero.")
 	if not (maxIterations > 0 and isinstance(maxIterations,int)):
 		raise Exception("Maximum number of iterations must be an integer strictly greater than zero.")
-	if path.exists(path_out):
+	if os.path.exists(path_out):
 		raise FileNotFoundError("Path " + path_out + " already exists!")
 	if not (len(delim_out) == 1 and isinstance(delim_out, str)):
 		raise Exception("Delimiter of output file must be a character (string of length one).")
@@ -121,8 +122,10 @@ def getInput(configFilePath):
 	# assign the TYPOGRAPHICALLY CORRECT values to the params dict and modify them if necessary.
 	# modify
 	intensityColumns = [item for sublist in intensityColumnsPerCondition for item in sublist]
-	wrapper = getWrapper(wrapper)
-	isotopicCorrection_matrix = getIsotopicCorrectionsMatrix(isotopicCorrection_matrix)
+	wrapper = getWrapper(os.path.join(jobdir, wrapper))
+	isotopicCorrection_matrix = getIsotopicCorrectionsMatrix(os.path.join(jobdir, isotopicCorrection_matrix))
+	path_out = os.path.join(jobdir, path_out)
+	data = os.path.join(jobdir, data)
 	# assign
 	params = {
 		'data': data,
