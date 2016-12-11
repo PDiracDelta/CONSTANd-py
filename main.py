@@ -117,7 +117,7 @@ def compareIntensitySN():
 	filepath2 = '../data/COON data/PSMs/fixed_BR1_b_SN.txt'
 	constandnorm=True
 	if constandnorm:
-		if path.exists('../data/compareIntensitySNProcessingResults'):
+		if os.path.exists('../data/compareIntensitySNProcessingResults'):
 			processingResults = pickle.load(open('../data/compareIntensitySNProcessingResults', 'rb'))
 		else:
 			params=getProcessingInput()
@@ -376,12 +376,12 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			                     header=processingParams[eName]['header_in'],
 			                     wrapper=processingParams[eName]['wrapper'])
 			processing_path_out = processingParams[eName]['path_out']
-			processingResultsDumpFilename = path.join(processing_path_out, 'processingResultsDump_'+str(eName))
+			processingResultsDumpFilename = os.path.join(processing_path_out, 'processingResultsDump_'+str(eName))
 			if doProcessing:
 				# prepare the output directories
 				if not os.path.exists(processing_path_out):  # do not overwrite dir
 					assert os.path.exists(
-						path.abspath(path.join(processing_path_out, path.pardir)))  # parent dir must exist
+						os.path.abspath(os.path.join(processing_path_out, os.path.pardir)))  # parent dir must exist
 					os.makedirs(processing_path_out)
 				else:
 					raise Exception("Output path "+processing_path_out+" already exists! Aborting.")
@@ -407,7 +407,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 		if doAnalysis:
 			# prepare the output directories
 			if not os.path.exists(analysis_path_out):  # do not overwrite dir
-				assert os.path.exists(path.abspath(path.join(analysis_path_out, path.pardir)))  # parent dir must exist
+				assert os.path.exists(os.path.abspath(os.path.join(analysis_path_out, os.path.pardir)))  # parent dir must exist
 				os.makedirs(analysis_path_out)
 
 			# perform analysis
@@ -431,7 +431,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 		if doReport:
 			# prepare the output directories
 			if not os.path.exists(results_path_out):  # do not overwrite dir
-				assert os.path.exists(path.abspath(path.join(results_path_out, path.pardir)))  # parent dir must exist
+				assert os.path.exists(os.path.abspath(os.path.join(results_path_out, os.path.pardir)))  # parent dir must exist
 				os.makedirs(results_path_out)
 
 			# visualize and make a report
@@ -451,6 +451,6 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 if __name__ == '__main__':
 	#masterConfigFilePath = 'jobConfig.ini' # TEST
-	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-11 22:17:20.393578_COON')
-	masterConfigFilePath = webFlow(exptype='COON')
-	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=False))
+	masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-11 22:17:20.393578_COON')
+	#masterConfigFilePath = webFlow(exptype='COON')
+	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=False))
