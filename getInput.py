@@ -115,8 +115,6 @@ def getProcessingInput(configFilePath):
 		raise Exception("Accuracy must be strictly greater than zero.")
 	if not (maxIterations > 0 and isinstance(maxIterations,int)):
 		raise Exception("Maximum number of iterations must be an integer strictly greater than zero.")
-	if os.path.exists(os.path.join(jobdir, path_out)):
-		raise FileNotFoundError("Path " + path_out + " already exists!")
 	if not (len(delim_out) == 1 and isinstance(delim_out, str)):
 		raise Exception("Delimiter of output file must be a character (string of length one).")
 
