@@ -22,7 +22,7 @@ def parseDelimiter(d):
 		return gd("unicode_escape")(d)[0] # treat delimiters correctly: ignore first escape
 
 
-def getInput(configFilePath):
+def getProcessingInput(configFilePath):
 	"""
 	Get mass spec data and CONSTANd parameters from the user or from the web interface as a dict.
 	"""
@@ -166,7 +166,7 @@ def getInput(configFilePath):
 	return params
 
 
-def getMasterInput(masterConfigFilePath):
+def getJobInput(masterConfigFilePath):
 	# add this prefix to all file paths
 	jobdir = os.path.abspath(os.path.join(masterConfigFilePath, os.pardir))
 
