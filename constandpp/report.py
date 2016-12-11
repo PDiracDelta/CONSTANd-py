@@ -38,7 +38,7 @@ def getColours(schema):
 	Returns list of colours for all the channels in all experiments (based on schema) so that the channels of the same
 	condition have the same marker.
 	:param schema:  dict    schema of the experiments
-	:return:        list    colours per condition (markers differ only across conditions)
+	:return:        list    colours for each channel; a different one for each condition (markers differ only across conditions)
 	"""
 	numConditions = len(list(schema.values())[0]['channelNamesPerCondition'])
 	distColours = distinguishableColours(numConditions)
