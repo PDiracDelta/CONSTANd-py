@@ -368,12 +368,6 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 	if not testing:
 		for eName in experimentNames:
-			# define global parameters
-			# setProcessingGlobals(intensityColumns=processingParams[eName]['intensityColumns'],
-			#                      removalColumnsToSave=processingParams[eName]['removalColumnsToSave'],
-			#                      noMissingValuesColumns=processingParams[eName]['noMissingValuesColumns'])
-			# setCollapseColumnsToSave(
-			# 	processingParams[eName]['collapseColumnsToSave'])  # define the intensityColumns for use in processing.py
 			""" Data processing """
 			# get all input parameters
 			processingParams[eName] = getProcessingInput(jobParams['schema'][eName]['config'])
