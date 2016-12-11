@@ -165,7 +165,7 @@ def getPCAPlot(PCAResult, schema):
 	#xmin, xmax, ymin, ymax = min(PCAResult[:, 0]), max(PCAResult[:, 0]), min(PCAResult[:, 1]), max(PCAResult[:, 1])
 	for (x, y, color, marker, label) in zip(PCAResult[:, 0], PCAResult[:, 1], colorsPerCondition, markersPerExperiment, allChannelAliases):
 		# produce scatterplot of two first principal components and annotate
-		plt.scatter(x, y, color=color, marker=marker, figure=PCAPlot)
+		plt.scatter(x, y, color=color, marker=marker, figure=PCAPlot, s=40)
 		plt.annotate(label, xy=(x, y), xytext=(-1, 1),
 			textcoords='offset points', ha='right', va='bottom')
 	#plt.axhspan(xmin=xmin-0.1(xmax-xmin), ymax=ymax+0.05*(ymax-ymin))
