@@ -20,7 +20,7 @@ from getInput import getProcessingInput, getJobInput
 from constand import constand
 from time import time
 from dataIO import *
-from dataproc import *
+from processing import *
 from collapse import collapse
 from analysis import *
 from report import *
@@ -124,7 +124,7 @@ def compareIntensitySN():
 			# setProcessingGlobals(intensityColumns=params['intensityColumns'],
 			# 					 removalColumnsToSave=params['removalColumnsToSave'],
 			# 					 noMissingValuesColumns=params['noMissingValuesColumns'])
-			# setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
+			# setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in processing.py
 			dfs = []
 			for filepath in [filepath1, filepath2]:
 				dfs.append(importDataFrame(filepath, delim=params['delim_in'], header=params['header_in']))
@@ -377,7 +377,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			#                      removalColumnsToSave=specificParams[eName]['removalColumnsToSave'],
 			#                      noMissingValuesColumns=specificParams[eName]['noMissingValuesColumns'])
 			# setCollapseColumnsToSave(
-			# 	specificParams[eName]['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
+			# 	specificParams[eName]['collapseColumnsToSave'])  # define the intensityColumns for use in processing.py
 			""" Data processing """
 			processing_path_out = specificParams[eName]['path_out']
 			processingResultsDumpFilename = path.abspath(path.join(processing_path_out, path.pardir))+'/processingResultsDump_'+str(eName)
