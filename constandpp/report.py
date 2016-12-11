@@ -181,7 +181,13 @@ def getHCDendrogram(HCResult, schema):
 	plt.title('Hierarchical Clustering Dendrogram', figure=HCDendrogram)
 	plt.xlabel('reporter channel', figure=HCDendrogram)
 	plt.ylabel('distance', figure=HCDendrogram)
-	dendrogram(HCResult, leaf_rotation=0., leaf_font_size=12, labels=allChannelAliases)
+	dendrogram(HCResult, orientation='right', leaf_rotation=0., leaf_font_size=12, labels=allChannelAliases)
+	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
+	colorsPerCondition = getColours(schema)
+	ax = plt.gca()
+	xlbls = ax.get_xmajorticklabels()
+	for i in range(len(xlbls)):
+		xlbls[i].set_color(label_colors[xlbls[i].get_text()])
 	plt.show()  # TEST
 	return HCDendrogram
 
