@@ -21,6 +21,7 @@ def webFlow():
 	HC_CONFIG2 = '../jobs/config_bis.ini'
 	HC_ICM1 = '../jobs/ICM6_default.tsv'
 	HC_ICM2 = '../jobs/ICM6_default.tsv'
+	HC_MASTERCONFIG = '../jobs/masterConfig.ini'
 
 	from shutil import copyfile
 
@@ -50,8 +51,8 @@ def webFlow():
 				                                                  prefix=eName+'_')
 				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=HC_WRAPPER1,
 				                                                     prefix=eName+'_')
-				this_incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath=HC_CONFIG1,
-				                                                    prefix=eName+'_')
+				this_incompleteSchema[eName]['config'] = os.path.join(this_job_path, uploadFile(this_job_path, sourceDataPath=HC_CONFIG1,
+				                                                    prefix=eName+'_')) # config needs FULL PATH!
 				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path, sourceDataPath=HC_ICM1,
 				                                                 prefix=eName+'_')
 			elif eName == 'mouse':
@@ -59,14 +60,14 @@ def webFlow():
 				                                                  prefix=eName+'_')
 				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=HC_WRAPPER2,
 				                                                     prefix=eName+'_')
-				this_incompleteSchema[eName]['config'] = uploadFile(this_job_path, sourceDataPath=HC_CONFIG2,
-				                                                    prefix=eName+'_')
+				this_incompleteSchema[eName]['config'] = os.path.join(this_job_path, uploadFile(this_job_path, sourceDataPath=HC_CONFIG2,
+				                                                    prefix=eName+'_')) # config needs FULL PATH!
 				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path, sourceDataPath=HC_ICM2,
 				                                                 prefix=eName+'_')
 			# in case no wrapper was uploaded
 			if this_incompleteSchema[eName]['wrapper'] is None:
-				wrapperFileName = os.path.join(this_job_path, eName+'_wrapper.tsv')
-				open(wrapperFileName, 'w').close()
+				wrapperFileName = eName+'_wrapper.tsv'
+				open(os.path.join(this_job_path, wrapperFileName), 'w').close()
 				this_incompleteSchema[eName]['wrapper'] = wrapperFileName
 		return this_incompleteSchema
 
@@ -77,7 +78,7 @@ def webFlow():
 		import fileinput
 		for eName in this_schema:
 			experiment = this_schema[eName]
-			configFile = experiment['config']
+			configFile = os.path.join(this_job_path, experiment['config'])
 			# open user config parameters
 			with open(configFile, 'a') as fout, fileinput.input(getBaseConfigFile()) as fin:
 				fout.write('\n') # so you dont accidentally append to the last line
@@ -93,16 +94,16 @@ def webFlow():
 				fout.write('intensityColumnsPerCondition = ' + dumps(experiment['channelAliasesPerCondition']) + '\n')
 				fout.write('isotopicCorrection_matrix = ' + experiment['isotopicCorrection_matrix'] + '\n')
 				# write output parameters
-				fout.write('path_out = '+str(os.path.join(this_job_path, eName+'_output_processing/'))+'\n')
+				fout.write('path_out = '+eName+'_output_processing/\n')
 				fout.write('filename_out = '+str(eName)+'\n')
 
-	def updateWrappers(this_schema):
+	def updateWrappers(this_job_path, this_schema):
 		# write the channel aliases to the wrapper
 		for eName in this_schema:
 			experiment = this_schema[eName]
 			channelNames = unnest(experiment['intensityColumnsPerCondition'])
 			channelAliases = unnest(experiment['channelAliasesPerCondition'])
-			wrapperFile = experiment['wrapper']
+			wrapperFile = os.path.join(this_job_path, experiment['wrapper'])
 			# open user config parameters
 			with open(wrapperFile, 'a') as fout:
 				fout.write('\n') # so you dont accidentally append to the last line
@@ -110,12 +111,12 @@ def webFlow():
 					fout.write(n+'\t'+a+'\n')
 
 	def getMasterConfig(this_job_path):
-		this_masterConfigFile = uploadFile(this_job_path, sourceDataPath='../jobs/masterConfig.ini',
+		this_masterConfigFile = uploadFile(this_job_path, sourceDataPath=HC_MASTERCONFIG,
 		                                             prefix='')
-		return this_masterConfigFile
+		return os.path.join(this_job_path, this_masterConfigFile)
 
-	def updateMasterConfig(this_job_path, this_masterConfigFile, this_schema):
-		with open(this_masterConfigFile, 'a') as fout:
+	def updateMasterConfig(this_job_path, this_masterConfigFileAbsPath, this_schema):
+		with open(this_masterConfigFileAbsPath, 'a') as fout:
 			fout.write('\n')  # so you dont accidentally append to the last line
 			fout.write('path_out = output_analysis\n')
 			fout.write('path_results = results\n')
@@ -138,10 +139,10 @@ def webFlow():
 
 	### STEP 3: update config files and wrapper files
 	updateConfigs(job_path, schema)
-	updateWrappers(schema)
+	updateWrappers(job_path, schema)
 
 	### STEP 4: get masterConfig from web and update it (add schema, date, path_out, path_results)
-	masterConfigFile = getMasterConfig(job_path)
-	updateMasterConfig(job_path, masterConfigFile, schema)
+	masterConfigFileAbsPath = getMasterConfig(job_path)
+	updateMasterConfig(job_path, masterConfigFileAbsPath, schema)
 
-	return masterConfigFile
+	return masterConfigFileAbsPath
