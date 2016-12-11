@@ -167,6 +167,9 @@ def getInput(configFilePath):
 
 
 def getMasterInput(masterConfigFilePath):
+	# add this prefix to all file paths
+	jobdir = os.path.abspath(os.path.join(masterConfigFilePath, os.pardir))
+
 	config = configparser.ConfigParser(allow_no_value=True, comment_prefixes=';',
 	                                   inline_comment_prefixes='@')
 	config.optionxform = str  # so that strings dont automatically get .lower()-ed
@@ -189,6 +192,9 @@ def getMasterInput(masterConfigFilePath):
 		raise Exception("Minimum number of principal coponents is 2.")
 
 	# assign the TYPOGRAPHICALLY CORRECT values to the params dict and modify them if necessary.
+	# modify
+	path_out = os.path.join(jobdir, path_out)
+	path_results = os.path.join(jobdir, path_results)
 	# assign
 	masterParams = {
 		'date': date,
