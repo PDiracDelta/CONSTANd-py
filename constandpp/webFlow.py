@@ -117,8 +117,8 @@ def webFlow():
 	def updateMasterConfig(this_job_path, this_masterConfigFile, this_schema):
 		with open(this_masterConfigFile, 'a') as fout:
 			fout.write('\n')  # so you dont accidentally append to the last line
-			fout.write('path_out = ' + os.path.join(this_job_path, 'output_analysis') + '\n')
-			fout.write('path_results = ' + os.path.join(this_job_path, 'results') + '\n')
+			fout.write('path_out = output_analysis\n')
+			fout.write('path_results = results\n')
 			fout.write('schema = '+dumps(this_schema)+'\n')
 			fout.write('date = ' + str(os.path.basename(this_job_path).split('.')[0]) + '\n')
 
