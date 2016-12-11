@@ -38,16 +38,18 @@ def getColours(schema):
 	Returns list of colours for all the channels in all experiments (based on schema) so that the channels of the same
 	condition have the same marker.
 	:param schema:  dict    schema of the experiments
-	:return:        list    colours for each channel; a different one for each condition (markers differ only across conditions)
+	:return:        dict    colour for each channel; a different one for each condition (markers differ only across conditions)
 	"""
-	numConditions = len(list(schema.values())[0]['channelNamesPerCondition'])
+	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
+	numConditions = len(list(schema.values())[0]['channelAliasesPerCondition'])
 	distColours = distinguishableColours(numConditions)
 	colours = []
 	for experiment in schema.values():
 		# repeat each channel's distColour as many times as there are channels in the current condition, and repeat for each experiment
 		conditions = experiment['channelAliasesPerCondition']
 		colours.append([np.tile(distColours[c], (len(conditions[c]),1)).tolist() for c in range(numConditions)])
-	return unnest(unnest(colours))
+	channelColoursDict = dict(zip(allChannelAliases, unnest(unnest(colours))))
+	return channelColoursDict
 
 
 def distinguishableMarkers(n):
@@ -158,7 +160,7 @@ def getPCAPlot(PCAResult, schema):
 	plt.ylabel('Second PC', figure=PCAPlot)
 
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
-	colorsPerCondition = getColours(schema)
+	channelColorsDict = getColours(schema)
 	markersPerExperiment = getMarkers(schema)
 	# labels for annotation
 	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
@@ -182,8 +184,7 @@ def getHCDendrogram(HCResult, schema):
 	plt.xlabel('reporter channel', figure=HCDendrogram)
 	plt.ylabel('distance', figure=HCDendrogram)
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
-	colorsPerCondition = getColours(schema)
-	channelColorsDict = dict(zip(allChannelAliases, colorsPerCondition)) # { channel : color }
+	channelColorsDict = getColours(schema)
 	dendrogram(HCResult, orientation='right', leaf_rotation=0., leaf_font_size=12, labels=allChannelAliases,
 	           link_color_func=lambda x: colorsPerCondition[x] if x < len(colorsPerCondition) else 'k',
 	           above_threshold_color='k')
