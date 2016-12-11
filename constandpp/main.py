@@ -211,7 +211,7 @@ def processDf(df, params, writeToDisk):
 		intensities, noCorrectionIndices = isotopicCorrection(getIntensities(df, intensityColumns=params['intensityColumns']),
 		                                                      correctionsMatrix=params['isotopicCorrection_matrix'])
 	else:
-		intensities = getIntensities(df)
+		intensities = getIntensities(df, intensityColumns=params['intensityColumns'])
 
 	# perform the CONSTANd algorithm; also do NOT include normalized intensities in df --> only for paying users.
 	normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
@@ -241,19 +241,20 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	dfs = dict((eName, result[0]) for eName, result in processingResultsItems)
 	normalizedIntensitiess = dict((eName, result[1]) for eName, result in processingResultsItems)
 	removedDatas = dict((eName, result[2]) for eName, result in processingResultsItems)
-	noCorrectionIndicess = dict((eName, result[3]) for eName, result in processingResultsItems)
-
-	# normalizedDf = dfs[0]
-	# normalizedIntensities = normalizedIntensitiess[0]
-	# removedData = removedDatas[0]
-	# noCorrectionIndices = noCorrectionIndicess[0]
+	noCorrectionIndicess = {}
+	for eName, result in processingResultsItems:
+		if len(result) > 3: # if noCorrectionIndices exists in results
+			noCorrectionIndicess[eName] = result[3]
 
 	experimentNames = processingResults.keys()
 	# contains statistics and metadata (like the parameters) about the analysis.
 	metadata = {}
 	# record detections without isotopic correction applied applied. Multi-indexed on experiment names and old indices!
-	metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for
-	                                              eName in experimentNames], keys=experimentNames)
+	try:
+		metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for
+	                                              eName in noCorrectionIndicess.keys()], keys=experimentNames)
+	except ValueError:
+		pass # not a single noCorrectionIndices was found. OK.
 	# record RT isolation statistics. Future: flag. Multi-indexed on experiment names and old indices!
 	metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for
 	                                         eName in experimentNames], keys=experimentNames)
