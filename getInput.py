@@ -124,7 +124,8 @@ def getProcessingInput(configFilePath):
 	# modify
 	#intensityColumns = [item for sublist in channelNamesPerCondition for item in sublist]
 	wrapper = getWrapper(os.path.join(jobdir, wrapper))
-	isotopicCorrection_matrix = getIsotopicCorrectionsMatrix(os.path.join(jobdir, isotopicCorrection_matrix))
+	if isotopicCorrection_matrix is not None:
+		isotopicCorrection_matrix = getIsotopicCorrectionsMatrix(os.path.join(jobdir, isotopicCorrection_matrix))
 	path_out = os.path.join(jobdir, path_out)
 	data = os.path.join(jobdir, data)
 	# assign
