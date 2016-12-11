@@ -361,26 +361,26 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
 	start = time()
 	masterParams = getJobInput(masterConfigFilePath) # config filenames + params for the combination of experiments
-	specificParams = {} # specific params for each experiment
+	processingParams = {} # specific params for each experiment
 	dfs = {}
 	processingResults = {}
 	experimentNames = list(masterParams['schema'].keys())
 	for eName in experimentNames:
 		# get all input parameters
-		specificParams[eName] = getProcessingInput(masterParams['schema'][eName]['config'])
+		processingParams[eName] = getProcessingInput(masterParams['schema'][eName]['config'])
 		# get the dataframes
-		dfs[eName] = getData(specificParams[eName]['data'], delim=specificParams[eName]['delim_in'], header=specificParams[eName]['header_in'], wrapper=specificParams[eName]['wrapper'])
+		dfs[eName] = getData(processingParams[eName]['data'], delim=processingParams[eName]['delim_in'], header=processingParams[eName]['header_in'], wrapper=processingParams[eName]['wrapper'])
 
 	if not testing:
 		for eName in experimentNames:
 			# define global parameters
-			# setProcessingGlobals(intensityColumns=specificParams[eName]['intensityColumns'],
-			#                      removalColumnsToSave=specificParams[eName]['removalColumnsToSave'],
-			#                      noMissingValuesColumns=specificParams[eName]['noMissingValuesColumns'])
+			# setProcessingGlobals(intensityColumns=processingParams[eName]['intensityColumns'],
+			#                      removalColumnsToSave=processingParams[eName]['removalColumnsToSave'],
+			#                      noMissingValuesColumns=processingParams[eName]['noMissingValuesColumns'])
 			# setCollapseColumnsToSave(
-			# 	specificParams[eName]['collapseColumnsToSave'])  # define the intensityColumns for use in processing.py
+			# 	processingParams[eName]['collapseColumnsToSave'])  # define the intensityColumns for use in processing.py
 			""" Data processing """
-			processing_path_out = specificParams[eName]['path_out']
+			processing_path_out = processingParams[eName]['path_out']
 			processingResultsDumpFilename = path.join(processing_path_out, 'processingResultsDump_'+str(eName))
 			if doProcessing:
 				# prepare the output directories
@@ -392,7 +392,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 				# process every input dataframe
 				logging.info("Starting processing of experiment '" + eName + "' of job '" + masterParams['jobname'] + "' at " +
 			             str(datetime.datetime.now()).split('.')[0])
-				processingResults[eName] = processDf(dfs[eName], specificParams[eName], writeToDisk)
+				processingResults[eName] = processDf(dfs[eName], processingParams[eName], writeToDisk)
 				logging.info("Finished processing of experiment '" + eName + "' of job '" + masterParams['jobname'] + "' at " +
 			             str(datetime.datetime.now()).split('.')[0])
 				pickle.dump(processingResults[eName], open(processingResultsDumpFilename, 'wb')) # TEST
@@ -447,7 +447,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			logging.warning("No report generated!")
 
 	elif testing:
-		devStuff(dfs[0], specificParams[0])
+		devStuff(dfs[0], processingParams[0])
 	stop = time()
 	print(stop - start)
 
