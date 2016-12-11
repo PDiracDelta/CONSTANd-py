@@ -183,15 +183,15 @@ def getHCDendrogram(HCResult, schema):
 	plt.ylabel('distance', figure=HCDendrogram)
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
 	colorsPerCondition = getColours(schema)
-	# channelColorsDict = dict(zip(allChannelAliases, colorsPerCondition)) # { channel : color }
+	channelColorsDict = dict(zip(allChannelAliases, colorsPerCondition)) # { channel : color }
 	dendrogram(HCResult, orientation='right', leaf_rotation=0., leaf_font_size=12, labels=allChannelAliases,
 	           link_color_func=lambda x: colorsPerCondition[x] if x < len(colorsPerCondition) else 'k',
 	           above_threshold_color='k')
 	ax = plt.gca()
 	ylbls = ax.get_ymajorticklabels()
 	for i in range(len(ylbls)):
-		#ylbls[i].set_color(channelColorsDict[ylbls[i].get_text()])
-		ylbls[i].set_color(colorsPerCondition[i])
+		ylbls[i].set_color(channelColorsDict[ylbls[i].get_text()])
+		#ylbls[i].set_color(colorsPerCondition[i])
 	plt.show()  # TEST
 	return HCDendrogram
 
