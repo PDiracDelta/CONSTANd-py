@@ -42,7 +42,7 @@ def getProcessingInput(configFilePath):
 	header_in = config.getint('DEFAULT','header_in')
 	wrapper = config.get('DEFAULT','wrapper')
 	removedDataInOneFile_bool = config.getboolean('DEFAULT','removedDataInOneFile_bool')
-	# intensityColumnsPerCondition = parseExpression(config.get('DEFAULT', 'intensityColumnsPerCondition'))
+	# channelNamesPerCondition = parseExpression(config.get('DEFAULT', 'channelNamesPerCondition'))
 	intensityColumns = parseExpression(config.get('DEFAULT', 'intensityColumns'))
 	wantedColumns = parseExpression(config.get('DEFAULT', 'wantedColumns'))
 	noMissingValuesColumns = parseExpression(config.get('DEFAULT', 'noMissingValuesColumns'))
@@ -122,7 +122,7 @@ def getProcessingInput(configFilePath):
 
 	# assign the TYPOGRAPHICALLY CORRECT values to the params dict and modify them if necessary.
 	# modify
-	#intensityColumns = [item for sublist in intensityColumnsPerCondition for item in sublist]
+	#intensityColumns = [item for sublist in channelNamesPerCondition for item in sublist]
 	wrapper = getWrapper(os.path.join(jobdir, wrapper))
 	isotopicCorrection_matrix = getIsotopicCorrectionsMatrix(os.path.join(jobdir, isotopicCorrection_matrix))
 	path_out = os.path.join(jobdir, path_out)
@@ -134,7 +134,7 @@ def getProcessingInput(configFilePath):
 		'header_in': header_in,
 		'wrapper': wrapper,
 		'removedDataInOneFile_bool': removedDataInOneFile_bool,
-		'intensityColumnsPerCondition': intensityColumns,
+		'channelNamesPerCondition': intensityColumns,
 		'intensityColumns': intensityColumns,
 		'wantedColumns': wantedColumns+intensityColumns, # needs to include intensitycolumns
 		'noMissingValuesColumns': noMissingValuesColumns,

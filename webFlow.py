@@ -91,7 +91,7 @@ def webFlow():
 				fout.write('data = ' + experiment['data'] + '\n')
 				fout.write('wrapper = ' + experiment['wrapper'] + '\n')
 					# caution! use the ALIASES, and NOT the original names (they are rewritten by the wrapper)
-				# fout.write('intensityColumnsPerCondition = ' + dumps(experiment['channelAliasesPerCondition']) + '\n')
+				# fout.write('channelNamesPerCondition = ' + dumps(experiment['channelAliasesPerCondition']) + '\n')
 				fout.write('intensityColumns = ' + dumps(unnest(experiment['channelAliasesPerCondition'])) + '\n')
 				fout.write('isotopicCorrection_matrix = ' + experiment['isotopicCorrection_matrix'] + '\n')
 				# write output parameters
@@ -102,7 +102,7 @@ def webFlow():
 		# write the channel aliases to the wrapper
 		for eName in this_schema:
 			experiment = this_schema[eName]
-			channelNames = unnest(experiment['intensityColumnsPerCondition'])
+			channelNames = unnest(experiment['channelNamesPerCondition'])
 			channelAliases = unnest(experiment['channelAliasesPerCondition'])
 			wrapperFile = os.path.join(this_job_path, experiment['wrapper'])
 			# open user config parameters
