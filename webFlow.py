@@ -91,7 +91,8 @@ def webFlow():
 				fout.write('data = ' + experiment['data'] + '\n')
 				fout.write('wrapper = ' + experiment['wrapper'] + '\n')
 					# caution! use the ALIASES, and NOT the original names (they are rewritten by the wrapper)
-				fout.write('intensityColumnsPerCondition = ' + dumps(experiment['channelAliasesPerCondition']) + '\n')
+				# fout.write('intensityColumnsPerCondition = ' + dumps(experiment['channelAliasesPerCondition']) + '\n')
+				fout.write('intensityColumns = ' + dumps(unnest(experiment['channelAliasesPerCondition'])) + '\n')
 				fout.write('isotopicCorrection_matrix = ' + experiment['isotopicCorrection_matrix'] + '\n')
 				# write output parameters
 				fout.write('path_out = '+eName+'_output_processing/\n')
