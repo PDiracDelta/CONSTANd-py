@@ -45,13 +45,13 @@ def importDataFrame(path_in, delim=None, header=0):
 	return df.dropna(how="all") # drop empty lines
 
 
-def getIsotopicCorrectionsMatrix(path_in='ICM_default.tsv'):
+def getIsotopicCorrectionsMatrix(path_in):
 	"""
 	Reads the isotopic corrections matrix from a file on disk through importDataFrame, and returns it as a matrix.
 	:param path_in: str         path of the isotopic corrections matrix file
 	:return icm:    pd.ndarray  isotopic corrections matrix
 	"""
-	return np.asmatrix(importDataFrame(path_in,delim='\t', header=None)).astype('float64') # make sure its float64
+	return np.asmatrix(importDataFrame(path_in, delim='\t', header=None)).astype('float64') # make sure its float64
 
 
 def getWrapper(path_in='wrapper.tsv'):
@@ -61,6 +61,15 @@ def getWrapper(path_in='wrapper.tsv'):
 	:return :       nested list    wrapper specifying column name transformations
 	"""
 	return list(importDataFrame(path_in, header=None).astype(str).values)
+
+
+def TMT2ICM(TMTImpuritiesDF):
+	"""
+	Converts a dataframe of TMT-like isotopic impurities into the correct isotopic correction matrix.
+	Column order should not be scrambled!
+	:param TMTImpuritiesDF: pd.DataFrame    TMT-like isotopic impurities
+	:return ICM:            np.ndarray      isotope impurity matrix
+	"""
 
 
 def parseSchemaFile(schemaPath): #todo move to web
