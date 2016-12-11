@@ -356,7 +356,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	Contains and explicits the workflow of the program. Using the booleans doProcessing, doAnalysis and writeToDisk one
 	can control	which parts of the workflow to perform.
 	"""
-	logFilePath = os.path.relpath(os.path.join(masterConfigFilePath, os.path.join(os.pardir, 'log.txt')))
+	logFilePath = os.path.abspath(os.path.join(masterConfigFilePath, os.path.join(os.pardir, 'log.txt')))
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
 	start = time()
 	masterParams = getMasterInput(masterConfigFilePath) # config filenames + params for the combination of experiments
@@ -380,12 +380,12 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			# 	specificParams[eName]['collapseColumnsToSave'])  # define the intensityColumns for use in dataproc.py
 			""" Data processing """
 			processing_path_out = specificParams[eName]['path_out']
-			processingResultsDumpFilename = path.relpath(path.join(processing_path_out, path.pardir))+'/processingResultsDump_'+str(eName)
+			processingResultsDumpFilename = path.abspath(path.join(processing_path_out, path.pardir))+'/processingResultsDump_'+str(eName)
 			if doProcessing:
 				# prepare the output directories
 				if not os.path.exists(processing_path_out):  # do not overwrite dir
 					assert os.path.exists(
-						path.relpath(path.join(processing_path_out, path.pardir)))  # parent dir must exist
+						path.abspath(path.join(processing_path_out, path.pardir)))  # parent dir must exist
 					os.makedirs(processing_path_out)
 
 				# process every input dataframe
@@ -409,7 +409,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 		if doAnalysis:
 			# prepare the output directories
 			if not os.path.exists(analysis_path_out):  # do not overwrite dir
-				assert os.path.exists(path.relpath(path.join(analysis_path_out, path.pardir)))  # parent dir must exist
+				assert os.path.exists(path.abspath(path.join(analysis_path_out, path.pardir)))  # parent dir must exist
 				os.makedirs(analysis_path_out)
 
 			# perform analysis
@@ -433,7 +433,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 		if doReport:
 			# prepare the output directories
 			if not os.path.exists(results_path_out):  # do not overwrite dir
-				assert os.path.exists(path.relpath(path.join(results_path_out, path.pardir)))  # parent dir must exist
+				assert os.path.exists(path.abspath(path.join(results_path_out, path.pardir)))  # parent dir must exist
 				os.makedirs(results_path_out)
 
 			# visualize and make a report
