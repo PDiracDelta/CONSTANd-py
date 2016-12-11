@@ -360,14 +360,14 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	logFilePath = os.path.abspath(os.path.join(masterConfigFilePath, os.path.join(os.pardir, 'log.txt')))
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
 	start = time()
-	masterParams = getJobInput(masterConfigFilePath) # config filenames + params for the combination of experiments
+	jobParams = getJobInput(masterConfigFilePath) # config filenames + params for the combination of experiments
 	processingParams = {} # specific params for each experiment
 	dfs = {}
 	processingResults = {}
-	experimentNames = list(masterParams['schema'].keys())
+	experimentNames = list(jobParams['schema'].keys())
 	for eName in experimentNames:
 		# get all input parameters
-		processingParams[eName] = getProcessingInput(masterParams['schema'][eName]['config'])
+		processingParams[eName] = getProcessingInput(jobParams['schema'][eName]['config'])
 		# get the dataframes
 		dfs[eName] = getData(processingParams[eName]['data'], delim=processingParams[eName]['delim_in'], header=processingParams[eName]['header_in'], wrapper=processingParams[eName]['wrapper'])
 
@@ -390,10 +390,10 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 					os.makedirs(processing_path_out)
 
 				# process every input dataframe
-				logging.info("Starting processing of experiment '" + eName + "' of job '" + masterParams['jobname'] + "' at " +
+				logging.info("Starting processing of experiment '" + eName + "' of job '" + jobParams['jobname'] + "' at " +
 			             str(datetime.datetime.now()).split('.')[0])
 				processingResults[eName] = processDf(dfs[eName], processingParams[eName], writeToDisk)
-				logging.info("Finished processing of experiment '" + eName + "' of job '" + masterParams['jobname'] + "' at " +
+				logging.info("Finished processing of experiment '" + eName + "' of job '" + jobParams['jobname'] + "' at " +
 			             str(datetime.datetime.now()).split('.')[0])
 				pickle.dump(processingResults[eName], open(processingResultsDumpFilename, 'wb')) # TEST
 			elif doAnalysis:
@@ -405,7 +405,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 				logging.warning("No processing step performed nor processing file loaded for experiment "+str(eName)+"!")
 
 		""" Data analysis """
-		analysis_path_out = masterParams['path_out']
+		analysis_path_out = jobParams['path_out']
 		analysisResultsDumpFilename = os.path.join(analysis_path_out, 'analysisResultsDump')
 		if doAnalysis:
 			# prepare the output directories
@@ -414,10 +414,10 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 				os.makedirs(analysis_path_out)
 
 			# perform analysis
-			logging.info("Starting analysis of job: " + masterParams['jobname'] + "at " +
+			logging.info("Starting analysis of job: " + jobParams['jobname'] + "at " +
 			             str(datetime.datetime.now()).split('.')[0])
-			analysisResults = analyzeProcessingResult(processingResults, masterParams, writeToDisk)
-			logging.info("Finished analysis of job: " + masterParams['jobname'] + "at " +
+			analysisResults = analyzeProcessingResult(processingResults, jobParams, writeToDisk)
+			logging.info("Finished analysis of job: " + jobParams['jobname'] + "at " +
 			             str(datetime.datetime.now()).split('.')[0])
 			pickle.dump(analysisResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
 		elif doReport:
@@ -429,7 +429,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			logging.warning("No analysis step performed nor analysis file loaded!")
 
 		""" Visualize and generate report """
-		results_path_out = masterParams['path_results']
+		results_path_out = jobParams['path_results']
 
 		if doReport:
 			# prepare the output directories
@@ -438,10 +438,10 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 				os.makedirs(results_path_out)
 
 			# visualize and make a report
-			logging.info("Starting visualization end report generation of job: " + masterParams['jobname'] + "at " +
+			logging.info("Starting visualization end report generation of job: " + jobParams['jobname'] + "at " +
 			             str(datetime.datetime.now()).split('.')[0])
-			generateReport(analysisResults, masterParams, logFilePath, writeToDisk)
-			logging.info("Finished visualization end report generation of job: " + masterParams['jobname'] + "at " +
+			generateReport(analysisResults, jobParams, logFilePath, writeToDisk)
+			logging.info("Finished visualization end report generation of job: " + jobParams['jobname'] + "at " +
 			             str(datetime.datetime.now()).split('.')[0])
 		else:
 			logging.warning("No report generated!")
