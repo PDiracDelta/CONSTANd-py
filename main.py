@@ -16,7 +16,7 @@ __status__ = "Development"
 
 import sys, os, logging, datetime
 from webFlow import webFlow
-from getInput import getInput, getMasterInput
+from getInput import getProcessingInput, getJobInput
 from constand import constand
 from time import time
 from dataIO import *
@@ -30,7 +30,7 @@ def performanceTest():  # remove for production # TEST
 	""" Use this development method to test the performance of the CONSTANd algorithm. """
 	t = []
 	for i in range(100):
-		params = getInput()
+		params = getProcessingInput()
 		df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(2*10**3, 6)), columns=list('ABCDEF'))
 		start = time()
 		constand(np.asarray(df), 1e-2, 50)
@@ -41,7 +41,7 @@ def performanceTest():  # remove for production # TEST
 
 def isotopicImpuritiesTest(): # TEST
 	## test if isotopic correction is necessary:
-	params = getInput()
+	params = getProcessingInput()
 	# get the dataframe
 	df = importDataFrame(params['files_in'], delim=params['delim_in'], header=params['header_in'])
 	correctedIntensities = getIntensities(df)
@@ -120,7 +120,7 @@ def compareIntensitySN():
 		if path.exists('../data/compareIntensitySNProcessingResults'):
 			processingResults = pickle.load(open('../data/compareIntensitySNProcessingResults', 'rb'))
 		else:
-			params=getInput()
+			params=getProcessingInput()
 			# setProcessingGlobals(intensityColumns=params['intensityColumns'],
 			# 					 removalColumnsToSave=params['removalColumnsToSave'],
 			# 					 noMissingValuesColumns=params['noMissingValuesColumns'])
@@ -359,14 +359,14 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	logFilePath = os.path.abspath(os.path.join(masterConfigFilePath, os.path.join(os.pardir, 'log.txt')))
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
 	start = time()
-	masterParams = getMasterInput(masterConfigFilePath) # config filenames + params for the combination of experiments
+	masterParams = getJobInput(masterConfigFilePath) # config filenames + params for the combination of experiments
 	specificParams = {} # specific params for each experiment
 	dfs = {}
 	processingResults = {}
 	experimentNames = list(masterParams['schema'].keys())
 	for eName in experimentNames:
 		# get all input parameters
-		specificParams[eName] = getInput(masterParams['schema'][eName]['config'])
+		specificParams[eName] = getProcessingInput(masterParams['schema'][eName]['config'])
 		# get the dataframes
 		dfs[eName] = getData(specificParams[eName]['data'], delim=specificParams[eName]['delim_in'], header=specificParams[eName]['header_in'], wrapper=specificParams[eName]['wrapper'])
 
@@ -453,5 +453,5 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 if __name__ == '__main__':
 	masterConfigFilePath = 'masterConfig.ini' # TEST
-	masterConfigFilePath = webFlow()
+	#masterConfigFilePath = webFlow()
 	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
