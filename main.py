@@ -453,6 +453,6 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 
 
 if __name__ == '__main__':
-	masterConfigFilePath = 'jobConfig.ini' # TEST
-	masterConfigFilePath = webFlow('COON')
-	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
+	#masterConfigFilePath = 'jobConfig.ini' # TEST
+	masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-11 20:12:44.402568_COON')
+	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=False))

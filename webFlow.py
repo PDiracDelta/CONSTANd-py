@@ -10,7 +10,19 @@ from dataIO import parseSchemaFile, unnest
 from json import dumps
 
 
-def webFlow(exptype='dummy'):
+def webFlow(exptype='dummy', previousjobdirName=None):
+	jobsPath = '../jobs'
+	jobConfigNameSuffix = '_jobConfig.ini'
+	if previousjobdirName is not None: # work on previously processed/analyzed data
+		previousjobdir = os.path.join(jobsPath, previousjobdirName)
+		if os.path.exists(previousjobdir):
+			jobName = '_'.join(os.path.basename(previousjobdir).split('_')[1:]) # haha this looks funky
+			assumedjobconfigfilepath = os.path.join(previousjobdir, jobName+jobConfigNameSuffix)
+			if os.path.exists(assumedjobconfigfilepath):
+				return assumedjobconfigfilepath
+			else:
+				raise Exception("No previous job config file found. Aborting.")
+
 	# HARDCODED FILE LOCATIONS
 	if exptype == 'dummy':
 		HC_JOBNAME = 'dummy'
@@ -61,8 +73,8 @@ def webFlow(exptype='dummy'):
 	def getJobName():
 		return HC_JOBNAME
 
-	def newJobDir(job_name):
-		jobPath = os.path.join('../jobs', str(datetime.datetime.now())+'_'+job_name)
+	def newJobDir(this_job_name):
+		jobPath = os.path.join('../jobs', str(datetime.datetime.now())+'_'+this_job_name)
 		os.makedirs(jobPath)
 		return os.path.abspath(jobPath)
 
@@ -168,10 +180,12 @@ def webFlow(exptype='dummy'):
 				for n, a in zip(channelNames, channelAliases):
 					fout.write(n+'\t'+a+'\n')
 
-	def getMasterConfig(this_job_path):
+	def getMasterConfig(this_job_path, this_job_name):
 		this_masterConfigFile = uploadFile(this_job_path, sourceDataPath=HC_MASTERCONFIG,
 		                                             prefix='')
-		return os.path.join(this_job_path, this_masterConfigFile)
+		new_masterConfigFile = os.path.join(this_job_path, this_job_name+jobConfigNameSuffix)
+		os.rename(os.path.join(this_job_path, this_masterConfigFile), new_masterConfigFile)
+		return new_masterConfigFile
 
 	def updateMasterConfig(this_job_path, this_masterConfigFileAbsPath, this_schema, this_jobname):
 		with open(this_masterConfigFileAbsPath, 'a') as fout:
@@ -202,7 +216,7 @@ def webFlow(exptype='dummy'):
 	updateWrappers(job_path, schema)
 
 	### STEP 4: get masterConfig from web and update it (add schema, date, path_out, path_results)
-	masterConfigFileAbsPath = getMasterConfig(job_path)
+	masterConfigFileAbsPath = getMasterConfig(job_path, job_name)
 	updateMasterConfig(job_path, masterConfigFileAbsPath, schema, job_name)
 
 	return masterConfigFileAbsPath
