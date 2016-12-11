@@ -63,13 +63,38 @@ def getWrapper(path_in='wrapper.tsv'):
 	return list(importDataFrame(path_in, header=None).astype(str).values)
 
 
-def TMT2ICM(TMTImpuritiesDF):
+def TMT2ICM(TMTImpuritiesDF): # todo move to web
 	"""
-	Converts a dataframe of TMT-like isotopic impurities into the correct isotopic correction matrix.
-	Column order should not be scrambled!
+	Converts a dataframe of TMT-like isotopic impurities (indexed on TMT label name) into the correct isotopic
+	correction matrix. Column order from the dataframe is conserved!
 	:param TMTImpuritiesDF: pd.DataFrame    TMT-like isotopic impurities
+													-2  -1  monoiso +1  +2
+											126     0   0   100     1.2 0
+											127N    1.2 3.3 100     2.5 0.3
+											127C    ...
+											...
 	:return ICM:            np.ndarray      isotope impurity matrix
 	"""
+	# cols6plex = ['126', '127', '128', '129', '130', '131']
+	# cols8plex = ['126', '127N', '127C', '128C', '129N', '129C', '130C', '131']
+	# cols10plex = ['126', '127N', '127C', '128N', '128C', '129N', '129C', '130N', '130C', '131']
+	Nplex = len(TMTImpuritiesDF)
+	colNames = list(TMTImpuritiesDF.index.values)
+	# if Nplex == 6:
+	# 	colNames = cols6plex
+	# elif Nplex == 8:
+	# 	colNames = cols8plex
+	# elif Nplex == 10:
+	# 	colNames = cols10plex
+	# else:
+	# 	raise Exception("Illegal plexity of your TMT labels. Only 6plex, 8plex, 10plex are supported.")
+	labelNames = ['O_'+n for n in colNames] # O_ for Observed_
+	icmdf = pd.DataFrame(index=labelNames, columns=colNames).fillna(0) # create empty ICM-dataframe of zeroes
+	for label in colNames: # determine label family; i.e. 127N = 127 (roundMass) + N (extraIsotope) -> 128N is familyPlus
+		roundMass = label[0:4]
+		if len(label) == 4:
+			extraIsotope = label[4]
+
 
 
 def parseSchemaFile(schemaPath): #todo move to web
