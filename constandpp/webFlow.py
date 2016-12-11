@@ -10,18 +10,49 @@ from dataIO import parseSchemaFile, unnest
 from json import dumps
 
 
-def webFlow():
+def webFlow(exptype='dummy'):
 	# HARDCODED FILE LOCATIONS
-	HC_SCHEMA = '../jobs/schema6.tsv'
-	HC_DATA1 = '../jobs/MB_noapostrophes.tsv'
-	HC_DATA2 = '../jobs/MB_noapostrophes_bis.tsv'
-	HC_WRAPPER1 = None
-	HC_WRAPPER2 = '../jobs/wrapper6_bis.tsv'
-	HC_CONFIG1 = '../jobs/processingConfig.ini'
-	HC_CONFIG2 = '../jobs/processingConfig_bis.ini'
-	HC_ICM1 = '../jobs/ICM6_default.tsv'
-	HC_ICM2 = '../jobs/ICM6_default.tsv'
-	HC_MASTERCONFIG = '../jobs/jobConfig.ini'
+	if exptype == 'dummy':
+		HC_SCHEMA = '../jobs/schema6.tsv'
+		HC_ENAME1 = 'human'
+		HC_ENAME2 = 'mouse'
+		HC_DATA1 = '../jobs/MB_noapostrophes.tsv'
+		HC_DATA2 = '../jobs/MB_noapostrophes_bis.tsv'
+		HC_WRAPPER1 = None
+		HC_WRAPPER2 = '../jobs/wrapper6_bis.tsv'
+		HC_CONFIG1 = '../jobs/processingConfig.ini'
+		HC_CONFIG2 = '../jobs/processingConfig_bis.ini'
+		HC_ICM1 = '../jobs/ICM6_default.tsv'
+		HC_ICM2 = '../jobs/ICM6_default.tsv'
+		HC_MASTERCONFIG = '../jobs/jobConfig.ini'
+	elif exptype == 'COON':
+		coondatapath = '../data/COON data/PSMs/'
+		datatype = '_e_ISO'
+		coonconfig = '../jobs/coonProcessingConfig.ini'
+		coonwrapper = None #'../jobs/coonWrapper.tsv'
+		coonICM = None
+		HC_SCHEMA = '../jobs/coonSchema.tsv'
+		HC_ENAME1 = 'BR1'
+		HC_ENAME2 = 'BR2'
+		HC_ENAME3 = 'BR3'
+		HC_ENAME4 = 'BR4'
+		HC_DATA1 = coondatapath+HC_ENAME1+datatype+'.txt'
+		HC_DATA2 = coondatapath+HC_ENAME2+datatype+'.txt'
+		HC_DATA3 = coondatapath+HC_ENAME3+datatype+'.txt'
+		HC_DATA4 = coondatapath+HC_ENAME4+datatype+'.txt'
+		HC_WRAPPER1 = coonwrapper
+		HC_WRAPPER2 = coonwrapper
+		HC_WRAPPER3 = coonwrapper
+		HC_WRAPPER4 = coonwrapper
+		HC_CONFIG1 = coonconfig
+		HC_CONFIG2 = coonconfig
+		HC_CONFIG3 = coonconfig
+		HC_CONFIG4 = coonconfig
+		HC_ICM1 = coonICM
+		HC_ICM2 = coonICM
+		HC_ICM3 = coonICM
+		HC_ICM4 = coonICM
+		HC_MASTERCONFIG = '../jobs/coonJobConfig.ini'
 
 	from shutil import copyfile
 
@@ -46,7 +77,7 @@ def webFlow():
 
 	def updateSchema(this_job_path, this_incompleteSchema):
 		for eName in this_incompleteSchema:
-			if eName == 'human':
+			if eName == HC_ENAME1:
 				this_incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath=HC_DATA1,
 				                                                  prefix=eName+'_')
 				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=HC_WRAPPER1,
@@ -55,7 +86,7 @@ def webFlow():
 				                                                    prefix=eName+'_')) # config needs FULL PATH!
 				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path, sourceDataPath=HC_ICM1,
 				                                                 prefix=eName+'_')
-			elif eName == 'mouse':
+			elif eName == HC_ENAME2:
 				this_incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath=HC_DATA2,
 				                                                  prefix=eName+'_')
 				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=HC_WRAPPER2,
@@ -63,6 +94,24 @@ def webFlow():
 				this_incompleteSchema[eName]['config'] = os.path.join(this_job_path, uploadFile(this_job_path, sourceDataPath=HC_CONFIG2,
 				                                                    prefix=eName+'_')) # config needs FULL PATH!
 				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path, sourceDataPath=HC_ICM2,
+				                                                 prefix=eName+'_')
+			elif eName == HC_ENAME3:
+				this_incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath=HC_DATA3,
+				                                                  prefix=eName+'_')
+				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=HC_WRAPPER3,
+				                                                     prefix=eName+'_')
+				this_incompleteSchema[eName]['config'] = os.path.join(this_job_path, uploadFile(this_job_path, sourceDataPath=HC_CONFIG3,
+				                                                    prefix=eName+'_')) # config needs FULL PATH!
+				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path, sourceDataPath=HC_ICM3,
+				                                                 prefix=eName+'_')
+			elif eName == HC_ENAME4:
+				this_incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath=HC_DATA4,
+				                                                  prefix=eName+'_')
+				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=HC_WRAPPER4,
+				                                                     prefix=eName+'_')
+				this_incompleteSchema[eName]['config'] = os.path.join(this_job_path, uploadFile(this_job_path, sourceDataPath=HC_CONFIG4,
+				                                                    prefix=eName+'_')) # config needs FULL PATH!
+				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path, sourceDataPath=HC_ICM4,
 				                                                 prefix=eName+'_')
 			# in case no wrapper was uploaded
 			if this_incompleteSchema[eName]['wrapper'] is None:
