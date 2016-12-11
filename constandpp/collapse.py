@@ -12,7 +12,7 @@ and replaces the duplicates with one representative detection and a combination/
 import numpy as np
 import logging
 from warnings import filterwarnings
-from dataproc import setIntensities, getIntensities
+from processing import setIntensities, getIntensities
 from scipy.spatial.distance import cdist, euclidean
 
 columnsToSave = None

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Collection of functions involved in analyzing the data that was processed by dataproc.py and constand.py.
+Collection of functions involved in analyzing the data that was processed by processing.py and constand.py.
 Performs a differential expression analysis on the normalized intensities as provided by CONSTANd.
 """
 
@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import logging
 from dataIO import unnest
-from dataproc import getIntensities
+from processing import getIntensities
 from collections import defaultdict
 from statsmodels.sandbox.stats.multicomp import multipletests
 from scipy.stats import ttest_ind as ttest
