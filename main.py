@@ -365,11 +365,6 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	dfs = {}
 	processingResults = {}
 	experimentNames = list(jobParams['schema'].keys())
-	for eName in experimentNames:
-		# get all input parameters
-		processingParams[eName] = getProcessingInput(jobParams['schema'][eName]['config'])
-		# get the dataframes
-		dfs[eName] = getData(processingParams[eName]['data'], delim=processingParams[eName]['delim_in'], header=processingParams[eName]['header_in'], wrapper=processingParams[eName]['wrapper'])
 
 	if not testing:
 		for eName in experimentNames:
@@ -380,6 +375,12 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			# setCollapseColumnsToSave(
 			# 	processingParams[eName]['collapseColumnsToSave'])  # define the intensityColumns for use in processing.py
 			""" Data processing """
+			# get all input parameters
+			processingParams[eName] = getProcessingInput(jobParams['schema'][eName]['config'])
+			# get the dataframes
+			dfs[eName] = getData(processingParams[eName]['data'], delim=processingParams[eName]['delim_in'],
+			                     header=processingParams[eName]['header_in'],
+			                     wrapper=processingParams[eName]['wrapper'])
 			processing_path_out = processingParams[eName]['path_out']
 			processingResultsDumpFilename = path.join(processing_path_out, 'processingResultsDump_'+str(eName))
 			if doProcessing:
