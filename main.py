@@ -269,25 +269,30 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe # and intensityColumns are unique and distinguishable
 	allExperimentsDF = combineExperimentDFs(dfs) #, params['schema'])
 
-	# get min and max protein-peptide mappings
-	minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF)
+	nConditions = len(list(params['schema'].values())[0]['channelAliasesPerCondition'])
+	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
+	if nConditions == 2:
+		# get min and max protein-peptide mappings
+		minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF)
 
-	# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
-	# !!! only for 2 conditions up to now!
-	minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema'])
-	fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema'])
+		# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
+		minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema'])
+		fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema'])
 
-	# perform differential expression analysis with Benjamini-Hochberg correction.
-	minProteinDF = applyDifferentialExpression(minProteinDF, params['alpha'])
-	fullProteinDF = applyDifferentialExpression(fullProteinDF, params['alpha'])
+		# perform differential expression analysis with Benjamini-Hochberg correction.
+		minProteinDF = applyDifferentialExpression(minProteinDF, params['alpha'])
+		fullProteinDF = applyDifferentialExpression(fullProteinDF, params['alpha'])
 
-	# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
-	minProteinDF = applyFoldChange(minProteinDF, params['pept2protCombinationMethod'])
-	fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
+		# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
+		minProteinDF = applyFoldChange(minProteinDF, params['pept2protCombinationMethod'])
+		fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
 
-	# indicate significance based on given thresholds alpha and FCThreshold
-	minProteinDF = applySignificance(minProteinDF, params['alpha'], params['FCThreshold'])
-	fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
+		# indicate significance based on given thresholds alpha and FCThreshold
+		minProteinDF = applySignificance(minProteinDF, params['alpha'], params['FCThreshold'])
+		fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
+	else:
+		minProteinDF = pd.DataFrame()
+		fullProteinDF = pd.DataFrame()
 
 	# dataframe with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
 	allExperimentsIntensitiesPerCommonPeptide, metadata['uncommonPeptides'] = getAllExperimentsIntensitiesPerCommonPeptide(dfs, params['schema'])
@@ -329,23 +334,32 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 	HCResult = analysisResults[3]
 	metadata = analysisResults[4]
 
-	# generate sorted (on FC) list of differentials
-	minSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(minProteinDF)
-	fullSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(fullProteinDF)
-	minSet = set(minSortedDifferentialProteinsDF['protein'])
-	fullSet = set(fullSortedDifferentialProteinsDF['protein'])
-	# list( [in min but not in full], [in full but not in min] )
-	metadata['diffMinFullProteins'] = [list(minSet.difference(fullSet)), list(fullSet.difference(minSet))]
-	# todo combine into one
+	nConditions = len(list(params['schema'].values())[0]['channelAliasesPerCondition'])
+	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
+	if nConditions == 2:
+		# generate sorted (on FC) list of differentials
+		minSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(minProteinDF)
+		fullSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(fullProteinDF)
+		minSet = set(minSortedDifferentialProteinsDF['protein'])
+		fullSet = set(fullSortedDifferentialProteinsDF['protein'])
+		# list( [in min but not in full], [in full but not in min] )
+		metadata['diffMinFullProteins'] = [list(minSet.difference(fullSet)), list(fullSet.difference(minSet))]
+		# todo combine into one
 
-	# data visualization
-	minVolcanoPlot = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
-	                                               params['labelVolcanoPlotAreas'])
-	if writeToDisk:
-		exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
-		           filename=params['jobname'] + '_minVolcanoPlot')
-	fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
-	                                                  params['labelVolcanoPlotAreas'])
+		# data visualization
+		minVolcanoPlot = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
+		                                               params['labelVolcanoPlotAreas'])
+		if writeToDisk:
+			exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
+			           filename=params['jobname'] + '_minVolcanoPlot')
+		fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
+		                                                  params['labelVolcanoPlotAreas'])
+	else:
+		minSortedDifferentialProteinsDF = pd.DataFrame()
+		fullSortedDifferentialProteinsDF = pd.DataFrame()
+		minVolcanoPlot = None
+		fullVolcanoPlot = None
+
 	if writeToDisk:
 		exportData(fullVolcanoPlot, dataType='fig', path_out=params['path_results'],
 		           filename=params['jobname'] + '_fullVolcanoPlot')
