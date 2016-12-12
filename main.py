@@ -221,6 +221,7 @@ def processDf(df, params, writeToDisk):
 	else:
 		# TEST do NOT perform CONSTANd
 		logging.warning("+++++++++++++++++++++++++++++++CONSTAND NOT PERFORMED+++++++++++++++++++++++++++++++++")
+		normalizedIntensities=[0]
 		normalizedDf = df
 
 	""" save results """
@@ -462,4 +463,4 @@ if __name__ == '__main__':
 	#masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-11 23:56:33.683926_COON_SN')
 	#masterConfigFilePath = webFlow(exptype='COON_SN')
 	masterConfigFilePath = webFlow(exptype='COON_norm') # todo constand uitzetten
-	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=True))
+	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
