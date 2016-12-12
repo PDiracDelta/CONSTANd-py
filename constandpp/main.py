@@ -362,11 +362,6 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 	                      fullVolcanoPlot, PCAPlot, HCDendrogram, metadata, logFilePath)
 	pdfReport = HTMLtoPDF(htmlReport)
 
-	if writeToDisk:
-		# save the visualizations
-		exportData(visualizationsDict, dataType='fig', path_out=params['path_results'],
-		           filename=params['jobname'] + '_dataViz') # TODO
-
 
 def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, testing):
 	"""
