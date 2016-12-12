@@ -381,7 +381,6 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	if not testing:
 		for eName in experimentNames:
 			""" Data processing """
-			print('Starting processing of '+eName+'...')
 			# get all input parameters
 			processingParams[eName] = getProcessingInput(jobParams['schema'][eName]['config'])
 			# get the dataframes
@@ -391,6 +390,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			processing_path_out = processingParams[eName]['path_out']
 			processingResultsDumpFilename = os.path.join(processing_path_out, 'processingResultsDump_'+str(eName))
 			if doProcessing:
+				print('Starting processing of ' + eName + '...')
 				# prepare the output directories
 				if not os.path.exists(processing_path_out):  # do not overwrite dir
 					assert os.path.exists(
@@ -415,10 +415,10 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 				logging.warning("No processing step performed nor processing file loaded for experiment "+str(eName)+"!")
 
 		""" Data analysis """
-		print('Starting analysis...')
 		analysis_path_out = jobParams['path_out']
 		analysisResultsDumpFilename = os.path.join(analysis_path_out, 'analysisResultsDump')
 		if doAnalysis:
+			print('Starting analysis...')
 			# prepare the output directories
 			if not os.path.exists(analysis_path_out):  # do not overwrite dir
 				assert os.path.exists(os.path.abspath(os.path.join(analysis_path_out, os.path.pardir)))  # parent dir must exist
@@ -440,10 +440,10 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			logging.warning("No analysis step performed nor analysis file loaded!")
 
 		""" Visualize and generate report """
-		print('Starting visualization and report generation...')
 		results_path_out = jobParams['path_results']
 
 		if doReport:
+			print('Starting visualization and report generation...')
 			# prepare the output directories
 			if not os.path.exists(results_path_out):  # do not overwrite dir
 				assert os.path.exists(os.path.abspath(os.path.join(results_path_out, os.path.pardir)))  # parent dir must exist
