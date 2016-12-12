@@ -197,8 +197,8 @@ def getHCDendrogram(HCResult, schema):
 	return HCDendrogram
 
 
-def makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, diffMinFullProteins,
-	                      visualizationsDict, metadata):
+def makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, minVolcanoPlot,
+	                      fullVolcanoPlot, PCAPlot, HCDendrogram, metadata, logFilePath):
 	"""
 	Pour all report ingredients into an HTML file.
 	:param minSortedDifferentialProteinsDF:     pd.DataFrame
