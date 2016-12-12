@@ -213,7 +213,7 @@ def processDf(df, params, writeToDisk):
 	else:
 		intensities = getIntensities(df, intensityColumns=params['intensityColumns'])
 
-	doConstand = False # todo # TEST
+	doConstand = True # todo # TEST
 	if doConstand:
 		# perform the CONSTANd algorithm;
 		normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
@@ -271,8 +271,9 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 
 	# get min and max protein-peptide mappings
 	minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF)
-	# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
 
+	# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
+	# !!! only for 2 conditions up to now!
 	minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema'])
 	fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema'])
 
@@ -467,12 +468,12 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 if __name__ == '__main__':
 	#masterConfigFilePath = 'jobConfig.ini' # TEST
 	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-11 22:17:20.393578_COON')
-	#masterConfigFilePath = webFlow(exptype='COON')
+	masterConfigFilePath = webFlow(exptype='COON')
 	#masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-11 23:56:33.683926_COON_SN')
 	#masterConfigFilePath = webFlow(exptype='COON_SN')
 	#masterConfigFilePath = webFlow(exptype='COON_norm') # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_norm', previousjobdirName='2016-12-12 10:10:37.693588_COON_norm')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_SN_norm')  # todo constand uitzetten
-	masterConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 10:22:41.783491_COON_SN_norm')  # todo constand uitzetten
+	#masterConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 10:22:41.783491_COON_SN_norm')  # todo constand uitzetten
 
-	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=True))
+	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))

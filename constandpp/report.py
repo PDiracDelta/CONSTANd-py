@@ -210,7 +210,7 @@ def getHCDendrogram(HCResult, schema):
 	for i in range(len(ylbls)):
 		ylbls[i].set_color(channelColorsDict[ylbls[i].get_text()])
 		#ylbls[i].set_color(colorsPerCondition[i])
-	#plt.show()  # TEST
+	plt.show()  # TEST
 	return HCDendrogram
 
 
