@@ -108,10 +108,10 @@ def getSortedDifferentialProteinsDF(df):
 def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	# todo docu
 	# todo add protein ID labels according to sorted list entry ID
-	volcanoPlot = plt.figure(figsize=(6, 5))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
+	volcanoPlot = plt.figure(figsize=(16, 12))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
-	mng = plt.get_current_fig_manager()
-	mng.full_screen_toggle()
+	#mng = plt.get_current_fig_manager()
+	#mng.full_screen_toggle()
 	plt.title(r'Volcano Plot ($FC>$' + str(FCThreshold) + r'; $\alpha=$' + str(alpha) + ')', figure=volcanoPlot)
 	plt.xlabel(r'log$_2$(fold change)', figure=volcanoPlot)
 	plt.ylabel(r'-log$_{10}$(p-value) ', figure=volcanoPlot)
@@ -157,10 +157,10 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 
 def getPCAPlot(PCAResult, schema):
 	# todo docu
-	PCAPlot = plt.figure(figsize=(6, 5))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
+	PCAPlot = plt.figure(figsize=(16, 12))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
-	mng = plt.get_current_fig_manager()
-	mng.full_screen_toggle()
+	#mng = plt.get_current_fig_manager()
+	#mng.full_screen_toggle()
 	plt.title('Principal Component scores', figure=PCAPlot)
 	plt.xlabel('First PC', figure=PCAPlot)
 	plt.ylabel('Second PC', figure=PCAPlot)
@@ -185,10 +185,10 @@ def getHCDendrogram(HCResult, schema):
 	# todo docu
 	# hierarchical clustering dendrogram
 	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
-	HCDendrogram = plt.figure(figsize=(6, 5)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
+	HCDendrogram = plt.figure(figsize=(16, 12)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
-	mng = plt.get_current_fig_manager()
-	mng.full_screen_toggle()
+	#mng = plt.get_current_fig_manager()
+	#mng.full_screen_toggle()
 	plt.title('Hierarchical Clustering Dendrogram', figure=HCDendrogram)
 	plt.xlabel('reporter channel', figure=HCDendrogram)
 	plt.ylabel('distance', figure=HCDendrogram)
