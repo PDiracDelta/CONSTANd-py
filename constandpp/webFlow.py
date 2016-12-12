@@ -275,6 +275,7 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 		return new_masterConfigFile
 
 	def updateMasterConfig(this_job_path, this_masterConfigFileAbsPath, this_schema, this_jobname):
+		#allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in this_schema.values()])
 		with open(this_masterConfigFileAbsPath, 'a') as fout:
 			fout.write('\n')  # so you dont accidentally append to the last line
 			fout.write('jobname = ' + this_jobname+ '\n')
