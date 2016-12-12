@@ -33,14 +33,13 @@ def distinguishableColours(n, type='jet'):
 	return cmap(np.linspace(0, 1.0, n))
 
 
-def getColours(schema):
+def getColours(schema, allChannelAliases):
 	"""
 	Returns list of colours for all the channels in all experiments (based on schema) so that the channels of the same
 	condition have the same marker.
 	:param schema:  dict    schema of the experiments
 	:return:        dict    colour for each channel; a different one for each condition (markers differ only across conditions)
 	"""
-	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
 	numConditions = len(list(schema.values())[0]['channelAliasesPerCondition'])
 	distColours = distinguishableColours(numConditions)
 	colours = []
@@ -80,14 +79,14 @@ def distinguishableMarkers(n):
 		return easilyDistinguishable[0:n]
 
 
-def getMarkers(schema):
+def getMarkers(schema, allChannelAliases):
 	"""
 	Returns list of markers for the channels in all experiments (based on schema) so that the channels of the same
 	experiment have the same marker.
 	:param schema:  dict    schema of the experiments
 	:return:        list    markers per channel (markers differ only across experiments)
 	"""
-	channelsPerExperiment = [len(unnest(experiment['channelNamesPerCondition'])) for experiment in schema.values()]
+	channelsPerExperiment = [len(unnest(experiment['channelAliasesPerCondition'])) for experiment in schema.values()]
 	distMarkers = distinguishableMarkers(len(channelsPerExperiment))
 	return unnest([[m]*n for m, n in zip(distMarkers, channelsPerExperiment)])
 
@@ -165,17 +164,20 @@ def getPCAPlot(PCAResult, schema):
 	plt.xlabel('First PC', figure=PCAPlot)
 	plt.ylabel('Second PC', figure=PCAPlot)
 
-	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
-	channelColorsDict = getColours(schema)
-	markersPerExperiment = getMarkers(schema)
 	# labels for annotation
 	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
+	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
+	channelColorsDict = getColours(schema, allChannelAliases)
+	markersPerExperiment = getMarkers(schema, allChannelAliases)
+
 	#xmin, xmax, ymin, ymax = min(PCAResult[:, 0]), max(PCAResult[:, 0]), min(PCAResult[:, 1]), max(PCAResult[:, 1])
 	for (x, y, marker, label) in zip(PCAResult[:, 0], PCAResult[:, 1], markersPerExperiment, allChannelAliases):
 		# produce scatterplot of two first principal components and annotate
 		plt.scatter(x, y, color=channelColorsDict[label], marker=marker, figure=PCAPlot, s=40)
 		plt.annotate(label, xy=(x, y), xytext=(-1, 1),
 			textcoords='offset points', ha='right', va='bottom')
+	legendHandle = [plt.scatter([],[], )]
+	plt.legend()
 	#plt.axhspan(xmin=xmin-0.1(xmax-xmin), ymax=ymax+0.05*(ymax-ymin))
 	#plt.show() # TEST
 	return PCAPlot
@@ -193,7 +195,7 @@ def getHCDendrogram(HCResult, schema):
 	plt.xlabel('reporter channel', figure=HCDendrogram)
 	plt.ylabel('distance', figure=HCDendrogram)
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
-	channelColorsDict = getColours(schema)
+	channelColorsDict = getColours(schema, allChannelAliases)
 	dendrogram(HCResult, orientation='right', leaf_rotation=0., leaf_font_size=12, labels=allChannelAliases,
 	           link_color_func=lambda x: channelColorsDict[allChannelAliases[x]] if x < len(allChannelAliases) else 'k',
 	           above_threshold_color='k')
