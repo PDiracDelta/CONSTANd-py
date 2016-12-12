@@ -213,7 +213,7 @@ def processDf(df, params, writeToDisk):
 	else:
 		intensities = getIntensities(df, intensityColumns=params['intensityColumns'])
 
-	doConstand = False # todo # TEST
+	doConstand = True # todo # TEST
 	if doConstand:
 		# perform the CONSTANd algorithm;
 		normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
@@ -376,6 +376,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 	if not testing:
 		for eName in experimentNames:
 			""" Data processing """
+			print('Starting processing of '+eName+'...')
 			# get all input parameters
 			processingParams[eName] = getProcessingInput(jobParams['schema'][eName]['config'])
 			# get the dataframes
@@ -409,6 +410,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 				logging.warning("No processing step performed nor processing file loaded for experiment "+str(eName)+"!")
 
 		""" Data analysis """
+		print('Starting analysis...')
 		analysis_path_out = jobParams['path_out']
 		analysisResultsDumpFilename = os.path.join(analysis_path_out, 'analysisResultsDump')
 		if doAnalysis:
@@ -433,6 +435,7 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			logging.warning("No analysis step performed nor analysis file loaded!")
 
 		""" Visualize and generate report """
+		print('Starting visualization and report generation...')
 		results_path_out = jobParams['path_results']
 
 		if doReport:
