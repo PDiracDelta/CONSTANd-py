@@ -213,9 +213,15 @@ def processDf(df, params, writeToDisk):
 	else:
 		intensities = getIntensities(df, intensityColumns=params['intensityColumns'])
 
-	# perform the CONSTANd algorithm; also do NOT include normalized intensities in df --> only for paying users.
-	normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
-	normalizedDf = setIntensities(df, intensities=normalizedIntensities, intensityColumns=params['intensityColumns'])
+	doConstand = False # todo # TEST
+	if doConstand:
+		# perform the CONSTANd algorithm;
+		normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
+		normalizedDf = setIntensities(df, intensities=normalizedIntensities, intensityColumns=params['intensityColumns'])
+	else:
+		# TEST do NOT perform CONSTANd
+		logging.warning("+++++++++++++++++++++++++++++++CONSTAND NOT PERFORMED+++++++++++++++++++++++++++++++++")
+		normalizedDf = df
 
 	""" save results """
 	if writeToDisk:
@@ -453,5 +459,7 @@ if __name__ == '__main__':
 	#masterConfigFilePath = 'jobConfig.ini' # TEST
 	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-11 22:17:20.393578_COON')
 	#masterConfigFilePath = webFlow(exptype='COON')
-	masterConfigFilePath = webFlow(exptype='COON_SN')
-	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
+	#masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-11 23:56:33.683926_COON_SN')
+	#masterConfigFilePath = webFlow(exptype='COON_SN')
+	masterConfigFilePath = webFlow(exptype='COON_norm') # todo constand uitzetten
+	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=True))
