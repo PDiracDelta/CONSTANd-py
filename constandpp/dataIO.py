@@ -246,15 +246,14 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 		else:
 			assert isinstance(data, pd.DataFrame)
 			data.to_csv(fullPath, sep=delim_out, index=False)
-	elif dataType == 'viz':
-		for fig in data: # should be a dict
-			outFileName = os.path.join(path_out, filename+'_'+fig)
-			with open(outFileName+'.pkl', "wb") as fout:
-				# save as pickle. Load again later as: ax = pickle.load(file('myplot.pickle')); then plt.show()
-				pickle.dump(fig, fout, protocol=4)
-			from matplotlib import pyplot as plt
-			ax = data[fig]
-			plt.savefig(outFileName+'.png', format='png', bbox_inches='tight')
+	elif dataType == 'fig':
+		outFileName = os.path.join(path_out, filename)
+		with open(outFileName+'.pkl', "wb") as fout:
+			# save as pickle. Load again later as: ax = pickle.load(file('myplot.pickle')); then plt.show()
+			pickle.dump(data, fout, protocol=4)
+		from matplotlib import pyplot as plt
+		#ax = data
+		plt.savefig(outFileName+'.png', format='png', bbox_inches='tight')
 
 
 def delim2ext(delim):
