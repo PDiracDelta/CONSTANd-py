@@ -482,12 +482,12 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 if __name__ == '__main__':
 	#masterConfigFilePath = 'jobConfig.ini' # TEST
 	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-11 22:17:20.393578_COON')
-	masterConfigFilePath = webFlow(exptype='COON')
-	#masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-11 23:56:33.683926_COON_SN')
+	#masterConfigFilePath = webFlow(exptype='COON')
+	masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-11 23:56:33.683926_COON_SN')
 	#masterConfigFilePath = webFlow(exptype='COON_SN')
 	#masterConfigFilePath = webFlow(exptype='COON_norm') # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_norm', previousjobdirName='2016-12-12 10:10:37.693588_COON_norm')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_SN_norm')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 10:22:41.783491_COON_SN_norm')  # todo constand uitzetten
 
-	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
+	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=True))

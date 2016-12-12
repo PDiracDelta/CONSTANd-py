@@ -182,8 +182,20 @@ def getPCAPlot(PCAResult, schema):
 		plt.scatter(x, y, color=channelColorsDict[label], marker=channelMarkersDict[label], figure=PCAPlot, s=40)
 		plt.annotate(label, xy=(x, y), xytext=(-1, 1),
 			textcoords='offset points', ha='right', va='bottom')
-	legendHandle = [plt.scatter([],[], )]
-	plt.legend()
+	legendHandles = []
+	legendStrings = []
+	# look for corresponding experiment name
+	markersToCheck = set(channelMarkersDict.values())
+	for channel, marker in channelMarkersDict.items():
+		if marker in markersToCheck:
+			for eName, experiment in schema.items():
+				if channel in unnest(experiment['channelAliasesPerCondition']):
+					handle = plt.scatter([], [], color='k', marker=marker, s=40)
+					legendHandles.append(handle)
+					legendStrings.append(eName)
+					markersToCheck.remove(marker)
+					break
+	plt.legend(legendHandles, legendStrings, scatterpoints=1)
 	#plt.axhspan(xmin=xmin-0.1(xmax-xmin), ymax=ymax+0.05*(ymax-ymin))
 	#plt.show() # TEST
 	return PCAPlot
