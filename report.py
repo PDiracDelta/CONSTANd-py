@@ -172,6 +172,7 @@ def getPCAPlot(PCAResult, schema):
 
 	# labels for annotation
 	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
+	#print(allChannelAliases) # TEST
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
 	channelColorsDict = getColours(schema, allChannelAliases)
 	channelMarkersDict = getMarkers(schema, allChannelAliases)

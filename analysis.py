@@ -191,6 +191,7 @@ def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 	:return:        np.ndarray          [e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN] for all COMMON peptides.
 	"""
 	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
+	#print(allChannelAliases) # TEST
 	peptidesDf = pd.DataFrame()
 	# join all dataframes together on the Annotated Sequence: you get ALL channels from ALL experiments as columns per peptide.
 	# [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
