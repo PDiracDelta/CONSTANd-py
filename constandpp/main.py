@@ -213,7 +213,7 @@ def processDf(df, params, writeToDisk):
 	else:
 		intensities = getIntensities(df, intensityColumns=params['intensityColumns'])
 
-	doConstand = True # todo # TEST
+	doConstand = False # todo # TEST
 	if doConstand:
 		# perform the CONSTANd algorithm;
 		normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
@@ -338,23 +338,33 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 	# todo combine into one
 
 	# data visualization
-	visualizationsDict = {}
-	visualizationsDict['minVolcano'] = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
+	minVolcanoPlot = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
 	                                               params['labelVolcanoPlotAreas'])
-	visualizationsDict['fullVolcano'] = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
+	if writeToDisk:
+		exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
+		           filename=params['jobname'] + '_minVolcanoPlot')
+	fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
 	                                                  params['labelVolcanoPlotAreas'])
-	visualizationsDict['pca'] = getPCAPlot(PCAResult, params['schema'])
-	visualizationsDict['hcd'] = getHCDendrogram(HCResult, params['schema'])
+	if writeToDisk:
+		exportData(fullVolcanoPlot, dataType='fig', path_out=params['path_results'],
+		           filename=params['jobname'] + '_fullVolcanoPlot')
+	PCAPlot = getPCAPlot(PCAResult, params['schema'])
+	if writeToDisk:
+		exportData(PCAPlot, dataType='fig', path_out=params['path_results'],
+		           filename=params['jobname'] + '_PCAPlot')
+	HCDendrogram = getHCDendrogram(HCResult, params['schema'])
+	if writeToDisk:
+		exportData(HCDendrogram, dataType='fig', path_out=params['path_results'],
+		           filename=params['jobname'] + '_HCDendrogram')
 
 	# generate HTML and PDF reports # todo
-	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, visualizationsDict,
-	                      metadata, logFilePath)
+	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, minVolcanoPlot,
+	                      fullVolcanoPlot, PCAPlot, HCDendrogram, metadata, logFilePath)
 	pdfReport = HTMLtoPDF(htmlReport)
 
-	writeToDisk = False # TEST
 	if writeToDisk:
 		# save the visualizations
-		exportData(visualizationsDict, dataType='viz', path_out=params['path_results'],
+		exportData(visualizationsDict, dataType='fig', path_out=params['path_results'],
 		           filename=params['jobname'] + '_dataViz') # TODO
 
 
@@ -467,6 +477,7 @@ if __name__ == '__main__':
 	#masterConfigFilePath = webFlow(exptype='COON_SN')
 	#masterConfigFilePath = webFlow(exptype='COON_norm') # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_norm', previousjobdirName='2016-12-12 10:10:37.693588_COON_norm')  # todo constand uitzetten
-	masterConfigFilePath = webFlow(exptype='COON_SN_norm')  # todo constand uitzetten
+	#masterConfigFilePath = webFlow(exptype='COON_SN_norm')  # todo constand uitzetten
+	masterConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 10:22:41.783491_COON_SN_norm')  # todo constand uitzetten
 
-	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
+	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=False, doReport=True, testing=False, writeToDisk=True))
