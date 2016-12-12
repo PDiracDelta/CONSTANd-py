@@ -80,15 +80,9 @@ def TMT2ICM(TMTImpuritiesDF): # todo move to web
 	# cols8plex = ['126', '127N', '127C', '128C', '129N', '129C', '130C', '131']
 	# cols10plex = ['126', '127N', '127C', '128N', '128C', '129N', '129C', '130N', '130C', '131']
 	Nplex = len(TMTImpuritiesDF)
+	if Nplex not in [6, 8, 10]:
+		raise Exception("Illegal plexity of your TMT labels. Only 6plex, 8plex, 10plex are supported.")
 	colNames = list(TMTImpuritiesDF.index.values)
-	# if Nplex == 6:
-	# 	colNames = cols6plex
-	# elif Nplex == 8:
-	# 	colNames = cols8plex
-	# elif Nplex == 10:
-	# 	colNames = cols10plex
-	# else:
-	# 	raise Exception("Illegal plexity of your TMT labels. Only 6plex, 8plex, 10plex are supported.")
 	labelNames = ['O_'+n for n in colNames] # O_ for Observed_
 	icmdf = pd.DataFrame(index=labelNames, columns=colNames).fillna(0) # create empty ICM-dataframe of zeroes
 	for label in colNames: # determine label family; i.e. 127N = 127 (roundMass) + N (extraIsotope) -> 128N is familyPlus
