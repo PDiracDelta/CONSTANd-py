@@ -117,13 +117,13 @@ def MAPlot(x,y):
 
 def compareIntensitySN(df1, df2):
 	from processing import getIntensities
-	filepath1 = '../data/COON data/PSMs/BR1_a.txt'
-	filepath2 = '../data/COON data/PSMs/BR1_b_SN.txt'
+	filepath1 = '../data/COON data/PSMs/BR1_e_ISO.txt'
+	filepath2 = '../data/COON data/PSMs/BR1_f_ISO_SN.txt'
 	intensityColumns = ["126", "127N", "127C", "128C","129N", "129C", "130C", "131"]
 	constandnorm=True
 	if constandnorm:
 		if os.path.exists('../data/compareIntensitySNProcessingResults'):
-			processingResults = pickle.load(open('../data/compareIntensitySNProcessingResults', 'rb'))
+			processingResults = pickle.load(open('job/compareIntensitySNProcessingResults', 'rb'))
 		else:
 			params=getProcessingInput('job/processingConfig.ini')
 			dfs = []
@@ -133,7 +133,7 @@ def compareIntensitySN(df1, df2):
 			else:
 				dfs = [df1, df2]
 			processingResults = [processDf(df, params, writeToDisk=False) for df in dfs]
-			pickle.dump(processingResults, open('../data/compareIntensitySNProcessingResults', 'wb'))
+			pickle.dump(processingResults, open('job/compareIntensitySNProcessingResults', 'wb'))
 		relIntensities = getIntensities(processingResults[0][0], intensityColumns=intensityColumns)
 		relSNs = getIntensities(processingResults[1][0], intensityColumns=intensityColumns)
 	else:
