@@ -379,16 +379,16 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 	pdfReport = HTMLtoPDF(htmlReport)
 
 
-def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, testing):
+def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, testing):
 	"""
 	For now this is just stuff for debugging and testing. Later:
 	Contains and explicits the workflow of the program. Using the booleans doProcessing, doAnalysis and writeToDisk one
 	can control	which parts of the workflow to perform.
 	"""
-	logFilePath = os.path.abspath(os.path.join(masterConfigFilePath, os.path.join(os.pardir, 'log.txt')))
+	logFilePath = os.path.abspath(os.path.join(jobConfigFilePath, os.path.join(os.pardir, 'log.txt')))
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
 	start = time()
-	jobParams = getJobInput(masterConfigFilePath) # config filenames + params for the combination of experiments
+	jobParams = getJobInput(jobConfigFilePath) # config filenames + params for the combination of experiments
 	processingParams = {} # specific params for each experiment
 	dfs = {}
 	processingResults = {}
@@ -491,4 +491,4 @@ if __name__ == '__main__':
 	#masterConfigFilePath = webFlow(exptype='COON_SN_norm')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 22:48:30.701250_COON_SN_norm')  # todo constand uitzetten
 
-	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=False, doReport=True, testing=True, writeToDisk=True))
+	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=False, doReport=True, testing=True, writeToDisk=True))
