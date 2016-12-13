@@ -15,18 +15,16 @@ __email__ = "vanhoutvenjoris@gmail.com"
 __status__ = "Development"
 
 import sys, os, logging, datetime
-from webFlow import webFlow
 from getInput import getProcessingInput, getJobInput
-from constand import constand
+from processingFlow import processDf
+from analysisFlow import analyzeProcessingResult
+from reportFlow import generateReport
 from time import time
 from dataIO import *
-from processing import *
-from collapse import collapse
-from analysis import *
-from report import *
 
 
 def performanceTest():  # remove for production # TEST
+	from constand import constand
 	""" Use this development method to test the performance of the CONSTANd algorithm. """
 	t = []
 	for i in range(100):
@@ -40,6 +38,8 @@ def performanceTest():  # remove for production # TEST
 
 
 def isotopicImpuritiesTest(): # TEST
+	from constand import constand
+	from processing import getIntensities
 	## test if isotopic correction is necessary:
 	params = getProcessingInput()
 	# get the dataframe
@@ -65,6 +65,7 @@ def isotopicImpuritiesTest(): # TEST
 
 
 def isotopicCorrectionsTest(params): # TEST
+	from processing import isotopicCorrection
 	if params['isotopicCorrection_bool']:
 		int_in = np.array([range(6), range(6)]) + np.array([np.zeros(6), 5*np.ones(6)])
 		# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
@@ -79,6 +80,8 @@ def isotopicCorrectionsTest(params): # TEST
 
 
 def MS2IntensityDoesntMatter(df):
+	from processing import getIntensities
+	from constand import constand
 	I = getIntensities(df)
 	r1 = constand(I, 1e-5, 50)
 	I[0] *= 1e9 # this is BIG. MS2 intensity doesnt reach beyond 1e9 so if one value has magnitudeOrder 1 it's still OK.
@@ -113,6 +116,7 @@ def MAPlot(x,y):
 
 
 def compareIntensitySN():
+	from processing import getIntensities
 	filepath1 = '../data/COON data/PSMs/BR1_a.txt'
 	filepath2 = '../data/COON data/PSMs/BR1_b_SN.txt'
 	intensityColumns = ["126", "127N", "127C", "128C","129N", "129C", "130C", "131"]
@@ -160,223 +164,6 @@ def devStuff(df, params): # TEST
 	# testDataComplementarity(df)
 	compareIntensitySN()
 	pass
-
-
-def processDf(df, params, writeToDisk):
-	# todo docu
-	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
-	# remove detections where (essential) data is missing.
-	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['intensityColumns'])
-	if params['removeBadConfidence_bool']:
-		df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'], params['removalColumnsToSave'])
-	# remove all useless columns from the dataFrame
-	df = removeObsoleteColumns(df, wantedColumns=params['wantedColumns'])
-	if params['removeIsolationInterference_bool']:
-		# remove all data with too high isolation interference
-		df, removedData['isolationInterference'] = removeIsolationInterference(df, params[
-			'removeIsolationInterference_threshold'], params['removalColumnsToSave'])
-	# remove all non-master protein accessions (entire column) and descriptions (selective).
-	df = setMasterProteinDescriptions(df)
-	if params['undoublePSMAlgo_bool']:
-		# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
-		df, removedData['PSMAlgo'] = undoublePSMAlgo(df, identifyingNodes=params['identifyingNodes'],
-		                                             exclusive=params['undoublePSMAlgo_exclusive_bool'],
-		                                             intensityColumns=params['intensityColumns'],
-		                                             removalColumnsToSave=params['removalColumnsToSave'])
-		# SANITY CHECK: no detections with the same scan number may exist after undoublePSMAlgo()
-		assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
-	# todo find mean of empty slices warning flood source (ABOVE this line)
-	# collapse peptide list redundancy due to multiple detections at different RT
-	# TEST here the intensity columns are alraedy lost
-	df, removedData['RT'] = collapse('RT', df, intensityColumns=params['intensityColumns'], method=params['collapse_method'],
-	                                 identifyingNodes=params['identifyingNodes'],
-	                                 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
-	if params['collapseCharge_bool']:
-		# collapse peptide list redundancy due to different charges (optional)
-		df, removedData['charge'] = collapse('Charge', df, intensityColumns=params['intensityColumns'], method=params['collapse_method'],
-		                                     identifyingNodes=params['identifyingNodes'],
-		                                     undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
-	if params['collapsePTM_bool']:
-		# collapse peptide list redundancy due to different charges (optional)
-		df, removedData['modifications'] = collapse('PTM', df, intensityColumns=params['intensityColumns'], method=params['collapse_method'],
-		                                            identifyingNodes=params['identifyingNodes'],
-		                                            undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
-
-	# SANITY CHECK: there should be no more duplicates if all collapses have been applied.
-	if params['undoublePSMAlgo_bool'] and params['collapseCharge_bool']:  # TEST
-		assert np.prod((len(i) < 2 for (s, i) in df.groupby(
-			'Annotated Sequence').groups))  # only 1 index vector in dict of SEQUENCE:[INDICES] for all sequences
-
-	if params['isotopicCorrection_bool']:
-		# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
-		intensities, noCorrectionIndices = isotopicCorrection(getIntensities(df, intensityColumns=params['intensityColumns']),
-		                                                      correctionsMatrix=params['isotopicCorrection_matrix'])
-	else:
-		intensities = getIntensities(df, intensityColumns=params['intensityColumns'])
-
-	doConstand = True # todo # TEST
-	if doConstand:
-		# perform the CONSTANd algorithm;
-		normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
-		normalizedDf = setIntensities(df, intensities=normalizedIntensities, intensityColumns=params['intensityColumns'])
-	else:
-		# TEST do NOT perform CONSTANd
-		logging.warning("+++++++++++++++++++++++++++++++CONSTAND NOT PERFORMED+++++++++++++++++++++++++++++++++")
-		normalizedIntensities=[0]
-		normalizedDf = df
-
-	""" save results """
-	if writeToDisk:
-		# save the removed data information
-		exportData(removedData, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_removedData',
-		           delim_out=params['delim_out'], inOneFile=params['removedDataInOneFile_bool'])
-		# save the final form of the dataFrame WITHOUT normalized intensities.
-		exportData(df, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_dataFrame', delim_out=params['delim_out'])
-		# save the normalized intensities obtained through CONSTANd
-		exportData(normalizedIntensities, dataType='txt', path_out=params['path_out'],
-		           filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
-		# save the DE analysis results
-
-	if params['isotopicCorrection_bool']:
-		return normalizedDf, normalizedIntensities, removedData, noCorrectionIndices # todo find better solution than 2 returns
-	else:
-		return normalizedDf, normalizedIntensities, removedData
-
-
-def analyzeProcessingResult(processingResults, params, writeToDisk):
-	# todo docu
-	processingResultsItems = processingResults.items()
-	dfs = dict((eName, result[0]) for eName, result in processingResultsItems)
-	normalizedIntensitiess = dict((eName, result[1]) for eName, result in processingResultsItems)
-	removedDatas = dict((eName, result[2]) for eName, result in processingResultsItems)
-	noCorrectionIndicess = {}
-	for eName, result in processingResultsItems:
-		if len(result) > 3: # if noCorrectionIndices exists in results
-			noCorrectionIndicess[eName] = result[3]
-
-	experimentNames = processingResults.keys()
-	# contains statistics and metadata (like the parameters) about the analysis.
-	metadata = {}
-	# record detections without isotopic correction applied applied. Multi-indexed on experiment names and old indices!
-	try:
-		metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for
-	                                              eName in noCorrectionIndicess.keys()], keys=experimentNames)
-	except ValueError:
-		pass # not a single noCorrectionIndices was found. OK.
-	# record RT isolation statistics. Future: flag. Multi-indexed on experiment names and old indices!
-	metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for
-	                                         eName in experimentNames], keys=experimentNames)
-
-	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe # and intensityColumns are unique and distinguishable
-	allExperimentsDF = combineExperimentDFs(dfs) #, params['schema'])
-
-	nConditions = len(list(params['schema'].values())[0]['channelAliasesPerCondition'])
-	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
-	if nConditions == 2:
-		# get min and max protein-peptide mappings
-		minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF)
-
-		# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
-		minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema'])
-		fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema'])
-
-		# perform differential expression analysis with Benjamini-Hochberg correction.
-		minProteinDF = applyDifferentialExpression(minProteinDF, params['alpha'])
-		fullProteinDF = applyDifferentialExpression(fullProteinDF, params['alpha'])
-
-		# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
-		minProteinDF = applyFoldChange(minProteinDF, params['pept2protCombinationMethod'])
-		fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
-
-		# indicate significance based on given thresholds alpha and FCThreshold
-		minProteinDF = applySignificance(minProteinDF, params['alpha'], params['FCThreshold'])
-		fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
-	else:
-		minProteinDF = pd.DataFrame()
-		fullProteinDF = pd.DataFrame()
-
-	# dataframe with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
-	allExperimentsIntensitiesPerCommonPeptide, metadata['uncommonPeptides'] = getAllExperimentsIntensitiesPerCommonPeptide(dfs, params['schema'])
-	# save the amount of NaN values per channel for common peptides.
-	metadata['commonNanValues'] = pd.DataFrame(np.sum(np.isnan(allExperimentsIntensitiesPerCommonPeptide), axis=0))
-	# perform PCA
-	PCAResult = getPCA(allExperimentsIntensitiesPerCommonPeptide, params['PCA_components'])
-	# perform hierarchical clustering
-	HCResult = getHC(allExperimentsIntensitiesPerCommonPeptide)
-
-	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
-	handyColumnOrder = ['protein', 'significant', 'adjusted p-value', 'log2 fold change c1/c2', 'description', 'p-value', 'peptides', 'condition 1', 'condition 2']
-	minProteinDF.reset_index(level=0, inplace=True)
-	fullProteinDF.reset_index(level=0, inplace=True)
-	minProteinDF = minProteinDF.reindex_axis(handyColumnOrder, axis=1)
-	fullProteinDF = fullProteinDF.reindex_axis(handyColumnOrder, axis=1)
-
-	""" save results """
-	if writeToDisk:
-		# save the protein-level dataframes
-		exportData(minProteinDF, dataType='df', path_out=params['path_out'],
-		           filename=params['jobname'] + '_results_minimal', delim_out=params['delim_out'])
-		exportData(fullProteinDF, dataType='df', path_out=params['path_out'],
-		           filename=params['jobname'] + '_results_full', delim_out=params['delim_out'])
-		# save the metadata
-		exportData(metadata, dataType='df', path_out=params['path_out'],
-		           filename=params['jobname'] + '_metadata',
-		           delim_out=params['delim_out'], inOneFile=False)
-		# generate a report PDF (without the normalized intensities: behind paywall?
-
-	return minProteinDF, fullProteinDF, PCAResult, HCResult, metadata
-
-
-def generateReport(analysisResults, params, logFilePath, writeToDisk):
-	# todo docu
-	minProteinDF = analysisResults[0]
-	fullProteinDF = analysisResults[1]
-	PCAResult = analysisResults[2]
-	HCResult = analysisResults[3]
-	metadata = analysisResults[4]
-
-	nConditions = len(list(params['schema'].values())[0]['channelAliasesPerCondition'])
-	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
-	if nConditions == 2:
-		# generate sorted (on FC) list of differentials
-		minSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(minProteinDF)
-		fullSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(fullProteinDF)
-		minSet = set(minSortedDifferentialProteinsDF['protein'])
-		fullSet = set(fullSortedDifferentialProteinsDF['protein'])
-		# list( [in min but not in full], [in full but not in min] )
-		metadata['diffMinFullProteins'] = [list(minSet.difference(fullSet)), list(fullSet.difference(minSet))]
-		# todo combine into one
-
-		# data visualization
-		minVolcanoPlot = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
-		                                               params['labelVolcanoPlotAreas'])
-		if writeToDisk:
-			exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
-			           filename=params['jobname'] + '_minVolcanoPlot')
-		fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
-		                                                  params['labelVolcanoPlotAreas'])
-	else:
-		minSortedDifferentialProteinsDF = pd.DataFrame()
-		fullSortedDifferentialProteinsDF = pd.DataFrame()
-		minVolcanoPlot = None
-		fullVolcanoPlot = None
-
-	if writeToDisk:
-		exportData(fullVolcanoPlot, dataType='fig', path_out=params['path_results'],
-		           filename=params['jobname'] + '_fullVolcanoPlot')
-	PCAPlot = getPCAPlot(PCAResult, params['schema'])
-	if writeToDisk:
-		exportData(PCAPlot, dataType='fig', path_out=params['path_results'],
-		           filename=params['jobname'] + '_PCAPlot')
-	HCDendrogram = getHCDendrogram(HCResult, params['schema'])
-	if writeToDisk:
-		exportData(HCDendrogram, dataType='fig', path_out=params['path_results'],
-		           filename=params['jobname'] + '_HCDendrogram')
-
-	# generate HTML and PDF reports # todo
-	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, minVolcanoPlot,
-	                      fullVolcanoPlot, PCAPlot, HCDendrogram, metadata, logFilePath)
-	pdfReport = HTMLtoPDF(htmlReport)
 
 
 def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, testing):
