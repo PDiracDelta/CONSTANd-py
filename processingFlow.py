@@ -8,6 +8,7 @@ Workflow of the processing part of CONSTANd++.
 from processing import *
 from dataIO import exportData
 from collapse import collapse
+from constand import constand
 
 
 def processDf(df, params, writeToDisk):
