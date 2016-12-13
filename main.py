@@ -113,14 +113,15 @@ def MAPlot(x,y):
 
 
 def compareIntensitySN():
-	filepath1 = '../data/COON data/PSMs/fixed_BR1_a.txt'
-	filepath2 = '../data/COON data/PSMs/fixed_BR1_b_SN.txt'
+	filepath1 = '../data/COON data/PSMs/BR1_a.txt'
+	filepath2 = '../data/COON data/PSMs/BR1_b_SN.txt'
+	intensityColumns = ["126", "127N", "127C", "128C","129N", "129C", "130C", "131"]
 	constandnorm=True
 	if constandnorm:
 		if os.path.exists('../data/compareIntensitySNProcessingResults'):
 			processingResults = pickle.load(open('../data/compareIntensitySNProcessingResults', 'rb'))
 		else:
-			params=getProcessingInput()
+			params=getProcessingInput('job/processingConfig.ini')
 			# setProcessingGlobals(intensityColumns=params['intensityColumns'],
 			# 					 removalColumnsToSave=params['removalColumnsToSave'],
 			# 					 noMissingValuesColumns=params['noMissingValuesColumns'])
@@ -130,8 +131,8 @@ def compareIntensitySN():
 				dfs.append(importDataFrame(filepath, delim=params['delim_in'], header=params['header_in']))
 			processingResults = [processDf(df, params, writeToDisk=False) for df in dfs]
 			pickle.dump(processingResults, open('../data/compareIntensitySNProcessingResults', 'wb'))
-		relIntensities = getIntensities(processingResults[0][0])
-		relSNs = getIntensities(processingResults[1][0])
+		relIntensities = getIntensities(processingResults[0][0], intensityColumns=intensityColumns)
+		relSNs = getIntensities(processingResults[1][0], intensityColumns=intensityColumns)
 	else:
 		df1 = importDataFrame(filepath1, delim='\t', header=0)
 		df2 = importDataFrame(filepath2, delim='\t', header=0)
@@ -474,20 +475,20 @@ def main(masterConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, 
 			logging.warning("No report generated!")
 
 	elif testing:
-		devStuff(dfs[0], processingParams[0])
+		devStuff(dfs, processingParams)
 	stop = time()
 	print(stop - start)
 
 
 if __name__ == '__main__':
-	#masterConfigFilePath = 'jobConfig.ini' # TEST
-	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-11 22:17:20.393578_COON')
-	masterConfigFilePath = webFlow(exptype='COON')
-	#masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-11 23:56:33.683926_COON_SN')
+	masterConfigFilePath = 'job/jobConfig.ini' # TEST
+	#masterConfigFilePath = webFlow(exptype='COON')
+	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-12 22:37:48.458146_COON')
 	#masterConfigFilePath = webFlow(exptype='COON_SN')
+	#masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-12 22:41:02.295891_COON_SN')
 	#masterConfigFilePath = webFlow(exptype='COON_norm') # todo constand uitzetten
-	#masterConfigFilePath = webFlow(exptype='COON_norm', previousjobdirName='2016-12-12 10:10:37.693588_COON_norm')  # todo constand uitzetten
+	#masterConfigFilePath = webFlow(exptype='COON_norm', previousjobdirName='2016-12-12 22:43:38.030716_COON_norm')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_SN_norm')  # todo constand uitzetten
-	#masterConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 10:22:41.783491_COON_SN_norm')  # todo constand uitzetten
+	#masterConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 22:48:30.701250_COON_SN_norm')  # todo constand uitzetten
 
-	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True))
+	sys.exit(main(masterConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=False, doReport=True, testing=True, writeToDisk=True))
