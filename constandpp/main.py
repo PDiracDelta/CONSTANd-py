@@ -115,7 +115,7 @@ def MAPlot(x,y):
 	plt.show()
 
 
-def compareIntensitySN():
+def compareIntensitySN(df1, df2):
 	from processing import getIntensities
 	filepath1 = '../data/COON data/PSMs/BR1_a.txt'
 	filepath2 = '../data/COON data/PSMs/BR1_b_SN.txt'
@@ -126,20 +126,20 @@ def compareIntensitySN():
 			processingResults = pickle.load(open('../data/compareIntensitySNProcessingResults', 'rb'))
 		else:
 			params=getProcessingInput('job/processingConfig.ini')
-			# setProcessingGlobals(intensityColumns=params['intensityColumns'],
-			# 					 removalColumnsToSave=params['removalColumnsToSave'],
-			# 					 noMissingValuesColumns=params['noMissingValuesColumns'])
-			# setCollapseColumnsToSave(params['collapseColumnsToSave'])  # define the intensityColumns for use in processing.py
 			dfs = []
-			for filepath in [filepath1, filepath2]:
-				dfs.append(importDataFrame(filepath, delim=params['delim_in'], header=params['header_in']))
+			if df1 is None and df2 is None:
+				for filepath in [filepath1, filepath2]:
+					dfs.append(importDataFrame(filepath, delim=params['delim_in'], header=params['header_in']))
+			else:
+				dfs = [df1, df2]
 			processingResults = [processDf(df, params, writeToDisk=False) for df in dfs]
 			pickle.dump(processingResults, open('../data/compareIntensitySNProcessingResults', 'wb'))
 		relIntensities = getIntensities(processingResults[0][0], intensityColumns=intensityColumns)
 		relSNs = getIntensities(processingResults[1][0], intensityColumns=intensityColumns)
 	else:
-		df1 = importDataFrame(filepath1, delim='\t', header=0)
-		df2 = importDataFrame(filepath2, delim='\t', header=0)
+		if df1 is None and df2 is None:
+			df1 = importDataFrame(filepath1, delim='\t', header=0)
+			df2 = importDataFrame(filepath2, delim='\t', header=0)
 		intensityColumns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
 		relIntensities = np.empty((len(df1.index),8), dtype='float')
 		relSNs = np.empty((len(df2.index),8), dtype='float')
@@ -162,7 +162,7 @@ def devStuff(df, params): # TEST
 	# isotopicCorrectionsTest(params)
 	# MS2IntensityDoesntMatter(df)
 	# testDataComplementarity(df)
-	compareIntensitySN()
+	compareIntensitySN(None, None)
 	pass
 
 
