@@ -120,10 +120,12 @@ def compareIntensitySN(df1, df2):
 	filepath1 = '../data/COON data/PSMs/BR1_e_ISO.txt'
 	filepath2 = '../data/COON data/PSMs/BR1_f_ISO_SN.txt'
 	intensityColumns = ["126", "127N", "127C", "128C","129N", "129C", "130C", "131"]
+	pickleFileName = 'job/compareIntensitySNProcessingResults'
 	constandnorm=True
+	alsoprocess=False
 	if constandnorm:
-		if os.path.exists('../data/compareIntensitySNProcessingResults'):
-			processingResults = pickle.load(open('job/compareIntensitySNProcessingResults', 'rb'))
+		if alsoprocess and os.path.exists(pickleFileName):
+			processingResults = pickle.load(open(pickleFileName, 'rb'))
 		else:
 			params=getProcessingInput('job/processingConfig.ini')
 			dfs = []
@@ -132,10 +134,16 @@ def compareIntensitySN(df1, df2):
 					dfs.append(importDataFrame(filepath, delim=params['delim_in'], header=params['header_in']))
 			else:
 				dfs = [df1, df2]
-			processingResults = [processDf(df, params, writeToDisk=False) for df in dfs]
-			pickle.dump(processingResults, open('job/compareIntensitySNProcessingResults', 'wb'))
-		relIntensities = getIntensities(processingResults[0][0], intensityColumns=intensityColumns)
-		relSNs = getIntensities(processingResults[1][0], intensityColumns=intensityColumns)
+			if alsoprocess:
+				processingResults = [processDf(df, params, writeToDisk=False) for df in dfs]
+				pickle.dump(processingResults, open(pickleFileName, 'wb'))
+		if alsoprocess:
+			relIntensities = getIntensities(processingResults[0][0], intensityColumns=intensityColumns)
+			relSNs = getIntensities(processingResults[1][0], intensityColumns=intensityColumns)
+		else:
+			from constand import constand
+			relIntensities, __, __, __ = constand(getIntensities(dfs[0], intensityColumns=intensityColumns), 1e-5, 50)
+			relSNs, __, __, __ = constand(getIntensities(dfs[1], intensityColumns=intensityColumns), 1e-5, 50)
 	else:
 		if df1 is None and df2 is None:
 			df1 = importDataFrame(filepath1, delim='\t', header=0)
