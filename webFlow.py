@@ -38,13 +38,13 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 		HC_ICM1 = '../jobs/ICM6_default.tsv'
 		HC_ICM2 = '../jobs/ICM6_default.tsv'
 		HC_MASTERCONFIG = '../jobs/jobConfig.ini'
-	elif exptype == 'COON':
+	elif exptype == 'COON' or exptype == 'COON_nonormnoconstand':
 		coondatapath = '../data/COON data/PSMs/'
 		datatype = '_e_ISO'
 		coonconfig = '../jobs/coonProcessingConfig.ini'
 		coonwrapper = None #'../jobs/coonWrapper.tsv'
 		coonICM = None
-		HC_JOBNAME = 'COON'
+		HC_JOBNAME = 'COON_nonormnoconstand'
 		HC_SCHEMA = '../jobs/coonSchema.tsv'
 		HC_ENAME1 = 'BR1'
 		HC_ENAME2 = 'BR2'
