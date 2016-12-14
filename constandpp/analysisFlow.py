@@ -93,6 +93,4 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		           filename=params['jobname'] + '_metadata',
 		           delim_out=params['delim_out'], inOneFile=False)
 
-
-
-	return minProteinDF, fullProteinDF, PCAResult, HCResult, metadata
+	return minProteinDF, fullProteinDF, PCAResult, HCResult, allExperimentsIntensitiesPerCommonPeptide, metadata
