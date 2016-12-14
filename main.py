@@ -280,12 +280,12 @@ if __name__ == '__main__':
 	#masterConfigFilePath = webFlow(exptype='COON')
 	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-12 22:37:48.458146_COON')
 	#masterConfigFilePath = webFlow(exptype='COON_SN')
-	#masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-12 22:41:02.295891_COON_SN')
+	masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-12 22:41:02.295891_COON_SN')
 	#masterConfigFilePath = webFlow(exptype='COON_norm') # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_norm', previousjobdirName='2016-12-12 22:43:38.030716_COON_norm')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_SN_norm')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 22:48:30.701250_COON_SN_norm')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_nonormnoconstand')  # todo constand uitzetten
 
-	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True,
+	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=True, doReport=True,
 	              testing=False, writeToDisk=True))

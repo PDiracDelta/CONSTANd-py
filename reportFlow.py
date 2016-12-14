@@ -15,7 +15,8 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 	fullProteinDF = analysisResults[1]
 	PCAResult = analysisResults[2]
 	HCResult = analysisResults[3]
-	metadata = analysisResults[4]
+	allExperimentsIntensitiesPerCommonPeptide = analysisResults[4]
+	metadata = analysisResults[5]
 
 	nConditions = len(list(params['schema'].values())[0]['channelAliasesPerCondition'])
 	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
