@@ -109,11 +109,13 @@ def MAPlot(x,y, title):
 	from matplotlib import pyplot as plt
 	logx = np.log2(x)
 	logy = np.log2(y)
-	plt.scatter((logx+logy)*0.5, logx-logy)
+	A = (logx + logy) * 0.5
+	M = logx-logy
+	plt.scatter(A, M)
 	if title is None:
 		plt.title('PD2.1 Intensities versus S/N values (scaled relatively within each row/peptide)')
 	else:
-		plt.title(title)
+		plt.title(title+'mean(M): '+str(np.mean(M)+'; var(M):'+str(np.var(M))))
 	plt.xlabel('A')
 	plt.ylabel('M')
 	plt.show()
@@ -281,7 +283,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 if __name__ == '__main__':
 	masterConfigFilePath = 'job/jobConfig.ini' # TEST
 	#masterConfigFilePath = webFlow(exptype='COON')
-	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-12 22:37:48.458146_COON')
+	masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-12 22:37:48.458146_COON')
 	#masterConfigFilePath = webFlow(exptype='COON_SN')
 	#masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-12 22:41:02.295891_COON_SN')
 	#masterConfigFilePath = webFlow(exptype='COON_norm') # todo constand uitzetten
