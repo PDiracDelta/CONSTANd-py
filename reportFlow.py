@@ -59,4 +59,3 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, minVolcanoPlot,
 	                      fullVolcanoPlot, PCAPlot, HCDendrogram, metadata, logFilePath)
 	pdfReport = HTMLtoPDF(htmlReport)
-

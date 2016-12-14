@@ -90,4 +90,3 @@ def processDf(df, params, writeToDisk):
 		return normalizedDf, normalizedIntensities, removedData, noCorrectionIndices # todo find better solution than 2 returns
 	else:
 		return normalizedDf, normalizedIntensities, removedData
-
