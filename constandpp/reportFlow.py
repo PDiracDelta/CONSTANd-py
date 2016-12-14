@@ -18,6 +18,19 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 	allExperimentsIntensitiesPerCommonPeptide = analysisResults[4]
 	metadata = analysisResults[5]
 
+	### TEST
+	testInterexperimentalOnPeptideLevel = True
+	if testInterexperimentalOnPeptideLevel:
+		from main import MAPlot
+		org3data = allExperimentsIntensitiesPerCommonPeptide[:, 3]
+		MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 11],
+		       'muscle exp [0] vs muscle exp [1]')
+		MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 0],
+		       'muscle exp [0] vs org0 exp [0]')
+		MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 8],
+		       'muscle exp [0] vs org0 exp [1]')
+
+
 	nConditions = len(list(params['schema'].values())[0]['channelAliasesPerCondition'])
 	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
 	if nConditions == 2:
