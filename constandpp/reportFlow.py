@@ -15,7 +15,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 	fullProteinDF = analysisResults[1]
 	PCAResult = analysisResults[2]
 	HCResult = analysisResults[3]
-	allExperimentsIntensitiesPerCommonPeptide = analysisResults[4]
+	allExperimentsIntensitiesPerCommonPeptide = np.asarray(analysisResults[4], dtype=float)
 	metadata = analysisResults[5]
 
 	### TEST
