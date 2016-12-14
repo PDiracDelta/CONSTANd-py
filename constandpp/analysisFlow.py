@@ -84,10 +84,15 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		           filename=params['jobname'] + '_results_minimal', delim_out=params['delim_out'])
 		exportData(fullProteinDF, dataType='df', path_out=params['path_out'],
 		           filename=params['jobname'] + '_results_full', delim_out=params['delim_out'])
+		# save the intensity matrix of all COMMON peptides
+		exportData(allExperimentsIntensitiesPerCommonPeptide, dataType='txt', path_out=params['path_out'],
+		           filename=params['jobname'] + '_CommonPeptideIntensities',
+		           delim_out=params['delim_out'], inOneFile=False)
 		# save the metadata
 		exportData(metadata, dataType='df', path_out=params['path_out'],
 		           filename=params['jobname'] + '_metadata',
 		           delim_out=params['delim_out'], inOneFile=False)
-		# generate a report PDF (without the normalized intensities: behind paywall?
+
+
 
 	return minProteinDF, fullProteinDF, PCAResult, HCResult, metadata
