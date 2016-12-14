@@ -44,7 +44,7 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 		coonconfig = '../jobs/coonProcessingConfig.ini'
 		coonwrapper = None #'../jobs/coonWrapper.tsv'
 		coonICM = None
-		HC_JOBNAME = 'COON_nonormnoconstand'
+		HC_JOBNAME = 'COON'
 		HC_SCHEMA = '../jobs/coonSchema.tsv'
 		HC_ENAME1 = 'BR1'
 		HC_ENAME2 = 'BR2'

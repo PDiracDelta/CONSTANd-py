@@ -32,20 +32,20 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 		# data visualization
 		minVolcanoPlot = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
 		                                               params['labelVolcanoPlotAreas'])
+		fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
+		                                 params['labelVolcanoPlotAreas'])
 		if writeToDisk:
 			exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
 			           filename=params['jobname'] + '_minVolcanoPlot')
-		fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
-		                                                  params['labelVolcanoPlotAreas'])
+
+			exportData(fullVolcanoPlot, dataType='fig', path_out=params['path_results'],
+			           filename=params['jobname'] + '_fullVolcanoPlot')
 	else:
 		minSortedDifferentialProteinsDF = pd.DataFrame()
 		fullSortedDifferentialProteinsDF = pd.DataFrame()
 		minVolcanoPlot = None
 		fullVolcanoPlot = None
 
-	if writeToDisk:
-		exportData(fullVolcanoPlot, dataType='fig', path_out=params['path_results'],
-		           filename=params['jobname'] + '_fullVolcanoPlot')
 	PCAPlot = getPCAPlot(PCAResult, params['schema'])
 	if writeToDisk:
 		exportData(PCAPlot, dataType='fig', path_out=params['path_results'],
