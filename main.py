@@ -115,7 +115,7 @@ def MAPlot(x,y, title):
 	if title is None:
 		plt.title('PD2.1 Intensities versus S/N values (scaled relatively within each row/peptide)')
 	else:
-		plt.title(title+'mean(M): '+str(np.mean(M)+'; var(M):'+str(np.var(M))))
+		plt.title(title+'mean(M): '+str(np.mean(M))+'; var(M):'+str(np.var(M)))
 	plt.xlabel('A')
 	plt.ylabel('M')
 	plt.show()
