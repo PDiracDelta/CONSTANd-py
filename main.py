@@ -105,12 +105,15 @@ def testDataComplementarity(df):
 	print(scannrs_final == scannrs_init)
 
 
-def MAPlot(x,y):
+def MAPlot(x,y, title):
 	from matplotlib import pyplot as plt
 	logx = np.log2(x)
 	logy = np.log2(y)
 	plt.scatter((logx+logy)*0.5, logx-logy)
-	plt.title('PD2.1 Intensities versus S/N values (scaled relatively within each row/peptide)')
+	if title is None:
+		plt.title('PD2.1 Intensities versus S/N values (scaled relatively within each row/peptide)')
+	else:
+		plt.title(title)
 	plt.xlabel('A')
 	plt.ylabel('M')
 	plt.show()
@@ -280,12 +283,12 @@ if __name__ == '__main__':
 	#masterConfigFilePath = webFlow(exptype='COON')
 	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-12 22:37:48.458146_COON')
 	#masterConfigFilePath = webFlow(exptype='COON_SN')
-	masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-12 22:41:02.295891_COON_SN')
+	#masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-12 22:41:02.295891_COON_SN')
 	#masterConfigFilePath = webFlow(exptype='COON_norm') # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_norm', previousjobdirName='2016-12-12 22:43:38.030716_COON_norm')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_SN_norm')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 22:48:30.701250_COON_SN_norm')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_nonormnoconstand')  # todo constand uitzetten
 
-	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=True, doReport=True,
+	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=False, doReport=True,
 	              testing=False, writeToDisk=True))
