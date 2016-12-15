@@ -202,9 +202,14 @@ def abundancesPCAHCD():
 		dfs[eName] = df
 
 	AEIPCP = getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema)[0].astype(np.float)
-	colTotals = np.nansum(AEIPCP, axis=0)
-	multipliers = np.max(colTotals)/colTotals
-	AEIPCPcorrected = AEIPCP*multipliers
+	doConstand = True
+	if doConstand:
+		from constand import constand
+		AEIPCPcorrected = constand(AEIPCP, 1e-5, 50)[0]
+	else:
+		colTotals = np.nansum(AEIPCP, axis=0)
+		multipliers = np.max(colTotals)/colTotals
+		AEIPCPcorrected = AEIPCP*multipliers
 	pca = getPCA(AEIPCPcorrected, 2)
 	hcd = getHC(AEIPCPcorrected)
 	PCAPlot = getPCAPlot(pca, schema)
