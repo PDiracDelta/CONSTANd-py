@@ -19,17 +19,23 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 	metadata = analysisResults[5]
 
 	### TEST
-	testInterexperimentalOnPeptideLevel = True
+	testInterexperimentalOnPeptideLevel = False
+	proteinLevelMAPlots = True
 	if testInterexperimentalOnPeptideLevel:
 		from main import MAPlot
-		org3data = allExperimentsIntensitiesPerCommonPeptide[:, 3]
-		MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 11],
-		       'muscle exp [0] vs muscle exp [1]')
-		MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 0],
-		       'muscle exp [0] vs org0 exp [0]')
-		MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 8],
-		       'muscle exp [0] vs org0 exp [1]')
-
+		org3data = allExperimentsIntensitiesPerCommonPeptide[:, 17]
+		#MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 11],
+		#       'org2 exp [1] vs org2 exp [1]')
+		MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 18],
+		       'org2 exp [2] vs org3 exp [2]')
+		MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 26],
+		       'org2 exp [2] vs org3 exp [3]')
+	if proteinLevelMAPlots:
+		from main import MAPlot
+		MAPlot(minProteinDF.loc[:, '3_muscle'], minProteinDF.loc[:, '4_muscle'],
+		       'org2 exp [2] vs org3 exp [2]')
+		MAPlot(minProteinDF.loc[:, '3_muscle'], minProteinDF.loc[:, '4_cerebrum'],
+		       'org2 exp [2] vs org3 exp [3]')
 
 	nConditions = len(list(params['schema'].values())[0]['channelAliasesPerCondition'])
 	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
