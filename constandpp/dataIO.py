@@ -144,7 +144,7 @@ def TMT2ICM(TMTImpuritiesDF): # todo move to web
 	return np.asmatrix(icmdf)/100 # percentages to floats
 
 
-def parseSchemaFile(schemaPath): #todo move to web
+def parseSchemaFile(schemaPath):
 	"""
 	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment. The
 	wrapper and config entries are set to None for now.
@@ -175,8 +175,7 @@ def parseSchemaFile(schemaPath): #todo move to web
 			                              for condition in channelNamesPerCondition]
 
 		incompleteSchemaDict[experimentName] = {'channelNamesPerCondition': channelNamesPerCondition,
-		                              'channelAliasesPerCondition': channelAliasesPerCondition,
-		                              'config': None, 'wrapper': None}
+		                              'channelAliasesPerCondition': channelAliasesPerCondition}
 	return incompleteSchemaDict
 
 
