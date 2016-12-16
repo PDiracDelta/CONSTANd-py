@@ -309,7 +309,7 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 			raise Exception("not implemented (ICM column and row order transformation from non-TMT formatted input).") # todo
 		this_path = os.path.abspath(os.path.join(filePath, os.pardir))
 		this_filename = os.path.basename(filePath)
-		exportData(icm, dataType='txt', path_out=this_path, filename=this_filename, delim_out='\t')
+		exportData(icm, dataType='txt', path_out=this_path, filename=this_filename[0:-4], delim_out='\t') # no extention
 
 	def updateSchema(this_job_path, this_incompleteSchema):
 		for eName in this_incompleteSchema:
