@@ -61,9 +61,9 @@ def getTMTIsotopicDistributions(path_in):
 	labels as specified in the file.
 	:param path_in: str         path of the file in tsv format
 	:return :    pd.DataFrame    TMT isotope distributions. Format:
-	 		                                ICM     -2  -1  monoiso +1  +2
-											126     0   0   100     1.2 0
-											127N    1.2 3.3 100     2.5 0.3
+	 		                                ICM     -2  -1  +1  +2
+											126     0   0   1.2 0
+											127N    1.2 3.3 2.5 0.3
 											127C    ...
 											...
 	"""
@@ -91,9 +91,9 @@ def TMT2ICM(TMTImpuritiesDF): # todo move to web
 	Converts a dataframe of TMT-like isotopic impurities (indexed on TMT label name) into the correct isotopic
 	correction matrix. Column order from the dataframe is conserved!
 	:param TMTImpuritiesDF: pd.DataFrame    TMT-like isotopic impurities
-													-2  -1  monoiso +1  +2
-											126     0   0   100     1.2 0
-											127N    1.2 3.3 100     2.5 0.3
+													-2  -1  +1  +2
+											126     0   0   1.2 0
+											127N    1.2 3.3 2.5 0.3
 											127C    ...
 											...
 	:return ICM:            np.ndarray      isotopic corrections matrix
