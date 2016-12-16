@@ -74,21 +74,48 @@ def TMT2ICM(TMTImpuritiesDF): # todo move to web
 											127N    1.2 3.3 100     2.5 0.3
 											127C    ...
 											...
-	:return ICM:            np.ndarray      isotope impurity matrix
+	:return ICM:            np.ndarray      isotopic corrections matrix
 	"""
 	# cols6plex = ['126', '127', '128', '129', '130', '131']
 	# cols8plex = ['126', '127N', '127C', '128C', '129N', '129C', '130C', '131']
 	# cols10plex = ['126', '127N', '127C', '128N', '128C', '129N', '129C', '130N', '130C', '131']
 	Nplex = len(TMTImpuritiesDF)
-	if Nplex not in [6, 8, 10]:
+	channelNames = list(TMTImpuritiesDF.index.values.astype(str))
+	labelNames = ['O_'+n for n in channelNames] # O_ for Observed_
+	# create empty ICM-dataframe with 100 on the diagonals and zeroes elsewhere
+	icmdf = pd.DataFrame(np.eye(Nplex)*100, index=labelNames, columns=channelNames).fillna(0)
+	# build the dictionary with correspondents
+	if Nplex == 6: #sixplex
+		correspondents = {}
+		for k in range(126,132):
+			correspondents[str(k)] = {'-2':str(k-2), '-1':str(k-1), '+1':str(k+1), '+2':str(k+2)}
+		correspondents['126']['-2'] = 'nobody'
+		correspondents['126']['-1'] = 'nobody'
+		correspondents['127']['-2'] = 'nobody'
+		correspondents['130']['+2'] = 'nobody'
+		correspondents['131']['+1'] = 'nobody'
+		correspondents['131']['+2'] = 'nobody'
+	elif Nplex in [8, 10]: # 8- and 10-plex
+		correspondents = {'126' : {'-2':'nobody', '-1':'nobody', '+1':'127C', '+2':'128N'},
+		          '127N': {'-2': 'nobody', '-1': 'nobody', '+1': '128N', '+2': '128C'},
+		          '127C': {'-2': 'nobody', '-1': '126', '+1': '128C', '+2': '129N'},
+		          '128N': {'-2': 'nobody', '-1': '127N', '+1': '129N', '+2': '129C'},
+		          '128C': {'-2': '126', '-1': '127C', '+1': '129C', '+2': '130N'},
+		          '129N': {'-2': '127N', '-1': '128N', '+1': '130N', '+2': '130C'},
+		          '129C': {'-2': '127C', '-1': '128C', '+1': '130C', '+2': '131'},
+		          '130N': {'-2': '128N', '-1': '129N', '+1': '131', '+2': 'nobody'},
+		          '130C': {'-2': '128C', '-1': '129C', '+1': 'nobody', '+2': 'nobody'},
+		          '131': {'-2': '129N', '-1': '130N', '+1': 'nobody', '+2': 'nobody'}}
+	else:
 		raise Exception("Illegal plexity of your TMT labels. Only 6plex, 8plex, 10plex are supported.")
-	colNames = list(TMTImpuritiesDF.index.values)
-	labelNames = ['O_'+n for n in colNames] # O_ for Observed_
-	icmdf = pd.DataFrame(index=labelNames, columns=colNames).fillna(0) # create empty ICM-dataframe of zeroes
-	for label in colNames: # determine label family; i.e. 127N = 127 (roundMass) + N (extraIsotope) -> 128N is familyPlus
-		roundMass = label[0:4]
-		if len(label) == 4:
-			extraIsotope = label[4]
+	# execute mappings
+	for trueChannel in channelNames: #for each row in TMTImpurities
+		for TMTisotope, observedChannel in correspondents[trueChannel].items(): # look up each isotope correspondent...
+			# ... and put the TMT input value of that isotope of the true channel into the icmdf location where the
+			# transfer from the observed channel to the true channel is stored. Obs = ICM * True
+			if observedChannel != 'nobody': # (only if the observed channel exists of course)
+				icmdf.loc['O_'+observedChannel, trueChannel] = TMTImpuritiesDF.loc[trueChannel, TMTisotope]
+	return np.asmatrix(icmdf)
 
 
 def parseSchemaFile(schemaPath): #todo move to web
