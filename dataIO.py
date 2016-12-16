@@ -138,8 +138,9 @@ def TMT2ICM(TMTImpuritiesDF): # todo move to web
 		for TMTisotope, observedChannel in correspondents[trueChannel].items(): # look up each isotope correspondent...
 			# ... and put the TMT input value of that isotope of the true channel into the icmdf location where the
 			# transfer from the observed channel to the true channel is stored. Obs = ICM * True
-			if observedChannel != 'nobody': # (only if the observed channel exists of course)
-				icmdf.loc['O_'+observedChannel, trueChannel] = TMTImpuritiesDF.loc[trueChannel, TMTisotope]
+			if observedChannel in channelNames: # (TMT 8plex is a subset of 10plex: some observed channels don't exist.
+				if observedChannel != 'nobody': # (only if the observed channel exists of course)
+					icmdf.loc['O_'+observedChannel, trueChannel] = TMTImpuritiesDF.loc[trueChannel, TMTisotope]
 	return np.asmatrix(icmdf)
 
 
