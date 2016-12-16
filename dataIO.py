@@ -74,6 +74,7 @@ def getTMTIsotopicDistributions(path_in):
 		raise Exception("Column header of the channels in the TMT isotopic distributions .tsv file should be 'ICM'.")
 	if set(tmtid.columns.values) != set(['-2','-1','+1','+2']):
 		raise Exception("TMT isotopic distributions .tsv file should contain columns '[-2, -1, +1, +2]'.")
+	tmtid.index = tmtid.index.values.astype(str)
 	return tmtid
 
 
@@ -106,6 +107,7 @@ def TMT2ICM(TMTImpuritiesDF): # todo move to web
 	labelNames = ['O_'+n for n in channelNames] # O_ for Observed_
 	# create empty ICM-dataframe with 100 on the diagonals and zeroes elsewhere
 	icmdf = pd.DataFrame(np.eye(Nplex)*100, index=labelNames, columns=channelNames).fillna(0)
+
 	# build the dictionary with correspondents
 	if Nplex == 6: #sixplex
 		correspondents = {}
@@ -130,6 +132,7 @@ def TMT2ICM(TMTImpuritiesDF): # todo move to web
 		          '131': {'-2': '129N', '-1': '130N', '+1': 'nobody', '+2': 'nobody'}}
 	else:
 		raise Exception("Illegal plexity of your TMT labels. Only 6plex, 8plex, 10plex are supported.")
+
 	# execute mappings
 	for trueChannel in channelNames: #for each row in TMTImpurities
 		for TMTisotope, observedChannel in correspondents[trueChannel].items(): # look up each isotope correspondent...
