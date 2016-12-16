@@ -69,7 +69,7 @@ def getTMTIsotopicDistributions(path_in):
 	"""
 	tmtid = importDataFrame(path_in)
 	if 'ICM' in tmtid.columns.values:
-		tmtid.set_index('ICM')
+		tmtid.set_index('ICM', drop=True, inplace=True)
 	else:
 		raise Exception("Column header of the channels in the TMT isotopic distributions .tsv file should be 'ICM'.")
 	if set(tmtid.columns.values) != set(['-2','-1','+1','+2']):
