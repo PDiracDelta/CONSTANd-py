@@ -15,7 +15,7 @@ from json import dumps
 def TMT2ICM(TMTImpuritiesDF, order=None): # todo move to web
 	"""
 	Converts a dataframe of TMT-like isotopic impurities (indexed on TMT label name) into the correct isotopic
-	correction matrix. Column order from the dataframe is conserved!
+	correction matrix. Column order from the dataframe is changed according to 'order'.
 	:param TMTImpuritiesDF: pd.DataFrame    TMT-like isotopic impurities
 													-2  -1  +1  +2
 											126     0   0   1.2 0
