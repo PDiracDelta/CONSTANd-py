@@ -55,6 +55,28 @@ def getIsotopicCorrectionsMatrix(path_in):
 	return np.asmatrix(importDataFrame(path_in, delim='\t', header=None)).astype('float64') # make sure its float64
 
 
+def getTMTIsotopicDistributions(path_in):
+	"""
+	Read the TMT isotope distributions table in tsv format from disk as a dataframe with the correct column headers and
+	labels as specified in the file.
+	:param path_in: str         path of the file in tsv format
+	:return :    pd.DataFrame    TMT isotope distributions. Format:
+	 		                                ICM     -2  -1  monoiso +1  +2
+											126     0   0   100     1.2 0
+											127N    1.2 3.3 100     2.5 0.3
+											127C    ...
+											...
+	"""
+	tmtid = importDataFrame(path_in)
+	if 'ICM' in tmtid.columns.values:
+		tmtid.set_index('ICM')
+	else:
+		raise Exception("Column header of the channels in the TMT isotopic distributions .tsv file should be 'ICM'.")
+	if set(tmtid.columns.values) != set(['-2','-1','+1','+2']):
+		raise Exception("TMT isotopic distributions .tsv file should contain columns '[-2, -1, +1, +2]'.")
+	return tmtid
+
+
 def getWrapper(path_in='wrapper.tsv'):
 	"""
 	Reads the wrapper from a file on disk through importDataFrame, and returns it as a list of tuples.
