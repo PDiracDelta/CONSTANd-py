@@ -12,7 +12,7 @@ from dataIO import parseSchemaFile, unnest
 from json import dumps
 
 
-def TMT2ICM(TMTImpuritiesDF): # todo move to web
+def TMT2ICM(TMTImpuritiesDF, order=None): # todo move to web
 	"""
 	Converts a dataframe of TMT-like isotopic impurities (indexed on TMT label name) into the correct isotopic
 	correction matrix. Column order from the dataframe is conserved!
@@ -66,6 +66,11 @@ def TMT2ICM(TMTImpuritiesDF): # todo move to web
 			if observedChannel in channelNames: # (TMT 8plex is a subset of 10plex: some observed channels don't exist.
 				if observedChannel != 'nobody': # (only if the observed channel exists of course)
 					icmdf.loc['O_'+observedChannel, trueChannel] = TMTImpuritiesDF.loc[trueChannel, TMTisotope]
+
+	if order is not None: # reorder according to 'order' of the channelAliasesPerCondition
+		order = unnest(order)
+		assert len(order) == Nplex
+		icmdf = icmdf.reindex_axis(order, axis=1).reindex_axis(['O_'+i for i in order], axis=0)
 
 	return np.asmatrix(icmdf)/100 # percentages to floats
 
@@ -297,7 +302,7 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 		from dataIO import exportData
 		if this_isTMTICM:
 			from dataIO import getTMTIsotopicDistributions
-			icm = TMT2ICM(getTMTIsotopicDistributions(filePath), order=unnest(this_channelAliasesPerCondition))
+			icm = TMT2ICM(getTMTIsotopicDistributions(filePath), this_channelAliasesPerCondition)
 		else:
 			from dataIO import getIsotopicCorrectionsMatrix
 			icm = getIsotopicCorrectionsMatrix(filePath)
