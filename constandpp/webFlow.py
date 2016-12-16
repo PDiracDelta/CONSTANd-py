@@ -239,6 +239,35 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 		HC_ICM3 = coonICM
 		HC_ICM4 = coonICM
 		HC_MASTERCONFIG = '../jobs/coonJobConfig.ini'
+	elif exptype == 'COON_noISO':
+		coondatapath = '../data/COON data/PSMs/'
+		datatype = '_a'
+		coonconfig = '../jobs/coonProcessingConfig.ini'
+		coonwrapper = None  # '../jobs/coonWrapper.tsv'
+		coonICM = None
+		HC_JOBNAME = 'COON_noISO'
+		HC_SCHEMA = '../jobs/coonSchema.tsv'
+		HC_ENAME1 = 'BR1'
+		HC_ENAME2 = 'BR2'
+		HC_ENAME3 = 'BR3'
+		HC_ENAME4 = 'BR4'
+		HC_DATA1 = coondatapath + HC_ENAME1 + datatype + '.txt'
+		HC_DATA2 = coondatapath + HC_ENAME2 + datatype + '.txt'
+		HC_DATA3 = coondatapath + HC_ENAME3 + datatype + '.txt'
+		HC_DATA4 = coondatapath + HC_ENAME4 + datatype + '.txt'
+		HC_WRAPPER1 = coonwrapper
+		HC_WRAPPER2 = coonwrapper
+		HC_WRAPPER3 = coonwrapper
+		HC_WRAPPER4 = coonwrapper
+		HC_CONFIG1 = coonconfig
+		HC_CONFIG2 = coonconfig
+		HC_CONFIG3 = coonconfig
+		HC_CONFIG4 = coonconfig
+		HC_ICM1 = coonICM
+		HC_ICM2 = coonICM
+		HC_ICM3 = coonICM
+		HC_ICM4 = coonICM
+		HC_MASTERCONFIG = '../jobs/coonJobConfig.ini'
 
 	from shutil import copyfile
 
