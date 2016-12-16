@@ -249,7 +249,7 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 		datatype = '_a'
 		coonconfig = '../jobs/coonProcessingConfig.ini'
 		coonwrapper = None  # '../jobs/coonWrapper.tsv'
-		coonICM = '../jobs/COON-ICM.tsv'
+		coonICM = '../jobs/coonICM.tsv'
 		HC_JOBNAME = 'COON_noISO'
 		HC_SCHEMA = '../jobs/coonSchema.tsv'
 		HC_ENAME1 = 'BR1'
@@ -357,7 +357,9 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 
 			isTMTICM = True
 			for eName in incompleteSchema:
-				transformICM(this_incompleteSchema[eName]['isotopicCorrection_matrix'], isTMTICM,
+				ICMFile = this_incompleteSchema[eName]['isotopicCorrection_matrix']
+				if ICMFile is not None:
+					transformICM(ICMFile, isTMTICM,
 				              this_incompleteSchema[eName]['channelAliasesPerCondition'])
 
 		return this_incompleteSchema
