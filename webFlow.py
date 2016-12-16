@@ -244,7 +244,7 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 		datatype = '_a'
 		coonconfig = '../jobs/coonProcessingConfig.ini'
 		coonwrapper = None  # '../jobs/coonWrapper.tsv'
-		coonICM = None
+		coonICM = '../jobs/COON-ICM.tsv'
 		HC_JOBNAME = 'COON_noISO'
 		HC_SCHEMA = '../jobs/coonSchema.tsv'
 		HC_ENAME1 = 'BR1'
@@ -293,6 +293,19 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 			copyfile(sourceDataPath, destinationData)
 			return os.path.basename(destinationData)
 
+	def transformICM(filePath, this_isTMTICM, this_channelAliasesPerCondition):
+		from dataIO import exportData
+		if this_isTMTICM:
+			from dataIO import getTMTIsotopicDistributions
+			icm = TMT2ICM(getTMTIsotopicDistributions(filePath), order=unnest(this_channelAliasesPerCondition))
+		else:
+			from dataIO import getIsotopicCorrectionsMatrix
+			icm = getIsotopicCorrectionsMatrix(filePath)
+			raise Exception("not implemented (ICM column and row order transformation from non-TMT formatted input).") # todo
+		this_path = os.path.abspath(os.path.join(filePath, os.pardir))
+		this_filename = os.path.basename(filePath)
+		exportData(icm, dataType='txt', path_out=this_path, filename=this_filename, delim_out='\t')
+
 	def updateSchema(this_job_path, this_incompleteSchema):
 		for eName in this_incompleteSchema:
 			if eName == HC_ENAME1:
@@ -336,6 +349,12 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 				wrapperFileName = eName+'_wrapper.tsv'
 				open(os.path.join(this_job_path, wrapperFileName), 'w').close()
 				this_incompleteSchema[eName]['wrapper'] = wrapperFileName
+
+			isTMTICM = True
+			for eName in incompleteSchema:
+				transformICM(this_incompleteSchema[eName]['isotopicCorrection_matrix'], isTMTICM,
+				              this_incompleteSchema[eName]['channelAliasesPerCondition'])
+
 		return this_incompleteSchema
 
 	def getBaseConfigFile():
@@ -411,6 +430,7 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 		raise e
 
 	### STEP 2: upload data files, wrapper files, ICM files and config (files), while updating schema with their locations.
+	# also make sure the ICM columns are in the right order and the ICM is transformed from TMT table if necessary.
 	schema = updateSchema(job_path, incompleteSchema)
 
 	### STEP 3: update config files and wrapper files
