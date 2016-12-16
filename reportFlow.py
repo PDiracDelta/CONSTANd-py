@@ -20,7 +20,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 
 	### TEST
 	testInterexperimentalOnPeptideLevel = False
-	proteinLevelMAPlots = True
+	proteinLevelMAPlots = False
 	if testInterexperimentalOnPeptideLevel:
 		from main import MAPlot
 		org3data = allExperimentsIntensitiesPerCommonPeptide[:, 17]
