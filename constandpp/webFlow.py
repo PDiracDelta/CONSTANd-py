@@ -359,7 +359,7 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 			for eName in incompleteSchema:
 				ICMFile = this_incompleteSchema[eName]['isotopicCorrection_matrix']
 				if ICMFile is not None:
-					transformICM(ICMFile, isTMTICM,
+					transformICM(os.path.join(this_job_path, ICMFile), isTMTICM,
 				              this_incompleteSchema[eName]['channelAliasesPerCondition'])
 
 		return this_incompleteSchema
