@@ -141,7 +141,7 @@ def TMT2ICM(TMTImpuritiesDF): # todo move to web
 			if observedChannel in channelNames: # (TMT 8plex is a subset of 10plex: some observed channels don't exist.
 				if observedChannel != 'nobody': # (only if the observed channel exists of course)
 					icmdf.loc['O_'+observedChannel, trueChannel] = TMTImpuritiesDF.loc[trueChannel, TMTisotope]
-	return np.asmatrix(icmdf)
+	return np.asmatrix(icmdf)/100 # percentages to floats
 
 
 def parseSchemaFile(schemaPath): #todo move to web
