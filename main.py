@@ -255,12 +255,13 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 			if doProcessing:
 				print('Starting processing of ' + eName + '...')
 				# prepare the output directories
-				if not os.path.exists(processing_path_out):  # do not overwrite dir
+				if not os.path.exists(os.path.abspath(processing_path_out)):  # do not overwrite dir
 					assert os.path.exists(
 						os.path.abspath(os.path.join(processing_path_out, os.path.pardir)))  # parent dir must exist
 					os.makedirs(processing_path_out)
 				else:
-					raise Exception("Output path "+processing_path_out+" already exists! Aborting.")
+					if jobConfigFilePath != 'job/jobConfig.ini': # TEST
+						raise Exception("Output path "+os.path.abspath(processing_path_out)+" already exists! Aborting.")
 
 				# process every input dataframe
 				logging.info("Starting processing of experiment '" + eName + "' of job '" + jobParams['jobname'] + "' at " +
@@ -339,7 +340,7 @@ if __name__ == '__main__':
 	#masterConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 22:48:30.701250_COON_SN_norm')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_nonormnoconstand')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_noISO')
-	masterConfigFilePath = webFlow(exptype='COON_noISO', previousjobdirName='2016-12-16 16:38:30.536344_COON_noISO')
+	#masterConfigFilePath = webFlow(exptype='COON_noISO', previousjobdirName='2016-12-16 16:38:30.536344_COON_noISO')
 
 	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=False, doReport=True,
 	              testing=False, writeToDisk=True))

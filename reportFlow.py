@@ -56,9 +56,9 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 		                                 params['labelVolcanoPlotAreas'])
 		if writeToDisk:
 			exportData(minSortedDifferentialProteinsDF, dataType='df', path_out=params['path_results'],
-					   filename=params['jobname'] + '_minSortedDifferentials')
+					   filename=params['jobname'] + '_minSortedDifferentials', delim_out='\t')
 			exportData(fullSortedDifferentialProteinsDF, dataType='df', path_out=params['path_results'],
-					   filename=params['jobname'] + '_fullSortedDifferentials')
+					   filename=params['jobname'] + '_fullSortedDifferentials', delim_out='\t')
 			exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
 			           filename=params['jobname'] + '_minVolcanoPlot')
 
