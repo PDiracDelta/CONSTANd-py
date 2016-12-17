@@ -55,6 +55,10 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 		fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
 		                                 params['labelVolcanoPlotAreas'])
 		if writeToDisk:
+			exportData(minSortedDifferentialProteinsDF, dataType='df', path_out=params['path_results'],
+					   filename=params['jobname'] + '_minSortedDifferentials')
+			exportData(fullSortedDifferentialProteinsDF, dataType='df', path_out=params['path_results'],
+					   filename=params['jobname'] + '_fullSortedDifferentials')
 			exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
 			           filename=params['jobname'] + '_minVolcanoPlot')
 
