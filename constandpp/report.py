@@ -99,15 +99,15 @@ def getMarkers(schema, allChannelAliases):
 
 def getSortedDifferentialProteinsDF(df):
 	"""
-	Sorts the differential protein data according to absolute fold change and resets the index. Returns only the columns
+	Sorts the differential protein data according to adjusted p-value and resets the index. Returns only the columns
 	specified.
 	:param df:  pd.DataFrame    unsorted
-	:return:    pd.DataFrame    sorted according to fold change and only specified columns
+	:return:    pd.DataFrame    sorted according to adjusted p-value and only specified columns
 	"""
 	reportColumns = ['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value']
 	significantIndices = list(df[df['significant'] == 'yes'].index) + list(df[df['significant'] == 'p'].index)
 	significantDf = df.loc[significantIndices, :]
-	return significantDf.reindex(significantDf['log2 fold change c1/c2'].abs().sort_values(ascending=False).index).loc[:, reportColumns]
+	return significantDf.reindex(significantDf['adjusted p-value'].sort_values(ascending=False).index).loc[:, reportColumns]
 
 
 def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
