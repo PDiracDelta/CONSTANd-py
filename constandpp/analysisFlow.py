@@ -46,9 +46,10 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema'])
 		fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema'])
 
-		# perform differential expression analysis with Benjamini-Hochberg correction.
-		minProteinDF = applyDifferentialExpression(minProteinDF, params['alpha'])
-		fullProteinDF = applyDifferentialExpression(fullProteinDF, params['alpha'])
+		# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
+		# nan values for a certain condition and keep the removed ones in metadata
+		minProteinDF, metadata['minSingleConditionProteins'] = applyDifferentialExpression(minProteinDF, params['alpha'])
+		fullProteinDF, metadata['fullSingleConditionProteins'] = applyDifferentialExpression(fullProteinDF, params['alpha'])
 
 		# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
 		minProteinDF = applyFoldChange(minProteinDF, params['pept2protCombinationMethod'])

@@ -109,3 +109,12 @@ WARNING:root:No processing step performed nor processing file loaded for experim
 INFO:root:Starting visualization end report generation of job: MBat 2016-12-17 12:16:01
 INFO:root:Starting analysis of job: MBat 2016-12-17 12:31:17
 WARNING:root:Peptides without Master Protein Accession detected. Omitting them in the analysis.
+INFO:root:Starting analysis of job: MBat 2016-12-17 12:51:48
+WARNING:root:Peptides without Master Protein Accession detected. Omitting them in the analysis.
+INFO:root:Finished analysis of job: MBat 2016-12-17 12:52:13
+INFO:root:Starting visualization end report generation of job: MBat 2016-12-17 12:52:13
+INFO:root:Finished visualization end report generation of job: MBat 2016-12-17 12:52:25
+INFO:root:Starting analysis of job: MBat 2016-12-17 12:53:51
+WARNING:root:Peptides without Master Protein Accession detected. Omitting them in the analysis.
+INFO:root:Starting analysis of job: MBat 2016-12-17 13:05:34
+WARNING:root:Peptides without Master Protein Accession detected. Omitting them in the analysis.
