@@ -61,7 +61,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		minProteinDF = pd.DataFrame()
 		fullProteinDF = pd.DataFrame()
 
-	# dataframe with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
+	# matrix with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
 	allExperimentsIntensitiesPerCommonPeptide, metadata['uncommonPeptides'] = getAllExperimentsIntensitiesPerCommonPeptide(dfs, params['schema'])
 	# save the amount of NaN values per channel for common peptides.
 	metadata['commonNanValues'] = pd.DataFrame(np.sum(np.isnan(allExperimentsIntensitiesPerCommonPeptide), axis=0))
