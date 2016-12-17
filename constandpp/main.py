@@ -105,7 +105,7 @@ def testDataComplementarity(df):
 	print(scannrs_final == scannrs_init)
 
 
-def MAPlot(x,y, title):
+def MAPlot(x,y, title=None):
 	from matplotlib import pyplot as plt
 	logx = np.log2(x)
 	logy = np.log2(y)
@@ -128,12 +128,12 @@ def compareIntensitySN(df1, df2):
 	intensityColumns = ["126", "127N", "127C", "128C","129N", "129C", "130C", "131"]
 	pickleFileName = 'job/compareIntensitySNProcessingResults'
 	constandnorm=True
-	alsoprocess=True
+	alsoprocess=False
 	if constandnorm:
 		if alsoprocess and os.path.exists(pickleFileName):
 			processingResults = pickle.load(open(pickleFileName, 'rb'))
 		else:
-			params=getProcessingInput('job/processingConfig.ini')
+			params = getProcessingInput('job/processingConfig.ini')
 			dfs = []
 			if df1 is None and df2 is None:
 				for filepath in [filepath1, filepath2]:
@@ -221,8 +221,8 @@ def devStuff(df, params): # TEST
 	# isotopicCorrectionsTest(params)
 	# MS2IntensityDoesntMatter(df)
 	# testDataComplementarity(df)
-	#compareIntensitySN(None, None)
-	abundancesPCAHCD()
+	compareIntensitySN(None, None)
+	#abundancesPCAHCD()
 	pass
 
 
@@ -343,4 +343,4 @@ if __name__ == '__main__':
 	#masterConfigFilePath = webFlow(exptype='COON_noISO', previousjobdirName='2016-12-16 16:38:30.536344_COON_noISO')
 
 	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=True, doReport=True,
-	              testing=False, writeToDisk=True))
+	              testing=True, writeToDisk=True))
