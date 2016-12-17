@@ -130,6 +130,7 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	# YES
 	xdataYES = df.loc[significantIndices_yes, 'log2 fold change c1/c2']
 	ydataYES = -np.log10(df.loc[significantIndices_yes, 'adjusted p-value'])
+
 	labelsYES = df.loc[significantIndices_yes, 'protein']
 	plt.scatter(xdataYES, ydataYES, color='r', figure=volcanoPlot)
 	# P
