@@ -139,11 +139,14 @@ def applyDifferentialExpression(this_proteinDF, alpha):
 	this_proteinDF['p-value'] = this_proteinDF.apply(lambda x: ttest(x['condition 1'], x['condition 2'], nan_policy='omit')[1], axis=1)
 	# remove masked values
 	this_proteinDF.loc[:, 'p-value'] = this_proteinDF.loc[:, 'p-value'].apply(lambda x: np.nan if x is np.ma.masked or x == 0.0 else x)
+	toDeleteProteins = this_proteinDF[np.isnan(this_proteinDF['p-value'])].index
+	removedData = this_proteinDF.loc[toDeleteProteins, :].copy()
+	this_proteinDF.drop(toDeleteProteins, inplace=True)
 	# Benjamini-Hochberg correction
 	# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
 	__, this_proteinDF['adjusted p-value'], __, __ = multipletests(pvals=np.asarray(this_proteinDF.loc[:, 'p-value']),
 																   alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
-	return this_proteinDF
+	return this_proteinDF, removedData
 
 
 def applyFoldChange(proteinDF, pept2protCombinationMethod):
