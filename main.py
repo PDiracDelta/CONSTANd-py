@@ -119,6 +119,7 @@ def MAPlot(x,y, title=None):
 	plt.xlabel('A')
 	plt.ylabel('M')
 	plt.show()
+	return M,A
 
 
 def compareIntensitySN(df1, df2):
@@ -163,11 +164,32 @@ def compareIntensitySN(df1, df2):
 	diff = abs(relIntensities - relSNs)
 	print(np.allclose(relIntensities, relSNs, atol=1e-3, equal_nan=True))
 	print("mean over all values")
-	print(np.nanmean(np.nanmean(diff[:, 0:6], 1)))
+	print(np.nanmean(np.nanmean(diff[:, 0:7], 1)))
+	print("median over all values")
+	print(np.nanmean(np.nanmedian(diff[:, 0:7], 1)))
 	print("max difference")
 	print(np.nanmax(np.nanmax(diff, 1)))
 
-	MAPlot(relIntensities.reshape(relIntensities.size, 1), relSNs.reshape(relSNs.size, 1))
+	return MAPlot(relIntensities.reshape(relIntensities.size, 1), relSNs.reshape(relSNs.size, 1))
+
+
+def compareICmethods():
+	PDdfFile = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/2016-12-19 20:53:16.947500_COON/BR1_output_processing/BR1_normalizedIntensities.tsv'
+	CdfFile = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/2016-12-19 20:20:39.161797_COON_noISO_rowsnormalized/BR1_output_processing/BR1_normalizedIntensities.tsv'
+	from dataIO import importDataFrame
+	from main import compareIntensitySN
+	from matplotlib import pyplot as plt
+	Cdf = importDataFrame(CdfFile)
+	PDdf = importDataFrame(PDdfFile)
+	PDdf.columns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
+	Cdf.columns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
+	M,A = compareIntensitySN(PDdf, Cdf)
+	Mfinite = M[np.isfinite(M)]
+	#np.digitize(M, np.linspace(min(M),max(M),20))
+	hist, bins = np.histogram(Mfinite, bins=20, )
+	plt.title('PD2.1 versus CONSTANd++ isotope-corrected intensities (after CONSTANd normalization).')
+	plt.bar(bins[0:-1], hist)
+	plt.show()
 
 
 def abundancesPCAHCD():
@@ -221,8 +243,9 @@ def devStuff(df, params): # TEST
 	# isotopicCorrectionsTest(params)
 	# MS2IntensityDoesntMatter(df)
 	# testDataComplementarity(df)
-	compareIntensitySN(None, None)
+	#compareIntensitySN(None, None)
 	#abundancesPCAHCD()
+	compareICmethods()
 	pass
 
 
@@ -330,7 +353,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 
 if __name__ == '__main__':
 	#masterConfigFilePath = 'job/jobConfig.ini' # TEST
-	#masterConfigFilePath = webFlow(exptype='COON')
+	masterConfigFilePath = webFlow(exptype='COON')
 	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-12 22:37:48.458146_COON')
 	#masterConfigFilePath = webFlow(exptype='COON_SN')
 	#masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-12 22:41:02.295891_COON_SN')
@@ -340,8 +363,8 @@ if __name__ == '__main__':
 	#masterConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 22:48:30.701250_COON_SN_norm')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_nonormnoconstand')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_nonormnoconstand', previousjobdirName='2016-12-17 18:36:07.239085_COON_nonormnoconstand')  # todo constand uitzetten
-	masterConfigFilePath = webFlow(exptype='COON_noISO')
+	#masterConfigFilePath = webFlow(exptype='COON_noISO')
 	#masterConfigFilePath = webFlow(exptype='COON_noISO', previousjobdirName='2016-12-16 16:38:30.536344_COON_noISO')
 
 	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True,
-	              testing=False, writeToDisk=True))
+	              testing=True, writeToDisk=True))
