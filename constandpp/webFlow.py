@@ -15,7 +15,8 @@ from json import dumps
 def TMT2ICM(TMTImpuritiesDF, order=None): # todo move to web
 	"""
 	Converts a dataframe of TMT-like isotopic impurities (indexed on TMT label name) into the correct isotopic
-	correction matrix. Column order from the dataframe is changed according to 'order'.
+	correction matrix. Column order from the dataframe is changed according to 'order'. Rows are normalized so that
+	their sums are equal to one.
 	:param TMTImpuritiesDF: pd.DataFrame    TMT-like isotopic impurities
 													-2  -1  +1  +2
 											126     0   0   1.2 0
@@ -71,8 +72,9 @@ def TMT2ICM(TMTImpuritiesDF, order=None): # todo move to web
 		order = unnest(order)
 		assert len(order) == Nplex
 		icmdf = icmdf.reindex_axis(order, axis=1).reindex_axis(['O_'+i for i in order], axis=0)
-
-	return np.asmatrix(icmdf)/100 # percentages to floats
+	icm = np.asmatrix(icmdf)
+	rowSums = np.asarray(np.sum(icm, axis=1))
+	return icm / rowSums # normalize each row so that the sum is one
 
 
 def constructMasterConfigContents(schemaDict, otherMasterParams): # todo move to web
@@ -247,9 +249,9 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 	elif exptype == 'COON_noISO':
 		coondatapath = '../data/COON data/PSMs/'
 		datatype = '_a'
-		coonconfig = '../jobs/coonProcessingConfig.ini'
+		coonconfig = '../jobs/coonProcessingConfig_iso.ini'
 		coonwrapper = None  # '../jobs/coonWrapper.tsv'
-		coonICM = '../jobs/coonICM.tsv'
+		coonICM = '../jobs/coonICM.tsv' # TEST
 		HC_JOBNAME = 'COON_noISO'
 		HC_SCHEMA = '../jobs/coonSchema.tsv'
 		HC_ENAME1 = 'BR1'
