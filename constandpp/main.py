@@ -187,7 +187,7 @@ def compareICmethods():
 	Mfinite = M[np.isfinite(M)]
 	#np.digitize(M, np.linspace(min(M),max(M),20))
 	hist, bins = np.histogram(Mfinite, bins=20, )
-	plt.title('PD2.1 versus CONSTANd++ isotope-corrected intensities (after CONSTANd normalization).')
+	plt.title('')
 	plt.bar(bins[0:-1], hist)
 	plt.show()
 
@@ -353,7 +353,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 
 if __name__ == '__main__':
 	#masterConfigFilePath = 'job/jobConfig.ini' # TEST
-	masterConfigFilePath = webFlow(exptype='COON')
+	#masterConfigFilePath = webFlow(exptype='COON')
 	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-12 22:37:48.458146_COON')
 	#masterConfigFilePath = webFlow(exptype='COON_SN')
 	#masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-12 22:41:02.295891_COON_SN')
@@ -365,6 +365,7 @@ if __name__ == '__main__':
 	#masterConfigFilePath = webFlow(exptype='COON_nonormnoconstand', previousjobdirName='2016-12-17 18:36:07.239085_COON_nonormnoconstand')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_noISO')
 	#masterConfigFilePath = webFlow(exptype='COON_noISO', previousjobdirName='2016-12-16 16:38:30.536344_COON_noISO')
+	masterConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
 
 	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True,
-	              testing=True, writeToDisk=True))
+	              testing=False, writeToDisk=True))
