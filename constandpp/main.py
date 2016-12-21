@@ -249,6 +249,18 @@ def compareAbundancesIntSN():
 	compareIntensitySN(abundancesInt, abundancesSN, title="Intensities versus S/N values (normalized abundances)")
 
 
+def intraInterMAPlots():
+	# calculate all intra- and inter-MA plots for the Max data set (Intensities only)
+	# on the PEPTIDE LEVEL
+	constandFiles = [
+		'../jobs/2016-12-21 15:14:09.935115_MAX_SN/B_output_processing/B_normalizedIntensities.tsv',
+		'../jobs/2016-12-21 15:14:09.935115_MAX_SN/B_output_processing/G_normalizedIntensities.tsv',
+		'../jobs/2016-12-21 15:14:09.935115_MAX_SN/B_output_processing/R_normalizedIntensities.tsv'
+	]
+	intraCs = [importDataFrame(file) for file in constandFiles]
+	return
+
+
 def devStuff(df, params): # TEST
 	# performanceTest()
 	# isotopicCorrectionsTest(params)
@@ -256,7 +268,9 @@ def devStuff(df, params): # TEST
 	# testDataComplementarity(df)
 	#compareIntensitySN(None, None)
 	#abundancesPCAHCD()
-	compareICmethods()
+	#compareICmethods()
+	#compareAbundancesIntSN()
+	intraInterMAPlots()
 	pass
 
 
@@ -379,4 +393,4 @@ if __name__ == '__main__':
 	masterConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
 
 	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True,
-	              testing=False, writeToDisk=True))
+	              testing=True, writeToDisk=True))
