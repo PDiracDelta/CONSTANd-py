@@ -26,12 +26,16 @@ def getRTIsolationInfo(removedData_RT):
 	:param removedData_RT:  pd.dataFrame    removedData for the RT collapse.
 	:return:                pd.DataFrame    statistics 'Degeneracy', 'mean', 'std', 'max-min' about the RT values
 	"""
-	duplicateGroups = removedData_RT.groupby('Representative First Scan').groups
-	RTIsolationInfo = []
-	for rfs, duplicates in duplicateGroups.items():
-		RTValues = removedData_RT.loc[duplicates, 'RT [min]']
-		RTIsolationInfo.append([rfs, len(duplicates), np.nanmean(RTValues), np.std(RTValues), np.ptp(RTValues)])
-	return pd.DataFrame(RTIsolationInfo, columns=['Representative First Scan', 'Degeneracy', 'mean', 'std', 'max-min'])
+	if 'Representative First Scan' in removedData_RT.columns.values and 'RT [min]' in removedData_RT.columns.values:
+		duplicateGroups = removedData_RT.groupby('Representative First Scan').groups
+		RTIsolationInfo = []
+		for rfs, duplicates in duplicateGroups.items():
+			RTValues = removedData_RT.loc[duplicates, 'RT [min]']
+			RTIsolationInfo.append([rfs, len(duplicates), np.nanmean(RTValues), np.std(RTValues), np.ptp(RTValues)])
+		return pd.DataFrame(RTIsolationInfo, columns=['Representative First Scan', 'Degeneracy', 'mean', 'std', 'max-min'])
+	else:
+		logging.warning("No RT isolation info could be calculated because a necessary column was missing.")
+		return pd.DataFrame()
 
 
 def getNoIsotopicCorrection(df, noCorrectionIndices):
