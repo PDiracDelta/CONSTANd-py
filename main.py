@@ -122,7 +122,7 @@ def MAPlot(x,y, title=None):
 	return M,A
 
 
-def compareIntensitySN(df1, df2):
+def compareIntensitySN(df1, df2, title=None):
 	from processing import getIntensities
 	filepath1 = '../data/COON data/PSMs/BR1_e_ISO.txt'
 	filepath2 = '../data/COON data/PSMs/BR1_f_ISO_SN.txt'
@@ -170,7 +170,7 @@ def compareIntensitySN(df1, df2):
 	print("max difference")
 	print(np.nanmax(np.nanmax(diff, 1)))
 
-	return MAPlot(relIntensities.reshape(relIntensities.size, 1), relSNs.reshape(relSNs.size, 1))
+	return MAPlot(relIntensities.reshape(relIntensities.size, 1), relSNs.reshape(relSNs.size, 1), title)
 
 
 def compareICmethods():
@@ -236,6 +236,17 @@ def abundancesPCAHCD():
 	hcd = getHC(AEIPCPcorrected)
 	PCAPlot = getPCAPlot(pca, schema)
 	HCDendrogram = getHCDendrogram(hcd, schema)
+
+
+def compareAbundancesIntSN():
+	abundancesIntFile = '../jobs/2016-12-20 19:03:17.450992_COON_abundances/P_BR1_output_processing/P_BR1_dataFrame.tsv'
+	abundancesSNFile = '../jobs/2016-12-20 19:02:48.246369_COON_SN_abundances/P_BR1_output_processing/P_BR1_dataFrame.tsv'
+	abundancesInt = importDataFrame(abundancesIntFile, delim='\t')
+	abundancesSN = importDataFrame(abundancesSNFile, delim='\t')
+	intensityColumns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
+	abundancesInt.columns = intensityColumns
+	abundancesSN.columns = intensityColumns
+	compareIntensitySN(abundancesInt, abundancesSN, title="Intensities versus S/N values (normalized abundances)")
 
 
 def devStuff(df, params): # TEST
