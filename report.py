@@ -212,8 +212,8 @@ def getHCDendrogram(HCResult, schema):
 	#mng = plt.get_current_fig_manager()
 	#mng.full_screen_toggle()
 	plt.title('Hierarchical Clustering Dendrogram', figure=HCDendrogram)
-	plt.xlabel('reporter channel', figure=HCDendrogram)
-	plt.ylabel('distance', figure=HCDendrogram)
+	plt.xlabel('distance', figure=HCDendrogram)
+	plt.ylabel('reporter channel', figure=HCDendrogram)
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
 	channelColorsDict = getColours(schema, allChannelAliases)
 	dendrogram(HCResult, orientation='right', leaf_rotation=0., leaf_font_size=12, labels=allChannelAliases,
