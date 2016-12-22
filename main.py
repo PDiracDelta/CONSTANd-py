@@ -269,10 +269,12 @@ def intraInterMAPlots():
 	cmeans, pdmeans, rmeans = [], [], []
 	cvars, pdvars, rvars = [], [], []
 	# INTER
-	for i in range(6): # for each sample of BM
-		for j in range(6): # compare with the samples of PM
-			cm,cv = MA(cdf)
-			cmeans.append(cdf)
+	nums = [[3,4],[5,6],[1,2]]
+	for n in nums: # for each experiment
+		for i in n: # for each sample of BM in this experiment
+			for j in n: # compare with the samples of PM in the same experiment
+				cm,cv = MA(cdf.loc[:,'BM'+str(i)], cdf.loc[:, 'PM'+str(j)])[2:3] # [2:3] only mean and var
+				cmeans.append(cdf)
 	# INTRA
 	relIntensities.reshape(relIntensities.size, 1)
 	#intraCs = [importDataFrame(file) for file in constandFiles]
