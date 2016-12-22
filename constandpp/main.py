@@ -105,21 +105,29 @@ def testDataComplementarity(df):
 	print(scannrs_final == scannrs_init)
 
 
-def MAPlot(x,y, title=None):
-	from matplotlib import pyplot as plt
+def MA(x,y):
 	logx = np.log2(x)
 	logy = np.log2(y)
 	A = (logx + logy) * 0.5
-	M = logx-logy
+	M = logx - logy
+	m = np.mean(M[np.isfinite(M)])
+	v = np.var(M[np.isfinite(M)])
+	return M,A,m,v
+
+
+def MAPlot(x,y, title=None):
+	from matplotlib import pyplot as plt
+	plt.figure(figsize=(16, 12))
+	M,A,m,v = MA(x,y)
 	plt.scatter(A, M)
 	if title is None:
 		plt.title('PD2.1 Intensities versus S/N values (scaled relatively within each row/peptide)')
 	else:
-		plt.title(title+'; mean(M): '+str(np.mean(M[np.isfinite(M)]))+'; var(M):'+str(np.var(M[np.isfinite(M)])))
+		plt.title(title+'; mean(M): '+str(m)+'; var(M):'+str(v))
 	plt.xlabel('A')
 	plt.ylabel('M')
 	plt.show()
-	return M,A
+	return M,A, m, v
 
 
 def compareIntensitySN(df1, df2, title=None):
@@ -252,12 +260,22 @@ def compareAbundancesIntSN():
 def intraInterMAPlots():
 	# calculate all intra- and inter-MA plots for the Max data set (Intensities only)
 	# on the PEPTIDE LEVEL
-	constandFiles = [
-		'../jobs/2016-12-21 15:14:09.935115_MAX_SN/B_output_processing/B_normalizedIntensities.tsv',
-		'../jobs/2016-12-21 15:14:09.935115_MAX_SN/B_output_processing/G_normalizedIntensities.tsv',
-		'../jobs/2016-12-21 15:14:09.935115_MAX_SN/B_output_processing/R_normalizedIntensities.tsv'
-	]
-	intraCs = [importDataFrame(file) for file in constandFiles]
+	constandFileName = '../jobs/2016-12-22 13:07:48.663095_MAX_SN_noTAM/output_analysis/MAX_SN_noTAM_CommonPeptideIntensities.tsv'
+	PDFileName = '../jobs/2016-12-22 13:02:23.517798_MAX_SN_abundances_noTAM/output_analysis/MAX_SN_abundances_noTAM_CommonPeptideIntensities.tsv'
+	rawFileName = '../jobs/2016-12-22 12:56:54.697920_MAX_SN_nonormnoconstand_noTAM/output_analysis/MAX_SN_nonormnoconstand_noTAM_CommonPeptideIntensities.tsv'
+	cdf = importDataFrame(constandFileName, delim='\t')
+	pddf = importDataFrame(PDFileName, delim='\t')
+	rdf = importDataFrame(rawFileName, delim='\t')
+	cmeans, pdmeans, rmeans = [], [], []
+	cvars, pdvars, rvars = [], [], []
+	# INTER
+	for i in range(6): # for each sample of BM
+		for j in range(6): # compare with the samples of PM
+			cm,cv = MA(cdf)
+			cmeans.append(cdf)
+	# INTRA
+	relIntensities.reshape(relIntensities.size, 1)
+	#intraCs = [importDataFrame(file) for file in constandFiles]
 	return
 
 
