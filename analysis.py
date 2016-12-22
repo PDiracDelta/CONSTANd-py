@@ -193,11 +193,12 @@ def applySignificance(df, alpha, FCThreshold):
 def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 	"""
 	Takes a list of dataframes and selects only the sequence and intensities, then inner joins them on sequence.
-	The result is the intensity matrix with ALL experiment channels per peptide, for only the COMMON peptides i.e. those
-	peptides detected in ALL experiments. Also returns list/DataFrame of peptides that are not common for all experiments.
+	The result is the intensity matrix as a dataframe with header with ALL experiment channels per peptide, for only the
+	COMMON peptides i.e. those peptides detected in ALL experiments. Also returns list/DataFrame of peptides that are
+	not common for all experiments.
 	:param dfs:     list(pd.DataFrame)  data of the experiments
 	:param schema:  dict                schema of the experiments
-	:return:        np.ndarray          [e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN] for all COMMON peptides.
+	:return:        pd.DataFrame          [e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN] for all COMMON peptides.
 	"""
 	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
 	#print(allChannelAliases) # TEST
@@ -214,7 +215,7 @@ def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 			                 on='Annotated Sequence')
 		allPeptides.extend(dfs[eName].loc[:, 'Annotated Sequence'])
 	uncommonPeptides = pd.DataFrame(list(set(allPeptides).difference(set(peptidesDf.loc[:, 'Annotated Sequence']))))
-	return getIntensities(peptidesDf, intensityColumns=allChannelAliases), uncommonPeptides
+	return peptidesDf.loc[:, allChannelAliases], uncommonPeptides
 
 
 def getPCA(intensities, nComponents):
