@@ -269,59 +269,160 @@ def intraInterMAPlots():
 	cmeans, pdmeans, rmeans = [], [], []
 	cvars, pdvars, rvars = [], [], []
 	experiments = [[3,4],[5,6],[1,2]]
-	# INTRA
-	for e in experiments: # for each experiment
-		for i in e: # for each sample of BM in this experiment
-			for j in e: # compare with the samples of PM in the same experiment
-				cm,cv = MA(cdf.loc[:,'BM'+str(i)], cdf.loc[:, 'PM'+str(j)])[2:4] # [2:4] only mean and var
-				cmeans.append(cm)
-				cvars.append(cv)
-				pdm, pdv = MA(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
-				pdmeans.append(pdm)
-				pdvars.append(pdv)
-				rm, rv = MA(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
-				rmeans.append(rm)
-				rvars.append(rv)
-	print("+++INTRA: \n"
-	      "CONSTANd means: average: " + str(np.mean(cmeans)) + "; values: " + str(cmeans) + "\n"
-	      "PD2.1 means: average: " + str(np.mean(pdmeans)) + "; values: " + str(pdmeans) + "\n"
-		  "raw means: average: " + str(np.mean(rmeans)) + "; values: " + str(rmeans) + "\n"
-		  "CONSTANd vars: average: " + str(np.mean(cvars)) + "; values: " + str(cvars) + "\n"
-	      "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
-	      "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
-	MAPlot(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'PM' + str(j)])
-	MAPlot(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])
-	MAPlot(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])
 
-	# INTER
-	# experiments = [[3,4],[5,6],[1,2]]
+	compareDIFFERENTconditions = False
+	compareIDENTICALconditions = True
+	if compareDIFFERENTconditions:
+		# INTRA
+		for e in experiments: # for each experiment
+			for i in e: # for each sample of BM in this experiment
+				for j in e: # compare with the samples of PM in the same experiment
+					cm,cv = MA(cdf.loc[:,'BM'+str(i)], cdf.loc[:, 'PM'+str(j)])[2:4] # [2:4] only mean and var
+					cmeans.append(cm)
+					cvars.append(cv)
+					pdm, pdv = MA(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
+					pdmeans.append(pdm)
+					pdvars.append(pdv)
+					rm, rv = MA(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
+					rmeans.append(rm)
+					rvars.append(rv)
+		print("+++INTRA: \n"
+		      "CONSTANd means: average: " + str(np.mean(cmeans)) + "; values: " + str(cmeans) + "\n"
+		      "PD2.1 means: average: " + str(np.mean(pdmeans)) + "; values: " + str(pdmeans) + "\n"
+			  "raw means: average: " + str(np.mean(rmeans)) + "; values: " + str(rmeans) + "\n"
+			  "CONSTANd vars: average: " + str(np.mean(cvars)) + "; values: " + str(cvars) + "\n"
+		      "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
+		      "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
+		MAPlot(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'PM' + str(j)])
+		MAPlot(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])
+		MAPlot(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])
+
+		# INTER
+		# experiments = [[3,4],[5,6],[1,2]]
+		cmeans, pdmeans, rmeans = [], [], []
+		cvars, pdvars, rvars = [], [], []
+		for l in range(len(experiments)):
+			notE = unnest(experiments[:l]+experiments[l+1:])
+			e = experiments[l]
+			for i in e:
+				for j in notE:
+					cm, cv = MA(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
+					cmeans.append(cm)
+					cvars.append(cv)
+					pdm, pdv = MA(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
+					pdmeans.append(pdm)
+					pdvars.append(pdv)
+					rm, rv = MA(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
+					rmeans.append(rm)
+					rvars.append(rv)
+		print("+++INTER: \n"
+		      "CONSTANd means: average: " + str(np.mean(cmeans)) + "; values: " + str(cmeans) + "\n"
+		      "PD2.1 means: average: " + str(np.mean(pdmeans)) + "; values: " + str(pdmeans) + "\n"
+			  "raw means: average: " + str(np.mean(rmeans)) + "; values: " + str(rmeans) + "\n"
+			  "CONSTANd vars: average: " + str(np.mean(cvars)) + "; values: " + str(cvars) + "\n"
+		      "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
+		      "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
+		# plot one graph for each (the last one):
+		MAPlot(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'PM' + str(j)])
+		MAPlot(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])
+		MAPlot(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])
+
 	cmeans, pdmeans, rmeans = [], [], []
 	cvars, pdvars, rvars = [], [], []
-	for l in range(len(experiments)):
-		notE = unnest(experiments[:l]+experiments[l+1:])
-		e = experiments[l]
-		for i in e:
-			for j in notE:
-				cm, cv = MA(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
-				cmeans.append(cm)
-				cvars.append(cv)
-				pdm, pdv = MA(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
-				pdmeans.append(pdm)
-				pdvars.append(pdv)
-				rm, rv = MA(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
-				rmeans.append(rm)
-				rvars.append(rv)
-	print("+++INTER: \n"
-	      "CONSTANd means: average: " + str(np.mean(cmeans)) + "; values: " + str(cmeans) + "\n"
-	      "PD2.1 means: average: " + str(np.mean(pdmeans)) + "; values: " + str(pdmeans) + "\n"
-		  "raw means: average: " + str(np.mean(rmeans)) + "; values: " + str(rmeans) + "\n"
-		  "CONSTANd vars: average: " + str(np.mean(cvars)) + "; values: " + str(cvars) + "\n"
-	      "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
-	      "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
-	# plot one graph for each (the last one):
-	MAPlot(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'PM' + str(j)])
-	MAPlot(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])
-	MAPlot(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])
+	experiments = [[3, 4], [5, 6], [1, 2]]
+	if compareIDENTICALconditions:
+		# INTRA
+		for e in experiments:  # for each experiment
+			for l in range(len(e)):  # for each sample in (and each condition) this experiment
+				notI = e[l+1:]
+				i = e[l]
+				if notI: # not empty
+					for j in notI:  # compare with the other sample(s) (that are of the same condition) in this experiment
+						cm, cv = MA(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'BM' + str(j)])[2:4]  # [2:4] only mean and var
+						cmeans.append(cm)
+						cvars.append(cv)
+						cm, cv = MA(cdf.loc[:, 'PM' + str(i)], cdf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
+						cmeans.append(cm)
+						cvars.append(cv)
+
+						pdm, pdv = MA(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'BM' + str(j)])[
+						           2:4]  # [2:4] only mean and var
+						pdmeans.append(pdm)
+						pdvars.append(pdv)
+						pdm, pdv = MA(pddf.loc[:, 'PM' + str(i)], pddf.loc[:, 'PM' + str(j)])[
+						           2:4]  # [2:4] only mean and var
+						pdmeans.append(pdm)
+						pdvars.append(pdv)
+
+						rm, rv = MA(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'BM' + str(j)])[2:4]  # [2:4] only mean and var
+						rmeans.append(rm)
+						rvars.append(rv)
+						rm, rv = MA(rdf.loc[:, 'PM' + str(i)], rdf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
+						rmeans.append(rm)
+						rvars.append(rv)
+		print("+++INTRA: \n"
+		      "CONSTANd means: average: " + str(np.nanmean(cmeans)) + "; values: " + str(cmeans) + "\n"
+		                                                                                        "PD2.1 means: average: " + str(
+			np.mean(pdmeans)) + "; values: " + str(pdmeans) + "\n"
+		                                                      "raw means: average: " + str(
+			np.mean(rmeans)) + "; values: " + str(rmeans) + "\n"
+		                                                    "CONSTANd vars: average: " + str(
+			np.mean(cvars)) + "; values: " + str(cvars) + "\n"
+		                                                  "PD2.1 vars: average: " + str(
+			np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
+		                                                    "raw vars: average: " + str(
+			np.mean(rvars)) + "; values: " + str(rvars) + "\n")
+		MAPlot(cdf.loc[:, 'BM' + str(1)], cdf.loc[:, 'BM' + str(2)])
+		MAPlot(pddf.loc[:, 'BM' + str(1)], pddf.loc[:, 'BM' + str(2)])
+		MAPlot(rdf.loc[:, 'BM' + str(1)], rdf.loc[:, 'BM' + str(2)])
+
+		# INTER
+		# experiments = [[3,4],[5,6],[1,2]]
+		cmeans, pdmeans, rmeans = [], [], []
+		cvars, pdvars, rvars = [], [], []
+		for l in range(len(experiments)):
+			notE = unnest(experiments[l + 1:])
+			e = experiments[l]
+			for i in e:
+				for j in notE:
+					cm, cv = MA(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'BM' + str(j)])[2:4]  # [2:4] only mean and var
+					cmeans.append(cm)
+					cvars.append(cv)
+					cm, cv = MA(cdf.loc[:, 'PM' + str(i)], cdf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
+					cmeans.append(cm)
+					cvars.append(cv)
+
+					pdm, pdv = MA(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'BM' + str(j)])[
+					           2:4]  # [2:4] only mean and var
+					pdmeans.append(pdm)
+					pdvars.append(pdv)
+					pdm, pdv = MA(pddf.loc[:, 'PM' + str(i)], pddf.loc[:, 'PM' + str(j)])[
+					           2:4]  # [2:4] only mean and var
+					pdmeans.append(pdm)
+					pdvars.append(pdv)
+
+					rm, rv = MA(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'BM' + str(j)])[2:4]  # [2:4] only mean and var
+					rmeans.append(rm)
+					rvars.append(rv)
+					rm, rv = MA(rdf.loc[:, 'PM' + str(i)], rdf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
+					rmeans.append(rm)
+					rvars.append(rv)
+		print("+++INTER: \n"
+		      "CONSTANd means: average: " + str(np.mean(cmeans)) + "; values: " + str(cmeans) + "\n"
+		                                                                                        "PD2.1 means: average: " + str(
+			np.mean(pdmeans)) + "; values: " + str(pdmeans) + "\n"
+		                                                      "raw means: average: " + str(
+			np.mean(rmeans)) + "; values: " + str(rmeans) + "\n"
+		                                                    "CONSTANd vars: average: " + str(
+			np.mean(cvars)) + "; values: " + str(cvars) + "\n"
+		                                                  "PD2.1 vars: average: " + str(
+			np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
+		                                                    "raw vars: average: " + str(
+			np.mean(rvars)) + "; values: " + str(rvars) + "\n")
+		# plot one graph for each (the last one):
+		MAPlot(cdf.loc[:, 'BM' + str(3)], cdf.loc[:, 'BM' + str(6)])
+		MAPlot(pddf.loc[:, 'BM' + str(3)], pddf.loc[:, 'BM' + str(6)])
+		MAPlot(rdf.loc[:, 'BM' + str(3)], rdf.loc[:, 'BM' + str(6)])
 
 
 def devStuff(df, params): # TEST
