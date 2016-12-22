@@ -289,6 +289,10 @@ def intraInterMAPlots():
 		  "CONSTANd vars: average: " + str(np.mean(cvars)) + "; values: " + str(cvars) + "\n"
 	      "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
 	      "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
+	MAPlot(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'PM' + str(j)])
+	MAPlot(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])
+	MAPlot(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])
+
 	# INTER
 	# experiments = [[3,4],[5,6],[1,2]]
 	cmeans, pdmeans, rmeans = [], [], []
@@ -314,6 +318,10 @@ def intraInterMAPlots():
 		  "CONSTANd vars: average: " + str(np.mean(cvars)) + "; values: " + str(cvars) + "\n"
 	      "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
 	      "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
+	# plot one graph for each (the last one):
+	MAPlot(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'PM' + str(j)])
+	MAPlot(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])
+	MAPlot(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])
 
 
 def devStuff(df, params): # TEST
