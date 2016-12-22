@@ -268,17 +268,52 @@ def intraInterMAPlots():
 	rdf = importDataFrame(rawFileName, delim='\t')
 	cmeans, pdmeans, rmeans = [], [], []
 	cvars, pdvars, rvars = [], [], []
-	# INTER
-	nums = [[3,4],[5,6],[1,2]]
-	for n in nums: # for each experiment
-		for i in n: # for each sample of BM in this experiment
-			for j in n: # compare with the samples of PM in the same experiment
-				cm,cv = MA(cdf.loc[:,'BM'+str(i)], cdf.loc[:, 'PM'+str(j)])[2:3] # [2:3] only mean and var
-				cmeans.append(cdf)
+	experiments = [[3,4],[5,6],[1,2]]
 	# INTRA
-	relIntensities.reshape(relIntensities.size, 1)
-	#intraCs = [importDataFrame(file) for file in constandFiles]
-	return
+	for e in experiments: # for each experiment
+		for i in e: # for each sample of BM in this experiment
+			for j in e: # compare with the samples of PM in the same experiment
+				cm,cv = MA(cdf.loc[:,'BM'+str(i)], cdf.loc[:, 'PM'+str(j)])[2:4] # [2:4] only mean and var
+				cmeans.append(cm)
+				cvars.append(cv)
+				pdm, pdv = MA(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
+				pdmeans.append(pdm)
+				pdvars.append(pdv)
+				rm, rv = MA(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
+				rmeans.append(rm)
+				rvars.append(rv)
+	print("+++INTRA: \n"
+	      "CONSTANd means: average: " + str(np.mean(cmeans)) + "; values: " + str(cmeans) + "\n"
+	      "PD2.1 means: average: " + str(np.mean(pdmeans)) + "; values: " + str(pdmeans) + "\n"
+		  "raw means: average: " + str(np.mean(rmeans)) + "; values: " + str(rmeans) + "\n"
+		  "CONSTANd vars: average: " + str(np.mean(cvars)) + "; values: " + str(cvars) + "\n"
+	      "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
+	      "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
+	# INTER
+	# experiments = [[3,4],[5,6],[1,2]]
+	cmeans, pdmeans, rmeans = [], [], []
+	cvars, pdvars, rvars = [], [], []
+	for l in range(len(experiments)):
+		notE = unnest(experiments[:l]+experiments[l+1:])
+		e = experiments[l]
+		for i in e:
+			for j in notE:
+				cm, cv = MA(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
+				cmeans.append(cm)
+				cvars.append(cv)
+				pdm, pdv = MA(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
+				pdmeans.append(pdm)
+				pdvars.append(pdv)
+				rm, rv = MA(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])[2:4]  # [2:4] only mean and var
+				rmeans.append(rm)
+				rvars.append(rv)
+	print("+++INTER: \n"
+	      "CONSTANd means: average: " + str(np.mean(cmeans)) + "; values: " + str(cmeans) + "\n"
+	      "PD2.1 means: average: " + str(np.mean(pdmeans)) + "; values: " + str(pdmeans) + "\n"
+		  "raw means: average: " + str(np.mean(rmeans)) + "; values: " + str(rmeans) + "\n"
+		  "CONSTANd vars: average: " + str(np.mean(cvars)) + "; values: " + str(cvars) + "\n"
+	      "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
+	      "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
 
 
 def devStuff(df, params): # TEST
@@ -397,7 +432,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 
 
 if __name__ == '__main__':
-	#masterConfigFilePath = 'job/jobConfig.ini' # TEST
+	masterConfigFilePath = 'job/jobConfig.ini' # TEST
 	#masterConfigFilePath = webFlow(exptype='COON')
 	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-12 22:37:48.458146_COON')
 	#masterConfigFilePath = webFlow(exptype='COON_SN')
@@ -410,7 +445,7 @@ if __name__ == '__main__':
 	#masterConfigFilePath = webFlow(exptype='COON_nonormnoconstand', previousjobdirName='2016-12-17 18:36:07.239085_COON_nonormnoconstand')  # todo constand uitzetten
 	#masterConfigFilePath = webFlow(exptype='COON_noISO')
 	#masterConfigFilePath = webFlow(exptype='COON_noISO', previousjobdirName='2016-12-16 16:38:30.536344_COON_noISO')
-	masterConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
+	#masterConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
 
 	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True,
 	              testing=True, writeToDisk=True))
