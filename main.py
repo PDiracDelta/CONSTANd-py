@@ -15,7 +15,7 @@ __email__ = "vanhoutvenjoris@gmail.com"
 __status__ = "Development"
 
 import sys, os, logging, datetime
-from webFlow import webFlow
+#from statsmodels.robust.scale import mad
 from getInput import getProcessingInput, getJobInput
 from processingFlow import processDf
 from analysisFlow import analyzeProcessingResult
@@ -47,7 +47,7 @@ def isotopicImpuritiesTest(): # TEST
 	df = importDataFrame(params['files_in'], delim=params['delim_in'], header=params['header_in'])
 	correctedIntensities = getIntensities(df)
 	normalizedIntensities, convergenceTrail, R, S = constand(correctedIntensities, params['accuracy'],
-	                                                         params['maxIterations'])
+															 params['maxIterations'])
 	# exportData(normalizedIntensities, 'txt', path_out=params['path_out'],
 	#            filename=params['jobname'] + '_normalizedIntensities', delim_out=params['delim_out'])
 	# test "impure data"
@@ -56,8 +56,8 @@ def isotopicImpuritiesTest(): # TEST
 	correctedIntensities_impure[0, :] -= spillover
 	correctedIntensities_impure[1, :] += spillover
 	normalizedIntensities_impure, convergenceTrail_i, R_i, S_i = constand(correctedIntensities_impure,
-	                                                                      params['accuracy'],
-	                                                                      params['maxIterations'])
+																		  params['accuracy'],
+																		  params['maxIterations'])
 	diff = abs(normalizedIntensities - normalizedIntensities_impure)
 	print(np.allclose(normalizedIntensities, normalizedIntensities_impure, atol=1e-3, equal_nan=True))
 	print(np.nanmean(np.nanmean(diff[:, 0:1], 1)))
@@ -261,7 +261,7 @@ def intraInterMAPlots():
 	# calculate all intra- and inter-MA plots for the Max data set (Intensities only)
 	# on the PEPTIDE LEVEL
 	constandFileName = '../jobs/2016-12-22 13:07:48.663095_MAX_SN_noTAM/output_analysis/MAX_SN_noTAM_CommonPeptideIntensities.tsv'
-	PDFileName = '../jobs/2016-12-22 13:02:23.517798_MAX_SN_abundances_noTAM/output_analysis/MAX_SN_abundances_noTAM_CommonPeptideIntensities.tsv'
+	PDFileName = '../jobs/2016-12-24 12:09:28.341520_MAX_SN_abundances_noTAM/output_analysis/MAX_SN_abundances_noTAM_CommonPeptideIntensities.tsv'
 	rawFileName = '../jobs/2016-12-22 12:56:54.697920_MAX_SN_nonormnoconstand_noTAM/output_analysis/MAX_SN_nonormnoconstand_noTAM_CommonPeptideIntensities.tsv'
 	cdf = importDataFrame(constandFileName, delim='\t')
 	pddf = importDataFrame(PDFileName, delim='\t')
@@ -287,12 +287,12 @@ def intraInterMAPlots():
 					rmeans.append(rm)
 					rvars.append(rv)
 		print("+++INTRA: \n"
-		      "CONSTANd means: average: " + str(np.mean(cmeans)) + "; values: " + str(cmeans) + "\n"
-		      "PD2.1 means: average: " + str(np.mean(pdmeans)) + "; values: " + str(pdmeans) + "\n"
-			  "raw means: average: " + str(np.mean(rmeans)) + "; values: " + str(rmeans) + "\n"
+			  "CONSTANd means: MAD: " + str(np.mean(np.abs(cmeans))) + "; values: " + str(cmeans) + "\n"
+			  "PD2.1 means: MAD: " + str(np.mean(np.abs(pdmeans))) + "; values: " + str(pdmeans) + "\n"
+			  "raw means: MAD: " + str(np.mean(np.abs(rmeans))) + "; values: " + str(rmeans) + "\n"
 			  "CONSTANd vars: average: " + str(np.mean(cvars)) + "; values: " + str(cvars) + "\n"
-		      "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
-		      "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
+			  "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
+			  "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
 		MAPlot(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'PM' + str(j)])
 		MAPlot(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])
 		MAPlot(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])
@@ -316,12 +316,12 @@ def intraInterMAPlots():
 					rmeans.append(rm)
 					rvars.append(rv)
 		print("+++INTER: \n"
-		      "CONSTANd means: average: " + str(np.mean(cmeans)) + "; values: " + str(cmeans) + "\n"
-		      "PD2.1 means: average: " + str(np.mean(pdmeans)) + "; values: " + str(pdmeans) + "\n"
-			  "raw means: average: " + str(np.mean(rmeans)) + "; values: " + str(rmeans) + "\n"
+			  "CONSTANd means: MAD: " + str(np.mean(np.abs(cmeans))) + "; values: " + str(cmeans) + "\n"
+			  "PD2.1 means: MAD: " + str(np.mean(np.abs(pdmeans))) + "; values: " + str(pdmeans) + "\n"
+			  "raw means: MAD: " + str(np.mean(np.abs(rmeans))) + "; values: " + str(rmeans) + "\n"
 			  "CONSTANd vars: average: " + str(np.mean(cvars)) + "; values: " + str(cvars) + "\n"
-		      "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
-		      "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
+			  "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
+			  "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
 		# plot one graph for each (the last one):
 		MAPlot(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'PM' + str(j)])
 		MAPlot(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])
@@ -346,11 +346,11 @@ def intraInterMAPlots():
 						cvars.append(cv)
 
 						pdm, pdv = MA(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'BM' + str(j)])[
-						           2:4]  # [2:4] only mean and var
+								   2:4]  # [2:4] only mean and var
 						pdmeans.append(pdm)
 						pdvars.append(pdv)
 						pdm, pdv = MA(pddf.loc[:, 'PM' + str(i)], pddf.loc[:, 'PM' + str(j)])[
-						           2:4]  # [2:4] only mean and var
+								   2:4]  # [2:4] only mean and var
 						pdmeans.append(pdm)
 						pdvars.append(pdv)
 
@@ -361,17 +361,12 @@ def intraInterMAPlots():
 						rmeans.append(rm)
 						rvars.append(rv)
 		print("+++INTRA: \n"
-		      "CONSTANd means: average: " + str(np.nanmean(cmeans)) + "; values: " + str(cmeans) + "\n"
-		                                                                                        "PD2.1 means: average: " + str(
-			np.mean(pdmeans)) + "; values: " + str(pdmeans) + "\n"
-		                                                      "raw means: average: " + str(
-			np.mean(rmeans)) + "; values: " + str(rmeans) + "\n"
-		                                                    "CONSTANd vars: average: " + str(
-			np.mean(cvars)) + "; values: " + str(cvars) + "\n"
-		                                                  "PD2.1 vars: average: " + str(
-			np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
-		                                                    "raw vars: average: " + str(
-			np.mean(rvars)) + "; values: " + str(rvars) + "\n")
+			  "CONSTANd means: MAD: " + str(np.mean(np.abs(cmeans))) + "; values: " + str(cmeans) + "\n"
+			  "PD2.1 means: MAD: " + str(np.mean(np.abs(pdmeans))) + "; values: " + str(pdmeans) + "\n"
+			  "raw means: MAD: " + str(np.mean(np.abs(rmeans))) + "; values: " + str(rmeans) + "\n"
+			  "CONSTANd vars: average: " + str(np.mean(cvars)) + "; values: " + str(cvars) + "\n"
+			  "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
+			  "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
 		MAPlot(cdf.loc[:, 'BM' + str(1)], cdf.loc[:, 'BM' + str(2)])
 		MAPlot(pddf.loc[:, 'BM' + str(1)], pddf.loc[:, 'BM' + str(2)])
 		MAPlot(rdf.loc[:, 'BM' + str(1)], rdf.loc[:, 'BM' + str(2)])
@@ -393,11 +388,11 @@ def intraInterMAPlots():
 					cvars.append(cv)
 
 					pdm, pdv = MA(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'BM' + str(j)])[
-					           2:4]  # [2:4] only mean and var
+							   2:4]  # [2:4] only mean and var
 					pdmeans.append(pdm)
 					pdvars.append(pdv)
 					pdm, pdv = MA(pddf.loc[:, 'PM' + str(i)], pddf.loc[:, 'PM' + str(j)])[
-					           2:4]  # [2:4] only mean and var
+							   2:4]  # [2:4] only mean and var
 					pdmeans.append(pdm)
 					pdvars.append(pdv)
 
@@ -408,17 +403,12 @@ def intraInterMAPlots():
 					rmeans.append(rm)
 					rvars.append(rv)
 		print("+++INTER: \n"
-		      "CONSTANd means: average: " + str(np.mean(cmeans)) + "; values: " + str(cmeans) + "\n"
-		                                                                                        "PD2.1 means: average: " + str(
-			np.mean(pdmeans)) + "; values: " + str(pdmeans) + "\n"
-		                                                      "raw means: average: " + str(
-			np.mean(rmeans)) + "; values: " + str(rmeans) + "\n"
-		                                                    "CONSTANd vars: average: " + str(
-			np.mean(cvars)) + "; values: " + str(cvars) + "\n"
-		                                                  "PD2.1 vars: average: " + str(
-			np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
-		                                                    "raw vars: average: " + str(
-			np.mean(rvars)) + "; values: " + str(rvars) + "\n")
+			  "CONSTANd means: MAD: " + str(np.mean(np.abs(cmeans))) + "; values: " + str(cmeans) + "\n"
+			  "PD2.1 means: MAD: " + str(np.mean(np.abs(pdmeans))) + "; values: " + str(pdmeans) + "\n"
+			  "raw means: MAD: " + str(np.mean(np.abs(rmeans))) + "; values: " + str(rmeans) + "\n"
+			  "CONSTANd vars: MAD: " + str(np.mean(cvars)) + "; values: " + str(cvars) + "\n"
+			  "PD2.1 vars: MAD: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
+			  "raw vars: MAD: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
 		# plot one graph for each (the last one):
 		MAPlot(cdf.loc[:, 'BM' + str(3)], cdf.loc[:, 'BM' + str(6)])
 		MAPlot(pddf.loc[:, 'BM' + str(3)], pddf.loc[:, 'BM' + str(6)])
@@ -460,8 +450,8 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 			processingParams[eName] = getProcessingInput(jobParams['schema'][eName]['config'])
 			# get the dataframes
 			dfs[eName] = getData(processingParams[eName]['data'], delim=processingParams[eName]['delim_in'],
-			                     header=processingParams[eName]['header_in'],
-			                     wrapper=processingParams[eName]['wrapper'])
+								 header=processingParams[eName]['header_in'],
+								 wrapper=processingParams[eName]['wrapper'])
 			processing_path_out = processingParams[eName]['path_out']
 			processingResultsDumpFilename = os.path.join(processing_path_out, 'processingResultsDump_'+str(eName))
 			if doProcessing:
@@ -477,10 +467,10 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 
 				# process every input dataframe
 				logging.info("Starting processing of experiment '" + eName + "' of job '" + jobParams['jobname'] + "' at " +
-			             str(datetime.datetime.now()).split('.')[0])
+						 str(datetime.datetime.now()).split('.')[0])
 				processingResults[eName] = processDf(dfs[eName], processingParams[eName], writeToDisk)
 				logging.info("Finished processing of experiment '" + eName + "' of job '" + jobParams['jobname'] + "' at " +
-			             str(datetime.datetime.now()).split('.')[0])
+						 str(datetime.datetime.now()).split('.')[0])
 				pickle.dump(processingResults[eName], open(processingResultsDumpFilename, 'wb')) # TEST
 			elif doAnalysis:
 				try:
@@ -502,10 +492,10 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 
 			# perform analysis
 			logging.info("Starting analysis of job: " + jobParams['jobname'] + "at " +
-			             str(datetime.datetime.now()).split('.')[0])
+						 str(datetime.datetime.now()).split('.')[0])
 			analysisResults = analyzeProcessingResult(processingResults, jobParams, writeToDisk)
 			logging.info("Finished analysis of job: " + jobParams['jobname'] + "at " +
-			             str(datetime.datetime.now()).split('.')[0])
+						 str(datetime.datetime.now()).split('.')[0])
 			pickle.dump(analysisResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
 		elif doReport:
 			try:
@@ -527,10 +517,10 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 
 			# visualize and make a report
 			logging.info("Starting visualization end report generation of job: " + jobParams['jobname'] + "at " +
-			             str(datetime.datetime.now()).split('.')[0])
+						 str(datetime.datetime.now()).split('.')[0])
 			generateReport(analysisResults, jobParams, logFilePath, writeToDisk)
 			logging.info("Finished visualization end report generation of job: " + jobParams['jobname'] + "at " +
-			             str(datetime.datetime.now()).split('.')[0])
+						 str(datetime.datetime.now()).split('.')[0])
 		else:
 			logging.warning("No report generated!")
 
@@ -557,4 +547,4 @@ if __name__ == '__main__':
 	#masterConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
 
 	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True,
-	              testing=True, writeToDisk=True))
+				  testing=True, writeToDisk=True))
