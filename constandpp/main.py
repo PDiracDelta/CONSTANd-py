@@ -16,6 +16,7 @@ __status__ = "Development"
 
 import sys, os, logging, datetime
 #from statsmodels.robust.scale import mad
+from webFlow import webFlow
 from getInput import getProcessingInput, getJobInput
 from processingFlow import processDf
 from analysisFlow import analyzeProcessingResult
@@ -126,6 +127,8 @@ def MAPlot(x,y, title=None):
 		plt.title(title+'; mean(M): '+str(m)+'; var(M):'+str(v))
 	plt.xlabel('A')
 	plt.ylabel('M')
+	#plt.xlim((-10.1,0))
+	#plt.ylim((-10.1, 10.1))
 	plt.show()
 	return M,A, m, v
 
@@ -182,8 +185,8 @@ def compareIntensitySN(df1, df2, title=None):
 
 
 def compareICmethods():
-	PDdfFile = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/2016-12-19 20:53:16.947500_COON/BR1_output_processing/BR1_normalizedIntensities.tsv'
-	CdfFile = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/2016-12-19 20:20:39.161797_COON_noISO_rowsnormalized/BR1_output_processing/BR1_normalizedIntensities.tsv'
+	PDdfFile = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/2016-12-26 10:56:10.646919_COON/BR1_output_processing/BR1_normalizedIntensities.tsv'
+	CdfFile = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/2016-12-26 10:50:42.462546_COON_noISO/BR1_output_processing/BR1_normalizedIntensities.tsv'
 	from dataIO import importDataFrame
 	from main import compareIntensitySN
 	from matplotlib import pyplot as plt
@@ -191,12 +194,15 @@ def compareICmethods():
 	PDdf = importDataFrame(PDdfFile)
 	PDdf.columns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
 	Cdf.columns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
-	M,A = compareIntensitySN(PDdf, Cdf)
+	M,A,m,v = compareIntensitySN(PDdf, Cdf)
+	print("MAD: "+str(np.nanmean(np.abs(M))))
 	Mfinite = M[np.isfinite(M)]
 	#np.digitize(M, np.linspace(min(M),max(M),20))
-	hist, bins = np.histogram(Mfinite, bins=20, )
+	hist, bins = np.histogram(Mfinite, bins=11, range=(-5,5))
 	plt.title('')
 	plt.bar(bins[0:-1], hist)
+	plt.xticks(np.arange(11)-5)
+	plt.xlim(-5,5)
 	plt.show()
 
 
@@ -422,9 +428,9 @@ def devStuff(df, params): # TEST
 	# testDataComplementarity(df)
 	#compareIntensitySN(None, None)
 	#abundancesPCAHCD()
-	#compareICmethods()
+	compareICmethods()
 	#compareAbundancesIntSN()
-	intraInterMAPlots()
+	#intraInterMAPlots()
 	pass
 
 
