@@ -421,6 +421,16 @@ def intraInterMAPlots():
 		MAPlot(rdf.loc[:, 'BM' + str(3)], rdf.loc[:, 'BM' + str(6)])
 
 
+def compareDEAresults():
+	df1file = '../jobs/2016-12-26 15:44:27.523732_MAX_noTAM/output_analysis/MAX_noTAM_results_minimal.tsv'
+	df2file = '../jobs/2016-12-22 13:07:48.663095_MAX_SN_noTAM/output_analysis/MAX_SN_noTAM_results_minimal.tsv'
+	df1sorted = importDataFrame(df1file, delim='\t').sort('protein')
+	df2sorted = importDataFrame(df2file, delim='\t').sort('protein')
+	assert set(df1sorted['protein']) == set(df2sorted['protein']) # else you cant compare without first matching each protein
+	fcM, fcA, fcm, fcv = MAPlot(df1sorted.loc[:, 'log2 fold change c1/c2'], df2sorted.loc[:, 'log2 fold change c1/c2'])
+	pM, pA, pm, pv = MAPlot(df1sorted.loc[:, 'adjusted p-value'], df2sorted.loc[:, 'adjusted p-value'])
+
+
 def devStuff(df, params): # TEST
 	# performanceTest()
 	# isotopicCorrectionsTest(params)
@@ -428,9 +438,10 @@ def devStuff(df, params): # TEST
 	# testDataComplementarity(df)
 	#compareIntensitySN(None, None)
 	#abundancesPCAHCD()
-	compareICmethods()
+	#compareICmethods()
 	#compareAbundancesIntSN()
 	#intraInterMAPlots()
+	compareDEAresults()
 	pass
 
 
