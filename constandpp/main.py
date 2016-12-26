@@ -430,12 +430,12 @@ def RDHPlot(x,y):
 	reldiff = diff/np.maximum(x,y)
 	#finite = diff[np.isfinite(M)]
 	# np.digitize(M, np.linspace(min(M),max(M),20))
-	hist, bins = np.histogram(reldiff, bins=11)#, range=(0, 5))
+	hist, bins = np.histogram(reldiff, bins=max(10,np.ceil(max(reldiff)-min(reldiff))))#, range=(0, 5))
 	plt.title('')
 	plt.ylabel('relative difference')
 	plt.bar(bins[0:-1], hist, width=0.1)
 	#plt.xticks(np.arange(11) - 5)
-	plt.xlim(min(bins), max(bins))
+	plt.xlim(min(bins)-1, max(bins)+1)
 	plt.show()
 	meandiff = np.nanmean(reldiff)
 	maxdiff = np.max(reldiff)
@@ -449,7 +449,7 @@ def compareDEAresults():
 	df2sorted = importDataFrame(df2file, delim='\t').sort('protein')
 	assert set(df1sorted['protein']) == set(df2sorted['protein']) # else you cant compare without first matching each protein
 	# fcM, fcA, fcm, fcv =
-	fmean, fmax = RDHPlot(df1sorted.loc[:, 'log2 fold change c1/c2'], df2sorted.loc[:, 'log2 fold change c1/c2'])
+	fmean, fmax = RDHPlot(np.power(2,df1sorted.loc[:, 'log2 fold change c1/c2']), np.power(2,df2sorted.loc[:, 'log2 fold change c1/c2']))
 	print("fc mean: " + str(fmean) + "\nmax: " + str(fmax))
 	# pM, pA, pm, pv =
 	pmean, pmax = RDHPlot(df1sorted.loc[:, 'adjusted p-value'], df2sorted.loc[:, 'adjusted p-value'])
