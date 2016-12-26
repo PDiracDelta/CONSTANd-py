@@ -430,12 +430,13 @@ def RDHPlot(x,y):
 	reldiff = diff/np.maximum(x,y)
 	#finite = diff[np.isfinite(M)]
 	# np.digitize(M, np.linspace(min(M),max(M),20))
-	hist, bins = np.histogram(reldiff, bins=max(10,np.ceil(max(reldiff)-min(reldiff))))#, range=(0, 5))
+	hist, bins = np.histogram(reldiff, bins=max(10,np.ceil(max(reldiff)-min(reldiff))), range=(0, 1))
 	plt.title('')
-	plt.ylabel('relative difference')
-	plt.bar(bins[0:-1], hist, width=0.1)
-	#plt.xticks(np.arange(11) - 5)
-	plt.xlim(min(bins)-1, max(bins)+1)
+	plt.xlabel('relative difference')
+	binsize = 0.05
+	plt.bar(bins[0:-1], hist, width=binsize)
+	plt.xticks(bins)
+	plt.xlim(min(bins)-binsize, max(bins)+binsize)
 	plt.show()
 	meandiff = np.nanmean(reldiff)
 	maxdiff = np.max(reldiff)
