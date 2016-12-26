@@ -421,14 +421,39 @@ def intraInterMAPlots():
 		MAPlot(rdf.loc[:, 'BM' + str(3)], rdf.loc[:, 'BM' + str(6)])
 
 
+def RDHPlot(x,y):
+	import matplotlib.pyplot as plt
+	x=np.array(x)
+	y=np.array(y)
+	# relative difference histogram
+	diff = np.abs(x-y)
+	reldiff = diff/np.maximum(x,y)
+	#finite = diff[np.isfinite(M)]
+	# np.digitize(M, np.linspace(min(M),max(M),20))
+	hist, bins = np.histogram(reldiff, bins=11)#, range=(0, 5))
+	plt.title('')
+	plt.ylabel('relative difference')
+	plt.bar(bins[0:-1], hist, width=0.1)
+	#plt.xticks(np.arange(11) - 5)
+	plt.xlim(min(bins), max(bins))
+	plt.show()
+	meandiff = np.nanmean(reldiff)
+	maxdiff = np.max(reldiff)
+	return meandiff, maxdiff
+
+
 def compareDEAresults():
 	df1file = '../jobs/2016-12-26 15:44:27.523732_MAX_noTAM/output_analysis/MAX_noTAM_results_minimal.tsv'
 	df2file = '../jobs/2016-12-22 13:07:48.663095_MAX_SN_noTAM/output_analysis/MAX_SN_noTAM_results_minimal.tsv'
 	df1sorted = importDataFrame(df1file, delim='\t').sort('protein')
 	df2sorted = importDataFrame(df2file, delim='\t').sort('protein')
 	assert set(df1sorted['protein']) == set(df2sorted['protein']) # else you cant compare without first matching each protein
-	fcM, fcA, fcm, fcv = MAPlot(df1sorted.loc[:, 'log2 fold change c1/c2'], df2sorted.loc[:, 'log2 fold change c1/c2'])
-	pM, pA, pm, pv = MAPlot(df1sorted.loc[:, 'adjusted p-value'], df2sorted.loc[:, 'adjusted p-value'])
+	# fcM, fcA, fcm, fcv =
+	fmean, fmax = RDHPlot(df1sorted.loc[:, 'log2 fold change c1/c2'], df2sorted.loc[:, 'log2 fold change c1/c2'])
+	print("fc mean: " + str(fmean) + "\nmax: " + str(fmax))
+	# pM, pA, pm, pv =
+	pmean, pmax = RDHPlot(df1sorted.loc[:, 'adjusted p-value'], df2sorted.loc[:, 'adjusted p-value'])
+	print("p mean: "+str(pmean)+"\nmax: "+str(pmax))
 
 
 def devStuff(df, params): # TEST
