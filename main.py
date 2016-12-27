@@ -263,6 +263,15 @@ def compareAbundancesIntSN():
 	compareIntensitySN(abundancesInt, abundancesSN, title="Intensities versus S/N values (normalized abundances)")
 
 
+def boxPlot(x, labels=None, ylab=None):
+	import matplotlib
+	from matplotlib import pyplot as plt
+	matplotlib.rcParams.update({'font.size': 20})
+	plt.boxplot(x, whis=[5, 95], showmeans=True, labels=labels)
+	plt.ylabel(ylab)
+	plt.show()
+
+
 def intraInterMAPlots():
 	# calculate all intra- and inter-MA plots for the Max data set (Intensities only)
 	# on the PEPTIDE LEVEL
@@ -299,9 +308,10 @@ def intraInterMAPlots():
 			  "CONSTANd vars: average: " + str(np.mean(cvars)) + "; values: " + str(cvars) + "\n"
 			  "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
 			  "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
-		MAPlot(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'PM' + str(j)])
-		MAPlot(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])
-		MAPlot(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])
+		#MAPlot(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'PM' + str(j)])
+		#MAPlot(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])
+		#MAPlot(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])
+		boxPlot([rvars, cvars, pdvars], labels=['raw', 'CONSTANd', 'PD2.1'], ylab='variance')
 
 		# INTER
 		# experiments = [[3,4],[5,6],[1,2]]
@@ -329,9 +339,10 @@ def intraInterMAPlots():
 			  "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
 			  "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
 		# plot one graph for each (the last one):
-		MAPlot(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'PM' + str(j)])
-		MAPlot(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])
-		MAPlot(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])
+		#MAPlot(cdf.loc[:, 'BM' + str(i)], cdf.loc[:, 'PM' + str(j)])
+		#MAPlot(pddf.loc[:, 'BM' + str(i)], pddf.loc[:, 'PM' + str(j)])
+		#MAPlot(rdf.loc[:, 'BM' + str(i)], rdf.loc[:, 'PM' + str(j)])
+		boxPlot([rvars, cvars, pdvars], labels=['raw', 'CONSTANd', 'PD2.1'], ylab='variance')
 
 	cmeans, pdmeans, rmeans = [], [], []
 	cvars, pdvars, rvars = [], [], []
@@ -373,9 +384,10 @@ def intraInterMAPlots():
 			  "CONSTANd vars: average: " + str(np.mean(cvars)) + "; values: " + str(cvars) + "\n"
 			  "PD2.1 vars: average: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
 			  "raw vars: average: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
-		MAPlot(cdf.loc[:, 'BM' + str(1)], cdf.loc[:, 'BM' + str(2)])
-		MAPlot(pddf.loc[:, 'BM' + str(1)], pddf.loc[:, 'BM' + str(2)])
-		MAPlot(rdf.loc[:, 'BM' + str(1)], rdf.loc[:, 'BM' + str(2)])
+		#MAPlot(cdf.loc[:, 'BM' + str(1)], cdf.loc[:, 'BM' + str(2)])
+		#MAPlot(pddf.loc[:, 'BM' + str(1)], pddf.loc[:, 'BM' + str(2)])
+		#MAPlot(rdf.loc[:, 'BM' + str(1)], rdf.loc[:, 'BM' + str(2)])
+		boxPlot([rvars, cvars, pdvars], labels=['raw', 'CONSTANd', 'PD2.1'], ylab='variance')
 
 		# INTER
 		# experiments = [[3,4],[5,6],[1,2]]
@@ -416,10 +428,10 @@ def intraInterMAPlots():
 			  "PD2.1 vars: MAD: " + str(np.mean(pdvars)) + "; values: " + str(pdvars) + "\n"
 			  "raw vars: MAD: " + str(np.mean(rvars)) + "; values: " + str(rvars) + "\n")
 		# plot one graph for each (the last one):
-		MAPlot(cdf.loc[:, 'BM' + str(3)], cdf.loc[:, 'BM' + str(6)])
-		MAPlot(pddf.loc[:, 'BM' + str(3)], pddf.loc[:, 'BM' + str(6)])
-		MAPlot(rdf.loc[:, 'BM' + str(3)], rdf.loc[:, 'BM' + str(6)])
-
+		#MAPlot(cdf.loc[:, 'BM' + str(3)], cdf.loc[:, 'BM' + str(6)])
+		#MAPlot(pddf.loc[:, 'BM' + str(3)], pddf.loc[:, 'BM' + str(6)])
+		#MAPlot(rdf.loc[:, 'BM' + str(3)], rdf.loc[:, 'BM' + str(6)])
+		boxPlot([rvars, cvars, pdvars], labels=['raw', 'CONSTANd', 'PD2.1'], ylab='variance')
 
 def RDHPlot(x,y):
 	import matplotlib.pyplot as plt
@@ -466,8 +478,8 @@ def devStuff(df, params): # TEST
 	#abundancesPCAHCD()
 	#compareICmethods()
 	#compareAbundancesIntSN()
-	#intraInterMAPlots()
-	compareDEAresults()
+	intraInterMAPlots()
+	#compareDEAresults()
 	pass
 
 
