@@ -283,7 +283,8 @@ def intraInterMAPlots():
 	rdf = importDataFrame(rawFileName, delim='\t')
 
 	compareDIFFERENTconditions = True
-	compareIDENTICALconditions = False
+	compareIDENTICALconditions = True
+	diffboxplots = False # THIS IS USELESS THE DIMENSIONS DONT MATCH
 	if compareDIFFERENTconditions:
 		D_intra_cmeans, D_intra_pdmeans, D_intra_rmeans = [], [], []
 		D_intra_cvars, D_intra_pdvars, D_intra_rvars = [], [], []
@@ -432,6 +433,17 @@ def intraInterMAPlots():
 		#MAPlot(pddf.loc[:, 'BM' + str(3)], pddf.loc[:, 'BM' + str(6)])
 		#MAPlot(rdf.loc[:, 'BM' + str(3)], rdf.loc[:, 'BM' + str(6)])
 		boxPlot([I_inter_rvars, I_inter_cvars, I_inter_pdvars], labels=['raw', 'CONSTANd', 'PD2.1'], ylab='variance')
+
+	if diffboxplots:
+		# THIS IS USELESS THE DIMENSIONS DONT MATCH
+		# transform all to arrays
+		allLists = [I_inter_rvars, I_intra_rvars, I_inter_cvars, I_intra_cvars, I_inter_pdvars, I_intra_pdvars, D_inter_rvars, D_intra_rvars, D_inter_cvars, D_intra_cvars, D_inter_pdvars, D_intra_pdvars]
+		I_inter_rvars, I_intra_rvars, I_inter_cvars, I_intra_cvars, I_inter_pdvars, I_intra_pdvars, D_inter_rvars, D_intra_rvars, D_inter_cvars, D_intra_cvars, D_inter_pdvars, D_intra_pdvars = (np.array(x) for x in allLists)
+		# amke boxplots of differences
+		boxPlot([I_inter_rvars-I_intra_rvars, I_inter_cvars-I_intra_cvars, I_inter_pdvars-I_intra_pdvars],
+		        labels=['raw', 'CONSTANd', 'PD2.1'], ylab=r'\Delta V')
+		boxPlot([D_inter_rvars - D_intra_rvars, D_inter_cvars - D_intra_cvars, D_inter_pdvars - D_intra_pdvars],
+		        labels=['raw', 'CONSTANd', 'PD2.1'], ylab=r'\Delta V')
 
 
 def RDHPlot(x,y):
