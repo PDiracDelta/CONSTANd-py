@@ -117,7 +117,9 @@ def MA(x,y):
 
 
 def MAPlot(x,y, title=None):
+	import matplotlib
 	from matplotlib import pyplot as plt
+	matplotlib.rcParams.update({'font.size': 20})
 	plt.figure(figsize=(16, 12))
 	M,A,m,v = MA(x,y)
 	plt.scatter(A, M)
@@ -447,7 +449,9 @@ def intraInterMAPlots():
 
 
 def RDHPlot(x,y):
+	import matplotlib
 	import matplotlib.pyplot as plt
+	matplotlib.rcParams.update({'font.size': 20})
 	x=np.array(x)
 	y=np.array(y)
 	# relative difference histogram

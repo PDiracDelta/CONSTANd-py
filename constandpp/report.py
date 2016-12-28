@@ -15,9 +15,13 @@ import numpy as np
 from dataIO import unnest
 from warnings import warn
 from scipy.cluster.hierarchy import dendrogram
+import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib import markers
 #from adjustText import adjust_text
+
+# adjust font size globally
+matplotlib.rcParams.update({'font.size': 20})
 
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
 
