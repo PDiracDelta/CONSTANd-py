@@ -25,7 +25,7 @@ from time import time
 from dataIO import *
 
 
-fontsize = 20
+fontsize = 30
 
 
 def performanceTest():  # remove for production # TEST
@@ -455,6 +455,7 @@ def RDHPlot(x,y,quantity=None):
 	import matplotlib
 	import matplotlib.pyplot as plt
 	matplotlib.rcParams.update({'font.size': fontsize})
+	plt.figure(figsize=(12, 9))
 	x=np.array(x)
 	y=np.array(y)
 	# relative difference histogram
@@ -462,16 +463,16 @@ def RDHPlot(x,y,quantity=None):
 	reldiff = diff/np.maximum(x,y)
 	#finite = diff[np.isfinite(M)]
 	# np.digitize(M, np.linspace(min(M),max(M),20))
-	hist, bins = np.histogram(reldiff, bins=max(10,np.ceil(max(reldiff)-min(reldiff))), range=(0, 1))
+	hist, bins = np.histogram(reldiff, bins=max(10,np.ceil(max(reldiff)-min(reldiff))), range=(0, np.ceil(max(reldiff)*10)/10))
 	plt.ylabel('number of proteins')
 	if quantity is None:
 		plt.xlabel('relative difference')
 	else:
 		plt.xlabel('relative difference in '+quantity)
-	binsize = 0.05
+	binsize = (max(bins)-min(bins))/(len(bins)-1)
 	plt.bar(bins[0:-1], hist, width=binsize)
 	plt.xticks(bins)
-	plt.xlim(min(bins)-binsize, max(bins)+binsize)
+	plt.xlim(0, min(max(bins)+binsize,1))
 	plt.show()
 	meandiff = np.nanmean(reldiff)
 	maxdiff = np.max(reldiff)
@@ -479,10 +480,10 @@ def RDHPlot(x,y,quantity=None):
 
 
 def compareDEAresults():
-	#df1file = '../jobs/2016-12-26 15:44:27.523732_MAX_noTAM/output_analysis/MAX_noTAM_results_minimal.tsv'
-	#df2file = '../jobs/2016-12-22 13:07:48.663095_MAX_SN_noTAM/output_analysis/MAX_SN_noTAM_results_minimal.tsv'
-	df1file = '../jobs/2016-12-30 14:46:02.689189_MAX_abundances_noTAM/output_analysis/MAX_abundances_noTAM_results_minimal.tsv'
-	df2file = '../jobs/2016-12-24 12:09:28.341520_MAX_SN_abundances_noTAM/output_analysis/MAX_SN_abundances_noTAM_results_minimal.tsv'
+	df1file = '../jobs/2016-12-26 15:44:27.523732_MAX_noTAM/output_analysis/MAX_noTAM_results_minimal.tsv'
+	df2file = '../jobs/2016-12-22 13:07:48.663095_MAX_SN_noTAM/output_analysis/MAX_SN_noTAM_results_minimal.tsv'
+	#df1file = '../jobs/2016-12-30 14:46:02.689189_MAX_abundances_noTAM/output_analysis/MAX_abundances_noTAM_results_minimal.tsv'
+	#df2file = '../jobs/2016-12-24 12:09:28.341520_MAX_SN_abundances_noTAM/output_analysis/MAX_SN_abundances_noTAM_results_minimal.tsv'
 	df1sorted = importDataFrame(df1file, delim='\t').sort('protein')
 	df2sorted = importDataFrame(df2file, delim='\t').sort('protein')
 	assert set(df1sorted['protein']) == set(df2sorted['protein']) # else you cant compare without first matching each protein
