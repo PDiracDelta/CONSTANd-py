@@ -25,6 +25,9 @@ from time import time
 from dataIO import *
 
 
+fontsize = 20
+
+
 def performanceTest():  # remove for production # TEST
 	from constand import constand
 	""" Use this development method to test the performance of the CONSTANd algorithm. """
@@ -119,7 +122,7 @@ def MA(x,y):
 def MAPlot(x,y, title=None):
 	import matplotlib
 	from matplotlib import pyplot as plt
-	matplotlib.rcParams.update({'font.size': 20})
+	matplotlib.rcParams.update({'font.size': fontsize})
 	plt.figure(figsize=(16, 12))
 	M,A,m,v = MA(x,y)
 	plt.scatter(A, M)
@@ -268,7 +271,7 @@ def compareAbundancesIntSN():
 def boxPlot(x, labels=None, ylab=None):
 	import matplotlib
 	from matplotlib import pyplot as plt
-	matplotlib.rcParams.update({'font.size': 20})
+	matplotlib.rcParams.update({'font.size': fontsize})
 	plt.boxplot(x, whis=[5, 95], showmeans=True, labels=labels)
 	plt.ylabel(ylab)
 	plt.show()
@@ -451,7 +454,7 @@ def intraInterMAPlots():
 def RDHPlot(x,y):
 	import matplotlib
 	import matplotlib.pyplot as plt
-	matplotlib.rcParams.update({'font.size': 20})
+	matplotlib.rcParams.update({'font.size': fontsize})
 	x=np.array(x)
 	y=np.array(y)
 	# relative difference histogram
@@ -460,7 +463,7 @@ def RDHPlot(x,y):
 	#finite = diff[np.isfinite(M)]
 	# np.digitize(M, np.linspace(min(M),max(M),20))
 	hist, bins = np.histogram(reldiff, bins=max(10,np.ceil(max(reldiff)-min(reldiff))), range=(0, 1))
-	plt.title('')
+	plt.title('number of proteins')
 	plt.xlabel('relative difference')
 	binsize = 0.05
 	plt.bar(bins[0:-1], hist, width=binsize)
