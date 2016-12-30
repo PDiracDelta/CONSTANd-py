@@ -451,7 +451,7 @@ def intraInterMAPlots():
 		        labels=['raw', 'CONSTANd', 'PD2.1'], ylab=r'\Delta V')
 
 
-def RDHPlot(x,y):
+def RDHPlot(x,y,quantity=None):
 	import matplotlib
 	import matplotlib.pyplot as plt
 	matplotlib.rcParams.update({'font.size': fontsize})
@@ -463,8 +463,11 @@ def RDHPlot(x,y):
 	#finite = diff[np.isfinite(M)]
 	# np.digitize(M, np.linspace(min(M),max(M),20))
 	hist, bins = np.histogram(reldiff, bins=max(10,np.ceil(max(reldiff)-min(reldiff))), range=(0, 1))
-	plt.title('number of proteins')
-	plt.xlabel('relative difference')
+	plt.ylabel('number of proteins')
+	if quantity is None:
+		plt.xlabel('relative difference')
+	else:
+		plt.xlabel('relative difference in '+quantity)
 	binsize = 0.05
 	plt.bar(bins[0:-1], hist, width=binsize)
 	plt.xticks(bins)
@@ -484,10 +487,10 @@ def compareDEAresults():
 	df2sorted = importDataFrame(df2file, delim='\t').sort('protein')
 	assert set(df1sorted['protein']) == set(df2sorted['protein']) # else you cant compare without first matching each protein
 	# fcM, fcA, fcm, fcv =
-	fmean, fmax = RDHPlot(np.power(2,df1sorted.loc[:, 'log2 fold change c1/c2']), np.power(2,df2sorted.loc[:, 'log2 fold change c1/c2']))
+	fmean, fmax = RDHPlot(np.power(2,df1sorted.loc[:, 'log2 fold change c1/c2']), np.power(2,df2sorted.loc[:, 'log2 fold change c1/c2']), quantity='log2 fold change')
 	print("fc mean: " + str(fmean) + "\nmax: " + str(fmax))
 	# pM, pA, pm, pv =
-	pmean, pmax = RDHPlot(df1sorted.loc[:, 'adjusted p-value'], df2sorted.loc[:, 'adjusted p-value'])
+	pmean, pmax = RDHPlot(df1sorted.loc[:, 'adjusted p-value'], df2sorted.loc[:, 'adjusted p-value'], quantity='adjusted p-value')
 	print("p mean: "+str(pmean)+"\nmax: "+str(pmax))
 
 
