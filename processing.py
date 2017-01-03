@@ -145,9 +145,12 @@ def undoublePSMAlgo(df, identifyingNodes, exclusive, intensityColumns, removalCo
 	:return df:             pd.dataFrame    data without double First Scan numbers due to PSMAlgo redundancy
 	:return removedData:    pd.dataFrame    basic info about the removed entries
 	"""
-	byIdentifyingNodeDict = df.groupby('Identifying Node Type').groups # {Identifying Node Type : [list of indices]}
+	if len(identifyingNodes['slaves']) == 0: # do NOT execute this method: there is only a single PSMAlgo!!!
+		import pandas as pd
+		return df, pd.DataFrame()
 	masterName = identifyingNodes['master'][0]
 	slaveScoreName = identifyingNodes['slaves'][0][1]
+	byIdentifyingNodeDict = df.groupby('Identifying Node Type').groups # {Identifying Node Type : [list of indices]}
 	columnsToSave = [slaveScoreName] + removalColumnsToSave + intensityColumns
 	masterIndices = set(byIdentifyingNodeDict[masterName])
 	toDelete = set(df.index.values).difference(masterIndices)  # all indices of detections not done by MASTER
