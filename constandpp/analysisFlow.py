@@ -40,24 +40,43 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
 	if nConditions == 2:
 		# get min and max protein-peptide mappings
-		minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF)
+		if params['fullProteinDF_bool']:
+			minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF)
+		else:
+			minProteinPeptidesDict, __, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF)
 
-		# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
-		minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema'])
-		fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema'])
+		if params['minProteinDF_bool']:
+			# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
+			minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema'])
 
-		# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
-		# nan values for a certain condition and keep the removed ones in metadata
-		minProteinDF, metadata['minSingleConditionProteins'] = applyDifferentialExpression(minProteinDF, params['alpha'])
-		fullProteinDF, metadata['fullSingleConditionProteins'] = applyDifferentialExpression(fullProteinDF, params['alpha'])
+			# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
+			# nan values for a certain condition and keep the removed ones in metadata
+			minProteinDF, metadata['minSingleConditionProteins'] = applyDifferentialExpression(minProteinDF, params['alpha'])
 
-		# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
-		minProteinDF = applyFoldChange(minProteinDF, params['pept2protCombinationMethod'])
-		fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
+			# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
+			minProteinDF = applyFoldChange(minProteinDF, params['pept2protCombinationMethod'])
 
-		# indicate significance based on given thresholds alpha and FCThreshold
-		minProteinDF = applySignificance(minProteinDF, params['alpha'], params['FCThreshold'])
-		fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
+			# indicate significance based on given thresholds alpha and FCThreshold
+			minProteinDF = applySignificance(minProteinDF, params['alpha'], params['FCThreshold'])
+		else:
+			minProteinDF = pd.DataFrame()
+
+		if params['fullProteinDF_bool']:
+			# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
+			fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema'])
+
+			# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
+			# nan values for a certain condition and keep the removed ones in metadata
+			fullProteinDF, metadata['fullSingleConditionProteins'] = applyDifferentialExpression(fullProteinDF,
+			                                                                                     params['alpha'])
+
+			# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
+			fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
+
+			# indicate significance based on given thresholds alpha and FCThreshold
+			fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
+		else:
+			fullProteinDF = pd.DataFrame()
 	else:
 		minProteinDF = pd.DataFrame()
 		fullProteinDF = pd.DataFrame()
