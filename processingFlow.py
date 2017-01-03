@@ -75,8 +75,12 @@ def processDf(df, params, writeToDisk):
 
 	""" save results """
 	if writeToDisk:
+		import os
 		# save the removed data information
-		exportData(removedData, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_removedData',
+		# create folder first
+		removedDataDir = os.path.join(params['path_out'], 'removedData')
+		os.makedirs(removedDataDir)
+		exportData(removedData, dataType='df', path_out=removedDataDir, filename=params['filename_out'] + '_removedData',
 		           delim_out=params['delim_out'], inOneFile=params['removedDataInOneFile_bool'])
 		# save the final form of the dataFrame WITHOUT normalized intensities.
 		exportData(df, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_dataFrame', delim_out=params['delim_out'])
