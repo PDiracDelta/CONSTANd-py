@@ -41,30 +41,30 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
 	if nConditions == 2:
 		# generate sorted (on FC) list of differentials
-		if params['minProteinDF_bool']:
+		if params['minExpression_bool']:
 			minSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(minProteinDF)
 			minSet = set(minSortedDifferentialProteinsDF['protein'])
 			# data visualization
 			minVolcanoPlot = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
 			                                params['labelVolcanoPlotAreas'])
-		if params['fullProteinDF_bool']:
+		if params['fullExpression_bool']:
 			fullSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(fullProteinDF)
 			fullSet = set(fullSortedDifferentialProteinsDF['protein'])
 			# data visualization
 			fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
 			                                 params['labelVolcanoPlotAreas'])
-		if params['minProteinDF_bool'] and params['fullProteinDF_bool']:
+		if params['minExpression_bool'] and params['fullExpression_bool']:
 			# list( [in min but not in full], [in full but not in min] )
 			metadata['diffMinFullProteins'] = [list(minSet.difference(fullSet)), list(fullSet.difference(minSet))]
 			# todo combine into one
 
 		if writeToDisk:
-			if params['minProteinDF_bool']:
+			if params['minExpression_bool']:
 				exportData(minSortedDifferentialProteinsDF, dataType='df', path_out=params['path_results'],
 				           filename=params['jobname'] + '_minSortedDifferentials', delim_out='\t')
 				exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
 				           filename=params['jobname'] + '_minVolcanoPlot')
-			if params['fullProteinDF_bool']:
+			if params['fullExpression_bool']:
 				exportData(fullSortedDifferentialProteinsDF, dataType='df', path_out=params['path_results'],
 						   filename=params['jobname'] + '_fullSortedDifferentials', delim_out='\t')
 				exportData(fullVolcanoPlot, dataType='fig', path_out=params['path_results'],

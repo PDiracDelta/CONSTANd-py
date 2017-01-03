@@ -40,12 +40,12 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
 	if nConditions == 2:
 		# get min and max protein-peptide mappings
-		if params['fullProteinDF_bool']:
+		if params['fullExpression_bool']:
 			minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF)
 		else:
 			minProteinPeptidesDict, __, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF)
 
-		if params['minProteinDF_bool']:
+		if params['minExpression_bool']:
 			# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
 			minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema'])
 
@@ -61,7 +61,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		else:
 			minProteinDF = pd.DataFrame()
 
-		if params['fullProteinDF_bool']:
+		if params['fullExpression_bool']:
 			# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
 			fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema'])
 
