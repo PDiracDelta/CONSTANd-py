@@ -179,6 +179,8 @@ def getJobInput(masterConfigFilePath):
 	date = config.get('DEFAULT', 'date')
 	schema = parseExpression(config.get('DEFAULT', 'schema'))
 	pept2protCombinationMethod = config.get('DEFAULT', 'pept2protCombinationMethod')
+	minProteinDF_bool = config.getboolean('DEFAULT', 'minProteinDF_bool')
+	fullProteinDF_bool = config.getboolean('DEFAULT', 'fullProteinDF_bool')
 	alpha = config.getfloat('DEFAULT', 'alpha')
 	FCThreshold = config.getfloat('DEFAULT', 'FCThreshold')
 	labelVolcanoPlotAreas = parseExpression(config.get('DEFAULT', 'labelVolcanoPlotAreas'))
@@ -200,6 +202,8 @@ def getJobInput(masterConfigFilePath):
 		'date': date,
 		'schema': schema,
 		'pept2protCombinationMethod': pept2protCombinationMethod,
+		'minProteinDF_bool': minProteinDF_bool,
+		'fullProteinDF_bool': fullProteinDF_bool,
 		'alpha': alpha,
 		'FCThreshold': FCThreshold,
 		'labelVolcanoPlotAreas': labelVolcanoPlotAreas,
