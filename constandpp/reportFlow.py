@@ -85,6 +85,6 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 		           filename=params['jobname'] + '_HCDendrogram')
 
 	# generate HTML and PDF reports # todo
-	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, minVolcanoPlot,
+	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, params['numDifferentials'], minVolcanoPlot,
 	                      fullVolcanoPlot, PCAPlot, HCDendrogram, metadata, logFilePath)
 	pdfReport = HTMLtoPDF(htmlReport)
