@@ -185,6 +185,7 @@ def getJobInput(masterConfigFilePath):
 	FCThreshold = config.getfloat('DEFAULT', 'FCThreshold')
 	labelVolcanoPlotAreas = parseExpression(config.get('DEFAULT', 'labelVolcanoPlotAreas'))
 	PCA_components = config.getint('DEFAULT', 'PCA_components')
+	numDifferentials = config.getint('DEFAULT', 'numDifferentials')
 	path_out = config.get('DEFAULT', 'path_out')
 	path_results = config.get('DEFAULT', 'path_results')
 	jobname = config.get('DEFAULT', 'jobname')
@@ -208,6 +209,7 @@ def getJobInput(masterConfigFilePath):
 		'FCThreshold': FCThreshold,
 		'labelVolcanoPlotAreas': labelVolcanoPlotAreas,
 		'PCA_components': PCA_components,
+		'numDifferentials': numDifferentials,
 		'path_out': path_out,
 		'path_results': path_results,
 		'jobname': jobname,

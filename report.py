@@ -233,7 +233,7 @@ def getHCDendrogram(HCResult, schema):
 	return HCDendrogram
 
 
-def makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, minVolcanoPlot,
+def makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, numDifferentials, minVolcanoPlot,
 	                      fullVolcanoPlot, PCAPlot, HCDendrogram, metadata, logFilePath):
 	"""
 	Pour all report ingredients into an HTML file.
