@@ -34,7 +34,6 @@ def processDf(df, params, writeToDisk):
 		                                             removalColumnsToSave=params['removalColumnsToSave'])
 		# SANITY CHECK: no detections with the same scan number may exist after undoublePSMAlgo()
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
-	# todo find mean of empty slices warning flood source (ABOVE this line)
 	# collapse peptide list redundancy due to multiple detections at different RT
 	# TEST here the intensity columns are alraedy lost
 	df, removedData['RT'] = collapse('RT', df, intensityColumns=params['intensityColumns'], method=params['collapse_method'],
