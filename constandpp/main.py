@@ -644,4 +644,4 @@ if __name__ == '__main__':
 	#masterConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
 
 	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True,
-				  testing=True, writeToDisk=True))
+				  testing=False, writeToDisk=True))
