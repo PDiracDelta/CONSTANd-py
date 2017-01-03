@@ -66,7 +66,7 @@ def combineExperimentDFs(dfs): #, schema):
 	return pd.concat(dfs.values(), keys=dfs.keys())
 
 
-def getProteinPeptidesDicts(df, fullProteinDF_bool):
+def getProteinPeptidesDicts(df, fullExpression_bool):
 	"""
 	Returns two dicts with the peptide indices (w.r.t. dataframe df) associated with each protein in the df as a
 	dictionary. One dict (min) contains only the peptide indices uniquely associated per protein, the other contains
@@ -91,7 +91,7 @@ def getProteinPeptidesDicts(df, fullProteinDF_bool):
 			# { protein : indices }
 			minProteinPeptidesDict = df.loc[peptideIndices].groupby("Master Protein Accessions").groups
 			maxProteinPeptidesDict = defaultdict(list, minProteinPeptidesDict.copy())
-		elif fullProteinDF_bool:  # multiple proteins accessions per peptide: save those to maxProteinPeptidesDict only.
+		elif fullExpression_bool:  # multiple proteins accessions per peptide: save those to maxProteinPeptidesDict only.
 			# { multiple proteins : indices }
 			multipleProteinPeptidesDict = df.loc[peptideIndices].groupby("Master Protein Accessions").groups
 			# cast dict values from int64index to list # todo find a non-ugly fix
@@ -101,7 +101,7 @@ def getProteinPeptidesDicts(df, fullProteinDF_bool):
 				for protein in multipleProteins: # extend the possibly (probably) already existing entry in the dict.
 					maxProteinPeptidesDict[protein].extend(nonUniqueIndices)
 	# 3rd return argument must be a dataframe!
-	if fullProteinDF_bool:
+	if fullExpression_bool:
 		return minProteinPeptidesDict, maxProteinPeptidesDict, df.loc[noMasterProteinAccession, ['First Scan', 'Annotated Sequence']]
 	else:
 		return minProteinPeptidesDict, None, df.loc[noMasterProteinAccession, ['First Scan', 'Annotated Sequence']]
