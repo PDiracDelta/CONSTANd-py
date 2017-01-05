@@ -481,6 +481,7 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 			fout.write('jobname = ' + this_jobname+ '\n')
 			fout.write('path_out = output_analysis\n')
 			fout.write('path_results = results\n')
+			fout.write('PCA_components = 2\n')
 			fout.write('schema = '+dumps(this_schema)+'\n')
 			fout.write('date = ' + str(os.path.basename(this_job_path).split('.')[0]) + '\n')
 
