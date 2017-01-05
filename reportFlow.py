@@ -40,7 +40,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 	nConditions = len(list(params['schema'].values())[0]['channelAliasesPerCondition'])
 	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
 	if nConditions == 2:
-		# generate sorted (on FC) list of differentials
+		# generate sorted (on p-value) list of differentials
 		if params['minExpression_bool']:
 			minSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(minProteinDF)
 			minSet = set(minSortedDifferentialProteinsDF['protein'])
