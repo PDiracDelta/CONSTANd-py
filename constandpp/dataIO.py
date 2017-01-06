@@ -99,9 +99,10 @@ def parseSchemaFile(schemaPath):
 	:return incompleteSchemaDict:   dict    schema in dict format, without config and wrapper information, in the format
 											{ experiment: { channels: [[channels] per condition], aliases: [[channels] per condition] }
 	"""
+	from collections import OrderedDict
 	# import schema file as dataframe and replace nan values by empty strings
 	schemaDF = importDataFrame(schemaPath, delim='\t', header=None, dtype=str).replace(np.nan, '', regex=True)
-	incompleteSchemaDict = {}
+	incompleteSchemaDict = OrderedDict() # use ordered dict so the items() order is always the same
 	assert np.mod(len(schemaDF), 2) == 0 # schema must have even number of lines
 	for i in range(int(len(schemaDF)/2)):
 		thisRow = schemaDF.loc[2*i, :]
