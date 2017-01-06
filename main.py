@@ -69,19 +69,36 @@ def isotopicImpuritiesTest(): # TEST
 # False tot en met 1e-3 --> fouten van > 0.1%
 
 
-def isotopicCorrectionsTest(params): # TEST
-	from processing import isotopicCorrection
-	if params['isotopicCorrection_bool']:
-		int_in = np.array([range(6), range(6)]) + np.array([np.zeros(6), 5*np.ones(6)])
-		# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
-		icm = params['isotopicCorrection_matrix']
-		icm[0,0] = 0.9
-		icm[0,1] = 0.1
-		int_out = isotopicCorrection(int_in, correctionsMatrix=icm)
-		print(int_out)
-		# M=np.eye(6); M[0,0]=0.9; M[0,1]=0.1; b=np.asarray(range(6)); c=np.asarray(range(6))+5
-		# print(int_out) above should be equal to:
-		# [np.linalg.solve(M, b) ; np.linalg.solve(M, c)]
+def isotopicCorrectionsTest(): # TEST
+	from processing import getIntensities
+	from constand import constand
+	from matplotlib import pyplot as plt
+	filepath1 = '../data/COON data/PSMs/BR1_a.txt'
+	filepathiso = '../data/COON data/PSMs/BR1_e_ISO.txt'
+	ics = unnest([["126", "127N", "127C", "128C"], ["129N", "129C", "130C", "131"]])
+	quan = np.asmatrix(constand(getIntensities(importDataFrame(filepath1, delim='\t'), intensityColumns=ics), accuracy=1e-5, maxIterations=50)[0])
+	# without constand
+	#quan = np.asmatrix(getIntensities(importDataFrame(filepath1, delim='\t'), intensityColumns=ics))
+	quanIso = np.asmatrix(constand(getIntensities(importDataFrame(filepathiso, delim='\t'), intensityColumns=ics), accuracy=1e-5,maxIterations=50)[0])
+	# quandf = pd.DataFrame(quan)
+	#quanIsodf = pd.DataFrame(quanIso)
+	#for col in range(len(ics)):
+	#	quanIsodf.loc[:, col] = 1 / 8 * np.asarray(quanIsodf.loc[:, col]) / np.nanmean(np.asarray(quanIsodf), 1)
+		#relSNs[:, col] = 1 / 8 * df2.loc[:, ics[col]] / np.nanmean(df2.loc[:, ics], 1)
+	#quanIso = np.asmatrix(quanIsodf)
+	diff = abs(quan - quanIso)
+	MAPlot(quan.flatten(), quanIso.flatten(), title='')
+	#RDHPlot(quan.flatten(), quanIso.flatten())
+	#print(np.allclose(quan, quanIso, atol=1e-3, equal_nan=True))
+	print("mean over all values")
+	print(np.nanmean(np.nanmean(diff[:, 0:7], 1)))
+	print("max difference")
+	print(np.nanmax(np.nanmax(diff, 1)))
+	print("median over all values")
+	#print(np.nanmean(np.nanmedian(diff[:, 0:7], 1)))
+	# M=np.eye(6); M[0,0]=0.9; M[0,1]=0.1; b=np.asarray(range(6)); c=np.asarray(range(6))+5
+	# print(int_out) above should be equal to:
+	# [np.linalg.solve(M, b) ; np.linalg.solve(M, c)]
 
 
 def MS2IntensityDoesntMatter(df):
@@ -512,7 +529,7 @@ def dataSuitabilityMA():
 
 def devStuff(df, params): # TEST
 	# performanceTest()
-	# isotopicCorrectionsTest(params)
+	isotopicCorrectionsTest()
 	# MS2IntensityDoesntMatter(df)
 	# testDataComplementarity(df)
 	#compareIntensitySN(None, None)
@@ -520,7 +537,7 @@ def devStuff(df, params): # TEST
 	#compareICmethods()
 	#compareAbundancesIntSN()
 	#intraInterMAPlots()
-	compareDEAresults()
+	#compareDEAresults()
 	#dataSuitabilityMA()
 	pass
 
@@ -629,7 +646,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 
 if __name__ == '__main__':
 	masterConfigFilePath = 'job/jobConfig.ini' # TEST
-	masterConfigFilePath = webFlow(exptype='COON')
+	#masterConfigFilePath = webFlow(exptype='COON')
 	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-12 22:37:48.458146_COON')
 	#masterConfigFilePath = webFlow(exptype='COON_SN')
 	#masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-12 22:41:02.295891_COON_SN')
@@ -644,4 +661,4 @@ if __name__ == '__main__':
 	#masterConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
 
 	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True,
-				  testing=False, writeToDisk=True))
+				  testing=True, writeToDisk=True))
