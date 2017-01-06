@@ -167,6 +167,7 @@ def getProcessingInput(configFilePath):
 
 
 def getJobInput(masterConfigFilePath):
+	from collections import OrderedDict
 	# add this prefix to all file paths
 	jobdir = os.path.abspath(os.path.join(masterConfigFilePath, os.pardir))
 
@@ -177,7 +178,7 @@ def getJobInput(masterConfigFilePath):
 
 	# get variables from config in correct typography
 	date = config.get('DEFAULT', 'date')
-	schema = parseExpression(config.get('DEFAULT', 'schema'))
+	schema = parseExpression(config.get('DEFAULT', 'schema'), object_pairs_hook=OrderedDict) # use ordered dict so the items() order is always the same
 	pept2protCombinationMethod = config.get('DEFAULT', 'pept2protCombinationMethod')
 	minExpression_bool = config.getboolean('DEFAULT', 'minExpression_bool')
 	fullExpression_bool = config.getboolean('DEFAULT', 'fullExpression_bool')
