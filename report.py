@@ -161,7 +161,7 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	                              [labelsYES, labelsP, labelsFC, labelsNO]):
 		if labelPlotBool:
 			for x, y, label in zip(xdata, ydata, labels):
-				plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points', ha='right', va='bottom')
+				plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points', ha='right', va='bottom', fontsize=20)
 
 	#plt.show() # TEST
 	return volcanoPlot
@@ -187,9 +187,9 @@ def getPCAPlot(PCAResult, schema):
 	#xmin, xmax, ymin, ymax = min(PCAResult[:, 0]), max(PCAResult[:, 0]), min(PCAResult[:, 1]), max(PCAResult[:, 1])
 	for (x, y, label) in zip(PCAResult[:, 0], PCAResult[:, 1], allChannelAliases):
 		# produce scatterplot of two first principal components and annotate
-		plt.scatter(x, y, color=channelColorsDict[label], marker=channelMarkersDict[label], figure=PCAPlot, s=40)
+		plt.scatter(x, y, color=channelColorsDict[label], marker=channelMarkersDict[label], figure=PCAPlot, s=80)
 		plt.annotate(label, xy=(x, y), xytext=(-1, 1),
-			textcoords='offset points', ha='right', va='bottom')
+			textcoords='offset points', ha='right', va='bottom', fontsize=20)
 	legendHandles = []
 	legendStrings = []
 	# look for corresponding experiment name
@@ -198,7 +198,7 @@ def getPCAPlot(PCAResult, schema):
 		if marker in markersToCheck:
 			for eName, experiment in schema.items():
 				if channel in unnest(experiment['channelAliasesPerCondition']):
-					handle = plt.scatter([], [], color='k', marker=marker, s=40)
+					handle = plt.scatter([], [], color='k', marker=marker, s=160)
 					legendHandles.append(handle)
 					legendStrings.append(eName)
 					markersToCheck.remove(marker)
