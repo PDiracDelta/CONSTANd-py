@@ -219,15 +219,19 @@ def compareICmethods():
 	PDdf = importDataFrame(PDdfFile)
 	PDdf.columns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
 	Cdf.columns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
-	M,A,m,v = compareIntensitySN(PDdf, Cdf)
+	M,A,m,v = compareIntensitySN(PDdf, Cdf, title='')
 	print("MAD: "+str(np.nanmean(np.abs(M))))
 	Mfinite = M[np.isfinite(M)]
 	#np.digitize(M, np.linspace(min(M),max(M),20))
-	hist, bins = np.histogram(Mfinite, bins=11, range=(-5,5))
+	nbins = 21
+	hist, bins = np.histogram(Mfinite, bins=nbins, range=(-5,5))
+	binwidth = bins[1] - bins[0]
 	plt.title('')
-	plt.bar(bins[0:-1], hist)
+	plt.bar(bins[0:-1], hist, width=binwidth)
 	plt.xticks(np.arange(11)-5)
 	plt.xlim(-5,5)
+	plt.xlabel('M')
+	plt.ylabel('amount of peptides')
 	plt.show()
 
 
@@ -523,11 +527,13 @@ def dataSuitabilityMA():
 		plexity = 6
 	elif 'COON' in rawfile:
 		plexity = 8
-	# i=3; j=1
-	# MAPlot(rawSNvalues.loc[:, i], rawSNvalues.loc[:, j], title='')
+	#i = 3; j = 1
+	#MAPlot(rawSNvalues.loc[:, i], rawSNvalues.loc[:, j], title='')
+	#i=3; j=1
+	#MAPlot(rawSNvalues.loc[:, i], rawSNvalues.loc[:, j], title='')
 	# MAX
 	#i=4; j=0
-	i=4; j=2
+	i=2; j=6
 	MAPlot(rawSNvalues.loc[:, i], rawSNvalues.loc[:, j], title='')
 	for i in range(plexity):
 		for j in range(i):
@@ -536,16 +542,16 @@ def dataSuitabilityMA():
 
 def devStuff(df, params): # TEST
 	# performanceTest()
-	#isotopicCorrectionsTest()
+	# isotopicCorrectionsTest()
 	# MS2IntensityDoesntMatter(df)
 	# testDataComplementarity(df)
 	#compareIntensitySN(None, None)
 	#abundancesPCAHCD()
-	#compareICmethods()
+	compareICmethods()
 	#compareAbundancesIntSN()
 	#intraInterMAPlots()
 	#compareDEAresults()
-	dataSuitabilityMA()
+	#dataSuitabilityMA()
 	pass
 
 
