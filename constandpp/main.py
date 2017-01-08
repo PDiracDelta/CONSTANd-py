@@ -164,7 +164,7 @@ def compareIntensitySN(df1, df2, title=None):
 	filepath2 = '../data/COON data/PSMs/BR1_f_ISO_SN.txt'
 	intensityColumns = ["126", "127N", "127C", "128C","129N", "129C", "130C", "131"]
 	pickleFileName = 'job/compareIntensitySNProcessingResults'
-	constandnorm=False
+	constandnorm=True
 	alsoprocess=False
 	if constandnorm:
 		if alsoprocess and os.path.exists(pickleFileName):
@@ -289,7 +289,7 @@ def compareAbundancesIntSN():
 	intensityColumns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
 	abundancesInt.columns = intensityColumns
 	abundancesSN.columns = intensityColumns
-	compareIntensitySN(abundancesInt, abundancesSN, title="Intensities versus S/N values (normalized abundances)")
+	compareIntensitySN(abundancesInt, abundancesSN, title='')# title="Intensities versus S/N values (normalized abundances)")
 
 
 def boxPlot(x, labels=None, ylab=None):
@@ -545,10 +545,10 @@ def devStuff(df, params): # TEST
 	# isotopicCorrectionsTest()
 	# MS2IntensityDoesntMatter(df)
 	# testDataComplementarity(df)
-	#compareIntensitySN(None, None)
+	#compareIntensitySN(None, None, title='')
 	#abundancesPCAHCD()
-	compareICmethods()
-	#compareAbundancesIntSN()
+	#compareICmethods()
+	compareAbundancesIntSN()
 	#intraInterMAPlots()
 	#compareDEAresults()
 	#dataSuitabilityMA()
@@ -660,18 +660,19 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 if __name__ == '__main__':
 	masterConfigFilePath = 'job/jobConfig.ini' # TEST
 	#masterConfigFilePath = webFlow(exptype='COON')
-	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-12 22:37:48.458146_COON')
+	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-26 10:56:10.646919_COON')
 	#masterConfigFilePath = webFlow(exptype='COON_SN')
-	#masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-12 22:41:02.295891_COON_SN')
+	#masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-20 14:21:47.786288_COON_SN')
 	#masterConfigFilePath = webFlow(exptype='COON_norm') # todo constand uitzetten
-	#masterConfigFilePath = webFlow(exptype='COON_norm', previousjobdirName='2016-12-12 22:43:38.030716_COON_norm')  # todo constand uitzetten
+	#masterConfigFilePath = webFlow(exptype='COON_norm', previousjobdirName='2016-12-12 22:43:38.030716_COON_norm')
 	#masterConfigFilePath = webFlow(exptype='COON_SN_norm')  # todo constand uitzetten
-	#masterConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 22:48:30.701250_COON_SN_norm')  # todo constand uitzetten
+	#masterConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 22:48:30.701250_COON_SN_norm')
 	#masterConfigFilePath = webFlow(exptype='COON_nonormnoconstand')  # todo constand uitzetten
-	#masterConfigFilePath = webFlow(exptype='COON_nonormnoconstand', previousjobdirName='2016-12-17 18:36:07.239085_COON_nonormnoconstand')  # todo constand uitzetten
+	#masterConfigFilePath = webFlow(exptype='COON_nonormnoconstand', previousjobdirName='2016-12-20 14:31:47.045927_COON_nonormnoconstand')
 	#masterConfigFilePath = webFlow(exptype='COON_noISO')
 	#masterConfigFilePath = webFlow(exptype='COON_noISO', previousjobdirName='2016-12-16 16:38:30.536344_COON_noISO')
 	#masterConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
+	#masterConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand', previousjobdirName='2016-12-20 14:39:09.476567_COON_SN_nonormnoconstand')
 
-	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True,
+	sys.exit(main(jobConfigFilePath=masterConfigFilePath, doProcessing=False, doAnalysis=False, doReport=True,
 				  testing=True, writeToDisk=True))
