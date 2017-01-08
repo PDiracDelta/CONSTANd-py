@@ -145,8 +145,10 @@ def MAPlot(x,y, title=None):
 	plt.scatter(A, M)
 	if title is None:
 		plt.title('PD2.1 Intensities versus S/N values (scaled relatively within each row/peptide)')
+	elif title=='':
+		plt.title('mean(M): '+str(m)+'; var(M):'+str(v))
 	else:
-		plt.title(title+'; mean(M): '+str(m)+'; var(M):'+str(v))
+		plt.title(title + '; mean(M): ' + str(m) + '; var(M):' + str(v))
 	plt.xlabel('A')
 	plt.ylabel('M')
 	#plt.xlim((-10.1,0))
@@ -513,15 +515,17 @@ def compareDEAresults():
 
 
 def dataSuitabilityMA():
-	rawfile = '../jobs/2016-12-20 14:39:09.476567_COON_SN_nonormnoconstand/output_analysis/COON_SN_nonormnoconstand_CommonPeptideIntensities.tsv'
-	#rawfile = '../jobs/2016-12-21 16:07:19.300450_MAX_SN_nonormnoconstand/output_analysis/MAX_SN_nonormnoconstand_CommonPeptideIntensities.tsv'
+	#rawfile = '../jobs/2016-12-20 14:39:09.476567_COON_SN_nonormnoconstand/output_analysis/COON_SN_nonormnoconstand_CommonPeptideIntensities.tsv'
+	rawfile = '../jobs/2016-12-21 16:07:19.300450_MAX_SN_nonormnoconstand/output_analysis/MAX_SN_nonormnoconstand_CommonPeptideIntensities.tsv'
 	rawSNvalues = importDataFrame(rawfile, delim='\t', header=None)
 	if 'MAX' in rawfile:
 		plexity = 6
 	elif 'COON' in rawfile:
 		plexity = 8
 	# i=3; j=1
-	# MAPlot(rawSNvalues.loc[:, i], rawSNvalues.loc[:, j], title=str(i + 1) + " versus " + str(j + 1))
+	# MAPlot(rawSNvalues.loc[:, i], rawSNvalues.loc[:, j], title='')
+	i=4; j=0
+	MAPlot(rawSNvalues.loc[:, i], rawSNvalues.loc[:, j], title='')
 	for i in range(plexity):
 		for j in range(i):
 			MAPlot(rawSNvalues.loc[:,i],rawSNvalues.loc[:,j],title=str(i+1)+" versus "+str(j+1))
@@ -529,7 +533,7 @@ def dataSuitabilityMA():
 
 def devStuff(df, params): # TEST
 	# performanceTest()
-	isotopicCorrectionsTest()
+	#isotopicCorrectionsTest()
 	# MS2IntensityDoesntMatter(df)
 	# testDataComplementarity(df)
 	#compareIntensitySN(None, None)
@@ -538,7 +542,7 @@ def devStuff(df, params): # TEST
 	#compareAbundancesIntSN()
 	#intraInterMAPlots()
 	#compareDEAresults()
-	#dataSuitabilityMA()
+	dataSuitabilityMA()
 	pass
 
 
