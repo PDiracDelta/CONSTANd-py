@@ -26,6 +26,7 @@ from dataIO import *
 
 
 fontsize = 30
+fontweight = 'normal'
 
 
 def performanceTest():  # remove for production # TEST
@@ -139,7 +140,7 @@ def MA(x,y):
 def MAPlot(x,y, title=None):
 	import matplotlib
 	from matplotlib import pyplot as plt
-	matplotlib.rcParams.update({'font.size': fontsize})
+	matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
 	plt.figure(figsize=(16, 12))
 	M,A,m,v = MA(x,y)
 	plt.scatter(A, M)
@@ -290,7 +291,7 @@ def compareAbundancesIntSN():
 def boxPlot(x, labels=None, ylab=None):
 	import matplotlib
 	from matplotlib import pyplot as plt
-	matplotlib.rcParams.update({'font.size': fontsize})
+	matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
 	plt.boxplot(x, whis=[5, 95], showmeans=True, labels=labels)
 	plt.ylabel(ylab)
 	plt.show()
@@ -473,7 +474,7 @@ def intraInterMAPlots():
 def RDHPlot(x,y,quantity=None):
 	import matplotlib
 	import matplotlib.pyplot as plt
-	matplotlib.rcParams.update({'font.size': fontsize})
+	matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
 	plt.figure(figsize=(12, 9))
 	x=np.array(x)
 	y=np.array(y)
@@ -524,7 +525,9 @@ def dataSuitabilityMA():
 		plexity = 8
 	# i=3; j=1
 	# MAPlot(rawSNvalues.loc[:, i], rawSNvalues.loc[:, j], title='')
-	i=4; j=0
+	# MAX
+	#i=4; j=0
+	i=4; j=2
 	MAPlot(rawSNvalues.loc[:, i], rawSNvalues.loc[:, j], title='')
 	for i in range(plexity):
 		for j in range(i):

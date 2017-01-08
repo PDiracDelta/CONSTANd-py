@@ -22,7 +22,8 @@ from matplotlib import markers
 
 # adjust font size globally
 fontsize = 30
-matplotlib.rcParams.update({'font.size': fontsize})
+fontweight = 'normal'
+matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
 
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
 
