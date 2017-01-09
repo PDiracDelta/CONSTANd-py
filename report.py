@@ -154,7 +154,10 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	ydataNO = -np.log10(df.loc[significantIndices_no, 'adjusted p-value'])
 	labelsNO = df.loc[significantIndices_no, 'protein']
 	plt.scatter(xdataNO, ydataNO, color='k', figure=volcanoPlot)
-
+	
+	# adjust limits
+	plt.xlim([int(min(min(xdataFC), min(xdataYES))), np.ceil(max(max(xdataFC), max(xdataYES)))])
+	plt.ylim([0, np.ceil(max(max(ydataP), max(ydataYES))/5)*5]) # int(base * round(float(x)/base))
 	# annotate where requested
 	for labelPlotBool,xdata,ydata,labels in zip(labelPlot,[xdataYES, xdataP, xdataFC, xdataNO],
 	                              [ydataYES, ydataP, ydataFC, ydataNO],
@@ -203,7 +206,9 @@ def getPCAPlot(PCAResult, schema):
 					legendStrings.append(eName)
 					markersToCheck.remove(marker)
 					break
-	plt.legend(legendHandles, legendStrings, scatterpoints=1)
+	plt.legend(legendHandles, legendStrings, scatterpoints=1)#, loc=2)
+	plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+	plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
 	#plt.axhspan(xmin=xmin-0.1(xmax-xmin), ymax=ymax+0.05*(ymax-ymin))
 	#plt.show() # TEST
 	return PCAPlot
