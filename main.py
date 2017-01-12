@@ -657,7 +657,8 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 	print(stop - start)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # this should not execute if main.py is not the main module called by the python interpreter,
+	# so if you start main.py from within web.py or something, this won't be executed.
 	masterConfigFilePath = 'job/jobConfig.ini' # TEST
 	#masterConfigFilePath = webFlow(exptype='COON')
 	#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-26 10:56:10.646919_COON')
