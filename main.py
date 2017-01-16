@@ -14,16 +14,16 @@ __maintainer__ = "Joris Van Houtven"
 __email__ = "vanhoutvenjoris@gmail.com"
 __status__ = "Development"
 
-import sys, os, logging, datetime
-#from statsmodels.robust.scale import mad
-from webFlow import webFlow
+import datetime
+import logging
+import sys
+from time import time
+from web.webFlow import webFlow
+from analysisFlow import analyzeProcessingResult
+from dataIO import *
 from getInput import getProcessingInput, getJobInput
 from processingFlow import processDf
-from analysisFlow import analyzeProcessingResult
 from reportFlow import generateReport
-from time import time
-from dataIO import *
-
 
 fontsize = 30
 fontweight = 'normal'
@@ -73,7 +73,6 @@ def isotopicImpuritiesTest(): # TEST
 def isotopicCorrectionsTest(): # TEST
 	from processing import getIntensities
 	from constand import constand
-	from matplotlib import pyplot as plt
 	filepath1 = '../data/COON data/PSMs/BR1_a.txt'
 	filepathiso = '../data/COON data/PSMs/BR1_e_ISO.txt'
 	ics = unnest([["126", "127N", "127C", "128C"], ["129N", "129C", "130C", "131"]])
