@@ -3,6 +3,7 @@ from web import app, mailer
 from flask import render_template, send_from_directory, request, redirect, url_for
 from flask_mail import Message
 from .forms import newJobForm
+from werkzeug.utils import secure_filename
 
 
 #############################
@@ -37,9 +38,26 @@ def documentation():
 def newjob():
 	form = newJobForm(request.form, csrf_enabled=False)
 	if request.method == 'POST' and form.validate():
-		form.jobName.file.save()
-		return redirect(url_for('login'))
+		jobName = form.jobName.data
+		from web.web import newJobDir
+		jobDir = newJobDir(jobName)
+		schemaFileName = 'schema_'+secure_filename(form.schema.file.filename)
+		schemaFilePath = os.path.join(jobDir, schemaFileName)
+		form.schema.file.save(schemaFilePath)
+		from dataIO import parseSchemaFile
+		try:
+			incompleteSchema = parseSchemaFile(schemaFilePath)
+		except Exception as e:  # remove file and job dir if something went wrong
+			os.remove(schemaFilePath)
+			os.removedirs(jobDir)
+			return redirect(url_for('newjob')) # todo give error message
+		return redirect(url_for('jobSettings', incompleteSchema))
 	return render_template('newjob.html', form=form)
+
+
+@app.route('/jobSettings', methods=['GET', 'POST'])
+def jobSettings(incompleteSchema):
+	return str(incompleteSchema)
 
 
 #############################
