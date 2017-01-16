@@ -1,12 +1,10 @@
 import pandas as pd
 import numpy as np
-import os
-from main import unnest
-from shutil import copyfile
+from dataIO import unnest
 from json import dumps
 
 
-def TMT2ICM(TMTImpuritiesDF, order=None): # todo move to web
+def TMT2ICM(TMTImpuritiesDF, order=None):
 	"""
 	Converts a dataframe of TMT-like isotopic impurities (indexed on TMT label name) into the correct isotopic
 	correction matrix. Column order from the dataframe is changed according to 'order'. Rows are normalized so that

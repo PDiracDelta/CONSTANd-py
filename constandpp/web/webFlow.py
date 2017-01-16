@@ -6,11 +6,10 @@ Collection of functions that simulates the web interface.
 """
 
 import os, datetime
-import numpy as np
-import pandas as pd
 from dataIO import parseSchemaFile, unnest
-from web import *
+from web.web import TMT2ICM
 from json import dumps
+from shutil import copyfile
 
 
 def webFlow(exptype='dummy', previousjobdirName=None):
