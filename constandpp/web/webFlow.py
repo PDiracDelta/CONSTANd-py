@@ -7,7 +7,7 @@ Collection of functions that simulates the web interface.
 
 import os, datetime
 from dataIO import parseSchemaFile, unnest
-from web.web import TMT2ICM
+from web.web import TMT2ICM, newJobDir
 from json import dumps
 from shutil import copyfile
 
@@ -246,11 +246,6 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 
 	def getJobName():
 		return HC_JOBNAME
-
-	def newJobDir(this_job_name):
-		jobPath = os.path.join('../jobs', str(datetime.datetime.now()) + '_' + this_job_name)
-		os.makedirs(jobPath)
-		return os.path.abspath(jobPath)
 
 	def uploadSchema(this_job_path):
 		this_schemaPath = HC_SCHEMA

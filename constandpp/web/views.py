@@ -1,8 +1,8 @@
 import os
 from web import app, mailer
-from flask import render_template, send_from_directory
+from flask import render_template, send_from_directory, request, redirect, url_for
 from flask_mail import Message
-from .forms import schemaForm
+from .forms import newJobForm
 
 
 #############################
@@ -15,7 +15,7 @@ def home():
 	#from web.webFlow import webFlow
 	#masterConfigFilePath = webFlow(exptype='COON')
 	#main(jobConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True)
-	return render_template('index.html', reportFile='reportexample.html')
+	return render_template('index.html', reportFile='reportexample.html', form=newJobForm(csrf_enabled=False))
 
 
 @app.route('/report/<file>')
@@ -33,9 +33,13 @@ def documentation():
 	return render_template('documentation.html', title="Documentation")
 
 
-@app.route('/newjob')
+@app.route('/newjob', methods=['GET', 'POST'])
 def newjob():
-	return render_template('newjob.html', form=schemaForm())
+	form = newJobForm(request.form, csrf_enabled=False)
+	if request.method == 'POST' and form.validate():
+		form.jobName.file.save()
+		return redirect(url_for('login'))
+	return render_template('newjob.html', form=form)
 
 
 #############################
