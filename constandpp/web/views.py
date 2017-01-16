@@ -32,6 +32,11 @@ def documentation():
 	return render_template('documentation.html', title="Documentation")
 
 
+@app.route('/newjob')
+def newjob():
+	return render_template('newjob.html')
+
+
 #############################
 #Admin functions
 #############################
