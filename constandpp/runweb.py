@@ -12,8 +12,6 @@ app = Flask(__name__)
 #db = SQLAlchemy(app)
 mail = Mail(app)
 
-@app.route('/')
-def hello_world():
-    return 'Hello, World!'
+from web import views
 
 app.run(debug=False, host='0.0.0.0')
