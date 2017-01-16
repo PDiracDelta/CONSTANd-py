@@ -2,6 +2,7 @@ import os
 from web import app, mailer
 from flask import render_template, send_from_directory
 from flask_mail import Message
+from .forms import schemaForm
 
 
 #############################
@@ -34,7 +35,7 @@ def documentation():
 
 @app.route('/newjob')
 def newjob():
-	return render_template('newjob.html')
+	return render_template('newjob.html', form=schemaForm())
 
 
 #############################
