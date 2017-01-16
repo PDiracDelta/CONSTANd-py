@@ -1,7 +1,18 @@
 <h2>New job</h2>
-Please upload an experimental setup schema file:
-{% for field in form %}
-{% for error in field.errors %}
-<span style="color: red;">{{ field.label }}: {{ error }} <br></span>
-{% endfor %}
-{% endfor %}<br>
+<form action="/" method="post" name="newJob">
+    <div class="input-group">
+        <h3>Job name:</h3>
+        {{ form.jobName(size=20, class="form-control", placeholder="myJob") }}
+
+        <h3>Experimental setup schema file (optional for single experiment):</h3>
+        {{ form.schema(size=20,class="form-control") }}
+
+        {% for field in form %}
+        {% for error in field.errors %}
+        <span style="color: red;">{{ field.label }}: {{ error }} <br></span>
+        {% endfor %}
+        {% endfor %}<br>
+    </div>
+    <button type="submit" value="schema">Create new job</button>
+</form>
+<br>

@@ -1,7 +1,15 @@
 import pandas as pd
 import numpy as np
+import os, datetime
 from dataIO import unnest
 from json import dumps
+
+
+def newJobDir(this_job_name):
+	jobBaseDir = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs'
+	jobPath = os.path.join(jobBaseDir, str(datetime.datetime.now()) + '_' + this_job_name)
+	os.makedirs(jobPath)
+	return os.path.abspath(jobPath)
 
 
 def TMT2ICM(TMTImpuritiesDF, order=None):
