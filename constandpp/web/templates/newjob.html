@@ -1,2 +1,7 @@
 <h2>New job</h2>
-Please upload a schema file:
+Please upload an experimental setup schema file:
+{% for field in form %}
+{% for error in field.errors %}
+<span style="color: red;">{{ field.label }}: {{ error }} <br></span>
+{% endfor %}
+{% endfor %}<br>
