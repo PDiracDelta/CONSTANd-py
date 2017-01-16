@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>CONSTANd++ Home</title>
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='css/style.css') }}">
-</head>
-
-<body>
-<h1 class="center">CONSTANd++</h1>
-Please see your HTML report <a href="report/{{ reportFile }}">here</a>.
-</body>
-
-</html>
+{% extends "base.html" %}
+{% block body %}
+Welcome to the CONSTANd++ web interface.
+You can start a new job using the form below.
+For information about the usage, please refer to the documentation.
+{% endblock %}

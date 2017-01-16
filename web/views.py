@@ -9,7 +9,7 @@ from flask_mail import Message
 #############################
 
 @app.route('/')
-def hello_world():
+def home():
 	#from main import main
 	#from web.webFlow import webFlow
 	#masterConfigFilePath = webFlow(exptype='COON')
@@ -27,12 +27,17 @@ def getFile(filename):
 	return send_from_directory('../../doc/figures/reportexample/', filename, as_attachment=True)
 
 
+@app.route('/docu')
+def documentation():
+	return render_template('documentation.html', title="Documentation")
+
+
 #############################
 #Admin functions
 #############################
 
 def send_mail(recipient, mailBodyFile, jobname, jobID, attachment): # TODO VITO credentials
-	subject = "Inschijving ULYSSIS workshop: %s" % (event_title)
+	subject = "Your CONSTANd++ job %s" % (jobname)
 	#body = "=== English version below ===\n\n"
 	#body += "Beste {0} {1},\n\n"
 	with open(os.path.join('static', mailBodyFile), 'r') as f:

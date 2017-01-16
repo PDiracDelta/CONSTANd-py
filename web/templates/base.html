@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    {% if title %}
+    <title>{{ title }} - CONSTANd++</title>
+    {% else %}
+    <title>CONSTANd++</title>
+    {% endif %}
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='css/style.css') }}">
+    {% endblock %}
+</head>
+
+<body>
+    <h1 class="center">CONSTANd++</h1>
+    <div>
+        <a href="/">Home</a><br>
+        <a href="/docu">Documentation</a>
+    </div>
+    {% block body %}{% endblock %}
+</body>
+
+</html>
