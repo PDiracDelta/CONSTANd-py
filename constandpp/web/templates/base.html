@@ -2,16 +2,15 @@
 <html>
 <head>
     {% block head %}
-    <meta charset="UTF-8">
-    {% if title %}
-    <title>{{ title }} - CONSTANd++</title>
-    {% else %}
-    <title>CONSTANd++</title>
-    {% endif %}
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='css/style.css') }}">
+        <meta charset="UTF-8">
+        {% if title %}
+            <title>{{ title }} - CONSTANd++</title>
+        {% else %}
+            <title>CONSTANd++</title>
+        {% endif %}
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='css/style.css') }}">
     {% endblock %}
 </head>
-
 <body>
     <h1 class="center">CONSTANd++</h1>
     <div>
@@ -19,6 +18,17 @@
         <a href="/docu">Documentation</a>
     </div>
     <br>
+
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <span style="color: red;">ERROR: {{ message }}<br></span>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- CONTENT-->
     {% block body %}{% endblock %}
 </body>
 
