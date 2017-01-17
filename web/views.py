@@ -37,11 +37,13 @@ def documentation():
 @app.route('/newjob', methods=['GET', 'POST'])
 def newjob():
 	form = newJobForm(request.form, csrf_enabled=False)
-	if request.method == 'POST' and form.validate():
+	#if request.method == 'POST' and form.validate():
+	if form.validate_on_submit():
 		jobName = form.jobName.data
 		from web.web import newJobDir
 		jobDir = newJobDir(jobName)
-		schemaFileName = 'schema_'+secure_filename(form.schema.file.filename)
+		#schemaFileName = 'schema_'+secure_filename(request.files[form.schema.name])#form.schema.data.filename)
+		schemaFileName = 'schema_' + secure_filename(request.files[request.files['schema']])
 		schemaFilePath = os.path.join(jobDir, schemaFileName)
 		form.schema.file.save(schemaFilePath)
 		from dataIO import parseSchemaFile
