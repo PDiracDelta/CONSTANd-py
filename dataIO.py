@@ -104,6 +104,7 @@ def parseSchemaFile(schemaPath):
 	schemaDF = importDataFrame(schemaPath, delim='\t', header=None, dtype=str).replace(np.nan, '', regex=True)
 	incompleteSchemaDict = OrderedDict() # use ordered dict so the items() order is always the same
 	assert np.mod(len(schemaDF), 2) == 0 # schema must have even number of lines
+	assert len(schemaDF.columns) > 2 # at least 3 columns
 	for i in range(int(len(schemaDF)/2)):
 		thisRow = schemaDF.loc[2*i, :]
 		experimentName = str(thisRow[0])

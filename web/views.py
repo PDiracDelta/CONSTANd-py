@@ -1,8 +1,8 @@
 import os
 from web import app, mailer
-from flask import render_template, send_from_directory, request, redirect, url_for, session
+from flask import render_template, send_from_directory, request, redirect, url_for, session, flash
 from flask_mail import Message
-from .forms import newJobForm
+from .forms import newJobForm, experimentForm, jobSettingsForm
 from werkzeug.utils import secure_filename
 
 
@@ -41,6 +41,7 @@ def newjob():
 	#if request.method == 'POST' and form.validate():
 	if form.validate_on_submit():
 		jobName = form.jobName.data
+		session['jobName'] = jobName
 		from web.web import newJobDir
 		jobDir = newJobDir(jobName)
 		#schemaFileName = 'schema_'+secure_filename(request.files[form.schema.name])#form.schema.data.filename)
@@ -50,18 +51,31 @@ def newjob():
 		from dataIO import parseSchemaFile
 		try:
 			session['incompleteSchema'] = parseSchemaFile(schemaFilePath)
-		except Exception as e:  # remove file and job dir if something went wrong
+		except Exception:  # remove file and job dir if something went wrong
 			os.remove(schemaFilePath)
 			os.removedirs(jobDir)
-			return redirect(url_for('newjob')) # todo give error message
+			session.clear()
+			flash("Invalid schema file format. Please refer to the documentation.")
+			return redirect(url_for('newjob'))
 		return redirect(url_for('jobSettings'))
 	return render_template('newjob.html', form=form)
 
 
-@app.route('/jobSettings', methods=['GET', 'POST'])
+@app.route('/jobsettings', methods=['GET', 'POST'])
 def jobSettings():
 	incompleteSchema = session.get('incompleteSchema')
-	return str(incompleteSchema)
+	# eforms = {(eName, experimentForm()) for eName in incompleteSchema}
+	form = jobSettingsForm()
+	numExperiments = len(incompleteSchema)
+	#form.experiments.min_entries = 3#numExperiments
+	for eName in incompleteSchema:
+		form.experiments.append_entry(experimentForm(prefix=eName)) #{'title': session["experiments"][pif][0]}
+	return render_template('jobsettings.html', jobName=session.get('jobName'), form=form)
+
+
+@app.route('/jobinfo', methods=['GET', 'POST'])
+def jobInfo():
+	return "success"
 
 
 #############################

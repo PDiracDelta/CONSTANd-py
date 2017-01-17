@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block body %}
+<h2>Job {{ jobName }} settings</h2>
+<form action="/jobinfo" method="post" name="jobSettings" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    {% if form %}
+        {# for e in form.experiments #}
+        <div class="input-group">
+            <h3>input files:</h3>
+            {#
+            {{ e.data(size=20,class="form-control") }}
+            {{ e.processingConfig(size=20,class="form-control") }}
+            {{ e.wrapper(size=20,class="form-control") }}
+            #}
+            {{ form.experiments(class="form-control") }}
+
+            {% for field in form %}
+                {% for error in field.errors %}
+                <span style="color: red;">{{ field.label }}: {{ error }} <br></span>
+                {% endfor %}
+            {% endfor %}<br>
+        </div>
+        {# endfor #}
+    {% endif %}
+    <button type="submit" value="submit">Submit job</button>
+</form>
+<br>
+{% endblock %}
