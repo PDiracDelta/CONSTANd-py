@@ -73,16 +73,15 @@ def jobSettings():
 		if cur.fetchall(): # already exists
 			redirect(url_for('jobinfo'))
 		else: # does not exist yet
-			run('python3 '+'/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/scripts/main.py '
+			run('python3 '+'"/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/scripts/main.py" '
 			    +' True', #doProcessing
 			    +' True', #doAnalysis
 			    +' True', #doReport
 			    +' False', #testing
 			    +' True', #writeToDisk
 			    +' &',
-			    shell=True) # RUN CONSTANd++
+			    shell=True) # RUN CONSTANd++ IN INDEPENDENT
 			cur = get_db().execute('INSERT INTO jobs VALUES ("' + session['jobDirName'] + '","' + session['jobName'] + '","","", 0, 0);')
-
 	else:
 		numExperiments = len(incompleteSchema)
 		#form.experiments.min_entries = 3#numExperiments
@@ -93,7 +92,31 @@ def jobSettings():
 
 @app.route('/jobinfo', methods=['GET', 'POST'])
 def jobInfo():
-	return "success"
+	jobID = request.args.get('id', '')
+	cur = get_db().execute('SELECT done FROM jobs WHERE id="' + jobID + '" LIMIT 1;')
+	isDone = cur.fetchall()
+	if isDone is not None:
+		if isDone:
+			cur = get_db().execute('SELECT htmlreport FROM jobs WHERE id="' + jobID + '" LIMIT 1;')
+			htmlreportPath = cur.fetchall()
+			pdfreportPath = htmlreportPath[0:-4]+'pdf'
+			return render_template('jobinfo.html', done=True, html=htmlreportPath, pdf=pdfreportPath)
+		else:
+			return render_template('jobinfo.html', done=False)
+	else:
+		return "Couldn't find that job (or something else went wrong)."
+
+
+@app.route('/htmlreport/<path:jobID>', methods=['GET', 'POST'])
+def getHtmlReport(jobID):
+	htmlFileName = request.args.get('htmlFileName', '')
+	return send_from_directory(app.config.get('allJobsDir')+jobID, htmlFileName, as_attachment=True)
+
+
+@app.route('/pdfreport/<path:jobID>', methods=['GET', 'POST'])
+def getPdfReport(jobID):
+	pdfFileName = request.args.get('pdfFileName', '')
+	return send_from_directory(app.config.get('allJobsDir')+jobID, pdfFileName, as_attachment=True)
 
 
 #############################

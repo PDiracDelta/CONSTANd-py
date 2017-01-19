@@ -645,6 +645,10 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 			logging.info("Starting visualization end report generation of job: " + jobParams['jobname'] + "at " +
 						 str(datetime.datetime.now()).split('.')[0])
 			generateReport(analysisResults, jobParams, logFilePath, writeToDisk)
+			get_db().execute('UPDATE jobs SET htmlreport = "'
+			                 +jobParams['path_result']+jobParams['jobname'] + '_report.html'+
+			                 ', pdfreport = "'+jobParams['path_result']+jobParams['jobname']+'_report.pdf"'
+			                 +' WHERE id = "' + jobDirName + '";')
 			logging.info("Finished visualization end report generation of job: " + jobParams['jobname'] + "at " +
 						 str(datetime.datetime.now()).split('.')[0])
 		else:
