@@ -12,6 +12,16 @@ def newJobDir(this_job_name):
 	return os.path.abspath(jobPath)
 
 
+def updateSchema(this_job_path, this_incompleteSchema, form):
+	from web.forms import FieldList, FormField, experimentForm
+	for fieldKey, fieldValue in form.data:
+		#if field.startswith('experiment') or field.startswith('Experiment') # file
+		if isinstance(fieldValue, FieldList(FormField(experimentForm))):
+			pass
+
+	return this_incompleteSchema
+
+
 def TMT2ICM(TMTImpuritiesDF, order=None):
 	"""
 	Converts a dataframe of TMT-like isotopic impurities (indexed on TMT label name) into the correct isotopic

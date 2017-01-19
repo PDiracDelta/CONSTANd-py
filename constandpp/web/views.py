@@ -59,7 +59,7 @@ def newJob():
 			session.clear()
 			flash("Invalid schema file format. Please refer to the documentation.")
 			return redirect(url_for('newjob'))
-		return redirect(url_for('jobsettings'))
+		return redirect(url_for('jobSettings'))
 	return render_template('newjob.html', form=form)
 
 
@@ -69,6 +69,8 @@ def jobSettings():
 	# eforms = {(eName, experimentForm()) for eName in incompleteSchema}
 	form = jobSettingsForm()
 	if form.validate_on_submit():
+		from web import updateSchema
+		updateSchema(os.path.join(app.config.get('allJobsDir'), session['jobDirName']), incompleteSchema, form)
 		cur = get_db().execute('SELECT EXISTS(SELECT 1 FROM jobs WHERE id="'+session['jobDirName']+'" LIMIT 1);')
 		if cur.fetchall(): # already exists
 			redirect(url_for('jobinfo'))
