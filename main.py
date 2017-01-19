@@ -691,10 +691,11 @@ if __name__ == '__main__': # this should not execute if main.py is not the main 
 		#masterConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
 		#masterConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand', previousjobdirName='2016-12-20 14:39:09.476567_COON_SN_nonormnoconstand')
 
+	from web import get_db
+	jobDirName = os.path.basename(masterConfigFilePath)
 	try:
 		main(jobConfigFilePath=masterConfigFilePath, doProcessing=doProcessing, doAnalysis=doAnalysis, doReport=doReport,
 				  testing=testing, writeToDisk=writeToDisk)
-	finally:
-		from web import get_db
-		jobDirName = os.path.basename(masterConfigFilePath)
+		get_db().execute('UPDATE jobs SET done = 1, success = 1 WHERE id = "' + jobDirName + '";')
+	except:
 		cur = get_db().execute('UPDATE jobs SET done = 1, success = 0 WHERE id = "'+jobDirName+'";')
