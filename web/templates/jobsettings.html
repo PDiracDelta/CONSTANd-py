@@ -12,7 +12,14 @@
             {{ e.processingConfig(size=20,class="form-control") }}
             {{ e.wrapper(size=20,class="form-control") }}
             #}
-            {{ form.experiments(class="form-control") }}
+            {{ form.experiments() }}
+            <br>pept2protCombinationMethod: {{ form.pept2protCombinationMethod() }}
+            <br>alpha: {{ form.alpha() }}
+            <br>FCThreshold: {{ form.FCThreshold() }}
+            <br>labelVolcanoPlotAreas: {{ form.labelVolcanoPlotAreas() }}
+            <br>minExpression_bool: {{ form.minExpression_bool() }}
+            <br>fullExpression_bool: {{ form.fullExpression_bool() }}
+            <br>numDifferentials: {{ form.numDifferentials() }}
 
             {% for field in form %}
                 {% for error in field.errors %}
