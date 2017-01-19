@@ -4,7 +4,8 @@ from flask import render_template, send_from_directory, request, redirect, url_f
 from flask_mail import Message
 from .forms import newJobForm, experimentForm, jobSettingsForm
 from werkzeug.utils import secure_filename
-
+from web import get_db
+from subprocess import run
 
 #############################
 #Client side
@@ -35,7 +36,7 @@ def documentation():
 
 
 @app.route('/newjob', methods=['GET', 'POST'])
-def newjob():
+def newJob():
 	#form = newJobForm(request.form)#, csrf_enabled=False)
 	form = newJobForm()
 	#if request.method == 'POST' and form.validate():
@@ -43,21 +44,22 @@ def newjob():
 		jobName = form.jobName.data
 		session['jobName'] = jobName
 		from web.web import newJobDir
-		jobDir = newJobDir(jobName)
+		jobDirPath = newJobDir(jobName)
+		session['jobDirName'] = os.path.basename(jobDirPath)
 		#schemaFileName = 'schema_'+secure_filename(request.files[form.schema.name])#form.schema.data.filename)
 		schemaFileName = 'schema_' + secure_filename(form.schema.data.filename)
-		schemaFilePath = os.path.join(jobDir, schemaFileName)
+		schemaFilePath = os.path.join(jobDirPath, schemaFileName)
 		form.schema.data.save(schemaFilePath)
 		from dataIO import parseSchemaFile
 		try:
 			session['incompleteSchema'] = parseSchemaFile(schemaFilePath)
 		except Exception:  # remove file and job dir if something went wrong
 			os.remove(schemaFilePath)
-			os.removedirs(jobDir)
+			os.removedirs(jobDirPath)
 			session.clear()
 			flash("Invalid schema file format. Please refer to the documentation.")
 			return redirect(url_for('newjob'))
-		return redirect(url_for('jobSettings'))
+		return redirect(url_for('jobsettings'))
 	return render_template('newjob.html', form=form)
 
 
@@ -66,11 +68,27 @@ def jobSettings():
 	incompleteSchema = session.get('incompleteSchema')
 	# eforms = {(eName, experimentForm()) for eName in incompleteSchema}
 	form = jobSettingsForm()
-	numExperiments = len(incompleteSchema)
-	#form.experiments.min_entries = 3#numExperiments
-	for eName in incompleteSchema:
-		form.experiments.append_entry(experimentForm(prefix=eName)) #{'title': session["experiments"][pif][0]}
-	return render_template('jobsettings.html', jobName=session.get('jobName'), form=form)
+	if form.validate_on_submit():
+		cur = get_db().execute('SELECT EXISTS(SELECT 1 FROM jobs WHERE id="'+session['jobDirName']+'" LIMIT 1);')
+		if cur.fetchall(): # already exists
+			redirect(url_for('jobinfo'))
+		else: # does not exist yet
+			run('python3 '+'/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/scripts/main.py '
+			    +' True', #doProcessing
+			    +' True', #doAnalysis
+			    +' True', #doReport
+			    +' False', #testing
+			    +' True', #writeToDisk
+			    +' &',
+			    shell=True) # RUN CONSTANd++
+			cur = get_db().execute('INSERT INTO jobs VALUES ("' + session['jobDirName'] + '","' + session['jobName'] + '","","", 0, 0);')
+
+	else:
+		numExperiments = len(incompleteSchema)
+		#form.experiments.min_entries = 3#numExperiments
+		for eName in incompleteSchema:
+			form.experiments.append_entry(experimentForm(prefix=eName)) #{'title': session["experiments"][pif][0]}
+		return render_template('jobsettings.html', jobName=session.get('jobName'), form=form)
 
 
 @app.route('/jobinfo', methods=['GET', 'POST'])
