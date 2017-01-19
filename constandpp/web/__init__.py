@@ -6,6 +6,7 @@ import sqlite3
 app = Flask(__name__)
 #with app.app_context():
 app.config.from_object('web.config')
+app.config['allJobsDir'] = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/'
 app.config['DB'] = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/jobs.db'
 #
 # jobs(id text primary key not null, jobname text, htmlreport text, pdfreport text, done integer default 0, success integer default 0);

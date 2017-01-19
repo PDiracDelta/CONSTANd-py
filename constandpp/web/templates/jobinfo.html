@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block body %}
+<h3>Info for job with ID: {{ jobID }}</h3>
+{% if done %}
+Job is done! View the results here:
+{% endif %}
+{% endblock %}
