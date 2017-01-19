@@ -88,3 +88,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, params['numDifferentials'], minVolcanoPlot,
 	                      fullVolcanoPlot, PCAPlot, HCDendrogram, metadata, logFilePath)
 	pdfReport = HTMLtoPDF(htmlReport)
+
+	if writeToDisk:
+		exportData(htmlReport, dataType='html', path_out=params['path_results'],
+		           filename=params['jobname'] + '_report')
