@@ -29,10 +29,11 @@ def saveFileStorage(this_path, fs, prefix=None):
 	if fs.filename == '':
 		return None
 	else:
-		if prefix:
-			filePath = os.path.join(this_path, prefix + '_' + fs.filename)
+		fileName = fs.filename.lstrip('/')
+		if prefix is not None:
+			filePath = os.path.join(this_path, prefix + '_' + fileName)
 		else:
-			filePath = os.path.join(this_path, fs.filename)
+			filePath = os.path.join(this_path, fileName)
 		fs.save(filePath)
 		return filePath
 
@@ -68,6 +69,34 @@ def DB_insertJob(jobDirName, jobName):
 
 def DB_getJobVar(ID, varName):
 	return get_db().execute('SELECT '+varName+' FROM jobs WHERE id="' + ID + '" LIMIT 1;')
+
+
+def updateConfigs(this_job_path, this_schema):
+	import fileinput
+	for eName in this_schema:
+		experiment = this_schema[eName]
+		configFile = os.path.join(this_job_path, experiment['config'])
+		# open user config parameters
+		with open(configFile, 'a') as fout, fileinput.input(getBaseConfigFile()) as fin:
+			fout.write('\n')  # so you dont accidentally append to the last line
+			# write baseConfig parameters
+			for line in fin:
+				if '[DEFAULT]' not in line:
+					fout.write(line)
+			# write schema parameters
+			fout.write('\n')  # so you dont accidentally append to the last line
+			fout.write('data = ' + experiment['data'] + '\n')
+			fout.write('wrapper = ' + experiment['wrapper'] + '\n')
+			# caution! use the ALIASES, and NOT the original names (they are rewritten by the wrapper)
+			# fout.write('channelNamesPerCondition = ' + dumps(experiment['channelAliasesPerCondition']) + '\n')
+			fout.write('intensityColumns = ' + dumps(unnest(experiment['channelAliasesPerCondition'])) + '\n')
+			if experiment['isotopicCorrection_matrix'] is not None:
+				fout.write('isotopicCorrection_matrix = ' + experiment['isotopicCorrection_matrix'] + '\n')
+			else:
+				fout.write('isotopicCorrection_matrix\n')
+			# write output parameters
+			fout.write('path_out = ' + eName + '_output_processing/\n')
+			fout.write('filename_out = ' + str(eName) + '\n')
 
 
 def TMT2ICM(TMTImpuritiesDF, order=None):

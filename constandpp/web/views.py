@@ -79,6 +79,7 @@ def jobSettings():
 			redirect(url_for('jobInfo'))
 		else: # does not exist yet
 			run('python3 '+'"/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/scripts/main.py" '
+				+' '+masterConfigFullPath
 			    +' True' #doProcessing
 			    +' True' #doAnalysis
 			    +' True' #doReport
