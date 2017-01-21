@@ -15,8 +15,8 @@ from web.web import updateSchema, DB_checkJobExist, DB_insertJob, DB_getJobVar, 
 def home():
 	#from main import main
 	#from web.webFlow import webFlow
-	#masterConfigFilePath = webFlow(exptype='COON')
-	#main(jobConfigFilePath=masterConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True)
+	#jobConfigFilePath = webFlow(exptype='COON')
+	#main(jobConfigFilePath=jobConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True)
 	return render_template('index.html', reportFile='reportexample.html', form=newJobForm())#csrf_enabled=False))
 
 
@@ -37,9 +37,8 @@ def documentation():
 
 @app.route('/newjob', methods=['GET', 'POST'])
 def newJob():
-	#form = newJobForm(request.form)#, csrf_enabled=False)
+	### STEP 1: get schema and create new job
 	form = newJobForm()
-	#if request.method == 'POST' and form.validate():
 	if form.validate_on_submit():
 		jobName = form.jobName.data
 		session['jobName'] = jobName
@@ -74,9 +73,14 @@ def jobSettings():
 	if form.validate_on_submit():
 		form = hackExperimentNamesIntoForm(form, eNames)
 		jobDir = os.path.join(app.config.get('allJobsDir'), session['jobDirName'])
+		### STEP 2: upload data files, wrapper files, ICM files and config (files), while updating schema with their locations.
 		schema = updateSchema(jobDir, incompleteSchema, form)
+		### STEP 3: update config files and wrapper files
 		updateConfigs(jobDir, schema)
 		updateWrappers(jobDir, schema)
+		### STEP 4: get masterConfig from web and update it (add schema, date, path_out, path_results)
+		jobConfigFileAbsPath = getJobConfig(job_path, job_name)
+		updateJobConfig(job_path, jobConfigFileAbsPath, schema, job_name)
 		cur = DB_checkJobExist(session['jobDirName'])
 		if cur.fetchall()[0][0]: # already exists
 			redirect(url_for('jobInfo'))

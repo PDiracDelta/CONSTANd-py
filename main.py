@@ -664,7 +664,7 @@ if __name__ == '__main__': # this should not execute if main.py is not the main 
 	args = sys.argv
 	if len(args) != 1:
 		assert len(args) == 7
-		masterConfigFilePath = args[1]
+		jobConfigFilePath = args[1]
 		doProcessing = bool(args[2])
 		doAnalysis = bool(args[3])
 		doReport = bool(args[4])
@@ -679,27 +679,27 @@ if __name__ == '__main__': # this should not execute if main.py is not the main 
 		testing = True
 		writeToDisk = True
 
-		masterConfigFilePath = 'job/jobConfig.ini' # TEST
-		#masterConfigFilePath = webFlow(exptype='COON')
-		#masterConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-26 10:56:10.646919_COON')
-		#masterConfigFilePath = webFlow(exptype='COON_SN')
-		#masterConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-20 14:21:47.786288_COON_SN')
-		#masterConfigFilePath = webFlow(exptype='COON_norm') # todo constand uitzetten
-		#masterConfigFilePath = webFlow(exptype='COON_norm', previousjobdirName='2016-12-12 22:43:38.030716_COON_norm')
-		#masterConfigFilePath = webFlow(exptype='COON_SN_norm')  # todo constand uitzetten
-		#masterConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 22:48:30.701250_COON_SN_norm')
-		#masterConfigFilePath = webFlow(exptype='COON_nonormnoconstand')  # todo constand uitzetten
-		#masterConfigFilePath = webFlow(exptype='COON_nonormnoconstand', previousjobdirName='2016-12-20 14:31:47.045927_COON_nonormnoconstand')
-		#masterConfigFilePath = webFlow(exptype='COON_noISO')
-		#masterConfigFilePath = webFlow(exptype='COON_noISO', previousjobdirName='2016-12-16 16:38:30.536344_COON_noISO')
-		#masterConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
-		#masterConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand', previousjobdirName='2016-12-20 14:39:09.476567_COON_SN_nonormnoconstand')
+		jobConfigFilePath = 'job/jobConfig.ini' # TEST
+		#jobConfigFilePath = webFlow(exptype='COON')
+		#jobConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-26 10:56:10.646919_COON')
+		#jobConfigFilePath = webFlow(exptype='COON_SN')
+		#jobConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-20 14:21:47.786288_COON_SN')
+		#jobConfigFilePath = webFlow(exptype='COON_norm') # todo constand uitzetten
+		#jobConfigFilePath = webFlow(exptype='COON_norm', previousjobdirName='2016-12-12 22:43:38.030716_COON_norm')
+		#jobConfigFilePath = webFlow(exptype='COON_SN_norm')  # todo constand uitzetten
+		#jobConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 22:48:30.701250_COON_SN_norm')
+		#jobConfigFilePath = webFlow(exptype='COON_nonormnoconstand')  # todo constand uitzetten
+		#jobConfigFilePath = webFlow(exptype='COON_nonormnoconstand', previousjobdirName='2016-12-20 14:31:47.045927_COON_nonormnoconstand')
+		#jobConfigFilePath = webFlow(exptype='COON_noISO')
+		#jobConfigFilePath = webFlow(exptype='COON_noISO', previousjobdirName='2016-12-16 16:38:30.536344_COON_noISO')
+		#jobConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
+		#jobConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand', previousjobdirName='2016-12-20 14:39:09.476567_COON_SN_nonormnoconstand')
 
 	from web import get_db
-	jobDirName = os.path.basename(masterConfigFilePath)
+	jobDirName = os.path.basename(jobConfigFilePath)
 	try:
-		main(jobConfigFilePath=masterConfigFilePath, doProcessing=doProcessing, doAnalysis=doAnalysis, doReport=doReport,
-				  testing=testing, writeToDisk=writeToDisk)
+		main(jobConfigFilePath=jobConfigFilePath, doProcessing=doProcessing, doAnalysis=doAnalysis, doReport=doReport,
+		     testing=testing, writeToDisk=writeToDisk)
 		get_db().execute('UPDATE jobs SET done = 1, success = 1 WHERE id = "' + jobDirName + '";')
 	except:
 		cur = get_db().execute('UPDATE jobs SET done = 1, success = 0 WHERE id = "'+jobDirName+'";')
