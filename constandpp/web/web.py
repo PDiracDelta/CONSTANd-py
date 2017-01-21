@@ -152,7 +152,7 @@ def startJob(jobConfigFullPath):
 	    + ' False'  # testing
 	    + ' True'  # writeToDisk
 	    + ' &',
-	    shell=True)  # RUN CONSTANd++ IN INDEPENDENT SUBPROCESS
+	    shell=True, stdin=None, stdout=None, stderr=None)  # RUN CONSTANd++ IN INDEPENDENT SUBPROCESS
 
 
 def TMT2ICM(TMTImpuritiesDF, order=None):
