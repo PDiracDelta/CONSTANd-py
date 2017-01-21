@@ -52,6 +52,7 @@ def updateSchema(this_job_path, this_incompleteSchema, form):
 					wrapperFileName = eName + '_wrapper.tsv'
 					open(os.path.join(this_job_path, wrapperFileName), 'w').close()
 					this_incompleteSchema[eName]['wrapper'] = wrapperFileName
+				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = None
 
 	return this_incompleteSchema
 
@@ -118,7 +119,8 @@ def makeJobConfigFile(this_job_path, this_jobname, this_schema, form):
 	jobConfigFullPath = os.path.join(this_job_path, 'jobConfig_'+this_jobname)
 	with open(jobConfigFullPath, 'w+') as fout:
 		for field in form:
-			fout.write(field.name + ' = '+ str(field.data) + '\n')
+			if field.name != 'csrf_token':
+				fout.write(field.name + ' = '+ str(field.data) + '\n')
 		# HARD CODED VARIABLES
 		#fout.write('\n')  # so you dont accidentally append to the last line
 		fout.write('jobname = ' + this_jobname + '\n')
