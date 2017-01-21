@@ -3,7 +3,8 @@ import numpy as np
 import os, datetime
 from dataIO import unnest
 from json import dumps
-from web import app, get_db, close_connection
+from web import app, mailer, get_db, close_connection
+from subprocess import run
 
 
 def newJobDir(this_job_name):
@@ -138,8 +139,20 @@ def DB_setJobCompleted(jobDirName):
 	get_db().execute('UPDATE jobs SET done = 1, success = 1 WHERE id = "' + jobDirName + '";')
 
 
-def DB_setJobCompleted(jobDirName):
+def DB_setJobFailed(jobDirName):
 	get_db().execute('UPDATE jobs SET done = 1, success = 0 WHERE id = "'+jobDirName+'";')
+
+
+def startJob(jobConfigFullPath):
+	run('python3 ' + '"/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/scripts/main.py" '
+	    + ' ' + jobConfigFullPath
+	    + ' True'  # doProcessing
+	    + ' True'  # doAnalysis
+	    + ' True'  # doReport
+	    + ' False'  # testing
+	    + ' True'  # writeToDisk
+	    + ' &',
+	    shell=True)  # RUN CONSTANd++ IN INDEPENDENT SUBPROCESS
 
 
 def TMT2ICM(TMTImpuritiesDF, order=None):
@@ -231,3 +244,18 @@ def constructMasterConfigContents(schemaDict, otherMasterParams): #todo obsolete
 			contents[k] = dumps(v)
 
 	return contents
+
+
+def send_mail(recipient, mailBodyFile, jobname, jobID, attachment): # TODO VITO credentials
+	from flask_mail import Message
+	subject = "Your CONSTANd++ job %s" % (jobname)
+	#body = "=== English version below ===\n\n"
+	#body += "Beste {0} {1},\n\n"
+	with open(os.path.join('static', mailBodyFile), 'r') as f:
+		body = f.read()
+	body = body.format(recipient, jobname, jobID)
+
+	msg = Message(subject, recipients=[recipient], body=body, sender=("ULYSSIS", "ulyssis@ulyssis.org"))
+	assert os.path.exists(attachment)
+	msg.attach(attachment)
+	mailer.send(msg)

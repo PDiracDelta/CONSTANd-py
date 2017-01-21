@@ -24,7 +24,7 @@ from dataIO import *
 from getInput import getProcessingInput, getJobInput
 from processingFlow import processDf
 from reportFlow import generateReport
-from web.web import DB_setJobReportRelPaths, DB_setJobCompleted, DB_setJobFailed
+from web.web import DB_setJobReportRelPaths, DB_close, DB_setJobCompleted, DB_setJobFailed
 
 fontsize = 30
 fontweight = 'normal'
@@ -701,3 +701,5 @@ if __name__ == '__main__': # this should not execute if main.py is not the main 
 		DB_setJobCompleted(jobDirName)
 	except:
 		DB_setJobFailed(jobDirName)
+	finally:
+		DB_close()
