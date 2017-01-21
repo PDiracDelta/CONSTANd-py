@@ -79,13 +79,12 @@ def jobSettings():
 		### STEP 4: get masterConfig from web and update it (add schema, date, path_out, path_results)
 		jobConfigFullPath = makeJobConfigFile(this_job_path=jobDir, this_jobname=session['jobName'], this_schema=schema, form=form)
 		cur = DB_checkJobExist(session['jobDirName'])
-		if cur.fetchall()[0][0]: # already exists
-			redirect(url_for('jobInfo'))
-		else: # does not exist yet
+		if not cur.fetchall()[0][0]: # job does not already exist --> create it in the DB and start it.
 			DB_insertJob(session['jobDirName'], session['jobName'])
 			#DB_close()
 			### RUN CONSTANd++ in independent subprocess ###
 			startJob(jobConfigFullPath)
+		redirect(url_for('jobInfo'))
 	elif len(form.experiments.entries)==0:
 		#form.experiments.label.text = 'experiment'
 		for i in range(len(eNames)): # todo replace by experimentNames = incompleteSchema.keys()
@@ -98,7 +97,7 @@ def jobSettings():
 def jobInfo():
 	jobID = request.args.get('id', '')
 	cur = DB_checkJobExist(jobID)
-	isDone = cur.fetchall()
+	isDone = cur.fetchall()[0][0]
 	if isDone is not None:
 		if isDone:
 			cur = DB_getJobVar(jobID, 'htmlreport')
