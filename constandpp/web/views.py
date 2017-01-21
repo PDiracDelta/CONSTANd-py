@@ -5,7 +5,7 @@ from flask_mail import Message
 from .forms import newJobForm, experimentForm, jobSettingsForm
 from werkzeug.utils import secure_filename
 from subprocess import run
-from web.web import updateSchema, DB_checkJobExist, DB_insertJob, DB_getJobVar, updateConfigs, updateWrappers
+from web.web import updateSchema, DB_checkJobExist, DB_insertJob, DB_getJobVar, updateConfigs, updateWrappers, makeJobConfigFile
 
 #############################
 #Client side
@@ -79,14 +79,13 @@ def jobSettings():
 		updateConfigs(jobDir, schema)
 		updateWrappers(jobDir, schema)
 		### STEP 4: get masterConfig from web and update it (add schema, date, path_out, path_results)
-		jobConfigFileAbsPath = getJobConfig(job_path, job_name)
-		updateJobConfig(job_path, jobConfigFileAbsPath, schema, job_name)
+		jobConfigFullPath = makeJobConfigFile(this_job_path=jobDir, this_jobname=session['jobName'], this_schema=schema, form=form)
 		cur = DB_checkJobExist(session['jobDirName'])
 		if cur.fetchall()[0][0]: # already exists
 			redirect(url_for('jobInfo'))
 		else: # does not exist yet
 			run('python3 '+'"/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/scripts/main.py" '
-				+' '+masterConfigFullPath
+				+' '+jobConfigFullPath
 			    +' True' #doProcessing
 			    +' True' #doAnalysis
 			    +' True' #doReport
