@@ -24,6 +24,7 @@ from dataIO import *
 from getInput import getProcessingInput, getJobInput
 from processingFlow import processDf
 from reportFlow import generateReport
+from web.web import DB_setJobReportRelPaths, DB_setJobCompleted, DB_setJobFailed
 
 fontsize = 30
 fontweight = 'normal'
@@ -645,10 +646,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 			logging.info("Starting visualization end report generation of job: " + jobParams['jobname'] + "at " +
 						 str(datetime.datetime.now()).split('.')[0])
 			generateReport(analysisResults, jobParams, logFilePath, writeToDisk)
-			get_db().execute('UPDATE jobs SET htmlreport = "'
-			                 +jobParams['path_result']+jobParams['jobname'] + '_report.html'+
-			                 ', pdfreport = "'+jobParams['path_result']+jobParams['jobname']+'_report.pdf"'
-			                 +' WHERE id = "' + jobDirName + '";')
+			DB_setJobReportRelPaths(jobDirName=jobDirName, resultPath=jobParams['path_result'], jobName=jobParams['jobname'])
 			logging.info("Finished visualization end report generation of job: " + jobParams['jobname'] + "at " +
 						 str(datetime.datetime.now()).split('.')[0])
 		else:
@@ -695,11 +693,11 @@ if __name__ == '__main__': # this should not execute if main.py is not the main 
 		#jobConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
 		#jobConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand', previousjobdirName='2016-12-20 14:39:09.476567_COON_SN_nonormnoconstand')
 
-	from web import get_db
+
 	jobDirName = os.path.basename(jobConfigFilePath)
 	try:
 		main(jobConfigFilePath=jobConfigFilePath, doProcessing=doProcessing, doAnalysis=doAnalysis, doReport=doReport,
 		     testing=testing, writeToDisk=writeToDisk)
-		get_db().execute('UPDATE jobs SET done = 1, success = 1 WHERE id = "' + jobDirName + '";')
+		DB_setJobCompleted(jobDirName)
 	except:
-		cur = get_db().execute('UPDATE jobs SET done = 1, success = 0 WHERE id = "'+jobDirName+'";')
+		DB_setJobFailed(jobDirName)

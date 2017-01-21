@@ -113,6 +113,35 @@ def updateWrappers(this_job_path, this_schema):
 				fout.write(n + '\t' + a + '\n')
 
 
+def makeJobConfigFile(this_job_path, this_jobname, this_schema, form):
+	jobConfigFullPath = os.path.join(this_job_path, 'jobConfig_'+this_jobname)
+	with open(jobConfigFullPath, 'w+') as fout:
+		for field in form:
+			fout.write(field.name + ' = '+ str(field.data) + '\n')
+		# HARD CODED VARIABLES
+		#fout.write('\n')  # so you dont accidentally append to the last line
+		fout.write('jobname = ' + this_jobname + '\n')
+		fout.write('path_out = output_analysis\n')
+		fout.write('path_results = results\n')
+		fout.write('PCA_components = 2\n')
+		fout.write('schema = ' + dumps(this_schema) + '\n')
+		fout.write('date = ' + str(os.path.basename(this_job_path).split('.')[0]) + '\n')
+	return jobConfigFullPath
+
+
+def DB_setJobReportRelPaths(jobDirName, resultpath, jobName):
+	get_db().execute('UPDATE jobs SET htmlreport = "' + os.path.join(resultpath, jobName+'_report.html')
+	                 + ', pdfreport = "' + os.path.join(resultpath, jobName+'_report.pdf') + '" WHERE id = "' + jobDirName + '";')
+
+
+def DB_setJobCompleted(jobDirName):
+	get_db().execute('UPDATE jobs SET done = 1, success = 1 WHERE id = "' + jobDirName + '";')
+
+
+def DB_setJobCompleted(jobDirName):
+	get_db().execute('UPDATE jobs SET done = 1, success = 0 WHERE id = "'+jobDirName+'";')
+
+
 def TMT2ICM(TMTImpuritiesDF, order=None):
 	"""
 	Converts a dataframe of TMT-like isotopic impurities (indexed on TMT label name) into the correct isotopic
@@ -178,7 +207,8 @@ def TMT2ICM(TMTImpuritiesDF, order=None):
 	return icm / rowSums # normalize each row so that the sum is one
 
 
-def constructMasterConfigContents(schemaDict, otherMasterParams): # todo move to web
+def constructMasterConfigContents(schemaDict, otherMasterParams): #todo obsolete
+	""" OBSOLETE """
 	# todo docu
 	def isNumeric(s):
 		""" Returns whether or not the argument is numeric """
