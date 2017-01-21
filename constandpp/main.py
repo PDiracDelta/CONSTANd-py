@@ -660,6 +660,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 
 if __name__ == '__main__': # this should not execute if main.py is not the main module called by the python interpreter,
 	args = sys.argv
+	print(str(args)) # TEST
 	if len(args) != 1:
 		assert len(args) == 7
 		jobConfigFilePath = args[1]
