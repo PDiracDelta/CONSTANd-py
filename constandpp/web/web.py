@@ -24,14 +24,31 @@ def hackExperimentNamesIntoForm(form, eNames):
 	return form
 
 
+def saveFileStorage(this_path, fs, prefix=None):
+	if fs.filename == '':
+		return None
+	else:
+		if prefix:
+			filePath = os.path.join(this_path, prefix + '_' + fs.filename)
+		else:
+			filePath = os.path.join(this_path, fs.filename)
+		fs.save(filePath)
+		return filePath
+
+
 def updateSchema(this_job_path, this_incompleteSchema, form):
 	#from web.forms import FileField, FormField
-	for e in len(form.experiments.):
-		for fileType, fileStorage in form.experiments[e].data:
-			eName = this_incompleteSchema
-			if fileType == 'dataFile':
-				dataFilePath = os.path.join(this_job_path, fileStorage.filename)
-				fileStorage.save(dataFilePath)
+	for eName in this_incompleteSchema.keys():
+		for experimentForm in form.experiments.entries:
+			if experimentForm.name == eName:
+				this_incompleteSchema[eName]['data'] = os.path.basename(saveFileStorage(this_job_path, experimentForm.data['dataFile'], prefix=eName))
+				this_incompleteSchema[eName]['config'] = saveFileStorage(this_job_path, experimentForm.data['processingConfig'], prefix=eName)
+				if experimentForm.data['wrapper'].filename != '':
+					this_incompleteSchema[eName]['wrapper'] = os.path.basename(saveFileStorage(this_job_path, experimentForm.data['wrapper'], prefix=eName))
+				else:
+					wrapperFileName = eName + '_wrapper.tsv'
+					open(os.path.join(this_job_path, wrapperFileName), 'w').close()
+					this_incompleteSchema[eName]['wrapper'] = wrapperFileName
 
 	return this_incompleteSchema
 

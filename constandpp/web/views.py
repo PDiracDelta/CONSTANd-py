@@ -72,28 +72,27 @@ def jobSettings():
 	form = jobSettingsForm()
 	from web.web import hackExperimentNamesIntoForm
 	if form.validate_on_submit():
+		form = hackExperimentNamesIntoForm(form, eNames)
 		from web.web import updateSchema
 		updateSchema(os.path.join(app.config.get('allJobsDir'), session['jobDirName']), incompleteSchema, form)
 		cur = get_db().execute('SELECT EXISTS(SELECT 1 FROM jobs WHERE id="'+session['jobDirName']+'" LIMIT 1);')
-		if cur.fetchall(): # already exists
-			redirect(url_for('jobinfo'))
+		if cur.fetchall()[0][0]: # already exists
+			redirect(url_for('jobInfo'))
 		else: # does not exist yet
 			run('python3 '+'"/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/scripts/main.py" '
-			    +' True', #doProcessing
-			    +' True', #doAnalysis
-			    +' True', #doReport
-			    +' False', #testing
-			    +' True', #writeToDisk
+			    +' True' #doProcessing
+			    +' True' #doAnalysis
+			    +' True' #doReport
+			    +' False' #testing
+			    +' True' #writeToDisk
 			    +' &',
 			    shell=True) # RUN CONSTANd++ IN INDEPENDENT
 			cur = get_db().execute('INSERT INTO jobs VALUES ("' + session['jobDirName'] + '","' + session['jobName'] + '","","", 0, 0);')
 	elif len(form.experiments.entries)==0:
 		#form.experiments.label.text = 'experiment'
 		for i in range(len(eNames)): # todo replace by experimentNames = incompleteSchema.keys()
-			form.experiments.append_entry(experimentForm(prefix=eNames[i]))  # {'title': session["experiments"][pif][0]}
-		# i = len(form.experiments.entries)
-		# form.experiments.entries
-	form = hackExperimentNamesIntoForm(form, eNames)
+			form.experiments.append_entry(experimentForm(prefix=eNames[i]))
+		form = hackExperimentNamesIntoForm(form, eNames)
 	return render_template('jobsettings.html', jobName=session.get('jobName'), form=form)
 
 
