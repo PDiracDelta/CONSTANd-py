@@ -66,10 +66,13 @@ def newJob():
 @app.route('/jobsettings', methods=['GET', 'POST'])
 def jobSettings():
 	incompleteSchema = session.get('incompleteSchema')
+	eNames = list(incompleteSchema.keys())
 	# eforms = {(eName, experimentForm()) for eName in incompleteSchema}
+	# CREATE FORM
 	form = jobSettingsForm()
+	from web.web import hackExperimentNamesIntoForm
 	if form.validate_on_submit():
-		from web import updateSchema
+		from web.web import updateSchema
 		updateSchema(os.path.join(app.config.get('allJobsDir'), session['jobDirName']), incompleteSchema, form)
 		cur = get_db().execute('SELECT EXISTS(SELECT 1 FROM jobs WHERE id="'+session['jobDirName']+'" LIMIT 1);')
 		if cur.fetchall(): # already exists
@@ -84,15 +87,14 @@ def jobSettings():
 			    +' &',
 			    shell=True) # RUN CONSTANd++ IN INDEPENDENT
 			cur = get_db().execute('INSERT INTO jobs VALUES ("' + session['jobDirName'] + '","' + session['jobName'] + '","","", 0, 0);')
-	else:
-		form.experiments.label.text = 'experiment'
-		numExperiments = len(incompleteSchema)
-		#form.experiments.min_entries = 3#numExperiments
-		for eName in incompleteSchema:
-			form.experiments.append_entry(experimentForm(prefix=eName)) #{'title': session["experiments"][pif][0]}
-			#i = len(form.experiments.entries)
-			#form.experiments.entries
-		return render_template('jobsettings.html', jobName=session.get('jobName'), form=form)
+	elif len(form.experiments.entries)==0:
+		#form.experiments.label.text = 'experiment'
+		for i in range(len(eNames)): # todo replace by experimentNames = incompleteSchema.keys()
+			form.experiments.append_entry(experimentForm(prefix=eNames[i]))  # {'title': session["experiments"][pif][0]}
+		# i = len(form.experiments.entries)
+		# form.experiments.entries
+	form = hackExperimentNamesIntoForm(form, eNames)
+	return render_template('jobsettings.html', jobName=session.get('jobName'), form=form)
 
 
 @app.route('/jobinfo', methods=['GET', 'POST'])

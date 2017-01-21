@@ -12,9 +12,21 @@ def newJobDir(this_job_name):
 	return os.path.abspath(jobPath)
 
 
+def hackExperimentNamesIntoForm(form, eNames):
+	import re
+	def replace(oldstring, eName):
+		newstring = re.sub(r'(e|E)xperiments-[0-9]*', eName, oldstring)
+		return newstring
+	#form._prefix = re.sub(r'(e|E)xperiments-[0-9]*', eName, form._prefix)
+	for i in range(len(eNames)):
+		form.experiments.entries[i].label.text = replace(form.experiments.entries[i].label.text, eNames[i])
+		form.experiments.entries[i].name = replace(form.experiments.entries[i].name, eNames[i])
+	return form
+
+
 def updateSchema(this_job_path, this_incompleteSchema, form):
 	#from web.forms import FileField, FormField
-	for e in len(form.experiments):
+	for e in len(form.experiments.):
 		for fileType, fileStorage in form.experiments[e].data:
 			eName = this_incompleteSchema
 			if fileType == 'dataFile':
