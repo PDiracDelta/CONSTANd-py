@@ -5,7 +5,7 @@ from flask_mail import Message
 from .forms import newJobForm, experimentForm, jobSettingsForm
 from werkzeug.utils import secure_filename
 from subprocess import run
-from web.web import updateSchema, DB_checkJobExist, DB_insertJob, DB_getJobVar
+from web.web import updateSchema, DB_checkJobExist, DB_insertJob, DB_getJobVar, updateConfigs, updateWrappers
 
 #############################
 #Client side
@@ -73,12 +73,16 @@ def jobSettings():
 	from web.web import hackExperimentNamesIntoForm
 	if form.validate_on_submit():
 		form = hackExperimentNamesIntoForm(form, eNames)
-		updateSchema(os.path.join(app.config.get('allJobsDir'), session['jobDirName']), incompleteSchema, form)
+		jobDir = os.path.join(app.config.get('allJobsDir'), session['jobDirName'])
+		schema = updateSchema(jobDir, incompleteSchema, form)
+		updateConfigs(jobDir, schema)
+		updateWrappers(jobDir, schema)
 		cur = DB_checkJobExist(session['jobDirName'])
 		if cur.fetchall()[0][0]: # already exists
 			redirect(url_for('jobInfo'))
 		else: # does not exist yet
 			run('python3 '+'"/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/scripts/main.py" '
+				+' '+masterConfigFullPath
 			    +' True' #doProcessing
 			    +' True' #doAnalysis
 			    +' True' #doReport
