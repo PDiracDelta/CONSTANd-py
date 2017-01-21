@@ -10,6 +10,7 @@ from dataIO import parseSchemaFile, unnest
 from web.web import TMT2ICM, newJobDir
 from json import dumps
 from shutil import copyfile
+from web.web import updateConfigs
 
 
 def webFlow(exptype='dummy', previousjobdirName=None):
@@ -340,33 +341,6 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 
 	def getBaseConfigFile():
 		return 'baseProcessingConfig.ini'
-
-	def updateConfigs(this_job_path, this_schema):
-		import fileinput
-		for eName in this_schema:
-			experiment = this_schema[eName]
-			configFile = os.path.join(this_job_path, experiment['config'])
-			# open user config parameters
-			with open(configFile, 'a') as fout, fileinput.input(getBaseConfigFile()) as fin:
-				fout.write('\n')  # so you dont accidentally append to the last line
-				# write baseConfig parameters
-				for line in fin:
-					if '[DEFAULT]' not in line:
-						fout.write(line)
-				# write schema parameters
-				fout.write('\n')  # so you dont accidentally append to the last line
-				fout.write('data = ' + experiment['data'] + '\n')
-				fout.write('wrapper = ' + experiment['wrapper'] + '\n')
-				# caution! use the ALIASES, and NOT the original names (they are rewritten by the wrapper)
-				# fout.write('channelNamesPerCondition = ' + dumps(experiment['channelAliasesPerCondition']) + '\n')
-				fout.write('intensityColumns = ' + dumps(unnest(experiment['channelAliasesPerCondition'])) + '\n')
-				if experiment['isotopicCorrection_matrix'] is not None:
-					fout.write('isotopicCorrection_matrix = ' + experiment['isotopicCorrection_matrix'] + '\n')
-				else:
-					fout.write('isotopicCorrection_matrix\n')
-				# write output parameters
-				fout.write('path_out = ' + eName + '_output_processing/\n')
-				fout.write('filename_out = ' + str(eName) + '\n')
 
 	def updateWrappers(this_job_path, this_schema):
 		# write the channel aliases to the wrapper
