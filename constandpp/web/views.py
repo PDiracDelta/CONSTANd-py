@@ -85,10 +85,13 @@ def jobSettings():
 			    shell=True) # RUN CONSTANd++ IN INDEPENDENT
 			cur = get_db().execute('INSERT INTO jobs VALUES ("' + session['jobDirName'] + '","' + session['jobName'] + '","","", 0, 0);')
 	else:
+		form.experiments.label.text = 'experiment'
 		numExperiments = len(incompleteSchema)
 		#form.experiments.min_entries = 3#numExperiments
 		for eName in incompleteSchema:
 			form.experiments.append_entry(experimentForm(prefix=eName)) #{'title': session["experiments"][pif][0]}
+			#i = len(form.experiments.entries)
+			#form.experiments.entries
 		return render_template('jobsettings.html', jobName=session.get('jobName'), form=form)
 
 

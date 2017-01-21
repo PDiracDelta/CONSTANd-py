@@ -11,7 +11,7 @@ class newJobForm(FlaskForm):
 
 
 class experimentForm(FlaskForm):
-	data = FileField('data', validators=[DataRequired()])
+	dataFile = FileField('dataFile', validators=[DataRequired()])
 	processingConfig = FileField('processingConfig')
 	wrapper = FileField('wrapper')
 

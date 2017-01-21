@@ -13,11 +13,13 @@ def newJobDir(this_job_name):
 
 
 def updateSchema(this_job_path, this_incompleteSchema, form):
-	from web.forms import FieldList, FormField, experimentForm
-	for fieldKey, fieldValue in form.data:
-		#if field.startswith('experiment') or field.startswith('Experiment') # file
-		if isinstance(fieldValue, FieldList(FormField(experimentForm))):
-			pass
+	#from web.forms import FileField, FormField
+	for e in len(form.experiments):
+		for fileType, fileStorage in form.experiments[e].data:
+			eName = this_incompleteSchema
+			if fileType == 'dataFile':
+				dataFilePath = os.path.join(this_job_path, fileStorage.filename)
+				fileStorage.save(dataFilePath)
 
 	return this_incompleteSchema
 
