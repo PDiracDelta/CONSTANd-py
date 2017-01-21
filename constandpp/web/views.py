@@ -70,7 +70,7 @@ def jobSettings():
 	from web.web import hackExperimentNamesIntoForm
 	if form.validate_on_submit():
 		form = hackExperimentNamesIntoForm(form, eNames)
-		jobDir = os.path.join(app.config.get('allJobsDir'), session['jobDirName'])
+		jobDir = os.path.join(app.config.get('allJobsDir'), session.get('jobDirName'))
 		### STEP 2: upload data files, wrapper files, ICM files and config (files), while updating schema with their locations.
 		schema = updateSchema(jobDir, incompleteSchema, form)
 		### STEP 3: update config files and wrapper files
