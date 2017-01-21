@@ -4,8 +4,8 @@ from flask import render_template, send_from_directory, request, redirect, url_f
 from flask_mail import Message
 from .forms import newJobForm, experimentForm, jobSettingsForm
 from werkzeug.utils import secure_filename
-from web import get_db
 from subprocess import run
+from web.web import updateSchema, DB_checkJobExist, DB_insertJob, DB_getJobVar
 
 #############################
 #Client side
@@ -73,9 +73,8 @@ def jobSettings():
 	from web.web import hackExperimentNamesIntoForm
 	if form.validate_on_submit():
 		form = hackExperimentNamesIntoForm(form, eNames)
-		from web.web import updateSchema
 		updateSchema(os.path.join(app.config.get('allJobsDir'), session['jobDirName']), incompleteSchema, form)
-		cur = get_db().execute('SELECT EXISTS(SELECT 1 FROM jobs WHERE id="'+session['jobDirName']+'" LIMIT 1);')
+		cur = DB_checkJobExist(session['jobDirName'])
 		if cur.fetchall()[0][0]: # already exists
 			redirect(url_for('jobInfo'))
 		else: # does not exist yet
@@ -87,7 +86,7 @@ def jobSettings():
 			    +' True' #writeToDisk
 			    +' &',
 			    shell=True) # RUN CONSTANd++ IN INDEPENDENT
-			cur = get_db().execute('INSERT INTO jobs VALUES ("' + session['jobDirName'] + '","' + session['jobName'] + '","","", 0, 0);')
+			cur = DB_insertJob(session['jobDirName'], session['jobName'])
 	elif len(form.experiments.entries)==0:
 		#form.experiments.label.text = 'experiment'
 		for i in range(len(eNames)): # todo replace by experimentNames = incompleteSchema.keys()
@@ -99,11 +98,11 @@ def jobSettings():
 @app.route('/jobinfo', methods=['GET', 'POST'])
 def jobInfo():
 	jobID = request.args.get('id', '')
-	cur = get_db().execute('SELECT done FROM jobs WHERE id="' + jobID + '" LIMIT 1;')
+	cur = DB_checkJobExist(jobID)
 	isDone = cur.fetchall()
 	if isDone is not None:
 		if isDone:
-			cur = get_db().execute('SELECT htmlreport FROM jobs WHERE id="' + jobID + '" LIMIT 1;')
+			cur = DB_getJobVar(jobID, 'htmlreport')
 			htmlreportPath = cur.fetchall()
 			pdfreportPath = htmlreportPath[0:-4]+'pdf'
 			return render_template('jobinfo.html', done=True, html=htmlreportPath, pdf=pdfreportPath)
