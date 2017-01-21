@@ -10,7 +10,7 @@ from dataIO import parseSchemaFile, unnest
 from web.web import TMT2ICM, newJobDir
 from json import dumps
 from shutil import copyfile
-from web.web import updateConfigs
+from web.web import updateConfigs, updateWrappers
 
 
 def webFlow(exptype='dummy', previousjobdirName=None):
@@ -339,16 +339,16 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 
 		return this_incompleteSchema
 
-	def getMasterConfig(this_job_path, this_job_name):
-		this_masterConfigFile = uploadFile(this_job_path, sourceDataPath=HC_MASTERCONFIG,
+	def getJobConfig(this_job_path, this_job_name):
+		this_jobConfigFile = uploadFile(this_job_path, sourceDataPath=HC_MASTERCONFIG,
 		                                   prefix='')
-		new_masterConfigFile = os.path.join(this_job_path, this_job_name + jobConfigNameSuffix)
-		os.rename(os.path.join(this_job_path, this_masterConfigFile), new_masterConfigFile)
-		return new_masterConfigFile
+		new_jobConfigFile = os.path.join(this_job_path, this_job_name + jobConfigNameSuffix)
+		os.rename(os.path.join(this_job_path, this_jobConfigFile), new_jobConfigFile)
+		return new_jobConfigFile
 
-	def updateMasterConfig(this_job_path, this_masterConfigFileAbsPath, this_schema, this_jobname):
+	def updateJobConfig(this_job_path, this_jobConfigFileAbsPath, this_schema, this_jobname):
 		# allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in this_schema.values()])
-		with open(this_masterConfigFileAbsPath, 'a') as fout:
+		with open(this_jobConfigFileAbsPath, 'a') as fout:
 			fout.write('\n')  # so you dont accidentally append to the last line
 			fout.write('jobname = ' + this_jobname + '\n')
 			fout.write('path_out = output_analysis\n')
@@ -377,8 +377,8 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 	updateConfigs(job_path, schema)
 	updateWrappers(job_path, schema)
 
-	### STEP 4: get masterConfig from web and update it (add schema, date, path_out, path_results)
-	masterConfigFileAbsPath = getMasterConfig(job_path, job_name)
-	updateMasterConfig(job_path, masterConfigFileAbsPath, schema, job_name)
+	### STEP 4: get jobConfig from web and update it (add schema, date, path_out, path_results)
+	jobConfigFileAbsPath = getJobConfig(job_path, job_name)
+	updateJobConfig(job_path, jobConfigFileAbsPath, schema, job_name)
 
-	return masterConfigFileAbsPath
+	return jobConfigFileAbsPath
