@@ -1,11 +1,9 @@
 import os
-from web import app, mailer
+from web import app
 from flask import render_template, send_from_directory, request, redirect, url_for, session, flash
-from flask_mail import Message
 from .forms import newJobForm, experimentForm, jobSettingsForm
 from werkzeug.utils import secure_filename
-from subprocess import run
-from web.web import updateSchema, DB_checkJobExist, DB_insertJob, DB_getJobVar, updateConfigs, updateWrappers, makeJobConfigFile
+from web.web import updateSchema, DB_close, DB_checkJobExist, DB_insertJob, DB_getJobVar, updateConfigs, updateWrappers, makeJobConfigFile, startJob
 
 #############################
 #Client side
@@ -84,16 +82,10 @@ def jobSettings():
 		if cur.fetchall()[0][0]: # already exists
 			redirect(url_for('jobInfo'))
 		else: # does not exist yet
-			run('python3 '+'"/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/scripts/main.py" '
-				+' '+jobConfigFullPath
-			    +' True' #doProcessing
-			    +' True' #doAnalysis
-			    +' True' #doReport
-			    +' False' #testing
-			    +' True' #writeToDisk
-			    +' &',
-			    shell=True) # RUN CONSTANd++ IN INDEPENDENT
-			cur = DB_insertJob(session['jobDirName'], session['jobName'])
+			DB_insertJob(session['jobDirName'], session['jobName'])
+			DB_close()
+			### RUN CONSTANd++ in independent subprocess ###
+			startJob(jobConfigFullPath)
 	elif len(form.experiments.entries)==0:
 		#form.experiments.label.text = 'experiment'
 		for i in range(len(eNames)): # todo replace by experimentNames = incompleteSchema.keys()
@@ -129,21 +121,3 @@ def getHtmlReport(jobID):
 def getPdfReport(jobID):
 	pdfFileName = request.args.get('pdfFileName', '')
 	return send_from_directory(app.config.get('allJobsDir')+jobID, pdfFileName, as_attachment=True)
-
-
-#############################
-#Admin functions
-#############################
-
-def send_mail(recipient, mailBodyFile, jobname, jobID, attachment): # TODO VITO credentials
-	subject = "Your CONSTANd++ job %s" % (jobname)
-	#body = "=== English version below ===\n\n"
-	#body += "Beste {0} {1},\n\n"
-	with open(os.path.join('static', mailBodyFile), 'r') as f:
-		body = f.read()
-	body = body.format(recipient, jobname, jobID)
-
-	msg = Message(subject, recipients=[recipient], body=body, sender=("ULYSSIS", "ulyssis@ulyssis.org"))
-	assert os.path.exists(attachment)
-	msg.attach(attachment)
-	mailer.send(msg)
