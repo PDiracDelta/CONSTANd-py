@@ -3,6 +3,7 @@ import numpy as np
 import os, datetime
 from dataIO import unnest
 from json import dumps
+from web import get_db, close_connection
 
 
 def newJobDir(this_job_name):
@@ -51,6 +52,22 @@ def updateSchema(this_job_path, this_incompleteSchema, form):
 					this_incompleteSchema[eName]['wrapper'] = wrapperFileName
 
 	return this_incompleteSchema
+
+
+def DB_close():
+	close_connection()
+
+
+def DB_checkJobExist(ID):
+	return get_db().execute('SELECT EXISTS(SELECT 1 FROM jobs WHERE id="' + ID + '" LIMIT 1);')
+
+
+def DB_insertJob(jobDirName, jobName):
+	return get_db().execute('INSERT INTO jobs VALUES ("' + jobDirName + '","' + jobName + '","","", 0, 0);')
+
+
+def DB_getJobVar(ID, varName):
+	return get_db().execute('SELECT '+varName+' FROM jobs WHERE id="' + ID + '" LIMIT 1;')
 
 
 def TMT2ICM(TMTImpuritiesDF, order=None):
