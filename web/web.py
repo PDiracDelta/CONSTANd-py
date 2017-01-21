@@ -119,7 +119,7 @@ def makeJobConfigFile(this_job_path, this_jobname, this_schema, form):
 	jobConfigFullPath = os.path.join(this_job_path, 'jobConfig_'+this_jobname)
 	with open(jobConfigFullPath, 'w+') as fout:
 		for field in form:
-			if field.name != 'csrf_token':
+			if field.name != 'csrf_token' and field.name != 'experiments':
 				fout.write(field.name + ' = '+ str(field.data) + '\n')
 		# HARD CODED VARIABLES
 		#fout.write('\n')  # so you dont accidentally append to the last line
@@ -146,15 +146,13 @@ def DB_setJobFailed(jobDirName):
 
 
 def startJob(jobConfigFullPath):
-	run('python3 ' + '"/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/scripts/main.py" '
-	    + ' ' + jobConfigFullPath
-	    + ' True'  # doProcessing
-	    + ' True'  # doAnalysis
-	    + ' True'  # doReport
-	    + ' False'  # testing
-	    + ' True'  # writeToDisk
-	    + ' &',
-	    shell=True, stdin=None, stdout=None, stderr=None)  # RUN CONSTANd++ IN INDEPENDENT SUBPROCESS
+	run(['python3 ', '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/scripts/main.py', jobConfigFullPath,
+	     'True', # doProcessing
+	     'True', # doAnalysis
+	     'True', # doReport
+	     'False', # testing
+	     'True', # writeToDisk
+	     ' &'], shell=True)#, stdin=None, stdout=None, stderr=None)  # RUN CONSTANd++ IN INDEPENDENT SUBPROCESS
 
 
 def TMT2ICM(TMTImpuritiesDF, order=None):
