@@ -83,7 +83,7 @@ def jobSettings():
 			redirect(url_for('jobInfo'))
 		else: # does not exist yet
 			DB_insertJob(session['jobDirName'], session['jobName'])
-			DB_close()
+			#DB_close()
 			### RUN CONSTANd++ in independent subprocess ###
 			startJob(jobConfigFullPath)
 	elif len(form.experiments.entries)==0:

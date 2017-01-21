@@ -702,4 +702,5 @@ if __name__ == '__main__': # this should not execute if main.py is not the main 
 	except:
 		DB_setJobFailed(jobDirName)
 	finally:
-		DB_close()
+		#DB_close()
+		pass
