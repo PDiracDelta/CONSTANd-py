@@ -83,7 +83,7 @@ def jobSettings():
 			DB_insertJob(session['jobDirName'], session['jobName'])
 			#DB_close()
 			### RUN CONSTANd++ in independent subprocess ###
-			startJob(jobConfigFullPath)
+			jobProcess = startJob(jobConfigFullPath)
 		redirect(url_for('jobInfo'))
 	elif len(form.experiments.entries)==0:
 		#form.experiments.label.text = 'experiment'
