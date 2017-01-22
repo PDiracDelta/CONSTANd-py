@@ -647,7 +647,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 			logging.info("Starting visualization end report generation of job: " + jobParams['jobname'] + "at " +
 						 str(datetime.datetime.now()).split('.')[0])
 			generateReport(analysisResults, jobParams, logFilePath, writeToDisk)
-			DB_setJobReportRelPaths(jobDirName=jobDirName, resultPath=jobParams['path_result'], jobName=jobParams['jobname'])
+			DB_setJobReportRelPaths(jobDirName=jobDirName, resultpath=jobParams['path_results'], jobName=jobParams['jobname'])
 			logging.info("Finished visualization end report generation of job: " + jobParams['jobname'] + "at " +
 						 str(datetime.datetime.now()).split('.')[0])
 		else:

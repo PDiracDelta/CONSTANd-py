@@ -251,11 +251,14 @@ def makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, 
 	:return:
 	"""
 	# todo docu
-	htmlReport = None
+	htmlReport = "<html>hi hell</html>"
 	return htmlReport
 
 
-def HTMLtoPDF(htmlReport):
+def HTMLtoPDF(htmlReportFullPath):
 	# todo docu
-	pdfReport = htmlReport
-	return pdfReport
+	from subprocess import run
+	pdfReportFullPath = htmlReportFullPath[0:-4]+'pdf'
+	command = 'wkhtmltopdf -L 1cm -R 1cm -T 1cm -B 1cm "'+htmlReportFullPath+'" "'+pdfReportFullPath+'"'
+	run(command, shell=True)
+	return pdfReportFullPath

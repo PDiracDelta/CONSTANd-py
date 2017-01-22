@@ -221,8 +221,10 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 		#ax = data
 		plt.savefig(outFileName+'.png', format='png', bbox_inches='tight')
 	elif dataType == 'html':
-		with open(fullPath+'.html', 'w') as htmlFile:
+		fullPath += '.html'
+		with open(fullPath, 'w') as htmlFile:
 			htmlFile.writelines(data)
+		return fullPath
 
 
 def delim2ext(delim):
