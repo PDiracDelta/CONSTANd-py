@@ -24,6 +24,7 @@ from dataIO import *
 from getInput import getProcessingInput, getJobInput
 from processingFlow import processDf
 from reportFlow import generateReport
+from web import app
 from web.web import DB_setJobReportRelPaths, DB_close, DB_setJobCompleted, DB_setJobFailed
 
 fontsize = 30
@@ -667,16 +668,16 @@ if __name__ == '__main__': # this should not execute if main.py is not the main 
 		doProcessing = bool(args[2])
 		doAnalysis = bool(args[3])
 		doReport = bool(args[4])
-		testing = bool(args[5])
-		writeToDisk = bool(args[6])
+		writeToDisk = bool(args[5])
+		testing = bool(args[6])
 
-	# so if you start main.py from within web.py or something, this won't be executed.
+	# so if you start main.py from within web.py or something, this won't be executed
 	else:
 		doProcessing = True
 		doAnalysis = False
 		doReport = True
-		testing = True
 		writeToDisk = True
+		testing = True
 
 		jobConfigFilePath = 'job/jobConfig.ini' # TEST
 		#jobConfigFilePath = webFlow(exptype='COON')
@@ -694,14 +695,15 @@ if __name__ == '__main__': # this should not execute if main.py is not the main 
 		#jobConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
 		#jobConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand', previousjobdirName='2016-12-20 14:39:09.476567_COON_SN_nonormnoconstand')
 
-
-	jobDirName = os.path.basename(jobConfigFilePath)
-	try:
+	with app.app_context():
+		jobDirName = os.path.basename(jobConfigFilePath)
+		#try:
 		main(jobConfigFilePath=jobConfigFilePath, doProcessing=doProcessing, doAnalysis=doAnalysis, doReport=doReport,
 		     testing=testing, writeToDisk=writeToDisk)
 		DB_setJobCompleted(jobDirName)
-	except:
+		#except:
+		#	print('X\n')  # TEST
 		DB_setJobFailed(jobDirName)
-	finally:
-		#DB_close()
-		pass
+		#finally:
+			#DB_close()
+		#	pass

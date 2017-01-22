@@ -4,7 +4,6 @@ import sqlite3
 #from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-#with app.app_context():
 app.config.from_object('web.config')
 app.config['allJobsDir'] = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/'
 app.config['DB'] = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/jobs.db'
