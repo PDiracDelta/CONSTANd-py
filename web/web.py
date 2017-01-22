@@ -147,7 +147,7 @@ def DB_setJobFailed(jobDirName):
 
 
 def startJob(jobConfigFullPath):
-	Popen(['python3 ', app.config.get('MAIN'), jobConfigFullPath,
+	return Popen(['python3 ', app.config.get('MAIN'), jobConfigFullPath,
 	     'True', # doProcessing
 	     'True', # doAnalysis
 	     'True', # doReport
