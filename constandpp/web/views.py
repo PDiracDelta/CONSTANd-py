@@ -14,19 +14,24 @@ def home():
 	return render_template('index.html', reportFile='reportexample.html', form=newJobForm())
 
 
-@app.route('/report/html/<path:file>')
-def report(file=None):
-	if file:
-		parentDirPath = os.path.dirname(file)
-		fileName = os.path.basename(file)
-	else:
-		return "No file path specified."
-	return send_from_directory(fileName, parentDirPath)
+@app.route('/report/html')
+def report():
+	jobID = request.args.get('id', '')
+	cur = DB_getJobVar(jobID, 'htmlreport')
+	htmlreportName = os.path.basename(cur.fetchall()[0][0])
+	resultsFullPath = os.path.join(app.config.get('ALLJOBSDIR'), jobID+'/results/')
+	#htmlFileName = request.args.get('htmlreport', '')
+	return send_from_directory(resultsFullPath, htmlreportName)
 
 
 @app.route('/report/pdf')
-def getFile(filename):
-	return send_from_directory('../../doc/figures/reportexample/', filename, as_attachment=True)
+def getFile():
+	jobID = request.args.get('id', '')
+	cur = DB_getJobVar(jobID, 'pdfreport')
+	pdfreportName = os.path.basename(cur.fetchall()[0][0])
+	resultsFullPath = os.path.join(app.config.get('ALLJOBSDIR'), jobID + '/results/')
+	#pdfFileName = request.args.get('pdfreport', '')
+	return send_from_directory(resultsFullPath, pdfreportName, as_attachment=True)
 
 
 @app.route('/docu')
@@ -103,10 +108,7 @@ def jobInfo():
 		isDone = cur.fetchall()[0][0]
 		if isDone is not None:
 			if isDone:
-				cur = DB_getJobVar(jobID, 'htmlreport')
-				htmlreportName = os.path.basename(cur.fetchall()[0][0])
-				pdfreportName = htmlreportName[0:-4]+'pdf'
-				return render_template('jobinfo.html', done=True, jobID=jobID, jobName=session.get('jobName'), html=htmlreportName, pdf=pdfreportName)
+				return render_template('jobinfo.html', done=True, jobID=jobID, jobName=session.get('jobName'))
 			else:
 				return render_template('jobinfo.html', done=False, jobID=jobID, jobName=session.get('jobName'), autorefresh=1)
 		else:

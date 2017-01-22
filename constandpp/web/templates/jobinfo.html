@@ -3,9 +3,10 @@
 {% if jobID %}
     <h3>Info for job with ID: {{ jobID }}</h3>
     {% if done %}
-    Job "{{ jobName }}" is done! View the <a href="report/html" id="{{ jobID }}" filename="{{ html }}">HTML report</a>, or download the <a href="report/pdf" id="{{ jobID }}" filename="{{ pdf }}">PDF report</a>.
+        Job "{{ jobName }}" is done!
+        <br>View the <a href="report/html?id={{ jobID }}">HTML report</a>, or download the <a href="report/pdf?id={{ jobID }}">PDF report</a>.
     {% else %}
-    Job "{{ jobName }}" is not done yet. This page will auto-refresh every {{ autorefresh }} seconds.
+        Job "{{ jobName }}" is not done yet. This page will auto-refresh every {{ autorefresh }} seconds.
     {% endif %}
 {% else %}
     Invalid page. Please enter the ID of the job you are looking for as the value for the URL parameter "id", e.g. "?id=2017-01-22 19:12:53.351963_myJob" and append it to the current url.
