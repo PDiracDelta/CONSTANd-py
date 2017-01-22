@@ -25,7 +25,7 @@ from getInput import getProcessingInput, getJobInput
 from processingFlow import processDf
 from reportFlow import generateReport
 from web import app
-from web.web import DB_setJobReportRelPaths, DB_close, DB_setJobCompleted, DB_setJobFailed
+from web.web import DB_setJobReportRelPaths, DB_setJobCompleted, DB_setJobFailed
 
 fontsize = 30
 fontweight = 'normal'
@@ -696,14 +696,10 @@ if __name__ == '__main__': # this should not execute if main.py is not the main 
 		#jobConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand', previousjobdirName='2016-12-20 14:39:09.476567_COON_SN_nonormnoconstand')
 
 	with app.app_context():
-		jobDirName = os.path.basename(jobConfigFilePath)
-		#try:
-		main(jobConfigFilePath=jobConfigFilePath, doProcessing=doProcessing, doAnalysis=doAnalysis, doReport=doReport,
+		jobDirName = os.path.basename(os.path.abspath(os.path.join(jobConfigFilePath, os.pardir)))
+		try:
+			main(jobConfigFilePath=jobConfigFilePath, doProcessing=doProcessing, doAnalysis=doAnalysis, doReport=doReport,
 		     testing=testing, writeToDisk=writeToDisk)
-		DB_setJobCompleted(jobDirName)
-		#except:
-		#	print('X\n')  # TEST
-		DB_setJobFailed(jobDirName)
-		#finally:
-			#DB_close()
-		#	pass
+			DB_setJobCompleted(jobDirName)
+		except:
+			DB_setJobFailed(jobDirName)

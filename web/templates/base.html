@@ -3,6 +3,9 @@
 <head>
     {% block head %}
         <meta charset="UTF-8">
+        {% if autorefresh %}
+            <meta http-equiv="refresh" content="{{ autorefresh }}">
+        {% endif %}
         {% if title %}
             <title>{{ title }} - CONSTANd++</title>
         {% else %}
