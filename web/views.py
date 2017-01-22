@@ -15,7 +15,7 @@ def home():
 
 
 @app.route('/report/html')
-def report():
+def htmlreport():
 	jobID = request.args.get('id', '')
 	cur = DB_getJobVar(jobID, 'htmlreport')
 	htmlreportName = os.path.basename(cur.fetchall()[0][0])
@@ -25,13 +25,18 @@ def report():
 
 
 @app.route('/report/pdf')
-def getFile():
+def pdfreport():
 	jobID = request.args.get('id', '')
 	cur = DB_getJobVar(jobID, 'pdfreport')
 	pdfreportName = os.path.basename(cur.fetchall()[0][0])
 	resultsFullPath = os.path.join(app.config.get('ALLJOBSDIR'), jobID + '/results/')
 	#pdfFileName = request.args.get('pdfreport', '')
 	return send_from_directory(resultsFullPath, pdfreportName, as_attachment=True)
+
+
+@app.route('/file')
+def getFile(filename):
+	return send_from_directory('../../doc/figures/reportexample/', filename, as_attachment=True)
 
 
 @app.route('/docu')

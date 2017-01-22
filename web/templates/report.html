@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+</head>
+<body>
+<h1 id="constand-report-{{ jobName }}"><span class="header-section-number">1</span> CONSTAND++ report: {{ jobName }}</h1>
+<h2 id="differential-expression-analysis"><span class="header-section-number">1.1</span> Differential Expression Analysis</h2>
+{% if minExpression_bool %}
+  <h3 id="minimal-expression"><span class="header-section-number">1.1</span> Minimal expression</h3>
+  <center>
+  <img src="{{ url_for('getFile', filename='{{ minVolcanoFileName }}') }}" title="minimal expression volcano plot" style="width:70.0%" />
+  </center>
+  <table>
+  <colgroup>
+  <col width="7%" />
+  <col width="58%" />
+  <col width="16%" />
+  <col width="18%" />
+  </colgroup>
+  <thead>
+  <tr class="header">
+  <th align="left">protein</th>
+  <th align="left">description</th>
+  <th align="left">fold change</th>
+  <th align="left">adjusted p-value</th>
+  </tr>
+  </thead>
+  <tbody>
+  {% for diff in mindifferentials %}
+    <tr class="odd"> <!-- even -->
+    <td align="left">{{ diff.protein }}</td>
+    <td align="left">{{ diff.description }}</td>
+    <td align="left">{{ diff.fc }}</td>
+    <td align="left">{{ diff.p }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+{% endif %}
+{% if fullExpression_bool %}
+  <h3 id="full-expression"><span class="header-section-number">1.2</span> Full expression</h3>
+  <center>
+  <img src="{{ url_for('getFile', filename='{{ fullVolcanoFileName }}') }}" title="full expression volcano plot" style="width:70.0%" />
+  </center>
+  <table>
+  <colgroup>
+  <col width="7%" />
+  <col width="58%" />
+  <col width="16%" />
+  <col width="18%" />
+  </colgroup>
+  <thead>
+  <tr class="header">
+  <th align="left">protein</th>
+  <th align="left">description</th>
+  <th align="left">fold change</th>
+  <th align="left">adjusted p-value</th>
+  </tr>
+  </thead>
+  <tbody>
+  {% for diff in fulldifferentials %}
+    <tr class="odd"> <!-- even -->
+    <td align="left">{{ diff.protein }}</td>
+    <td align="left">{{ diff.description }}</td>
+    <td align="left">{{ diff.fc }}</td>
+    <td align="left">{{ diff.p }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+{% endif %}
+<h2 id="quality-control"><span class="header-section-number">2</span> Quality control</h2>
+<h3 id="principal-components-analysis-plot"><span class="header-section-number">2.1</span> Principal components analysis plot</h3>
+<center>
+<img src="{{ url_for('getFile', filename='{{ PCAFileName }}') }}" title="PCA plot" style="width:70.0%" />
+</center>
+<h3 id="hierarchical-clustering-dendrogram"><span class="header-section-number">2.2</span> Hierarchical clustering dendrogram</h3>
+<center>
+<img src="{{ url_for('getFile', filename='{{ HCDFileName }}') }}" title="HC Dendrogram plot" style="width:70.0%" />
+</center>
+<h3 id="miscellaneous"><span class="header-section-number">2.3</span> Miscellaneous</h3>
+<ul>
+  <li>Number of peptides without master protein accession = {{ numNoProtein }}</li>
+  <li>Number of peptides found in every condition across all experiments = {{ numCommonPeptides }}</li>
+  <li>Number of peptides not found in every condition across all experiments = {{ numUnCommonPeptides }}</li>
+  <li>Number of proteins in the minimal expression result = {{ minNumProteins }}</li>
+  <li>Number of proteins in the full expression result = {{ fullNumProteins }}</li>
+</ul>
+<h2 id="metadata"><span class="header-section-number">3</span> Metadata</h2>
+<ul>
+  <li>CONSTANd++ version = 0.1</li>
+  <li>date = {{ date }}</li>
+  <li>duration = {{ duration }}</li>
+</ul>
+<h3 id="log"><span class="header-section-number">3.1</span> log</h3>
+<p>
+{% for line in log %}
+  {{ line }}<br />
+{% endfor %}
+</p>
+<h3 id="configuration"><span class="header-section-number">3.2</span> Configuration</h3>
+<h4 id="schema"><span class="header-section-number">3.2.1</span> Schema</h4>
+<table>
+<thead>
+  <tr class="header">
+  <th align="center">experiment</th>
+  <th align="center">condition 1</th>
+  <th align="center">condition 2</th>
+  </tr>
+</thead>
+<tbody>
+{% for e in experiments %}
+  <tr class="odd">
+  <td align="center">{{ e.eName }}</td>
+  <td align="center">{{ e.cond1Aliases }}</td>
+  <td align="center">{{ e.cond2Aliases }}</td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+<h4 id="job-{{ jobName }}"><span class="header-section-number">3.2.2</span> Job {{ jobName }}</h4>
+  <ul>
+    {% for p in jobParams %}
+      <li>{{ p }} = {{ jobParams.p }}</li>
+  </ul>
+{% for e in experiments %}
+{% set sectionNumber = loop.index + 2 %}
+  <h4 id="processing-{{ e.eName }}"><span class="header-section-number">3.2.{{ sectionNumber }}</span> Processing {{ e.eName }}</h4>
+    <ul>
+      {% for p in e.processingParams %}
+        <li>{{ p }} = {{ e.processingParams.p }}</li>
+    </ul>
+{% endfor %}
+</body>
+</html>
