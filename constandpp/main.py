@@ -663,14 +663,14 @@ if __name__ == '__main__': # this should not execute if main.py is not the main 
 	args = sys.argv
 	print(str(args)) # TEST
 	if len(args) != 1:
-		assert len(args) == 7
+		assert len(args) == 7 # todo use argparser
 		jobConfigFilePath = args[1]
-		doProcessing = bool(args[2])
-		doAnalysis = bool(args[3])
-		doReport = bool(args[4])
-		writeToDisk = bool(args[5])
-		testing = bool(args[6])
-
+		doProcessing = (args[2] == 'True')
+		doAnalysis = (args[3] == 'True')
+		doReport = (args[4] == 'True')
+		writeToDisk = (args[5] == 'True')
+		testing = (args[6] == 'True')
+		print('\n'+str(testing))
 	# so if you start main.py from within web.py or something, this won't be executed
 	else:
 		doProcessing = True

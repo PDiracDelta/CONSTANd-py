@@ -4,7 +4,7 @@ import os, datetime
 from dataIO import unnest
 from json import dumps
 from web import app, mailer, get_db, close_connection
-from subprocess import run
+from subprocess import Popen, PIPE
 
 
 def newJobDir(this_job_name):
@@ -147,13 +147,13 @@ def DB_setJobFailed(jobDirName):
 
 
 def startJob(jobConfigFullPath):
-	run(['python3 ', '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/scripts/main.py', jobConfigFullPath,
+	Popen(['python3 ', app.config.get('MAIN'), jobConfigFullPath,
 	     'True', # doProcessing
 	     'True', # doAnalysis
 	     'True', # doReport
-	     'False', # testing
 	     'True', # writeToDisk
-	     ' &'], shell=True)#, stdin=None, stdout=None, stderr=None)  # RUN CONSTANd++ IN INDEPENDENT SUBPROCESS
+	     'False', # testing
+		 ], shell=True, stdout=PIPE, stderr=PIPE, stdin=PIPE)
 
 
 def TMT2ICM(TMTImpuritiesDF, order=None):
