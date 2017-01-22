@@ -3,7 +3,7 @@ from web import app
 from flask import render_template, send_from_directory, request, redirect, url_for, session, flash
 from .forms import newJobForm, experimentForm, jobSettingsForm
 from werkzeug.utils import secure_filename
-from web.web import updateSchema, DB_close, DB_checkJobExist, DB_insertJob, DB_getJobVar, updateConfigs, updateWrappers, makeJobConfigFile, startJob
+from web.web import updateSchema, DB_checkJobExist, DB_insertJob, DB_getJobVar, updateConfigs, updateWrappers, makeJobConfigFile, startJob
 
 #############################
 #Client side
@@ -11,19 +11,20 @@ from web.web import updateSchema, DB_close, DB_checkJobExist, DB_insertJob, DB_g
 
 @app.route('/')
 def home():
-	#from main import main
-	#from web.webFlow import webFlow
-	#jobConfigFilePath = webFlow(exptype='COON')
-	#main(jobConfigFilePath=jobConfigFilePath, doProcessing=True, doAnalysis=True, doReport=True, testing=False, writeToDisk=True)
-	return render_template('index.html', reportFile='reportexample.html', form=newJobForm())#csrf_enabled=False))
+	return render_template('index.html', reportFile='reportexample.html', form=newJobForm())
 
 
-@app.route('/report/<file>')
+@app.route('/report/html/<path:file>')
 def report(file=None):
-	return render_template(file)
+	if file:
+		parentDirPath = os.path.dirname(file)
+		fileName = os.path.basename(file)
+	else:
+		return "No file path specified."
+	return send_from_directory(fileName, parentDirPath)
 
 
-@app.route('/jobs/<path:filename>')
+@app.route('/report/pdf')
 def getFile(filename):
 	return send_from_directory('../../doc/figures/reportexample/', filename, as_attachment=True)
 
@@ -55,7 +56,7 @@ def newJob():
 			os.removedirs(jobDirPath)
 			session.clear()
 			flash("Invalid schema file format. Please refer to the documentation.")
-			return redirect(url_for('newjob'))
+			return redirect(url_for('newJob'))
 		return redirect(url_for('jobSettings'))
 	return render_template('newjob.html', form=form)
 
@@ -78,13 +79,14 @@ def jobSettings():
 		updateWrappers(jobDir, schema)
 		### STEP 4: get masterConfig from web and update it (add schema, date, path_out, path_results)
 		jobConfigFullPath = makeJobConfigFile(this_job_path=jobDir, this_jobname=session['jobName'], this_schema=schema, form=form)
-		cur = DB_checkJobExist(session['jobDirName'])
+		cur = DB_checkJobExist(session.get('jobDirName'))
 		if not cur.fetchall()[0][0]: # job does not already exist --> create it in the DB and start it.
-			DB_insertJob(session['jobDirName'], session['jobName'])
+			cur = DB_insertJob(session.get('jobDirName'), session.get('jobName'))
+			cur.close()
 			#DB_close()
 			### RUN CONSTANd++ in independent subprocess ###
 			jobProcess = startJob(jobConfigFullPath)
-		redirect(url_for('jobInfo'))
+		return redirect(url_for('jobInfo', id=session.get('jobDirName')))
 	elif len(form.experiments.entries)==0:
 		#form.experiments.label.text = 'experiment'
 		for i in range(len(eNames)): # todo replace by experimentNames = incompleteSchema.keys()
@@ -96,18 +98,21 @@ def jobSettings():
 @app.route('/jobinfo', methods=['GET', 'POST'])
 def jobInfo():
 	jobID = request.args.get('id', '')
-	cur = DB_checkJobExist(jobID)
-	isDone = cur.fetchall()[0][0]
-	if isDone is not None:
-		if isDone:
-			cur = DB_getJobVar(jobID, 'htmlreport')
-			htmlreportPath = cur.fetchall()
-			pdfreportPath = htmlreportPath[0:-4]+'pdf'
-			return render_template('jobinfo.html', done=True, html=htmlreportPath, pdf=pdfreportPath)
+	if jobID: # id has been set
+		cur = DB_checkJobExist(jobID)
+		isDone = cur.fetchall()[0][0]
+		if isDone is not None:
+			if isDone:
+				cur = DB_getJobVar(jobID, 'htmlreport')
+				htmlreportName = os.path.basename(cur.fetchall()[0][0])
+				pdfreportName = htmlreportName[0:-4]+'pdf'
+				return render_template('jobinfo.html', done=True, jobID=jobID, jobName=session.get('jobName'), html=htmlreportName, pdf=pdfreportName)
+			else:
+				return render_template('jobinfo.html', done=False, jobID=jobID, jobName=session.get('jobName'), autorefresh=1)
 		else:
-			return render_template('jobinfo.html', done=False)
+			return "Couldn't find that job (or something else went wrong)."
 	else:
-		return "Couldn't find that job (or something else went wrong)."
+		return render_template('jobinfo.html')
 
 
 @app.route('/htmlreport/<path:jobID>', methods=['GET', 'POST'])

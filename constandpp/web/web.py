@@ -57,16 +57,14 @@ def updateSchema(this_job_path, this_incompleteSchema, form):
 	return this_incompleteSchema
 
 
-def DB_close():
-	close_connection()
-
-
 def DB_checkJobExist(ID):
 	return get_db().execute('SELECT EXISTS(SELECT 1 FROM jobs WHERE id="' + ID + '" LIMIT 1);')
 
 
 def DB_insertJob(jobDirName, jobName):
-	return get_db().execute('INSERT INTO jobs VALUES ("' + jobDirName + '","' + jobName + '","","", 0, 0);')
+	cur = get_db().execute('INSERT INTO jobs VALUES ("' + jobDirName + '","' + jobName + '","","", 0, 0);')
+	get_db().commit()
+	return cur
 
 
 def DB_getJobVar(ID, varName):
@@ -136,14 +134,17 @@ def makeJobConfigFile(this_job_path, this_jobname, this_schema, form):
 def DB_setJobReportRelPaths(jobDirName, resultpath, jobName):
 	get_db().execute('UPDATE jobs SET htmlreport = "' + os.path.join(resultpath, jobName+'_report.html')
 	                 + '", pdfreport = "' + os.path.join(resultpath, jobName+'_report.pdf') + '" WHERE id = "' + jobDirName + '";')
+	get_db().commit()
 
 
 def DB_setJobCompleted(jobDirName):
 	get_db().execute('UPDATE jobs SET done = 1, success = 1 WHERE id = "' + jobDirName + '";')
+	get_db().commit()
 
 
 def DB_setJobFailed(jobDirName):
 	get_db().execute('UPDATE jobs SET done = 1, success = 0 WHERE id = "'+jobDirName+'";')
+	get_db().commit()
 
 
 def startJob(jobConfigFullPath):
