@@ -25,3 +25,4 @@ class jobSettingsForm(FlaskForm):
 	minExpression_bool = BooleanField(default=True)
 	fullExpression_bool = BooleanField(default=False)
 	numDifferentials = IntegerField(default=10)
+	delim_out = SelectField('delim_out', choices=[('\\t', 'tab'), (',', 'comma')], default=('\\t', 'tab'))

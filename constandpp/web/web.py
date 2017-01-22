@@ -116,8 +116,9 @@ def updateWrappers(this_job_path, this_schema):
 
 
 def makeJobConfigFile(this_job_path, this_jobname, this_schema, form):
-	jobConfigFullPath = os.path.join(this_job_path, 'jobConfig_'+this_jobname)
+	jobConfigFullPath = os.path.join(this_job_path, 'jobConfig_'+this_jobname+'.ini')
 	with open(jobConfigFullPath, 'w+') as fout:
+		fout.write('[DEFAULT]\n') # todo enable
 		for field in form:
 			if field.name != 'csrf_token' and field.name != 'experiments':
 				fout.write(field.name + ' = '+ str(field.data) + '\n')

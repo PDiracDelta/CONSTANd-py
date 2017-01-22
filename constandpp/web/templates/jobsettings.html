@@ -20,6 +20,7 @@
             <br>minExpression_bool: {{ form.minExpression_bool() }}
             <br>fullExpression_bool: {{ form.fullExpression_bool() }}
             <br>numDifferentials: {{ form.numDifferentials() }}
+            <br>delim_out: {{ form.delim_out() }}
 
             {% for field in form %}
                 {% for error in field.errors %}
