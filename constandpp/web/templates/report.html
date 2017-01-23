@@ -90,11 +90,11 @@
 </center>
 <h3 id="miscellaneous"><span class="header-section-number">2.3</span> Miscellaneous</h3>
 <ul>
-  <li>Number of peptides without master protein accession = {{ metadata['noMasterProteinAccession'] }}</li>
-  <li>Number of peptides found in every condition across all experiments = {{ metadata['numCommonPeptides'] }}</li>
-  <li>Number of peptides not found in every condition across all experiments = {{ metadata['numUnCommonPeptides'] }}</li>
-  <li>Number of proteins in the minimal expression result = {{ metadata['minNumProteins'] }}</li>
-  <li>Number of proteins in the full expression result = {{ metadata['fullNumProteins'] }}</li>
+  <li>Number of peptides without master protein accession = {{ metadata['numeric'].loc[0, 'numNoMasterProteinAccession'] }}</li>
+  <li>Number of peptides found in every condition across all experiments = {{ metadata['numeric'].loc[0, 'numCommonPeptides'] }}</li>
+  <li>Number of peptides not found in every condition across all experiments = {{ metadata['numeric'].loc[0, 'numUnCommonPeptides'] }}</li>
+  <li>Number of proteins in the minimal expression result = {{ metadata['numeric'].loc[0, 'minNumProteins'] }}</li>
+  <li>Number of proteins in the full expression result = {{ metadata['numeric'].loc[0, 'fullNumProteins'] }}</li>
 </ul>
 <h2 id="metadata"><span class="header-section-number">3</span> Metadata</h2>
 <ul>

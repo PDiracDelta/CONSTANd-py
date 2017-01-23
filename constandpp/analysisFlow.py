@@ -23,6 +23,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	experimentNames = processingResults.keys()
 	# contains statistics and metadata (like the parameters) about the analysis.
 	metadata = {}
+	metadata['numeric'] = pd.DataFrame()
 	# record detections without isotopic correction applied applied. Multi-indexed on experiment names and old indices!
 	try:
 		metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for
@@ -44,6 +45,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 			minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF)
 		else:
 			minProteinPeptidesDict, __, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF)
+		metadata['numeric'].loc[0, 'numNoMasterProteinAccession'] = len(metadata['noMasterProteinAccession'])
 
 		if params['minExpression_bool']:
 			# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
@@ -52,7 +54,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 			# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
 			# nan values for a certain condition and keep the removed ones in metadata
 			minProteinDF, metadata['minSingleConditionProteins'] = applyDifferentialExpression(minProteinDF, params['alpha'])
-			metadata['minNumProteins'] = len(minProteinDF)
+			metadata['numeric'].loc[0, 'minNumProteins'] = len(minProteinDF)
 
 			# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
 			minProteinDF = applyFoldChange(minProteinDF, params['pept2protCombinationMethod'])
@@ -70,7 +72,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 			# nan values for a certain condition and keep the removed ones in metadata
 			fullProteinDF, metadata['fullSingleConditionProteins'] = applyDifferentialExpression(fullProteinDF,
 			                                                                                     params['alpha'])
-			metadata['fullNumProteins'] = len(fullProteinDF)
+			metadata['numeric'].loc[0, 'fullNumProteins'] = len(fullProteinDF)
 
 			# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
 			fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
@@ -85,8 +87,8 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 
 	# dataframe with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
 	allExperimentsIntensitiesPerCommonPeptide, metadata['uncommonPeptides'] = getAllExperimentsIntensitiesPerCommonPeptide(dfs, params['schema'])
-	metadata['numUnCommonPeptides'] = len(metadata['uncommonPeptides'])
-	metadata['numCommonPeptides'] = len(allExperimentsIntensitiesPerCommonPeptide) - metadata['numUnCommonPeptides']
+	metadata['numeric'].loc[0, 'numUnCommonPeptides'] = len(metadata['uncommonPeptides'])
+	metadata['numeric'].loc[0, 'numCommonPeptides'] = len(allExperimentsIntensitiesPerCommonPeptide) - metadata['numeric'].loc[0, 'numUnCommonPeptides']
 	# save the amount of NaN values per channel for common peptides.
 	metadata['commonNanValues'] = pd.DataFrame(np.sum(np.isnan(allExperimentsIntensitiesPerCommonPeptide), axis=0))
 	# perform PCA

@@ -64,16 +64,20 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 				           filename=params['jobname'] + '_minSortedDifferentials', delim_out='\t')
 				minVolcanoFullPath = exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
 				           filename=params['jobname'] + '_minVolcanoPlot')
+			else:
+				minVolcanoFullPath = None
 			if params['fullExpression_bool']:
 				exportData(fullSortedDifferentialProteinsDF, dataType='df', path_out=params['path_results'],
 						   filename=params['jobname'] + '_fullSortedDifferentials', delim_out='\t')
 				fullVolcanoFullPath = exportData(fullVolcanoPlot, dataType='fig', path_out=params['path_results'],
 				           filename=params['jobname'] + '_fullVolcanoPlot')
+			else:
+				fullVolcanoFullPath = None
 	else:
 		minSortedDifferentialProteinsDF = pd.DataFrame()
 		fullSortedDifferentialProteinsDF = pd.DataFrame()
-		minVolcanoPlot = None
-		fullVolcanoPlot = None
+		minVolcanoFullPath = None
+		fullVolcanoFullPath = None
 
 	PCAPlot = getPCAPlot(PCAResult, params['schema'])
 	if writeToDisk:
