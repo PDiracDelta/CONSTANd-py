@@ -280,8 +280,8 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 	experiments = jobParams['schema']
 	for e in experiments:
 		experiments[e]['cond1Aliases'] = experiments[e]['channelAliasesPerCondition'][0]
-	htmlReport = render_template('report.html', jobName=jobParams['jobname'], minVolcanoFileName=minVolcanoFullPath,
-	                             fullVolcanoFileName=fullVolcanoFullPath, minExpression_bool=jobParams['minExpression_bool'],
+	htmlReport = render_template('report.html', jobName=jobParams['jobname'], minVolcanoFullPath=minVolcanoFullPath,
+	                             fullVolcanoFullPath=fullVolcanoFullPath, minExpression_bool=jobParams['minExpression_bool'],
 	                             fullExpression_bool=jobParams['fullExpression_bool'], mindifferentials=minTopDifferentials,
 	                             fulldifferentials=fullTopDifferentials, PCAFileName=PCAPlotFullPath,
 	                             HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
