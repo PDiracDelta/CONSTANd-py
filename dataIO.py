@@ -213,13 +213,14 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 			assert isinstance(data, pd.DataFrame)
 			data.to_csv(fullPath, sep=delim_out, index=False)
 	elif dataType == 'fig':
-		outFileName = os.path.join(path_out, filename)
-		with open(outFileName+'.pkl', "wb") as fout:
+		outFileFullPathNoExt = os.path.join(path_out, filename)
+		with open(outFileFullPathNoExt+'.pkl', "wb") as fout:
 			# save as pickle. Load again later as: ax = pickle.load(file('myplot.pickle')); then plt.show()
 			pickle.dump(data, fout, protocol=4)
 		from matplotlib import pyplot as plt
 		#ax = data
-		plt.savefig(outFileName+'.png', format='png', bbox_inches='tight')
+		plt.savefig(outFileFullPathNoExt+'.png', format='png', bbox_inches='tight')
+		return outFileFullPathNoExt+'.png'
 	elif dataType == 'html':
 		fullPath += '.html'
 		with open(fullPath, 'w') as htmlFile:
