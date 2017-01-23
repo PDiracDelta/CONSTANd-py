@@ -26,6 +26,7 @@ from processingFlow import processDf
 from reportFlow import generateReport
 from web import app
 from web.web import DB_setJobReportRelPaths, DB_setJobCompleted, DB_setJobFailed
+from traceback import print_exc
 
 fontsize = 30
 fontweight = 'normal'
@@ -670,16 +671,16 @@ if __name__ == '__main__': # this should not execute if main.py is not the main 
 		doReport = (args[4] == 'True')
 		writeToDisk = (args[5] == 'True')
 		testing = (args[6] == 'True')
-		print('\n'+str(testing))
 	# so if you start main.py from within web.py or something, this won't be executed
 	else:
 		doProcessing = True
-		doAnalysis = False
+		doAnalysis = True
 		doReport = True
 		writeToDisk = True
-		testing = True
+		testing = False
 
-		jobConfigFilePath = 'job/jobConfig.ini' # TEST
+		#jobConfigFilePath = 'job/jobConfig.ini' # TEST
+		jobConfigFilePath = '../jobs/2017-01-23 02:03:45.691804_plz/jobConfig_plz.ini'
 		#jobConfigFilePath = webFlow(exptype='COON')
 		#jobConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-26 10:56:10.646919_COON')
 		#jobConfigFilePath = webFlow(exptype='COON_SN')
@@ -703,3 +704,4 @@ if __name__ == '__main__': # this should not execute if main.py is not the main 
 			DB_setJobCompleted(jobDirName)
 		except:
 			DB_setJobFailed(jobDirName)
+			print_exc()

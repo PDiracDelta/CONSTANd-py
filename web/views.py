@@ -95,13 +95,12 @@ def jobSettings():
 		if not cur.fetchall()[0][0]: # job does not already exist --> create it in the DB and start it.
 			cur = DB_insertJob(session.get('jobDirName'), session.get('jobName'))
 			cur.close()
-			#DB_close()
 			### RUN CONSTANd++ in independent subprocess ###
 			jobProcess = startJob(jobConfigFullPath)
 		return redirect(url_for('jobInfo', id=session.get('jobDirName')))
 	elif len(form.experiments.entries)==0:
 		#form.experiments.label.text = 'experiment'
-		for i in range(len(eNames)): # todo replace by experimentNames = incompleteSchema.keys()
+		for i in range(len(eNames)):
 			form.experiments.append_entry(experimentForm(prefix=eNames[i]))
 		form = hackExperimentNamesIntoForm(form, eNames)
 	return render_template('jobsettings.html', jobName=session.get('jobName'), form=form)
@@ -111,7 +110,7 @@ def jobSettings():
 def jobInfo():
 	jobID = request.args.get('id', '')
 	if jobID: # id has been set
-		cur = DB_checkJobExist(jobID)
+		cur = DB_getJobVar('done')
 		isDone = cur.fetchall()[0][0]
 		if isDone is not None:
 			if isDone:
