@@ -172,7 +172,7 @@ def getJobInput(masterConfigFilePath):
 	jobdir = os.path.abspath(os.path.join(masterConfigFilePath, os.pardir))
 
 	config = configparser.ConfigParser(allow_no_value=True, comment_prefixes=';',
-	                                   inline_comment_prefixes='@')
+	                                   inline_comment_prefixes='$')
 	config.optionxform = str  # so that strings dont automatically get .lower()-ed
 	config.read(masterConfigFilePath, encoding='utf-8')
 
@@ -190,7 +190,9 @@ def getJobInput(masterConfigFilePath):
 	path_out = config.get('DEFAULT', 'path_out')
 	path_results = config.get('DEFAULT', 'path_results')
 	jobname = config.get('DEFAULT', 'jobname')
+	jobID = config.get('DEFAULT', 'jobID')
 	delim_out = gd("unicode_escape")(config.get('DEFAULT', 'delim_out'))[0]  # treat delimiters correctly: ignore first escape
+	mailRecipient = config.get('DEFAULT', 'mailRecipient')
 
 	if PCA_components < 2:
 		raise Exception("Minimum number of principal coponents is 2.")
@@ -214,7 +216,9 @@ def getJobInput(masterConfigFilePath):
 		'path_out': path_out,
 		'path_results': path_results,
 		'jobname': jobname,
-		'delim_out': delim_out
+		'jobID': jobID,
+		'delim_out': delim_out,
+		'mailRecipient': mailRecipient
 	}
 
 	return masterParams

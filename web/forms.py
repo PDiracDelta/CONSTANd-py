@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 #from flask_wtf.file import FileField
-from wtforms import StringField, RadioField, BooleanField, IntegerField, SelectField, FileField, FieldList, FormField, FloatField
+from wtforms import StringField, BooleanField, IntegerField, SelectField, FileField, FieldList, FormField, FloatField
 from wtforms.validators import DataRequired
 #from werkzeug.utils import secure_filename
 
@@ -26,3 +26,4 @@ class jobSettingsForm(FlaskForm):
 	fullExpression_bool = BooleanField(default=False)
 	numDifferentials = IntegerField(default=10)
 	delim_out = SelectField('delim_out', choices=[('\\t', 'tab'), (',', 'comma')], default=('\\t', 'tab'))
+	mailRecipient = StringField(default="foo@bar.baz")
