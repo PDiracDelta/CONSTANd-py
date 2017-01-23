@@ -47,12 +47,16 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			# data visualization
 			minVolcanoPlot = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
 			                                params['labelVolcanoPlotAreas'])
+		else:
+			minSortedDifferentialProteinsDF = pd.DataFrame()
 		if params['fullExpression_bool']:
 			fullSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(fullProteinDF)
 			fullSet = set(fullSortedDifferentialProteinsDF['protein'])
 			# data visualization
 			fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
 			                                 params['labelVolcanoPlotAreas'])
+		else:
+			fullSortedDifferentialProteinsDF = pd.DataFrame()
 		if params['minExpression_bool'] and params['fullExpression_bool']:
 			# list( [in min but not in full], [in full but not in min] )
 			metadata['diffMinFullProteins'] = [list(minSet.difference(fullSet)), list(fullSet.difference(minSet))]

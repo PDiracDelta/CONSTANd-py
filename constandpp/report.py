@@ -156,8 +156,14 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	plt.scatter(xdataNO, ydataNO, color='k', figure=volcanoPlot)
 	
 	# adjust limits
-	plt.xlim([int(min(min(xdataFC), min(xdataYES))), np.ceil(max(max(xdataFC), max(xdataYES)))])
-	plt.ylim([0, np.ceil(max(max(ydataP), max(ydataYES))/5)*5]) # int(base * round(float(x)/base))
+	try:
+		plt.xlim([int(min(min(xdataFC), min(xdataYES))), np.ceil(max(max(xdataFC), max(xdataYES)))])
+	except ValueError:
+		plt.xlim([-5,5])
+	try:
+		plt.ylim([0, np.ceil(max(max(ydataP), max(ydataYES))/5)*5]) # int(base * round(float(x)/base))
+	except ValueError:
+		plt.ylim([0, 100])  # int(base * round(float(x)/base))
 	# annotate where requested
 	for labelPlotBool,xdata,ydata,labels in zip(labelPlot,[xdataYES, xdataP, xdataFC, xdataNO],
 	                              [ydataYES, ydataP, ydataFC, ydataNO],
@@ -254,15 +260,27 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 	from flask import render_template
 	from time import time
 	numDifferentials = jobParams['numDifferentials']
-	minTopDifferentials = minSortedDifferentialProteinsDF.loc[range(numDifferentials), :]
-	fullTopDifferentials = fullSortedDifferentialProteinsDF.loc[range(numDifferentials), :]
+	if jobParams['minExpression_bool']:
+		if numDifferentials < len(minSortedDifferentialProteinsDF):
+			minTopDifferentials = minSortedDifferentialProteinsDF.loc[range(numDifferentials), :]
+		else:
+			minTopDifferentials = minSortedDifferentialProteinsDF
+	else:
+		minTopDifferentials = pd.DataFrame(columns=minSortedDifferentialProteinsDF.columns)
+	if jobParams['fullExpression_bool']:
+		if numDifferentials < len(fullSortedDifferentialProteinsDF):
+			fullTopDifferentials = fullSortedDifferentialProteinsDF.loc[range(numDifferentials), :]
+		else:
+			fullTopDifferentials = fullSortedDifferentialProteinsDF
+	else:
+		fullTopDifferentials = pd.DataFrame(columns=fullSortedDifferentialProteinsDF.columns)
 	with open(logFilePath, 'r') as logFile:
 		logContents = logFile.readlines()
 	approxDuration = time() - startTime
 	experiments = jobParams['schema']
 	for e in experiments:
 		experiments[e]['cond1Aliases'] = experiments[e]['channelAliasesPerCondition'][0]
-	htmlReport = render_template(jobName=jobParams['jobname'], minVolcanoFileName=minVolcanoFullPath,
+	htmlReport = render_template('report.html', jobName=jobParams['jobname'], minVolcanoFileName=minVolcanoFullPath,
 	                             fullVolcanoFileName=fullVolcanoFullPath, minExpression_bool=jobParams['minExpression_bool'],
 	                             fullExpression_bool=jobParams['fullExpression_bool'], mindifferentials=minTopDifferentials,
 	                             fulldifferentials=fullTopDifferentials, PCAFileName=PCAPlotFullPath,
