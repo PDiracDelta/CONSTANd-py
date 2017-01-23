@@ -9,7 +9,7 @@ from report import *
 from dataIO import exportData
 
 
-def generateReport(analysisResults, params, logFilePath, writeToDisk):
+def generateReport(analysisResults, params, logFilePath, writeToDisk, processingParams, startTime):
 	# todo docu
 	minProteinDF = analysisResults[0]
 	fullProteinDF = analysisResults[1]
@@ -62,12 +62,12 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 			if params['minExpression_bool']:
 				exportData(minSortedDifferentialProteinsDF, dataType='df', path_out=params['path_results'],
 				           filename=params['jobname'] + '_minSortedDifferentials', delim_out='\t')
-				exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
+				minVolcanoFullPath = exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
 				           filename=params['jobname'] + '_minVolcanoPlot')
 			if params['fullExpression_bool']:
 				exportData(fullSortedDifferentialProteinsDF, dataType='df', path_out=params['path_results'],
 						   filename=params['jobname'] + '_fullSortedDifferentials', delim_out='\t')
-				exportData(fullVolcanoPlot, dataType='fig', path_out=params['path_results'],
+				fullVolcanoFullPath = exportData(fullVolcanoPlot, dataType='fig', path_out=params['path_results'],
 				           filename=params['jobname'] + '_fullVolcanoPlot')
 	else:
 		minSortedDifferentialProteinsDF = pd.DataFrame()
@@ -77,18 +77,21 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk):
 
 	PCAPlot = getPCAPlot(PCAResult, params['schema'])
 	if writeToDisk:
-		exportData(PCAPlot, dataType='fig', path_out=params['path_results'],
+		PCAPlotFullPath = exportData(PCAPlot, dataType='fig', path_out=params['path_results'],
 		           filename=params['jobname'] + '_PCAPlot')
 	HCDendrogram = getHCDendrogram(HCResult, params['schema'])
 	if writeToDisk:
-		exportData(HCDendrogram, dataType='fig', path_out=params['path_results'],
+		HCDendrogramFullPath = exportData(HCDendrogram, dataType='fig', path_out=params['path_results'],
 		           filename=params['jobname'] + '_HCDendrogram')
 
 	# generate HTML and PDF reports # todo
-	htmlReport = makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, params['numDifferentials'], minVolcanoPlot,
-	                      fullVolcanoPlot, PCAPlot, HCDendrogram, metadata, logFilePath)
-
 	if writeToDisk:
+		htmlReport = makeHTML(jobParams=params, processingParams=processingParams,
+		                      minSortedDifferentialProteinsDF=minSortedDifferentialProteinsDF,
+		                      fullSortedDifferentialProteinsDF=fullSortedDifferentialProteinsDF,
+		                      minVolcanoFullPath=minVolcanoFullPath, fullVolcanoFullPath=fullVolcanoFullPath,
+		                      PCAPlotFullPath=PCAPlotFullPath, HCDendrogramFullPath=HCDendrogramFullPath,
+		                      metadata=metadata, logFilePath=logFilePath, startTime=startTime)
 		htmlFullPath = exportData(htmlReport, dataType='html', path_out=params['path_results'],
 		           filename=params['jobname'] + '_report')
 

@@ -239,8 +239,8 @@ def getHCDendrogram(HCResult, schema):
 	return HCDendrogram
 
 
-def makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, numDifferentials, minVolcanoPlot,
-	                      fullVolcanoPlot, PCAPlot, HCDendrogram, metadata, logFilePath):
+def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, minVolcanoFullPath,
+             fullVolcanoFullPath, PCAPlotFullPath, HCDendrogramFullPath, metadata, logFilePath, startTime):
 	"""
 	Pour all report ingredients into an HTML file.
 	:param minSortedDifferentialProteinsDF:     pd.DataFrame
@@ -251,7 +251,24 @@ def makeHTML(minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, 
 	:return:
 	"""
 	# todo docu
-	htmlReport = "<html>hi hell</html>"
+	from flask import render_template
+	from time import time
+	numDifferentials = jobParams['numDifferentials']
+	minTopDifferentials = minSortedDifferentialProteinsDF.loc[range(numDifferentials), :]
+	fullTopDifferentials = fullSortedDifferentialProteinsDF.loc[range(numDifferentials), :]
+	with open(logFilePath, 'r') as logFile:
+		logContents = logFile.readlines()
+	approxDuration = time() - startTime
+	experiments = jobParams['schema']
+	for e in experiments:
+		experiments[e]['cond1Aliases'] = experiments[e]['channelAliasesPerCondition'][0]
+	htmlReport = render_template(jobName=jobParams['jobname'], minVolcanoFileName=minVolcanoFullPath,
+	                             fullVolcanoFileName=fullVolcanoFullPath, minExpression_bool=jobParams['minExpression_bool'],
+	                             fullExpression_bool=jobParams['fullExpression_bool'], mindifferentials=minTopDifferentials,
+	                             fulldifferentials=fullTopDifferentials, PCAFileName=PCAPlotFullPath,
+	                             HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
+	                             duration=approxDuration, log=logContents, jobParams=jobParams,
+	                             processingParams=processingParams, experiments=experiments)
 	return htmlReport
 
 
