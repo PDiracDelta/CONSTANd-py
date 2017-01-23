@@ -100,7 +100,7 @@ def jobSettings():
 			### RUN CONSTANd++ in independent subprocess ###
 			jobProcess = startJob(jobConfigFullPath)
 		### SEND JOB START MAIL ###
-		send_mail(recipient='xtrajoris@gmail.com', mailBodyFile='jobstartedMail', jobname=session.get('jobName'), jobID=jobID, attachment=None)
+		send_mail(recipient=form.mailRecipient.data, mailBodyFile='jobstartedMail', jobname=session.get('jobName'), jobID=jobID, attachment=None)
 		return redirect(url_for('jobInfo', id=session.get('jobDirName')))
 	elif len(form.experiments.entries)==0:
 		#form.experiments.label.text = 'experiment'
