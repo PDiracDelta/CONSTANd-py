@@ -233,7 +233,7 @@ def getHCDendrogram(HCResult, schema):
 	plt.ylabel('reporter channel', figure=HCDendrogram)
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
 	channelColorsDict = getColours(schema, allChannelAliases)
-	dendrogram(HCResult, orientation='right', leaf_rotation=0., leaf_font_size=12, labels=allChannelAliases,
+	dendrogram(HCResult, orientation='right', leaf_rotation=0., leaf_font_size=24, labels=allChannelAliases,
 	           link_color_func=lambda x: channelColorsDict[allChannelAliases[x]] if x < len(allChannelAliases) else 'k',
 	           above_threshold_color='k')
 	ax = plt.gca()
