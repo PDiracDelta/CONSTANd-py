@@ -12,7 +12,11 @@
 {% if minExpression_bool %}
   <h3 id="minimal-expression"><span class="header-section-number">1.1</span> Minimal expression</h3>
   <center>
-  <img src="file://{{ minVolcanoFullPath }}"title="minimal expression volcano plot" style="width:70.0%" />
+  {% if pdfsrc %}
+    <img src="file://{{ minVolcanoFullPath }}"title="minimal expression volcano plot" style="width:70.0%" />
+  {% else %}
+    <img src="/static/{{ minVolcanoFullPath }}"title="minimal expression volcano plot" style="width:70.0%" />
+  {% endif %}
   </center>
   <table>
   <colgroup>
@@ -47,7 +51,11 @@
 {% if fullExpression_bool %}
   <h3 id="full-expression"><span class="header-section-number">1.2</span> Full expression</h3>
   <center>
-  <img src="file://{{ fullVolcanoFullPath }}"title="full expression volcano plot" style="width:70.0%" />
+  {% if pdfsrc %}
+  <img src="file://{{ fullVolcanoFullPath }}" title="full expression volcano plot" style="width:70.0%" />
+  {% else %}
+    <img src="/static/{{ minVolcanoFullPath }}" title="minimal expression volcano plot" style="width:70.0%" />
+  {% endif %}
   </center>
   <table>
   <colgroup>
@@ -82,19 +90,31 @@
 <h2 id="quality-control"><span class="header-section-number">2</span> Quality control</h2>
 <h3 id="principal-components-analysis-plot"><span class="header-section-number">2.1</span> Principal components analysis plot</h3>
 <center>
-<img src="file://{{ PCAFileName }}" title="PCA plot" style="width:70.0%" />
+{% if pdfsrc %}
+  <img src="file://{{ PCAFileName }}" title="PCA plot" style="width:70.0%" />
+{% else %}
+  <img src="/static/{{ PCAFileName }}" title="PCA plot" style="width:70.0%" />
+{% endif %}
 </center>
 <h3 id="hierarchical-clustering-dendrogram"><span class="header-section-number">2.2</span> Hierarchical clustering dendrogram</h3>
 <center>
-<img src="file://{{ HCDFileName }}" title="HC Dendrogram plot" style="width:70.0%" />
+{% if pdfsrc %}
+  <img src="file://{{ HCDFileName }}" title="HC Dendrogram plot" style="width:70.0%" />
+{% else %}
+  <img src="/static/{{ HCDFileName }}" title="HC Dendrogram plot" style="width:70.0%" />
+{% endif %}
 </center>
 <h3 id="miscellaneous"><span class="header-section-number">2.3</span> Miscellaneous</h3>
 <ul>
   <li>Number of peptides without master protein accession = {{ metadata['numeric'].loc[0, 'numNoMasterProteinAccession'] }}</li>
   <li>Number of peptides found in every condition across all experiments = {{ metadata['numeric'].loc[0, 'numCommonPeptides'] }}</li>
   <li>Number of peptides not found in every condition across all experiments = {{ metadata['numeric'].loc[0, 'numUnCommonPeptides'] }}</li>
-  <li>Number of proteins in the minimal expression result = {{ metadata['numeric'].loc[0, 'minNumProteins'] }}</li>
-  <li>Number of proteins in the full expression result = {{ metadata['numeric'].loc[0, 'fullNumProteins'] }}</li>
+  {% if minExpression_bool %}
+    <li>Number of proteins in the minimal expression result = {{ metadata['numeric'].loc[0, 'minNumProteins'] }}</li>
+  {% endif %}
+  {% if fullExpression_bool %}
+    <li>Number of proteins in the full expression result = {{ metadata['numeric'].loc[0, 'fullNumProteins'] }}</li>
+  {% endif %}
 </ul>
 <h2 id="metadata"><span class="header-section-number">3</span> Metadata</h2>
 <ul>
@@ -119,27 +139,27 @@
   </tr>
 </thead>
 <tbody>
-{% for eName in schema %}
+{% for eName, e in jobParams['schema'].items() %}
   <tr class="odd">
   <td align="center">{{ eName }}</td>
-  <td align="center">{{ schema['{{ eName }}']['channelAliasesPerCondition'][0] }}</td>
-  <td align="center">{{ schema['{{ eName }}']['channelAliasesPerCondition'][1] }}</td>
+  <td align="center">{{ e['channelAliasesPerCondition'][0] }}</td>
+  <td align="center">{{ e['channelAliasesPerCondition'][1] }}</td>
   </tr>
 {% endfor %}
 </tbody>
 </table>
 <h4 id="job-{{ jobName }}"><span class="header-section-number">3.2.2</span> Job {{ jobName }}</h4>
   <ul>
-    {% for p in jobParams %}
-      <li>{{ p }} = {{ jobParams['{{ p }}'] }}</li>
+    {% for p, v in jobParams.items() %}
+      <li>{{ p }} = {{ v }}</li>
     {% endfor %}
   </ul>
-{% for eName in schema %}
+{% for eName, e in processingParams.items() %}
 {% set sectionNumber = loop.index + 2 %}
   <h4 id="processing-{{ eName }}"><span class="header-section-number">3.2.{{ sectionNumber }}</span> Processing {{ eName }}</h4>
     <ul>
-      {% for p in processingParams['{{ eName }}'] %}
-        <li>{{ p }} = {{ processingParams['{{ eName }}']['{{ p }}'] }}</li>
+      {% for p, v in e.items() %}
+        <li>{{ p }} = {{ v }}</li>
       {% endfor %}
     </ul>
 {% endfor %}

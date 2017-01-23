@@ -259,6 +259,16 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 	# todo docu
 	from flask import render_template
 	from time import time
+	from web import app
+	from os import path, pardir
+	allJobdsParDir = path.abspath(path.join(app.config.get('ALLJOBSDIR'), pardir))
+
+	def hackImagePathToSymlinkInStaticDir(old_path):
+		if old_path is not None:
+			return old_path.split(allJobdsParDir)[1].lstrip('/')
+		else:
+			return None
+
 	numDifferentials = jobParams['numDifferentials']
 	if jobParams['minExpression_bool']:
 		if numDifferentials < len(minSortedDifferentialProteinsDF):
@@ -276,24 +286,41 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 		fullTopDifferentials = pd.DataFrame(columns=fullSortedDifferentialProteinsDF.columns)
 	with open(logFilePath, 'r') as logFile:
 		logContents = logFile.readlines()
+
 	approxDuration = time() - startTime
 	experiments = jobParams['schema']
 	for e in experiments:
 		experiments[e]['cond1Aliases'] = experiments[e]['channelAliasesPerCondition'][0]
-	htmlReport = render_template('report.html', jobName=jobParams['jobname'], minVolcanoFullPath=minVolcanoFullPath,
+	pdfhtmlreport = render_template('report.html', jobName=jobParams['jobname'], minVolcanoFullPath=minVolcanoFullPath,
 	                             fullVolcanoFullPath=fullVolcanoFullPath, minExpression_bool=jobParams['minExpression_bool'],
 	                             fullExpression_bool=jobParams['fullExpression_bool'], mindifferentials=minTopDifferentials,
 	                             fulldifferentials=fullTopDifferentials, PCAFileName=PCAPlotFullPath,
 	                             HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 	                             duration=approxDuration, log=logContents, jobParams=jobParams,
+	                             processingParams=processingParams, experiments=experiments, pdfsrc='True')
+	minVolcanoFullPath = hackImagePathToSymlinkInStaticDir(minVolcanoFullPath)
+	fullVolcanoFullPath = hackImagePathToSymlinkInStaticDir(fullVolcanoFullPath)
+	HCDendrogramFullPath = hackImagePathToSymlinkInStaticDir(HCDendrogramFullPath)
+	PCAPlotFullPath = hackImagePathToSymlinkInStaticDir(PCAPlotFullPath)
+	htmlReport = render_template('report.html', jobName=jobParams['jobname'], minVolcanoFullPath=minVolcanoFullPath,
+	                             fullVolcanoFullPath=fullVolcanoFullPath,
+	                             minExpression_bool=jobParams['minExpression_bool'],
+	                             fullExpression_bool=jobParams['fullExpression_bool'],
+	                             mindifferentials=minTopDifferentials,
+	                             fulldifferentials=fullTopDifferentials, PCAFileName=PCAPlotFullPath,
+	                             HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
+	                             duration=approxDuration, log=logContents, jobParams=jobParams,
 	                             processingParams=processingParams, experiments=experiments)
-	return htmlReport
+	return htmlReport, pdfhtmlreport
 
 
 def HTMLtoPDF(htmlReportFullPath):
 	# todo docu
 	from subprocess import run
+
 	pdfReportFullPath = htmlReportFullPath[0:-4]+'pdf'
 	command = 'wkhtmltopdf -L 1cm -R 1cm -T 1cm -B 1cm "'+htmlReportFullPath+'" "'+pdfReportFullPath+'"'
 	run(command, shell=True)
+	rmcmd = 'rm -f "'+htmlReportFullPath+'"'
+	run(rmcmd, shell=True)
 	return pdfReportFullPath
