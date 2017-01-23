@@ -133,7 +133,7 @@ def makeJobConfigFile(this_job_path, this_jobname, this_schema, form):
 
 def DB_setJobReportRelPaths(jobDirName, resultpath, jobName):
 	get_db().execute('UPDATE jobs SET htmlreport = "' + os.path.join(resultpath, jobName+'_report.html')
-	                 + '", pdfreport = "' + os.path.join(resultpath, jobName+'_report.pdf') + '" WHERE id = "' + jobDirName + '";')
+	                 + '", pdfreport = "' + os.path.join(resultpath, jobName+'_Report.pdf') + '" WHERE id = "' + jobDirName + '";')
 	get_db().commit()
 
 

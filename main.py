@@ -680,7 +680,7 @@ if __name__ == '__main__': # this should not execute if main.py is not the main 
 		testing = False
 
 		#jobConfigFilePath = 'job/jobConfig.ini' # TEST
-		jobConfigFilePath = '../jobs/2017-01-23 02:03:45.691804_plz/jobConfig_plz.ini'
+		jobConfigFilePath = '../jobs/2017-01-23 02:40:26.553814_two/jobConfig_two.ini'
 		#jobConfigFilePath = webFlow(exptype='COON')
 		#jobConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-26 10:56:10.646919_COON')
 		#jobConfigFilePath = webFlow(exptype='COON_SN')

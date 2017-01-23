@@ -94,7 +94,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 
 	# generate HTML and PDF reports # todo
 	if writeToDisk:
-		htmlReport = makeHTML(jobParams=params, processingParams=processingParams,
+		htmlReport, pdfhtmlreport = makeHTML(jobParams=params, processingParams=processingParams,
 		                      minSortedDifferentialProteinsDF=minSortedDifferentialProteinsDF,
 		                      fullSortedDifferentialProteinsDF=fullSortedDifferentialProteinsDF,
 		                      minVolcanoFullPath=minVolcanoFullPath, fullVolcanoFullPath=fullVolcanoFullPath,
@@ -102,5 +102,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		                      metadata=metadata, logFilePath=logFilePath, startTime=startTime)
 		htmlFullPath = exportData(htmlReport, dataType='html', path_out=params['path_results'],
 		           filename=params['jobname'] + '_report')
+		pdfhtmlFullPath = exportData(pdfhtmlreport, dataType='html', path_out=params['path_results'],
+		           filename=params['jobname'] + '_Report')
 
-		pdfFullPath = HTMLtoPDF(htmlFullPath)
+		pdfFullPath = HTMLtoPDF(pdfhtmlFullPath)
