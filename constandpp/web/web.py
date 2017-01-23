@@ -254,13 +254,15 @@ def send_mail(recipient, mailBodyFile, jobname, jobID, attachment): # TODO VITO 
 	subject = "Your CONSTANd++ job %s" % (jobname)
 	#body = "=== English version below ===\n\n"
 	#body += "Beste {0} {1},\n\n"
-	with open(os.path.join('static', mailBodyFile), 'r') as f:
+	with open(os.path.join(app.config.root_path, 'static/'+mailBodyFile), 'r') as f:
 		body = f.read()
 	body = body.format(recipient, jobname, jobID)
 
-	msg = Message(subject, recipients=[recipient], body=body, sender=("ULYSSIS", "ulyssis@ulyssis.org"))
-	assert os.path.exists(attachment)
-	aName = os.path.basename(attachment)
-	with app.open_resource(attachment) as a:
-		msg.attach(filename=aName, content_type='application/pdf', data=a.read())
+	msg = Message(subject, recipients=[recipient], body=body, sender=("CONSTANd++", "constand@vito.be"))
+
+	if attachment is not None:
+		assert os.path.exists(attachment)
+		aName = os.path.basename(attachment)
+		with app.open_resource(attachment) as a:
+			msg.attach(filename=aName, content_type='application/pdf', data=a.read())
 	mailer.send(msg)

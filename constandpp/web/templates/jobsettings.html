@@ -6,6 +6,7 @@
     {% if form %}
         {# for e in form.experiments #}
         <div class="input-group">
+            <br>mailRecipient: {{ form.mailRecipient() }}
             <h3>input files:</h3>
             {#
             {{ e.data(size=20,class="form-control") }}
