@@ -260,5 +260,7 @@ def send_mail(recipient, mailBodyFile, jobname, jobID, attachment): # TODO VITO 
 
 	msg = Message(subject, recipients=[recipient], body=body, sender=("ULYSSIS", "ulyssis@ulyssis.org"))
 	assert os.path.exists(attachment)
-	msg.attach(attachment)
+	aName = os.path.basename(attachment)
+	with app.open_resource(attachment) as a:
+		msg.attach(filename=aName, content_type='application/pdf', data=a.read())
 	mailer.send(msg)
