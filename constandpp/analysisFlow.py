@@ -83,6 +83,8 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 
 	# dataframe with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
 	allExperimentsIntensitiesPerCommonPeptide, metadata['uncommonPeptides'] = getAllExperimentsIntensitiesPerCommonPeptide(dfs, params['schema'])
+	metadata['numUnCommonPeptides'] = len(metadata['uncommonPeptides'])
+	metadata['numCommonPeptides'] = len(allExperimentsIntensitiesPerCommonPeptide) - metadata['numUnCommonPeptides']
 	# save the amount of NaN values per channel for common peptides.
 	metadata['commonNanValues'] = pd.DataFrame(np.sum(np.isnan(allExperimentsIntensitiesPerCommonPeptide), axis=0))
 	# perform PCA
