@@ -110,7 +110,7 @@ def jobSettings():
 def jobInfo():
 	jobID = request.args.get('id', '')
 	if jobID: # id has been set
-		cur = DB_getJobVar('done')
+		cur = DB_getJobVar(jobID, 'done')
 		isDone = cur.fetchall()[0][0]
 		if isDone is not None:
 			if isDone:
