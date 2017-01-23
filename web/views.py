@@ -102,6 +102,7 @@ def jobSettings():
 		### SEND JOB START MAIL ###
 		send_mail(recipient=form.mailRecipient.data, mailBodyFile='jobstartedMail', jobname=session.get('jobName'), jobID=jobID, attachment=None)
 		return redirect(url_for('jobInfo', id=session.get('jobDirName')))
+
 	elif len(form.experiments.entries)==0:
 		#form.experiments.label.text = 'experiment'
 		for i in range(len(eNames)):
