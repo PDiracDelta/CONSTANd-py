@@ -110,4 +110,4 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		from web.web import send_mail
 		### SEND JOB COMPLETED MAIL ###
 		send_mail(recipient='xtrajoris@gmail.com', mailBodyFile='reportMail',
-		          jobname=session.get('jobName'), jobID=jobID, attachment=None)
+		          jobname=params['jobname'], jobID=params['jobID'], attachment=pdfFullPath)
