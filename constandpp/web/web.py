@@ -8,7 +8,7 @@ from subprocess import Popen, PIPE
 
 
 def newJobDir(this_job_name):
-	jobBaseDir = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs'
+	jobBaseDir = app.config.get('ALLJOBSDIR')
 	jobPath = os.path.join(jobBaseDir, str(datetime.datetime.now()) + '_' + this_job_name)
 	os.makedirs(jobPath)
 	return os.path.abspath(jobPath)
