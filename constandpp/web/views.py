@@ -81,23 +81,26 @@ def jobSettings():
 	# eforms = {(eName, experimentForm()) for eName in incompleteSchema}
 	# CREATE FORM
 	form = jobSettingsForm()
-	from web.web import hackExperimentNamesIntoForm
+	from web.web import hackExperimentNamesIntoForm, send_mail
 	if form.validate_on_submit():
+		jobID = session.get('jobDirName')
 		form = hackExperimentNamesIntoForm(form, eNames)
-		jobDir = os.path.join(app.config.get('allJobsDir'), session.get('jobDirName'))
+		jobDir = os.path.join(app.config.get('allJobsDir'), jobID)
 		### STEP 2: upload data files, wrapper files, ICM files and config (files), while updating schema with their locations.
 		schema = updateSchema(jobDir, incompleteSchema, form)
 		### STEP 3: update config files and wrapper files
 		updateConfigs(jobDir, schema)
 		updateWrappers(jobDir, schema)
 		### STEP 4: get masterConfig from web and update it (add schema, date, path_out, path_results)
-		jobConfigFullPath = makeJobConfigFile(this_job_path=jobDir, this_jobname=session['jobName'], this_schema=schema, form=form)
-		cur = DB_checkJobExist(session.get('jobDirName'))
+		jobConfigFullPath = makeJobConfigFile(this_job_path=jobDir, this_jobname=session.get('jobName'), jobID=jobID, this_schema=schema, form=form)
+		cur = DB_checkJobExist(jobID)
 		if not cur.fetchall()[0][0]: # job does not already exist --> create it in the DB and start it.
-			cur = DB_insertJob(session.get('jobDirName'), session.get('jobName'))
+			cur = DB_insertJob(jobID, session.get('jobName'))
 			cur.close()
 			### RUN CONSTANd++ in independent subprocess ###
 			jobProcess = startJob(jobConfigFullPath)
+		### SEND JOB START MAIL ###
+		send_mail(recipient='xtrajoris@gmail.com', mailBodyFile='jobstartedMail', jobname=session.get('jobName'), jobID=jobID, attachment=None)
 		return redirect(url_for('jobInfo', id=session.get('jobDirName')))
 	elif len(form.experiments.entries)==0:
 		#form.experiments.label.text = 'experiment'
@@ -123,14 +126,14 @@ def jobInfo():
 	else:
 		return render_template('jobinfo.html')
 
-
-@app.route('/htmlreport/<path:jobID>', methods=['GET', 'POST'])
-def getHtmlReport(jobID):
-	htmlFileName = request.args.get('htmlFileName', '')
-	return send_from_directory(app.config.get('allJobsDir')+jobID, htmlFileName, as_attachment=True)
-
-
-@app.route('/pdfreport/<path:jobID>', methods=['GET', 'POST'])
-def getPdfReport(jobID):
-	pdfFileName = request.args.get('pdfFileName', '')
-	return send_from_directory(app.config.get('allJobsDir')+jobID, pdfFileName, as_attachment=True)
+#
+# @app.route('/htmlreport/<path:jobID>', methods=['GET', 'POST'])
+# def getHtmlReport(jobID):
+# 	htmlFileName = request.args.get('htmlFileName', '')
+# 	return send_from_directory(app.config.get('allJobsDir')+jobID, htmlFileName, as_attachment=True)
+#
+#
+# @app.route('/pdfreport/<path:jobID>', methods=['GET', 'POST'])
+# def getPdfReport(jobID):
+# 	pdfFileName = request.args.get('pdfFileName', '')
+# 	return send_from_directory(app.config.get('allJobsDir')+jobID, pdfFileName, as_attachment=True)

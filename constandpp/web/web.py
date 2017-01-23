@@ -113,7 +113,7 @@ def updateWrappers(this_job_path, this_schema):
 				fout.write(n + '\t' + a + '\n')
 
 
-def makeJobConfigFile(this_job_path, this_jobname, this_schema, form):
+def makeJobConfigFile(this_job_path, this_jobname, jobID, this_schema, form):
 	jobConfigFullPath = os.path.join(this_job_path, 'jobConfig_'+this_jobname+'.ini')
 	with open(jobConfigFullPath, 'w+') as fout:
 		fout.write('[DEFAULT]\n') # todo enable
@@ -123,6 +123,7 @@ def makeJobConfigFile(this_job_path, this_jobname, this_schema, form):
 		# HARD CODED VARIABLES
 		#fout.write('\n')  # so you dont accidentally append to the last line
 		fout.write('jobname = ' + this_jobname + '\n')
+		fout.write('jobID = ' + jobID + '\n')
 		fout.write('path_out = output_analysis\n')
 		fout.write('path_results = results\n')
 		fout.write('PCA_components = 2\n')
