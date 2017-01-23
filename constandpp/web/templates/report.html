@@ -12,7 +12,6 @@
 {% if minExpression_bool %}
   <h3 id="minimal-expression"><span class="header-section-number">1.1</span> Minimal expression</h3>
   <center>
-  <!--<img src="{{ url_for('getFile', fileFullPath='{{ minVolcanoFullPath }}') }}" title="minimal expression volcano plot" style="width:70.0%" />-->
   <img src="file://{{ minVolcanoFullPath }}"title="minimal expression volcano plot" style="width:70.0%" />
   </center>
   <table>
@@ -48,7 +47,6 @@
 {% if fullExpression_bool %}
   <h3 id="full-expression"><span class="header-section-number">1.2</span> Full expression</h3>
   <center>
-  <!--<img src="{{ url_for('getFile', fileFullPath='{{ fullVolcanoFullPath }}') }}" title="full expression volcano plot" style="width:70.0%" />-->
   <img src="file://{{ fullVolcanoFullPath }}"title="full expression volcano plot" style="width:70.0%" />
   </center>
   <table>
@@ -84,12 +82,10 @@
 <h2 id="quality-control"><span class="header-section-number">2</span> Quality control</h2>
 <h3 id="principal-components-analysis-plot"><span class="header-section-number">2.1</span> Principal components analysis plot</h3>
 <center>
-<!--<img src="{{ url_for('getFile', fileFullPath='{{ PCAFileName }}') }}" title="PCA plot" style="width:70.0%" />-->
 <img src="file://{{ PCAFileName }}" title="PCA plot" style="width:70.0%" />
 </center>
 <h3 id="hierarchical-clustering-dendrogram"><span class="header-section-number">2.2</span> Hierarchical clustering dendrogram</h3>
 <center>
-<!--<img src="{{ url_for('getFile', fileFullPath='{{ HCDFileName }}') }}" title="HC Dendrogram plot" style="width:70.0%" />-->
 <img src="file://{{ HCDFileName }}" title="HC Dendrogram plot" style="width:70.0%" />
 </center>
 <h3 id="miscellaneous"><span class="header-section-number">2.3</span> Miscellaneous</h3>
@@ -126,7 +122,6 @@
 {% for eName in schema %}
   <tr class="odd">
   <td align="center">{{ eName }}</td>
-  <!--<td align="center">{{ experiments['{{ eName }}']['{{ cond1Aliases }}'] }}</td>-->
   <td align="center">{{ schema['{{ eName }}']['channelAliasesPerCondition'][0] }}</td>
   <td align="center">{{ schema['{{ eName }}']['channelAliasesPerCondition'][1] }}</td>
   </tr>
