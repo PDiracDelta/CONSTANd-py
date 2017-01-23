@@ -17,13 +17,15 @@
   <table>
   <colgroup>
   <col width="7%" />
-  <col width="58%" />
+  <col width="4%" />
+  <col width="54%" />
   <col width="16%" />
   <col width="18%" />
   </colgroup>
   <thead>
   <tr class="header">
   <th align="left">protein</th>
+  <th align="left">significance</th>
   <th align="left">description</th>
   <th align="left">fold change</th>
   <th align="left">adjusted p-value</th>
@@ -32,10 +34,11 @@
   <tbody>
   {% for diff in mindifferentials %}
     <tr class="odd"> <!-- even -->
-    <td align="left">{{ diff.protein }}</td>
-    <td align="left">{{ diff.description }}</td>
-    <td align="left">{{ diff.fc }}</td>
-    <td align="left">{{ diff.p }}</td>
+    <td align="left">{{ diff['protein'] }}</td>
+    <td align="left">{{ diff['significant'] }}</td>
+    <td align="left">{{ diff['description'] }}</td>
+    <td align="left">{{ diff['log2 fold change c1/c2'] }}</td>
+    <td align="left">{{ diff['adjusted p-value'] }}</td>
     </tr>
   {% endfor %}
   </tbody>
@@ -49,13 +52,15 @@
   <table>
   <colgroup>
   <col width="7%" />
-  <col width="58%" />
+  <col width="4%" />
+  <col width="54%" />
   <col width="16%" />
   <col width="18%" />
   </colgroup>
   <thead>
   <tr class="header">
   <th align="left">protein</th>
+  <th align="left">significance</th>
   <th align="left">description</th>
   <th align="left">fold change</th>
   <th align="left">adjusted p-value</th>
@@ -64,10 +69,11 @@
   <tbody>
   {% for diff in fulldifferentials %}
     <tr class="odd"> <!-- even -->
-    <td align="left">{{ diff.protein }}</td>
-    <td align="left">{{ diff.description }}</td>
-    <td align="left">{{ diff.fc }}</td>
-    <td align="left">{{ diff.p }}</td>
+    <td align="left">{{ diff['protein'] }}</td>
+    <td align="left">{{ diff['significant'] }}</td>
+    <td align="left">{{ diff['description'] }}</td>
+    <td align="left">{{ diff['log2 fold change c1/c2'] }}</td>
+    <td align="left">{{ diff['adjusted p-value'] }}</td>
     </tr>
   {% endfor %}
   </tbody>
@@ -84,11 +90,11 @@
 </center>
 <h3 id="miscellaneous"><span class="header-section-number">2.3</span> Miscellaneous</h3>
 <ul>
-  <li>Number of peptides without master protein accession = {{ numNoProtein }}</li>
-  <li>Number of peptides found in every condition across all experiments = {{ numCommonPeptides }}</li>
-  <li>Number of peptides not found in every condition across all experiments = {{ numUnCommonPeptides }}</li>
-  <li>Number of proteins in the minimal expression result = {{ minNumProteins }}</li>
-  <li>Number of proteins in the full expression result = {{ fullNumProteins }}</li>
+  <li>Number of peptides without master protein accession = {{ metadata['noMasterProteinAccession'] }}</li>
+  <li>Number of peptides found in every condition across all experiments = {{ metadata['numCommonPeptides'] }}</li>
+  <li>Number of peptides not found in every condition across all experiments = {{ metadata['numUnCommonPeptides'] }}</li>
+  <li>Number of proteins in the minimal expression result = {{ metadata['minNumProteins'] }}</li>
+  <li>Number of proteins in the full expression result = {{ metadata['fullNumProteins'] }}</li>
 </ul>
 <h2 id="metadata"><span class="header-section-number">3</span> Metadata</h2>
 <ul>
@@ -113,11 +119,12 @@
   </tr>
 </thead>
 <tbody>
-{% for e in experiments %}
+{% for eName in schema %}
   <tr class="odd">
-  <td align="center">{{ e.eName }}</td>
-  <td align="center">{{ e.cond1Aliases }}</td>
-  <td align="center">{{ e.cond2Aliases }}</td>
+  <td align="center">{{ eName }}</td>
+  <!--<td align="center">{{ experiments['{{ eName }}']['{{ cond1Aliases }}'] }}</td>-->
+  <td align="center">{{ schema['{{ eName }}']['channelAliasesPerCondition'][0] }}</td>
+  <td align="center">{{ schema['{{ eName }}']['channelAliasesPerCondition'][1] }}</td>
   </tr>
 {% endfor %}
 </tbody>
@@ -125,14 +132,14 @@
 <h4 id="job-{{ jobName }}"><span class="header-section-number">3.2.2</span> Job {{ jobName }}</h4>
   <ul>
     {% for p in jobParams %}
-      <li>{{ p }} = {{ jobParams.p }}</li>
+      <li>{{ p }} = {{ jobParams['{{ p }}'] }}</li>
   </ul>
-{% for e in experiments %}
+{% for eName in schema %}
 {% set sectionNumber = loop.index + 2 %}
-  <h4 id="processing-{{ e.eName }}"><span class="header-section-number">3.2.{{ sectionNumber }}</span> Processing {{ e.eName }}</h4>
+  <h4 id="processing-{{ eName }}"><span class="header-section-number">3.2.{{ sectionNumber }}</span> Processing {{ eName }}</h4>
     <ul>
-      {% for p in e.processingParams %}
-        <li>{{ p }} = {{ e.processingParams.p }}</li>
+      {% for p in processingParams['{{ eName }}'] %}
+        <li>{{ p }} = {{ processingParams['{{ eName }}']['{{ p }}'] }}</li>
     </ul>
 {% endfor %}
 </body>

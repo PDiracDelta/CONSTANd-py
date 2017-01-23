@@ -34,9 +34,11 @@ def pdfreport():
 	return send_from_directory(resultsFullPath, pdfreportName, as_attachment=True)
 
 
-@app.route('/file')
-def getFile(filename):
-	return send_from_directory('../../doc/figures/reportexample/', filename, as_attachment=True)
+@app.route('/file/<path:fileFullPath>')
+def getFile(fileFullPath):
+	dirFullPath = os.path.dirname(fileFullPath)
+	fileName = os.path.basename(fileFullPath)
+	return send_from_directory(dirFullPath, fileName, as_attachment=True)
 
 
 @app.route('/docu')
