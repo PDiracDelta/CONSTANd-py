@@ -22,20 +22,6 @@ import numpy as np
 import logging
 from pandas import Series
 
-# intensityColumns = None
-# removalColumnsToSave = None
-# noMissingValuesColumns = None
-#
-#
-# def setProcessingGlobals(intensityColumns, removalColumnsToSave, noMissingValuesColumns):
-# 	"""
-# 	Sets the value of the global variable intensityColumns for use in the module functions.
-# 	:param intensityColumns: list   names of the columns that contain the MS2 intensities
-# 	"""
-# 	globals()['intensityColumns'] = intensityColumns
-# 	globals()['removalColumnsToSave'] = removalColumnsToSave
-# 	globals()['noMissingValuesColumns'] = noMissingValuesColumns
-
 
 def removeObsoleteColumns(df, wantedColumns):
 	"""
@@ -51,8 +37,10 @@ def removeObsoleteColumns(df, wantedColumns):
 def removeMissing(df, noMissingValuesColumns, intensityColumns):
 	"""
 	Removes detections for which entries in essential columns is missing, or which have no quan values or labels.
-	:param df:  pd.dataFrame    with missing values
-	:return df: pd.dataFrame    without missing values
+	:param df:  					pd.dataFrame    data with missing values
+	:param noMissingValuesColumns:	list			columns which may not contain missing values
+	:param intensityColumns:		list			columns that contain the quantification values
+	:return df:						pd.dataFrame    data without missing values
 	"""
 	toDelete = []
 	for column in noMissingValuesColumns:
@@ -76,10 +64,12 @@ def removeBadConfidence(df, minimum, removalColumnsToSave):
 	"""
 	Removes detections from the input dataFrame if they have a confidence level worse than the given minimum. Saves some
 	info about data with lower than minimum confidence levels in removedData.
-	:param df:              pd.dataFrame    data with all confidence levels
-	:param minimum:         str             minimum confidence level
-	:return df:             pd.dataFrame    data with confidence levels > minimum
-	:return removedData:    pd.dataFrame    data with confidence levels < minimum
+	Information of removed entries is saved according to removalColumnsToSave.
+	:param df:              		pd.dataFrame    data with all confidence levels
+	:param minimum:         		str             minimum confidence level
+	:param removalColumnsToSave:	list			fields to save if an entry gets removed
+	:return df:             		pd.dataFrame    data with confidence levels > minimum
+	:return removedData:			pd.dataFrame    data with confidence levels < minimum
 	"""
 	columnsToSave = ['Confidence'] + removalColumnsToSave
 	conf2int = {'Low': 1, 'Medium': 2, 'High': 3}
@@ -98,10 +88,12 @@ def removeIsolationInterference(df, threshold, removalColumnsToSave):
 	"""
 	Remove the data where there is too much isolation interference (above threshold) and return the remaining dataFrame
 	along with info about the deletions.
-	:param df:              pd.dataFrame    unfiltered data
-	:param threshold:       float           remove all data with isolation interference above this value
-	:return df:             pd.dataFrame    filtered data
-	:return removedData:    pd.dataFrame    basic info about the removed values
+	Information of removed entries is saved according to removalColumnsToSave.
+	:param df:              		pd.dataFrame    unfiltered data
+	:param threshold:       		float           remove all data with isolation interference above this value
+	:param removalColumnsToSave:	list			fields to save if an entry gets removed
+	:return df:             		pd.dataFrame    filtered data
+	:return removedData:    		pd.dataFrame    basic info about the removed values
 	"""
 	columnsToSave = ['Isolation Interference [%]'] + removalColumnsToSave
 	toDelete = df.loc[df['Isolation Interference [%]'] > threshold].index # indices of rows to delete
@@ -139,11 +131,13 @@ def undoublePSMAlgo(df, identifyingNodes, exclusive, intensityColumns, removalCo
 	Removes redundant data due to different PSM algorithms producing the same peptide match. The 'master' algorithm
 	values are preferred over the 'slave' algorithm values, the latter whom are removed and have their basic information
 	saved in removedData. If exclusive=true, this function only keeps master data (and saves slave(s) basic info).
-	:param df:              pd.dataFrame    data with double First Scan numbers due to PSMAlgo redundancy
-	:param identifyingNodes:dict            master-slave PSM algorithm specifier
-	:param exclusive:       bool            save master data exclusively or include slave data where necessary?
-	:return df:             pd.dataFrame    data without double First Scan numbers due to PSMAlgo redundancy
-	:return removedData:    pd.dataFrame    basic info about the removed entries
+	:param df:              	pd.dataFrame    data with double First Scan numbers due to PSMAlgo redundancy
+	:param identifyingNodes:		dict            master-slave PSM algorithm specifier
+	:param exclusive:       		bool            save master data exclusively or include slave data where necessary?
+	:param intensityColumns:		list			columns that contain the quantification values
+	:param removalColumnsToSave:	list			fields to save if an entry gets removed
+	:return df:             		pd.dataFrame    data without double First Scan numbers due to PSMAlgo redundancy
+	:return removedData:    		pd.dataFrame    basic info about the removed entries
 	"""
 	if len(identifyingNodes['slaves']) == 0: # do NOT execute this method: there is only a single PSMAlgo!!!
 		import pandas as pd
@@ -193,11 +187,11 @@ def isotopicCorrection(intensities, correctionsMatrix):
 
 def getIntensities(df, intensityColumns, indices=None):
 	"""
-	Extracts the (absolute) intensity matrix from the dataFrame.
+	Extracts the (absolute) matrix of quantification values from the dataFrame as an ndarray.
 	:param df:              pd.dataFrame or pd.Series   Pandas dataFrame/Series from which to extract the intensities
-	:param indices:         list                        indices of the detections for which to obtain the intensities
-	:param intensityColumns:list                        names of the intensity columns
-	:return intensities:    np.ndArray                  matrix with the intensities
+	:param intensityColumns:list						columns that contain the quantification values
+	:param indices:         list                        indices of the entries for which to obtain the intensities
+	:return intensities:    np.ndarray                  matrix of quantification values
 	"""
 	if isinstance(df, Series): # this is a dataframe with only 1 entry: indexing [:, cols] doesnt work.
 		return np.asarray(df.loc[intensityColumns])
@@ -209,13 +203,13 @@ def getIntensities(df, intensityColumns, indices=None):
 
 def setIntensities(df, intensities, intensityColumns):
 	"""
-	Sets the intensities of the dataFrame at the specified location equal to the array of given intensities, at the
-	specified locations if a dict is provided instead of an array.
-	:param df:              pd.dataFrame    input dataFrame
+	Sets the quantification values of the dataFrame at the specified location equal to the array of given intensities,
+	at the specified locations if a dict is provided instead of an array.
+	:param df:              pd.dataFrame    input dataframe
 	:param intensities:     np.ndarray      matrix with MS2 intensities
 							dict            dict {index:[values]} with index and values of all df entries to be modified
-	:param intensityColumns:list            the columns of the df that contain the intensities
-	:return df:             pd.dataFrame    output dataFrame with updated intensities
+	:param intensityColumns:list			columns that contain the quantification values
+	:return df:             pd.dataFrame    output dataframe with updated intensities
 	"""
 	if isinstance(intensities, np.ndarray):
 		assert df.loc[:, intensityColumns].shape == intensities.shape
