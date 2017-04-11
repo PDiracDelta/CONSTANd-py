@@ -14,27 +14,20 @@ __maintainer__ = "Joris Van Houtven"
 __email__ = "vanhoutvenjoris@gmail.com"
 __status__ = "Development"
 
-import datetime
-import logging
-import sys
-from time import time
-from web.webFlow import webFlow
-from analysisFlow import analyzeProcessingResult
+import sys, logging, datetime
 from dataIO import *
-from getInput import getProcessingInput, getJobInput
-from processingFlow import processDf
-from reportFlow import generateReport
-from web import app
-from web.web import DB_setJobReportRelPaths, DB_setJobCompleted, DB_setJobFailed
-from traceback import print_exc
+
 
 fontsize = 30
 fontweight = 'normal'
 
 
 def performanceTest():  # remove for production # TEST
-	from constand import constand
 	""" Use this development method to test the performance of the CONSTANd algorithm. """
+	from constand import constand
+	from getInput import getProcessingInput
+	from time import time
+
 	t = []
 	for i in range(100):
 		params = getProcessingInput()
@@ -47,6 +40,7 @@ def performanceTest():  # remove for production # TEST
 
 
 def isotopicImpuritiesTest(): # TEST
+	from getInput import getProcessingInput
 	from constand import constand
 	from processing import getIntensities
 	## test if isotopic correction is necessary:
@@ -161,7 +155,10 @@ def MAPlot(x,y, title=None):
 
 
 def compareIntensitySN(df1, df2, title=None):
+	from getInput import getProcessingInput, getJobInput
+	from processingFlow import processDf
 	from processing import getIntensities
+
 	filepath1 = '../data/COON data/PSMs/BR1_e_ISO.txt'
 	filepath2 = '../data/COON data/PSMs/BR1_f_ISO_SN.txt'
 	intensityColumns = ["126", "127N", "127C", "128C","129N", "129C", "130C", "131"]
@@ -563,6 +560,13 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 	Contains and explicits the workflow of the program. Using the booleans doProcessing, doAnalysis and writeToDisk one
 	can control	which parts of the workflow to perform.
 	"""
+	#todo proper docu
+	from getInput import getProcessingInput, getJobInput
+	from processingFlow import processDf
+	from analysisFlow import analyzeProcessingResult
+	from reportFlow import generateReport
+	from time import time
+
 	logFilePath = os.path.abspath(os.path.join(jobConfigFilePath, os.path.join(os.pardir, 'log.txt')))
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
 	start = time()
