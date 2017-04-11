@@ -10,7 +10,28 @@ from dataIO import exportData
 
 
 def analyzeProcessingResult(processingResults, params, writeToDisk):
-	# todo docu
+	"""
+	Calls all the necessary functions to perform the analysis on a processingResults dict of objects.
+	Takes the processed dataframe of each experiment in the setup, combines it into one global dataframe for all
+	experiments, maps it to the protein level and performs a differential expression analysis, indicating the
+	significance of each protein. The analysis can be carried out either for only injective	protein-peptide associations
+	(minProteinDF) or using also the non-injective associations (fullProteinDF) or both.
+	Also, on the common-peptide-level global dataframe a Principal Component Analysis is performed of which the first 2 PCs are
+	saved, as well as a Hierarchical Clustering.
+	Along the way, removed data as well as some metadata are saved in the corresponding variables.
+	:param processingResults:	dict			for each experiment: [normalizedDf, normalizedIntensities, removedData, noCorrectionIndices]
+	:param params:				dict			job (global) parameters
+	:param writeToDisk:			bool			write results to disk (if not: just pass the return statement)
+	:return minProteinDF:		pd.DataFrame	combined analysis data of all experiments, on the protein level, only
+												for injective protein-peptide associations
+	:return fullProteinDF:		pd.DataFrame	combined analysis data of all experiments, on the protein level
+	:return PCAResult:			np.ndarray		PC scores for the quantification channels in the common-peptide-level global dataframe
+	:return HCResult:			np.ndarray  	Nx4 linkage matrix of the quantification channels in the common-peptide-level global dataframe
+	:return allExperimentsIntensitiesPerCommonPeptide:	pd.DataFrame	for all COMMON (found in all experiments) peptides:
+																		[e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
+	:return metadata:			pd.DataFrame	metadata: [noIsotopicCorrection, RTIsolationInfo, noMasterProteinAccession,
+												minSingleConditionProteins, fullSingleConditionProteins, uncommonPeptides, commonNanValues]
+	"""
 	processingResultsItems = processingResults.items()
 	dfs = dict((eName, result[0]) for eName, result in processingResultsItems)
 	normalizedIntensitiess = dict((eName, result[1]) for eName, result in processingResultsItems)
@@ -24,7 +45,8 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# contains statistics and metadata (like the parameters) about the analysis.
 	metadata = {}
 	metadata['numeric'] = pd.DataFrame()
-	# record detections without isotopic correction applied applied. Multi-indexed on experiment names and old indices!
+	# record detections without isotopic correction applied. Multi-indexed on experiment names and old indices!
+	# This is done here instead of the processing flow because back then there was no metadata variable yet.
 	try:
 		metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for
 	                                              eName in noCorrectionIndicess.keys()], keys=experimentNames)
@@ -34,7 +56,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for
 	                                         eName in experimentNames], keys=experimentNames)
 
-	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe # and intensityColumns are unique and distinguishable
+	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe as an outer join
 	allExperimentsDF = combineExperimentDFs(dfs) #, params['schema'])
 
 	nConditions = len(list(params['schema'].values())[0]['channelAliasesPerCondition'])
@@ -53,7 +75,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 
 			# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
 			# nan values for a certain condition and keep the removed ones in metadata
-			minProteinDF, metadata['minSingleConditionProteins'] = applyDifferentialExpression(minProteinDF, params['alpha'])
+			minProteinDF, metadata['minSingleConditionProteins'] = testDifferentialExpression(minProteinDF, params['alpha'])
 			metadata['numeric'].loc[0, 'minNumProteins'] = len(minProteinDF)
 
 			# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
@@ -70,7 +92,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 
 			# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
 			# nan values for a certain condition and keep the removed ones in metadata
-			fullProteinDF, metadata['fullSingleConditionProteins'] = applyDifferentialExpression(fullProteinDF,
+			fullProteinDF, metadata['fullSingleConditionProteins'] = testDifferentialExpression(fullProteinDF,
 			                                                                                     params['alpha'])
 			metadata['numeric'].loc[0, 'fullNumProteins'] = len(fullProteinDF)
 
