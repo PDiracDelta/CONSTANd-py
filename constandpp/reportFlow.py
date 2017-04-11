@@ -10,7 +10,19 @@ from dataIO import exportData
 
 
 def generateReport(analysisResults, params, logFilePath, writeToDisk, processingParams, startTime):
-	# todo docu
+	"""
+	Calls all the necessary functions to make visualizations and generate an HTML and PDF report.
+	Takes an analysisResults object and uses the PCA and HC to generate a 2D PC plot as well as a HC dendrogram. If
+	nConditions==2 then volcano plots for minExpression (injective) and fullExpression (non-injective, if available) are
+	also produced and for each expression type a list of top differentials (according to adjusted p-value) is constructed.
+	They are poured into an HTML report together with the parameters and metadata, and then converted into a PDF report.
+	Graphs and report fiels are written to disk if so specified by writeToDisk.
+	:param analysisResults:	list	[minProteinDF, fullProteinDF, PCAResult, HCResult, allExperimentsIntensitiesPerCommonPeptide]
+	:param params:			dict	job (global) parameters
+	:param logFilePath:		str		path to the log file with information about each processingFlow and analysisFlow call
+	:param writeToDisk:		bool	write visualizations and reports to disk (if not: just pass the return statement)
+	:return:
+	""" # todo redo this, because the repo was updated
 	minProteinDF = analysisResults[0]
 	fullProteinDF = analysisResults[1]
 	PCAResult = analysisResults[2]
@@ -19,6 +31,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	metadata = analysisResults[5]
 
 	### TEST
+	# make MA plots for comparing conditions
 	testInterexperimentalOnPeptideLevel = False
 	proteinLevelMAPlots = False
 	if testInterexperimentalOnPeptideLevel:
