@@ -12,7 +12,19 @@ from constand import constand
 
 
 def processDf(df, params, writeToDisk):
-	# todo docu
+	"""
+	Calls all the necessary functions to process the dataframe of one experiment and prepare the analysis input objects.
+	Cleans the input data, removes redundancy due to PSM algorithm, charge (optional) and PTMs (optional), then corrects
+	isotopic impurities (optional),	normalizes using the CONSTANd method and saves the output to disk if so required.
+	Along the way, removed data is kept in a corresponding dict of dataframes.
+	:param df:						pd.DataFrame		Peptide Spectrum Match dataframe (see documentation).
+	:param params:					dict				experiment-specific processing parameters (see getInput.py.)
+	:param writeToDisk:				bool				write results to harddisk (if not: only pass via return statement).
+	:return normalizedDf:			pd.DataFrame		cleaned, normalized data on the "unique modified peptide" level
+	:return normalizedIntensities:	np.ndarray			matrix of quantification values on the "unique modified peptide" level
+	:return removedData:			{ pd.DataFrame }	removed data: [missing, confidence, isolationInterference,
+														PSMAlgo, RT, charge, modifications]
+	"""
 	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
 	# remove detections where (essential) data is missing.
 	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['intensityColumns'])
@@ -90,6 +102,6 @@ def processDf(df, params, writeToDisk):
 		# save the DE analysis results
 
 	if params['isotopicCorrection_bool']:
-		return normalizedDf, normalizedIntensities, removedData, noCorrectionIndices # todo find better solution than 2 returns
+		return normalizedDf, normalizedIntensities, removedData, noCorrectionIndices  # todo find better solution than 2 returns
 	else:
-		return normalizedDf, normalizedIntensities, removedData
+		return normalizedDf, normalizedIntensities, removedData  #todo add noCorrectionIndices variable that is empty
