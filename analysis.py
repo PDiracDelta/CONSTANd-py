@@ -23,7 +23,7 @@ def getRTIsolationInfo(removedData_RT):
 	"""
 	Returns dataFrame with the mean, standard deviation, and max-min value of the RT values for each duplicate_group
 	representative that is found in the removedData_RT dataframe containing the removedData for the RT collapse.
-	:param removedData_RT:  pd.dataFrame    removedData for the RT collapse.
+	:param removedData_RT:  pd.DataFrame    removedData for the RT collapse.
 	:return:                pd.DataFrame    statistics 'Degeneracy', 'mean', 'std', 'max-min' about the RT values
 	"""
 	if 'Representative First Scan' in removedData_RT.columns.values and 'RT [min]' in removedData_RT.columns.values:
@@ -41,28 +41,20 @@ def getRTIsolationInfo(removedData_RT):
 def getNoIsotopicCorrection(df, noCorrectionIndices):
 	"""
 	Given a dataframe and indices of detections that received no corrections, returns some basic info about them.
-	:param df:                  pd.dataFrame
+	:param df:                  pd.DataFrame	processed and possibly (if not: exception caught) isotope-corrected data frame
 	:param noCorrectionIndices: list            indices of detections that received no isotopic correction
-	:return:                    pd.dataFrame    ['First Scan', 'Identifying Node Type', 'Annotated Sequence', 'Master Protein Accessions']
+	:return:                    pd.DataFrame    ['First Scan', 'Identifying Node Type', 'Annotated Sequence', 'Master Protein Accessions']
 	"""
 	return df.loc[noCorrectionIndices, ['First Scan', 'Identifying Node Type', 'Annotated Sequence', 'Master Protein Accessions']]
 
 
-def combineExperimentDFs(dfs): #, schema):
-	# """
-	# All dataframes first have their intensityColumns replaced by their aliases so that they remain distinguishable after
-	# the merge. Then the dataframes are merged and attain a multi-index (experimentName, oldIndex).
-	# :param dfs:     dict of pd.DataFrames   data to be merged
-	# :param schema:  dict of dicts           schema describing the hierarchy of experiments and conditions and channels
-	# :return:        pd.DataFrame            data of ALL experiments, with distinguishable channels and multi-indexed on
-	# 										experiment name and old index
-	# """
-	# for eName in schema:
-	# 	channelAliases = [channel for condition in schema[eName]['channelAliasesPerCondition'] for channel in condition]
-	# 	channels = [channel for condition in schema[eName]['channelNamesPerCondition'] for channel in condition]
-	# 	for channel,alias in zip(channels,channelAliases):
-	# 		# replace each old intensityColumn name by its new alias
-	# 		dfs[eName].columns[dfs[eName].columns.index(channel)] = alias
+def combineExperimentDFs(dfs):
+	"""
+	Merge dataframes of all experiments into one multi-indexed (eName, oldIndex) dataframe, by performing an outer join.
+	The intensity columns are non-identical across different dataframes and resulting empty fields are valued NaN.
+	:param dfs:     [pd.DataFrame]	dataframes from multiple experiments
+	:return: 		pd.DataFrame	dataframe containing an outer join of the input list of dataframes
+	"""
 	return pd.concat(dfs.values(), keys=dfs.keys())
 
 
@@ -71,9 +63,11 @@ def getProteinPeptidesDicts(df, fullExpression_bool):
 	Returns two dicts with the peptide indices (w.r.t. dataframe df) associated with each protein in the df as a
 	dictionary. One dict (min) contains only the peptide indices uniquely associated per protein, the other contains
 	all peptides indices associated per protein.
-	:return minProteinPeptidesDict:	dict	{ protein : uniquely associated peptide indices }
-	:return maxProteinPeptidesDict:	dict	{ protein : all associated peptide indices }
-	:return 						list	peptide sequences without master protein accession
+	:param df:							pd.DataFrame	peptide-level data frame
+	:param fullExpression_bool:			bool			also get non-injective protein-peptide relations dict
+	:return minProteinPeptidesDict:		dict			{ protein : uniquely associated peptide indices (injective) }
+	:return fullProteinPeptidesDict:	dict			{ protein : all associated peptide indices (non-injective) }
+	:return 							pd.Series		peptide sequences without master protein accession
 	"""
 	# create this column if it doesn't exist. It gets removed afterwards anyway.
 	if "# Protein Groups" not in df.columns.values:
@@ -81,7 +75,7 @@ def getProteinPeptidesDicts(df, fullExpression_bool):
 	numProteinGroupsDict = df.groupby("# Protein Groups").groups  # { # Protein Groups : indices }
 	# DEFAULTDICT doesn't return a KeyError when key not found, but rather None. !!! so you can safely .extend()
 	minProteinPeptidesDict = None  # proteins get contribution only from peptides which correspond uniquely to them
-	maxProteinPeptidesDict = None  # proteins get maximal contribution from all corresponding peptides even if corresponding to multiple proteins
+	fullProteinPeptidesDict = None  # proteins get maximal contribution from all corresponding peptides even if corresponding to multiple proteins
 	noMasterProteinAccession = []
 	for numGroups, peptideIndices in numProteinGroupsDict.items():
 		if numGroups == 0:
@@ -90,30 +84,40 @@ def getProteinPeptidesDicts(df, fullExpression_bool):
 		elif numGroups == 1:  # these have only 1 master protein accession
 			# { protein : indices }
 			minProteinPeptidesDict = df.loc[peptideIndices].groupby("Master Protein Accessions").groups
-			maxProteinPeptidesDict = defaultdict(list, minProteinPeptidesDict.copy())
-		elif fullExpression_bool:  # multiple proteins accessions per peptide: save those to maxProteinPeptidesDict only.
+			fullProteinPeptidesDict = defaultdict(list, minProteinPeptidesDict.copy())
+		elif fullExpression_bool:  # multiple proteins accessions per peptide: save those to fullProteinPeptidesDict only.
 			# { multiple proteins : indices }
 			multipleProteinPeptidesDict = df.loc[peptideIndices].groupby("Master Protein Accessions").groups
 			# cast dict values from int64index to list # todo find a non-ugly fix
-			maxProteinPeptidesDict = defaultdict(list, dict((k,list(v)) for k,v in maxProteinPeptidesDict.items()))  # ugly
+			fullProteinPeptidesDict = defaultdict(list, dict((k,list(v)) for k,v in fullProteinPeptidesDict.items()))  # ugly
 			for multipleProteinsString, nonUniqueIndices in multipleProteinPeptidesDict.items():
 				multipleProteins = multipleProteinsString.split('; ')
 				for protein in multipleProteins: # extend the possibly (probably) already existing entry in the dict.
-					maxProteinPeptidesDict[protein].extend(nonUniqueIndices)
+					fullProteinPeptidesDict[protein].extend(nonUniqueIndices)
 	# 3rd return argument must be a dataframe!
 	if fullExpression_bool:
-		return minProteinPeptidesDict, maxProteinPeptidesDict, df.loc[noMasterProteinAccession, ['First Scan', 'Annotated Sequence']]
-	else:
+		return minProteinPeptidesDict, fullProteinPeptidesDict, df.loc[noMasterProteinAccession, ['First Scan', 'Annotated Sequence']]
+	else:  # todo also allow only max expression
 		return minProteinPeptidesDict, None, df.loc[noMasterProteinAccession, ['First Scan', 'Annotated Sequence']]
 
 
 def getProteinDF(df, proteinPeptidesDict, schema):
-	# todo docu
-	#proteinDF = pd.DataFrame([list(proteinPeptidesDict.keys())].extend([[None, ]*len(proteinPeptidesDict.keys()), ]*3),
+	"""
+	Transform the data index from the peptide to the protein level by using the associations in proteinPeptidesDict, and
+	select only relevant information. The resulting dataframe is indexed on the Master Protein Accessions.
+	Quantification values from all associated unique modified peptides are kept in a list per condition (max: 2) for
+	each protein.
+	:param df:					pd.DataFrame				outer join of all experiments.
+	:param proteinPeptidesDict:	{protein: [peptide ids]}	proteins and their associated peptide ids.
+	:param schema:				dict                		schema of the experiments' hierarchy.
+	:return proteinDF:			pd.DataFrame				transformed and selected data on the protein level.
+															Structure:
+															['protein', 'peptides', 'description', 'condition 1', 'condition 2']
+	"""
 	proteinDFColumns = ['protein', 'peptides', 'description', 'condition 1', 'condition 2']
 	proteinDF = pd.DataFrame([list(proteinPeptidesDict.keys())].extend([[None], ]*len(proteinDFColumns)),
-	                         columns=proteinDFColumns).set_index('protein')
-	# define channelNamesPerConditionDict so that it contains the channels of ALL experiments
+							 columns=proteinDFColumns).set_index('protein')
+	# define channelAliasesPerConditionDict so that it contains the channels of ALL experiments
 	channelAliasesPerConditionDict = dict((eName, experiment['channelAliasesPerCondition']) for eName, experiment in schema.items())
 	for protein, peptideIndices in proteinPeptidesDict.items():
 		# interpret as multi index so that you can call .levels and .get_level_values()
@@ -141,8 +145,16 @@ def getProteinDF(df, proteinPeptidesDict, schema):
 	return proteinDF
 
 
-def applyDifferentialExpression(this_proteinDF, alpha):
-	# todo docu
+def testDifferentialExpression(this_proteinDF, alpha):
+	"""
+	Perform a t-test for independent samples for each protein on its (2) associated lists of peptide quantifications,
+	do a Benjamini-Hochberg correction and store the results in new "p-values" and "adjusted p-values" columns in the
+	dataframe. If a test returns NaN or masked values (e.g. due to sample size==1) the corresponding protein is removed.
+	:param this_proteinDF:	pd.DataFrame	data from all experiments on the protein level
+	:param alpha:			float			confidence level for the t-test
+	:return this_proteinDF:	pd.DataFrame	data on protein level, with statistical test information
+	:return removedData:	pd.DataFrame	protein entries removed due to invalid t-test results
+	"""
 	# { protein : indices of (uniquely/all) associated peptides }
 	# perform t-test on the intensities lists of both conditions of each protein, assuming data is independent.
 	this_proteinDF['p-value'] = this_proteinDF.apply(lambda x: ttest(x['condition 1'], x['condition 2'], nan_policy='omit')[1], axis=1)
@@ -159,8 +171,13 @@ def applyDifferentialExpression(this_proteinDF, alpha):
 
 
 def applyFoldChange(proteinDF, pept2protCombinationMethod):
-	""" Calculate the fold change for each protein (pept2protCombinationMethod) and apply it to the given protein dataframe """
-	# todo proper docu
+	"""
+	Calculate the log2 fold change for each protein according to pept2protCombinationMethod and add it to the new
+	"log2 fold change c1/c2" column.
+	:param proteinDF:					pd.DataFrame	data on the protein level with t-test results.
+	:param pept2protCombinationMethod:  str				method for reducing peptide information into one figure per protein
+	:return proteinDF:					pd.DataFrame	data on the protein level, including fold changes
+	"""
 	if pept2protCombinationMethod == 'mean':
 		proteinDF['log2 fold change c1/c2'] = proteinDF.apply(lambda x: np.log2(np.nanmean(x['condition 1'])/np.nanmean(x['condition 2'])), axis=1)
 	elif pept2protCombinationMethod == 'median':
@@ -199,12 +216,11 @@ def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 	The result is the intensity matrix as a dataframe with header with ALL experiment channels per peptide, for only the
 	COMMON peptides i.e. those peptides detected in ALL experiments. Also returns list/DataFrame of peptides that are
 	not common for all experiments.
-	:param dfs:     list(pd.DataFrame)  data of the experiments
-	:param schema:  dict                schema of the experiments
-	:return:        pd.DataFrame          [e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN] for all COMMON peptides.
+	:param dfs:     [ pd.DataFrame ]	data of the experiments
+	:param schema:  dict                schema of the experiments' hierarchy
+	:return:        pd.DataFrame		[e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN] for all COMMON peptides.
 	"""
 	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
-	#print(allChannelAliases) # TEST
 	peptidesDf = pd.DataFrame()
 	# join all dataframes together on the Annotated Sequence: you get ALL channels from ALL experiments as columns per peptide.
 	# [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
