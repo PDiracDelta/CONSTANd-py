@@ -332,7 +332,11 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 
 
 def HTMLtoPDF(htmlReportFullPath):
-	# todo docu
+	"""
+	Generate a PDF file by converting the HTML report using the linux wkhtml2pdf package in a subprocess.
+	:param htmlReportFullPath:	str		path to the HTML report file
+	:return pdfReportFullPath:	str		path to the PDF report file
+	"""
 	from subprocess import run
 
 	pdfReportFullPath = htmlReportFullPath[0:-4]+'pdf'
