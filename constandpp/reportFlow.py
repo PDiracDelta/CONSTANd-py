@@ -16,13 +16,16 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	nConditions==2 then volcano plots for minExpression (injective) and fullExpression (non-injective, if available) are
 	also produced and for each expression type a list of top differentials (according to adjusted p-value) is constructed.
 	They are poured into an HTML report together with the parameters and metadata, and then converted into a PDF report.
-	Graphs and report fiels are written to disk if so specified by writeToDisk.
+	Because of technical reasons to do with image representation, the PDF is generated from a slightly different HTML
+	file than the "public" HTML file.
+	Graphs and report files are written to disk if so specified by writeToDisk.
 	:param analysisResults:	list	[minProteinDF, fullProteinDF, PCAResult, HCResult, allExperimentsIntensitiesPerCommonPeptide]
 	:param params:			dict	job (global) parameters
 	:param logFilePath:		str		path to the log file with information about each processingFlow and analysisFlow call
 	:param writeToDisk:		bool	write visualizations and reports to disk (if not: just pass the return statement)
-	:return:
-	""" # todo redo this, because the repo was updated
+	:param processingParams:dict	experiment-specific processing parameters (see getInput.py.)
+	:param startTime:		float	UNIX epoch timestamp at which the reportFlow was started
+	"""
 	minProteinDF = analysisResults[0]
 	fullProteinDF = analysisResults[1]
 	PCAResult = analysisResults[2]
