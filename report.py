@@ -166,8 +166,8 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 		plt.ylim([0, 100])  # int(base * round(float(x)/base))
 	# annotate where requested
 	for labelPlotBool,xdata,ydata,labels in zip(labelPlot,[xdataYES, xdataP, xdataFC, xdataNO],
-	                              [ydataYES, ydataP, ydataFC, ydataNO],
-	                              [labelsYES, labelsP, labelsFC, labelsNO]):
+								  [ydataYES, ydataP, ydataFC, ydataNO],
+								  [labelsYES, labelsP, labelsFC, labelsNO]):
 		if labelPlotBool:
 			for x, y, label in zip(xdata, ydata, labels):
 				plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points', ha='right', va='bottom', fontsize=20)
@@ -234,8 +234,8 @@ def getHCDendrogram(HCResult, schema):
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
 	channelColorsDict = getColours(schema, allChannelAliases)
 	dendrogram(HCResult, orientation='right', leaf_rotation=0., leaf_font_size=24, labels=allChannelAliases,
-	           link_color_func=lambda x: channelColorsDict[allChannelAliases[x]] if x < len(allChannelAliases) else 'k',
-	           above_threshold_color='k')
+			   link_color_func=lambda x: channelColorsDict[allChannelAliases[x]] if x < len(allChannelAliases) else 'k',
+			   above_threshold_color='k')
 	ax = plt.gca()
 	ylbls = ax.get_ymajorticklabels()
 	for i in range(len(ylbls)):
@@ -246,7 +246,7 @@ def getHCDendrogram(HCResult, schema):
 
 
 def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, minVolcanoFullPath,
-             fullVolcanoFullPath, PCAPlotFullPath, HCDendrogramFullPath, metadata, logFilePath, startTime):
+			 fullVolcanoFullPath, PCAPlotFullPath, HCDendrogramFullPath, metadata, logFilePath, startTime):
 	"""
 	Pour all report ingredients into an HTML file.
 	:param minSortedDifferentialProteinsDF:     pd.DataFrame
@@ -292,25 +292,25 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 	for e in experiments:
 		experiments[e]['cond1Aliases'] = experiments[e]['channelAliasesPerCondition'][0]
 	pdfhtmlreport = render_template('report.html', jobName=jobParams['jobname'], minVolcanoFullPath=minVolcanoFullPath,
-	                             fullVolcanoFullPath=fullVolcanoFullPath, minExpression_bool=jobParams['minExpression_bool'],
-	                             fullExpression_bool=jobParams['fullExpression_bool'], mindifferentials=minTopDifferentials,
-	                             fulldifferentials=fullTopDifferentials, PCAFileName=PCAPlotFullPath,
-	                             HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
-	                             duration=approxDuration, log=logContents, jobParams=jobParams,
-	                             processingParams=processingParams, experiments=experiments, pdfsrc='True')
+								 fullVolcanoFullPath=fullVolcanoFullPath, minExpression_bool=jobParams['minExpression_bool'],
+								 fullExpression_bool=jobParams['fullExpression_bool'], mindifferentials=minTopDifferentials,
+								 fulldifferentials=fullTopDifferentials, PCAFileName=PCAPlotFullPath,
+								 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
+								 duration=approxDuration, log=logContents, jobParams=jobParams,
+								 processingParams=processingParams, experiments=experiments, pdfsrc='True')
 	minVolcanoFullPath = hackImagePathToSymlinkInStaticDir(minVolcanoFullPath)
 	fullVolcanoFullPath = hackImagePathToSymlinkInStaticDir(fullVolcanoFullPath)
 	HCDendrogramFullPath = hackImagePathToSymlinkInStaticDir(HCDendrogramFullPath)
 	PCAPlotFullPath = hackImagePathToSymlinkInStaticDir(PCAPlotFullPath)
 	htmlReport = render_template('report.html', jobName=jobParams['jobname'], minVolcanoFullPath=minVolcanoFullPath,
-	                             fullVolcanoFullPath=fullVolcanoFullPath,
-	                             minExpression_bool=jobParams['minExpression_bool'],
-	                             fullExpression_bool=jobParams['fullExpression_bool'],
-	                             mindifferentials=minTopDifferentials,
-	                             fulldifferentials=fullTopDifferentials, PCAFileName=PCAPlotFullPath,
-	                             HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
-	                             duration=approxDuration, log=logContents, jobParams=jobParams,
-	                             processingParams=processingParams, experiments=experiments)
+								 fullVolcanoFullPath=fullVolcanoFullPath,
+								 minExpression_bool=jobParams['minExpression_bool'],
+								 fullExpression_bool=jobParams['fullExpression_bool'],
+								 mindifferentials=minTopDifferentials,
+								 fulldifferentials=fullTopDifferentials, PCAFileName=PCAPlotFullPath,
+								 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
+								 duration=approxDuration, log=logContents, jobParams=jobParams,
+								 processingParams=processingParams, experiments=experiments)
 	return htmlReport, pdfhtmlreport
 
 

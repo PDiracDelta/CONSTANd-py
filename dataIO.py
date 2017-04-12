@@ -61,7 +61,7 @@ def getTMTIsotopicDistributions(path_in):
 	labels as specified in the file.
 	:param path_in: str         path of the file in tsv format
 	:return :    pd.DataFrame    TMT isotope distributions. Format:
-	 		                                ICM     -2  -1  +1  +2
+											ICM     -2  -1  +1  +2
 											126     0   0   1.2 0
 											127N    1.2 3.3 2.5 0.3
 											127C    ...
@@ -117,10 +117,10 @@ def parseSchemaFile(schemaPath):
 		else: # aliases not (properly) provided
 			shortExperimentName = str(nextRow[0])
 			channelAliasesPerCondition = [[shortExperimentName + '_' + channelName for channelName in condition]
-			                              for condition in channelNamesPerCondition]
+										  for condition in channelNamesPerCondition]
 
 		incompleteSchemaDict[experimentName] = {'channelNamesPerCondition': channelNamesPerCondition,
-		                              'channelAliasesPerCondition': channelAliasesPerCondition}
+									  'channelAliasesPerCondition': channelAliasesPerCondition}
 	return incompleteSchemaDict
 
 

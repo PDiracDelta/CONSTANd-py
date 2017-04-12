@@ -49,12 +49,12 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# This is done here instead of the processing flow because back then there was no metadata variable yet.
 	try:
 		metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for
-	                                              eName in noCorrectionIndicess.keys()], keys=experimentNames)
+												  eName in noCorrectionIndicess.keys()], keys=experimentNames)
 	except ValueError:
 		pass # not a single noCorrectionIndices was found. OK.
 	# record RT isolation statistics. Future: flag. Multi-indexed on experiment names and old indices!
 	metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for
-	                                         eName in experimentNames], keys=experimentNames)
+											 eName in experimentNames], keys=experimentNames)
 
 	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe as an outer join
 	allExperimentsDF = combineExperimentDFs(dfs) #, params['schema'])
@@ -93,7 +93,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 			# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
 			# nan values for a certain condition and keep the removed ones in metadata
 			fullProteinDF, metadata['fullSingleConditionProteins'] = testDifferentialExpression(fullProteinDF,
-			                                                                                     params['alpha'])
+																								 params['alpha'])
 			metadata['numeric'].loc[0, 'fullNumProteins'] = len(fullProteinDF)
 
 			# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
@@ -129,16 +129,16 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	if writeToDisk:
 		# save the protein-level dataframes
 		exportData(minProteinDF, dataType='df', path_out=params['path_out'],
-		           filename=params['jobname'] + '_results_minimal', delim_out=params['delim_out'])
+				   filename=params['jobname'] + '_results_minimal', delim_out=params['delim_out'])
 		exportData(fullProteinDF, dataType='df', path_out=params['path_out'],
-		           filename=params['jobname'] + '_results_full', delim_out=params['delim_out'])
+				   filename=params['jobname'] + '_results_full', delim_out=params['delim_out'])
 		# save the intensity matrix of all COMMON peptides
 		exportData(allExperimentsIntensitiesPerCommonPeptide, dataType='df', path_out=params['path_out'],
-		           filename=params['jobname'] + '_CommonPeptideIntensities',
-		           delim_out=params['delim_out'], inOneFile=False)
+				   filename=params['jobname'] + '_CommonPeptideIntensities',
+				   delim_out=params['delim_out'], inOneFile=False)
 		# save the metadata
 		exportData(metadata, dataType='df', path_out=params['path_out'],
-		           filename=params['jobname'] + '_metadata',
-		           delim_out=params['delim_out'], inOneFile=False)
+				   filename=params['jobname'] + '_metadata',
+				   delim_out=params['delim_out'], inOneFile=False)
 
 	return minProteinDF, fullProteinDF, PCAResult, HCResult, allExperimentsIntensitiesPerCommonPeptide, metadata

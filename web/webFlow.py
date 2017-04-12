@@ -276,54 +276,54 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 		this_path = os.path.abspath(os.path.join(filePath, os.pardir))
 		this_filename = os.path.basename(filePath)
 		exportData(icm, dataType='txt', path_out=this_path, filename=this_filename[0:-4],
-		           delim_out='\t')  # no extention
+				   delim_out='\t')  # no extention
 
 	def updateSchema(this_job_path, this_incompleteSchema):
 		for eName in this_incompleteSchema:
 			if eName == HC_ENAME1:
 				this_incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath=HC_DATA1,
-				                                                  prefix=eName + '_')
+																  prefix=eName + '_')
 				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=HC_WRAPPER1,
-				                                                     prefix=eName + '_')
+																	 prefix=eName + '_')
 				this_incompleteSchema[eName]['config'] = os.path.join(this_job_path, uploadFile(this_job_path,
-				                                                                                sourceDataPath=HC_CONFIG1,
-				                                                                                prefix=eName + '_'))  # config needs FULL PATH!
+																								sourceDataPath=HC_CONFIG1,
+																								prefix=eName + '_'))  # config needs FULL PATH!
 				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path,
-				                                                                       sourceDataPath=HC_ICM1,
-				                                                                       prefix=eName + '_')
+																					   sourceDataPath=HC_ICM1,
+																					   prefix=eName + '_')
 			elif eName == HC_ENAME2:
 				this_incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath=HC_DATA2,
-				                                                  prefix=eName + '_')
+																  prefix=eName + '_')
 				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=HC_WRAPPER2,
-				                                                     prefix=eName + '_')
+																	 prefix=eName + '_')
 				this_incompleteSchema[eName]['config'] = os.path.join(this_job_path, uploadFile(this_job_path,
-				                                                                                sourceDataPath=HC_CONFIG2,
-				                                                                                prefix=eName + '_'))  # config needs FULL PATH!
+																								sourceDataPath=HC_CONFIG2,
+																								prefix=eName + '_'))  # config needs FULL PATH!
 				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path,
-				                                                                       sourceDataPath=HC_ICM2,
-				                                                                       prefix=eName + '_')
+																					   sourceDataPath=HC_ICM2,
+																					   prefix=eName + '_')
 			elif eName == HC_ENAME3:
 				this_incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath=HC_DATA3,
-				                                                  prefix=eName + '_')
+																  prefix=eName + '_')
 				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=HC_WRAPPER3,
-				                                                     prefix=eName + '_')
+																	 prefix=eName + '_')
 				this_incompleteSchema[eName]['config'] = os.path.join(this_job_path, uploadFile(this_job_path,
-				                                                                                sourceDataPath=HC_CONFIG3,
-				                                                                                prefix=eName + '_'))  # config needs FULL PATH!
+																								sourceDataPath=HC_CONFIG3,
+																								prefix=eName + '_'))  # config needs FULL PATH!
 				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path,
-				                                                                       sourceDataPath=HC_ICM3,
-				                                                                       prefix=eName + '_')
+																					   sourceDataPath=HC_ICM3,
+																					   prefix=eName + '_')
 			elif eName == HC_ENAME4:
 				this_incompleteSchema[eName]['data'] = uploadFile(this_job_path, sourceDataPath=HC_DATA4,
-				                                                  prefix=eName + '_')
+																  prefix=eName + '_')
 				this_incompleteSchema[eName]['wrapper'] = uploadFile(this_job_path, sourceDataPath=HC_WRAPPER4,
-				                                                     prefix=eName + '_')
+																	 prefix=eName + '_')
 				this_incompleteSchema[eName]['config'] = os.path.join(this_job_path, uploadFile(this_job_path,
-				                                                                                sourceDataPath=HC_CONFIG4,
-				                                                                                prefix=eName + '_'))  # config needs FULL PATH!
+																								sourceDataPath=HC_CONFIG4,
+																								prefix=eName + '_'))  # config needs FULL PATH!
 				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = uploadFile(this_job_path,
-				                                                                       sourceDataPath=HC_ICM4,
-				                                                                       prefix=eName + '_')
+																					   sourceDataPath=HC_ICM4,
+																					   prefix=eName + '_')
 			# in case no wrapper was uploaded
 			if this_incompleteSchema[eName]['wrapper'] is None:
 				wrapperFileName = eName + '_wrapper.tsv'
@@ -335,13 +335,13 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 			ICMFile = this_incompleteSchema[eName]['isotopicCorrection_matrix']
 			if ICMFile is not None:
 				transformICM(os.path.join(this_job_path, ICMFile), isTMTICM,
-				             this_incompleteSchema[eName]['channelNamesPerCondition'])
+							 this_incompleteSchema[eName]['channelNamesPerCondition'])
 
 		return this_incompleteSchema
 
 	def getJobConfig(this_job_path, this_job_name):
 		this_jobConfigFile = uploadFile(this_job_path, sourceDataPath=HC_MASTERCONFIG,
-		                                   prefix='')
+										   prefix='')
 		new_jobConfigFile = os.path.join(this_job_path, this_job_name + jobConfigNameSuffix)
 		os.rename(os.path.join(this_job_path, this_jobConfigFile), new_jobConfigFile)
 		return new_jobConfigFile

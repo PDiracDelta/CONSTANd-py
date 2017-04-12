@@ -117,7 +117,7 @@ def setMasterProteinDescriptions(df):
 		descriptionsLists = df.loc[:, 'Protein Descriptions'].astype(str).apply(lambda x: x.split('; '))
 		# [[indices of master descriptions with respect to list of all descriptions] per peptide]
 		correctIndicesLists = [[proteins.index(masterProtein) for masterProtein in list(filter(lambda x: x.lower()!='nan', masterProteins))]
-			              for masterProteins, proteins in zip(masterProteinsLists, proteinsLists)]
+						  for masterProteins, proteins in zip(masterProteinsLists, proteinsLists)]
 		# [[master descriptions] per peptide]
 		df.loc[:, 'Protein Descriptions'] = ['; '.join([descriptionsList[i] for i in correctIndices]) for (descriptionsList, correctIndices) in zip(descriptionsLists, correctIndicesLists)]
 		df.drop('Protein Accessions', axis=1, inplace=True)
@@ -151,7 +151,7 @@ def undoublePSMAlgo(df, identifyingNodes, exclusive, intensityColumns, removalCo
 	if not exclusive:  # remove unique SLAVE scans from the toDelete list
 		byFirstScanDict = df.groupby('First Scan').groups
 		singles = set(map(lambda e: e[0], filter(lambda e: len(e) == 1,
-		                                         byFirstScanDict.values())))  # indices of detections done by only 1 PSMAlgo
+												 byFirstScanDict.values())))  # indices of detections done by only 1 PSMAlgo
 		singlesNotByMasterIndices = singles.difference(masterIndices)
 		toDelete = toDelete.difference(singlesNotByMasterIndices)  # keep only indices not discovered by SLAVE
 	removedData = df.loc[toDelete, columnsToSave]

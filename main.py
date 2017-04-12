@@ -469,9 +469,9 @@ def intraInterMAPlots():
 		I_inter_rvars, I_intra_rvars, I_inter_cvars, I_intra_cvars, I_inter_pdvars, I_intra_pdvars, D_inter_rvars, D_intra_rvars, D_inter_cvars, D_intra_cvars, D_inter_pdvars, D_intra_pdvars = (np.array(x) for x in allLists)
 		# amke boxplots of differences
 		boxPlot([I_inter_rvars-I_intra_rvars, I_inter_cvars-I_intra_cvars, I_inter_pdvars-I_intra_pdvars],
-		        labels=['raw', 'CONSTANd', 'PD2.1'], ylab=r'\Delta V')
+				labels=['raw', 'CONSTANd', 'PD2.1'], ylab=r'\Delta V')
 		boxPlot([D_inter_rvars - D_intra_rvars, D_inter_cvars - D_intra_cvars, D_inter_pdvars - D_intra_pdvars],
-		        labels=['raw', 'CONSTANd', 'PD2.1'], ylab=r'\Delta V')
+				labels=['raw', 'CONSTANd', 'PD2.1'], ylab=r'\Delta V')
 
 
 def RDHPlot(x,y,quantity=None):
@@ -709,7 +709,7 @@ if __name__ == '__main__': # this should not execute if main.py is not the main 
 		jobDirName = os.path.basename(os.path.abspath(os.path.join(jobConfigFilePath, os.pardir)))
 		try:
 			main(jobConfigFilePath=jobConfigFilePath, doProcessing=doProcessing, doAnalysis=doAnalysis, doReport=doReport,
-		     testing=testing, writeToDisk=writeToDisk)
+			 testing=testing, writeToDisk=writeToDisk)
 			DB_setJobCompleted(jobDirName)
 		except:
 			DB_setJobFailed(jobDirName)

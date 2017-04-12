@@ -15,16 +15,16 @@ mailer = Mail(app)
 
 
 def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(app.config.get('DB'))
-    return db
+	db = getattr(g, '_database', None)
+	if db is None:
+		db = g._database = sqlite3.connect(app.config.get('DB'))
+	return db
 
 
 @app.teardown_appcontext
 def close_connection(exception):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
+	db = getattr(g, '_database', None)
+	if db is not None:
+		db.close()
 
 from web import views
