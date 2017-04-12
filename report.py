@@ -107,7 +107,7 @@ def getSortedDifferentialProteinsDF(df):
 	"""
 	Sorts the differential protein data according to adjusted p-value and resets the index. Returns only the columns
 	specified.
-	:param df:  pd.DataFrame    unsorted
+	:param df:  pd.DataFrame    unsorted DE analysis results on the protein level
 	:return:    pd.DataFrame    sorted according to adjusted p-value and only specified columns
 	"""
 	reportColumns = ['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value']
@@ -117,7 +117,17 @@ def getSortedDifferentialProteinsDF(df):
 
 
 def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
-	# todo docu
+	"""
+	Generates a volcano plot using the log2 fold changes and adjusted p-values of the differential protein data. It is
+	divided in several regions according to the indicated significance level (as can be determined by alpha and FCThreshold)
+	and colours each region differently.
+	The IDs of the protein data points each region may be annotated if so specified by labelPlot.
+	:param df:				pd.DataFrame	DE analysis results data on the protein level.
+	:param alpha:			float			significance level used in the t-test of the DE analysis
+	:param FCThreshold:		float			log2 fold change threshold used in the DE analysis
+	:param labelPlot:		[ bool ]		label the data in the different significance regions: [ yes, p, fc, no ]
+	:return volcanoPlot:	plt.figure		volcano plot as a matplotlib figure object
+	"""
 	# todo add protein ID labels according to sorted list entry ID
 	volcanoPlot = plt.figure(figsize=(16, 12))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
