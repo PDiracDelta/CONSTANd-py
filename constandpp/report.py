@@ -86,14 +86,13 @@ def distinguishableMarkers(n):
 		return easilyDistinguishable[0:n]
 
 
-def getMarkers(schema, allChannelAliases):
+def getMarkers(schema):
 	"""
 	Returns list of markers for the channels in all experiments (based on schema) so that the channels of the same
 	experiment have the same marker.
-	:param schema:  dict    schema of the experiments' hierarchy
-	:return:        dict
+	:param schema:  			dict    schema of the experiments' hierarchy
+	:return channelMarkersDict:	dict	marker for each channel; a different one for each experiment
 	"""
-	# todo docu
 	distMarkers = distinguishableMarkers(len(schema))
 	channelMarkersDict = {}
 	i = 0
