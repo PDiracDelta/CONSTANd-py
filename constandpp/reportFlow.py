@@ -43,15 +43,15 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		#MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 11],
 		#       'org2 exp [1] vs org2 exp [1]')
 		MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 18],
-		       'org2 exp [2] vs org3 exp [2]')
+			   'org2 exp [2] vs org3 exp [2]')
 		MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 26],
-		       'org2 exp [2] vs org3 exp [3]')
+			   'org2 exp [2] vs org3 exp [3]')
 	if proteinLevelMAPlots:
 		from main import MAPlot
 		MAPlot(minProteinDF.loc[:, '3_muscle'], minProteinDF.loc[:, '4_muscle'],
-		       'org2 exp [2] vs org3 exp [2]')
+			   'org2 exp [2] vs org3 exp [2]')
 		MAPlot(minProteinDF.loc[:, '3_muscle'], minProteinDF.loc[:, '4_cerebrum'],
-		       'org2 exp [2] vs org3 exp [3]')
+			   'org2 exp [2] vs org3 exp [3]')
 
 	nConditions = len(list(params['schema'].values())[0]['channelAliasesPerCondition'])
 	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
@@ -62,7 +62,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			minSet = set(minSortedDifferentialProteinsDF['protein'])
 			# data visualization
 			minVolcanoPlot = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
-			                                params['labelVolcanoPlotAreas'])
+											params['labelVolcanoPlotAreas'])
 		else:
 			minSortedDifferentialProteinsDF = pd.DataFrame()
 		if params['fullExpression_bool']:
@@ -70,7 +70,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			fullSet = set(fullSortedDifferentialProteinsDF['protein'])
 			# data visualization
 			fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
-			                                 params['labelVolcanoPlotAreas'])
+											 params['labelVolcanoPlotAreas'])
 		else:
 			fullSortedDifferentialProteinsDF = pd.DataFrame()
 		if params['minExpression_bool'] and params['fullExpression_bool']:
@@ -81,16 +81,16 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		if writeToDisk:
 			if params['minExpression_bool']:
 				exportData(minSortedDifferentialProteinsDF, dataType='df', path_out=params['path_results'],
-				           filename=params['jobname'] + '_minSortedDifferentials', delim_out='\t')
+						   filename=params['jobname'] + '_minSortedDifferentials', delim_out='\t')
 				minVolcanoFullPath = exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
-				           filename=params['jobname'] + '_minVolcanoPlot')
+						   filename=params['jobname'] + '_minVolcanoPlot')
 			else:
 				minVolcanoFullPath = None
 			if params['fullExpression_bool']:
 				exportData(fullSortedDifferentialProteinsDF, dataType='df', path_out=params['path_results'],
 						   filename=params['jobname'] + '_fullSortedDifferentials', delim_out='\t')
 				fullVolcanoFullPath = exportData(fullVolcanoPlot, dataType='fig', path_out=params['path_results'],
-				           filename=params['jobname'] + '_fullVolcanoPlot')
+						   filename=params['jobname'] + '_fullVolcanoPlot')
 			else:
 				fullVolcanoFullPath = None
 	else:
@@ -102,28 +102,28 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	PCAPlot = getPCAPlot(PCAResult, params['schema'])
 	if writeToDisk:
 		PCAPlotFullPath = exportData(PCAPlot, dataType='fig', path_out=params['path_results'],
-		           filename=params['jobname'] + '_PCAPlot')
+				   filename=params['jobname'] + '_PCAPlot')
 	HCDendrogram = getHCDendrogram(HCResult, params['schema'])
 	if writeToDisk:
 		HCDendrogramFullPath = exportData(HCDendrogram, dataType='fig', path_out=params['path_results'],
-		           filename=params['jobname'] + '_HCDendrogram')
+				   filename=params['jobname'] + '_HCDendrogram')
 
 	# generate HTML and PDF reports # todo
 	if writeToDisk:
 		htmlReport, pdfhtmlreport = makeHTML(jobParams=params, processingParams=processingParams,
-		                      minSortedDifferentialProteinsDF=minSortedDifferentialProteinsDF,
-		                      fullSortedDifferentialProteinsDF=fullSortedDifferentialProteinsDF,
-		                      minVolcanoFullPath=minVolcanoFullPath, fullVolcanoFullPath=fullVolcanoFullPath,
-		                      PCAPlotFullPath=PCAPlotFullPath, HCDendrogramFullPath=HCDendrogramFullPath,
-		                      metadata=metadata, logFilePath=logFilePath, startTime=startTime)
+							  minSortedDifferentialProteinsDF=minSortedDifferentialProteinsDF,
+							  fullSortedDifferentialProteinsDF=fullSortedDifferentialProteinsDF,
+							  minVolcanoFullPath=minVolcanoFullPath, fullVolcanoFullPath=fullVolcanoFullPath,
+							  PCAPlotFullPath=PCAPlotFullPath, HCDendrogramFullPath=HCDendrogramFullPath,
+							  metadata=metadata, logFilePath=logFilePath, startTime=startTime)
 		htmlFullPath = exportData(htmlReport, dataType='html', path_out=params['path_results'],
-		           filename=params['jobname'] + '_report')
+				   filename=params['jobname'] + '_report')
 		pdfhtmlFullPath = exportData(pdfhtmlreport, dataType='html', path_out=params['path_results'],
-		           filename=params['jobname'] + '_Report')
+				   filename=params['jobname'] + '_Report')
 
 		pdfFullPath = HTMLtoPDF(pdfhtmlFullPath)
 
 		from web.web import send_mail
 		### SEND JOB COMPLETED MAIL ###
 		send_mail(recipient=params['mailRecipient'], mailBodyFile='reportMail',
-		          jobname=params['jobname'], jobID=params['jobID'], attachment=pdfFullPath)
+				  jobname=params['jobname'], jobID=params['jobID'], attachment=pdfFullPath)

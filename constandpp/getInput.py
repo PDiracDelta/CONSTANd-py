@@ -32,7 +32,7 @@ def getProcessingInput(configFilePath):
 
 	# read the config file to obtain the defaults
 	config = configparser.ConfigParser(allow_no_value=True, comment_prefixes=';',
-	                                   inline_comment_prefixes='@')  # TODO split up CONFIG and DEFAULT (user input files vs workflow params)
+									   inline_comment_prefixes='@')  # TODO split up CONFIG and DEFAULT (user input files vs workflow params)
 	config.optionxform = str # so that strings dont automatically get .lower()-ed
 	config.read(configFilePath, encoding='utf-8')
 
@@ -86,7 +86,7 @@ def getProcessingInput(configFilePath):
 		raise Exception("Please indicate which columns (in addition to the intensities) to save for removed data.")
 	if removeBadConfidence_bool is None:
 		raise Exception("Please indicate whether you would like to remove detections with confidence lower than certain "
-		                "threshold.")
+						"threshold.")
 	if removeBadConfidence_bool and removeBadConfidence_minimum not in ['High', 'Medium']:
 		raise Exception("Invalid minimum confidence level: "+removeBadConfidence_minimum+". Must select 'Medium' or 'High'.")
 	if removeIsolationInterference_bool is None:
@@ -172,7 +172,7 @@ def getJobInput(masterConfigFilePath):
 	jobdir = os.path.abspath(os.path.join(masterConfigFilePath, os.pardir))
 
 	config = configparser.ConfigParser(allow_no_value=True, comment_prefixes=';',
-	                                   inline_comment_prefixes='$')
+									   inline_comment_prefixes='$')
 	config.optionxform = str  # so that strings dont automatically get .lower()-ed
 	config.read(masterConfigFilePath, encoding='utf-8')
 

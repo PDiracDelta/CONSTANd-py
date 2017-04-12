@@ -134,7 +134,7 @@ def makeJobConfigFile(this_job_path, this_jobname, jobID, this_schema, form):
 
 def DB_setJobReportRelPaths(jobDirName, resultpath, jobName):
 	get_db().execute('UPDATE jobs SET htmlreport = "' + os.path.join(resultpath, jobName+'_report.html')
-	                 + '", pdfreport = "' + os.path.join(resultpath, jobName+'_Report.pdf') + '" WHERE id = "' + jobDirName + '";')
+					 + '", pdfreport = "' + os.path.join(resultpath, jobName+'_Report.pdf') + '" WHERE id = "' + jobDirName + '";')
 	get_db().commit()
 
 
@@ -150,11 +150,11 @@ def DB_setJobFailed(jobDirName):
 
 def startJob(jobConfigFullPath):
 	return Popen(['python3', app.config.get('MAIN'), jobConfigFullPath,
-	     'True', # doProcessing
-	     'True', # doAnalysis
-	     'True', # doReport
-	     'True', # writeToDisk
-	     'False', # testing
+		 'True', # doProcessing
+		 'True', # doAnalysis
+		 'True', # doReport
+		 'True', # writeToDisk
+		 'False', # testing
 		 ], shell=False, stdout=PIPE, stderr=PIPE, stdin=PIPE)
 
 
@@ -193,15 +193,15 @@ def TMT2ICM(TMTImpuritiesDF, order=None):
 		correspondents['131']['+2'] = 'nobody'
 	elif Nplex in [8, 10]: # 8- and 10-plex
 		correspondents = {'126' : {'-2':'nobody', '-1':'nobody', '+1':'127C', '+2':'128N'},
-		          '127N': {'-2': 'nobody', '-1': 'nobody', '+1': '128N', '+2': '128C'},
-		          '127C': {'-2': 'nobody', '-1': '126', '+1': '128C', '+2': '129N'},
-		          '128N': {'-2': 'nobody', '-1': '127N', '+1': '129N', '+2': '129C'},
-		          '128C': {'-2': '126', '-1': '127C', '+1': '129C', '+2': '130N'},
-		          '129N': {'-2': '127N', '-1': '128N', '+1': '130N', '+2': '130C'},
-		          '129C': {'-2': '127C', '-1': '128C', '+1': '130C', '+2': '131'},
-		          '130N': {'-2': '128N', '-1': '129N', '+1': '131', '+2': 'nobody'},
-		          '130C': {'-2': '128C', '-1': '129C', '+1': 'nobody', '+2': 'nobody'},
-		          '131': {'-2': '129N', '-1': '130N', '+1': 'nobody', '+2': 'nobody'}}
+				  '127N': {'-2': 'nobody', '-1': 'nobody', '+1': '128N', '+2': '128C'},
+				  '127C': {'-2': 'nobody', '-1': '126', '+1': '128C', '+2': '129N'},
+				  '128N': {'-2': 'nobody', '-1': '127N', '+1': '129N', '+2': '129C'},
+				  '128C': {'-2': '126', '-1': '127C', '+1': '129C', '+2': '130N'},
+				  '129N': {'-2': '127N', '-1': '128N', '+1': '130N', '+2': '130C'},
+				  '129C': {'-2': '127C', '-1': '128C', '+1': '130C', '+2': '131'},
+				  '130N': {'-2': '128N', '-1': '129N', '+1': '131', '+2': 'nobody'},
+				  '130C': {'-2': '128C', '-1': '129C', '+1': 'nobody', '+2': 'nobody'},
+				  '131': {'-2': '129N', '-1': '130N', '+1': 'nobody', '+2': 'nobody'}}
 	else:
 		raise Exception("Illegal plexity of your TMT labels. Only 6plex, 8plex, 10plex are supported.")
 

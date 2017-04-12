@@ -131,17 +131,17 @@ def getProteinDF(df, proteinPeptidesDict, schema):
 			peptideIndicesPerExperiment = peptideIndices.values[peptideIndices.get_level_values(0) == eName]
 			# get a list of dfs, to sort the intensities per channel.
 			condition1intensitiesPerChannel = [df.loc[peptideIndicesPerExperiment, channel] for channel in
-			                                   channelAliasesPerConditionDict[eName][0]]
+											   channelAliasesPerConditionDict[eName][0]]
 			condition2intensitiesPerChannel = [df.loc[peptideIndicesPerExperiment, channel] for channel in
-			                                   channelAliasesPerConditionDict[eName][1]]
+											   channelAliasesPerConditionDict[eName][1]]
 			condition1Intensities = pd.concat([condition1Intensities] + condition1intensitiesPerChannel, axis=0, ignore_index=True)
 			condition2Intensities = pd.concat([condition2Intensities] + condition2intensitiesPerChannel, axis=0, ignore_index=True)
 		# fill new dataframe on protein level, per condition
 		if 'Protein Descriptions' not in df.columns.values:
 			df['Protein Descriptions'] = pd.Series()
 		proteinDF.loc[protein, :] = [df.loc[peptideIndices, 'Annotated Sequence'].tolist(),
-		                             df.loc[peptideIndices, 'Protein Descriptions'][0],
-		                             condition1Intensities.tolist(), condition2Intensities.tolist()]
+									 df.loc[peptideIndices, 'Protein Descriptions'][0],
+									 condition1Intensities.tolist(), condition2Intensities.tolist()]
 	return proteinDF
 
 
@@ -231,7 +231,7 @@ def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 			peptidesDf = dfs[eName].loc[:, ['Annotated Sequence'] + eChannelAliases]
 		else:
 			peptidesDf = pd.merge(peptidesDf, dfs[eName].loc[:, ['Annotated Sequence'] + eChannelAliases],
-			                 on='Annotated Sequence')
+							 on='Annotated Sequence')
 		allPeptides.extend(dfs[eName].loc[:, 'Annotated Sequence'])
 	uncommonPeptides = pd.DataFrame(list(set(allPeptides).difference(set(peptidesDf.loc[:, 'Annotated Sequence']))))
 	return peptidesDf.loc[:, allChannelAliases], uncommonPeptides

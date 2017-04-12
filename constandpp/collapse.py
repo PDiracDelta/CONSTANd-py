@@ -116,7 +116,7 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 				for byPropIndices in notSingleList: # only if there actually is at least one group of dnp.asarray(df.locuplicates
 					## SELECT IDENTICAL <NEXTPROPERTY> ##
 					groupByIdenticalProperties(df.loc[byPropIndices].groupby(remainingProperties[0]).groups,
-					                           remainingProperties[1:])  # first pop the [0] property to both return and remove it!
+											   remainingProperties[1:])  # first pop the [0] property to both return and remove it!
 			else:  # no more properties to check: mark groups of indices as duplicates
 				this_duplicateLists.extend(notSingleList)
 
@@ -197,7 +197,7 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 						noSlavePSMAlgoWarnedYet = True
 				if np.isnan(bestIndex) and not isNanWarnedYet:
 					logging.warning("No best PSM score found for some lists of duplicates; first duplicate arbitrarily chosen. "
-					     "First Scan numbers of first list encountered: "+str(df.loc[this_duplicatesList, 'First Scan']))
+						 "First Scan numbers of first list encountered: "+str(df.loc[this_duplicatesList, 'First Scan']))
 					isNanWarnedYet = True
 					bestIndex = this_duplicatesList[0]
 			this_bestIndicesDict[bestIndex] = this_duplicatesList
@@ -271,7 +271,7 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 	# add the representative index of each collection of collapsed duplicates
 	removedData.insert(loc=0, column='Representative First Scan', value=-1)
 	for duplicatesList, rfs in zip(bestIndicesDict.values(),
-	                               representativesDf['First Scan']):  # relies on fact that order is conserved! #todo
+								   representativesDf['First Scan']):  # relies on fact that order is conserved! #todo
 		removedData.loc[duplicatesList, 'Representative First Scan'] = rfs
 	# actually remove the toDelete detections
 	df.drop(toDelete, inplace=True)
