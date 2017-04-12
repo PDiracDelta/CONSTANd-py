@@ -566,6 +566,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 	from analysisFlow import analyzeProcessingResult
 	from reportFlow import generateReport
 	from time import time
+	from web.web import DB_setJobReportRelPaths
 
 	logFilePath = os.path.abspath(os.path.join(jobConfigFilePath, os.path.join(os.pardir, 'log.txt')))
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
@@ -665,6 +666,10 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 
 
 if __name__ == '__main__': # this should not execute if main.py is not the main module called by the python interpreter,
+	from web.web import DB_setJobCompleted, DB_setJobFailed
+	from web import app
+	from traceback import print_exc
+	
 	args = sys.argv
 	print(str(args)) # TEST
 	if len(args) != 1:
