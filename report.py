@@ -6,7 +6,7 @@ Functions involved in generating the report that includes:
 * volcano plot
 * PCA plot
 * HC tree
-* list of differentially expressed proteins, sorted on fold change
+* list of differentially expressed proteins, sorted on adjusted p-value
 * metadata info (warnings etc.)
 * overview of parameters used in the workflow
 """
@@ -30,10 +30,10 @@ matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
 
 def distinguishableColours(n, type='jet'):
 	"""
-	Generates distinguishable colours in the format of a nConditionsx4 array.
+	Generates distinguishable colours in the format of a n array.
 	:param nConditions: int         number of colours
 	:param type:        str         specifier of which colourmap to use
-	:return:            np.ndarray  nConditionsx4 array
+	:return:            np.ndarray  nx4 array
 	"""
 	cmap = plt.get_cmap(type)  # brg, jet
 	return cmap(np.linspace(0, 1.0, n))
@@ -42,9 +42,9 @@ def distinguishableColours(n, type='jet'):
 def getColours(schema, allChannelAliases):
 	"""
 	Returns list of colours for all the channels in all experiments (based on schema) so that the channels of the same
-	condition have the same marker.
-	:param schema:  dict    schema of the experiments
-	:return:        dict    colour for each channel; a different one for each condition (markers differ only across conditions)
+	condition have the same colour.
+	:param schema:  			dict    schema of the experiments' hierarchy' hierarchy
+	:return channelColoursDict:	dict    colour for each channel; a different one for each condition
 	"""
 	numConditions = len(list(schema.values())[0]['channelAliasesPerCondition'])
 	distColours = distinguishableColours(numConditions)
@@ -89,7 +89,7 @@ def getMarkers(schema, allChannelAliases):
 	"""
 	Returns list of markers for the channels in all experiments (based on schema) so that the channels of the same
 	experiment have the same marker.
-	:param schema:  dict    schema of the experiments
+	:param schema:  dict    schema of the experiments' hierarchy
 	:return:        dict
 	"""
 	# todo docu
