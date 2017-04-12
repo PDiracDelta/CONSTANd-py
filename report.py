@@ -187,23 +187,25 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 
 
 def getPCAPlot(PCAResult, schema):
-	# todo docu
+	"""
+	Generates a 2D plot of each quantification channel's first 2 PC scores. Identical colour means identical condition,
+	and identical marker means identical experiment.
+	:param PCAResult:	np.ndarray	PC scores of the channels for each protein (see getPCA() in analysis.py)
+	:param schema:	dict	schema of the experiments' hierarchy
+	:return PCAPlot:	plt.figure		PCA plot as a matplotlib figure object
+	"""
 	PCAPlot = plt.figure(figsize=(16, 12))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
-	#mng = plt.get_current_fig_manager()
-	#mng.full_screen_toggle()
 	plt.title('Principal Component scores', figure=PCAPlot)
 	plt.xlabel('First PC', figure=PCAPlot)
 	plt.ylabel('Second PC', figure=PCAPlot)
 
 	# labels for annotation
 	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
-	#print(allChannelAliases) # TEST
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
 	channelColorsDict = getColours(schema, allChannelAliases)
 	channelMarkersDict = getMarkers(schema, allChannelAliases)
 
-	#xmin, xmax, ymin, ymax = min(PCAResult[:, 0]), max(PCAResult[:, 0]), min(PCAResult[:, 1]), max(PCAResult[:, 1])
 	for (x, y, label) in zip(PCAResult[:, 0], PCAResult[:, 1], allChannelAliases):
 		# produce scatterplot of two first principal components and annotate
 		plt.scatter(x, y, color=channelColorsDict[label], marker=channelMarkersDict[label], figure=PCAPlot, s=80)
@@ -225,7 +227,6 @@ def getPCAPlot(PCAResult, schema):
 	plt.legend(legendHandles, legendStrings, scatterpoints=1)#, loc=2)
 	plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 	plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-	#plt.axhspan(xmin=xmin-0.1(xmax-xmin), ymax=ymax+0.05*(ymax-ymin))
 	#plt.show() # TEST
 	return PCAPlot
 
