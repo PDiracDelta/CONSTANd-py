@@ -173,7 +173,7 @@ def applyWrapper(columns, wrapper):
 	return newColumns
 
 
-def getData(path_in, delim=None, header=0, wrapper=None):
+def importExperimentData(path_in, delim=None, header=0, wrapper=None):
 	"""
 	Gets the experimental data specified by path_in from disk, applies a wrapper (optional) and fixes common
 	format mistakes.

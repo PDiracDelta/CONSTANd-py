@@ -627,9 +627,9 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 			# get all input parameters
 			processingParams[eName] = getProcessingInput(jobParams['schema'][eName]['config'])
 			# get the dataframes
-			dfs[eName] = getData(processingParams[eName]['data'], delim=processingParams[eName]['delim_in'],
-								 header=processingParams[eName]['header_in'],
-								 wrapper=processingParams[eName]['wrapper'])
+			dfs[eName] = importExperimentData(processingParams[eName]['data'], delim=processingParams[eName]['delim_in'],
+											  header=processingParams[eName]['header_in'],
+											  wrapper=processingParams[eName]['wrapper'])
 			processing_path_out = processingParams[eName]['path_out']
 			processingResultsDumpFilename = os.path.join(processing_path_out, 'processingResultsDump_' + str(eName))
 			if doProcessing:
