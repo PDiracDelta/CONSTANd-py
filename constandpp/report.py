@@ -265,19 +265,33 @@ def getHCDendrogram(HCResult, schema):
 def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF, minVolcanoFullPath,
 			 fullVolcanoFullPath, PCAPlotFullPath, HCDendrogramFullPath, metadata, logFilePath, startTime):
 	"""
-	Pour all report ingredients into an HTML file.
-	:param minSortedDifferentialProteinsDF:     pd.DataFrame
-	:param fullSortedDifferentialProteinsDF:    pd.DataFrame
-	:param diffMinFullProteins:                 nested list
-	:param visualizationsDict:                  dict
-	:param metadata:                            dict
-	:return:
+	Pour all report visualizations, the list(s) of differentials, metadata and job parameters into an HTML file.
+	A second HTML file used for conversion to PDF is generated slightly different from the one used	for actual HTML
+	representation, for technical reasons to do with image representation.
+	:param jobParams:
+	:param processingParams:
+	:param minSortedDifferentialProteinsDF:     pd.DataFrame	differential protein data (minimal expression, injective)
+																sorted on adjusted p-value and only specified columns
+	:param fullSortedDifferentialProteinsDF:    pd.DataFrame	differential protein data (full expression, non-injective)
+																sorted on adjusted p-value and only specified columns
+	:param minVolcanoFullPath:					str				path to the volcano plot image (minimal expression)
+	:param fullVolcanoFullPath:					str				path to the volcano plot image (full expression)
+	:param PCAPlotFullPath: 					str				path to the PCA plot image
+	:param HCDendrogramFullPath: 				str				path to the HC dendrogram image
+	:param metadata:							dict			[noIsotopicCorrection, RTIsolationInfo, noMasterProteinAccession,
+																minSingleConditionProteins, fullSingleConditionProteins,
+																uncommonPeptides, commonNanValues]
+	:param logFilePath:							str				path to the log file with information about each
+																processingFlow and analysisFlow call
+	:param startTime:							float			UNIX epoch timestamp at which the reportFlow was started
+	:return htmlReport:							str				report HTML (for actual HTML representation)
+	:return pdfhtmlreport:						str				report HTML (for conversion to PDF)
 	"""
-	# todo docu
 	from flask import render_template
 	from time import time
 	from web import app
 	from os import path, pardir
+	
 	allJobdsParDir = path.abspath(path.join(app.config.get('ALLJOBSDIR'), pardir))
 
 	def hackImagePathToSymlinkInStaticDir(old_path):
