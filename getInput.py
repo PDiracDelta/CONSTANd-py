@@ -10,7 +10,7 @@ import configparser
 import os
 from json import loads as parseExpression
 from codecs import getdecoder as gd
-from dataIO import importIsotopicCorrectionsMatrix, getWrapper
+from dataIO import importIsotopicCorrectionsMatrix, importWrapper
 
 
 def parseDelimiter(d):
@@ -126,7 +126,7 @@ def getProcessingInput(configFilePath):
 	# assign the TYPOGRAPHICALLY CORRECT values to the params dict and modify them if necessary.
 	# modify
 	#intensityColumns = [item for sublist in channelNamesPerCondition for item in sublist]
-	wrapper = getWrapper(os.path.join(jobdir, wrapper))
+	wrapper = importWrapper(os.path.join(jobdir, wrapper))
 	if isotopicCorrection_matrix is not None:
 		isotopicCorrection_matrix = importIsotopicCorrectionsMatrix(os.path.join(jobdir, isotopicCorrection_matrix))
 	path_out = os.path.join(jobdir, path_out)
