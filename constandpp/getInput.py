@@ -24,7 +24,12 @@ def parseDelimiter(d):
 
 def getProcessingInput(configFilePath):
 	"""
-	Get mass spec data and CONSTANd parameters from the user or from the web interface as a dict.
+	Returns the processing parameters in a dict based on the .ini file at the argument path. Creates a ConfigParser
+	object to scan the config file and gets all hardcoded variables one by one from the DEFAULT section, parsing them
+	if necessary. Some checks are performed to verify config integrity, and then a handful of remaining parameters are
+	constructed from the given ones. At last they are all gathered again and returned in a dict.
+	:param configFilePath:	str		path to the processing config .ini file
+	:return params:			dict	all processing parameters
 	"""
 	# TODO add all parameters in docstring
 	# add this prefix to all file paths
@@ -166,15 +171,24 @@ def getProcessingInput(configFilePath):
 	return params
 
 
-def getJobInput(masterConfigFilePath):
+def getJobInput(jobConfigFilePath):
+	"""
+	Returns the job parameters in a dict based on the .ini file at the argument path. Creates a ConfigParser
+	object to scan the config file and gets all hardcoded variables one by one from the DEFAULT section, parsing them
+	if necessary. Some checks are performed to verify config integrity, and then a handful of remaining parameters are
+	constructed from the given ones. At last they are all gathered again and returned in a dict.
+	:param jobConfigFilePath:	str		path to the job config .ini file
+	:return params:					dict	all job config parameters
+	"""
 	from collections import OrderedDict
+	
 	# add this prefix to all file paths
-	jobdir = os.path.abspath(os.path.join(masterConfigFilePath, os.pardir))
+	jobdir = os.path.abspath(os.path.join(jobConfigFilePath, os.pardir))
 
 	config = configparser.ConfigParser(allow_no_value=True, comment_prefixes=';',
 									   inline_comment_prefixes='$')
 	config.optionxform = str  # so that strings dont automatically get .lower()-ed
-	config.read(masterConfigFilePath, encoding='utf-8')
+	config.read(jobConfigFilePath, encoding='utf-8')
 
 	# get variables from config in correct typography
 	date = config.get('DEFAULT', 'date')
@@ -193,7 +207,9 @@ def getJobInput(masterConfigFilePath):
 	jobID = config.get('DEFAULT', 'jobID')
 	delim_out = gd("unicode_escape")(config.get('DEFAULT', 'delim_out'))[0]  # treat delimiters correctly: ignore first escape
 	mailRecipient = config.get('DEFAULT', 'mailRecipient')
-
+	
+	# perform checks on the validity of the parameters and raise exceptions if necessary
+	# DO NOT change the value of variables here!
 	if PCA_components < 2:
 		raise Exception("Minimum number of principal coponents is 2.")
 
@@ -202,7 +218,7 @@ def getJobInput(masterConfigFilePath):
 	path_out = os.path.join(jobdir, path_out)
 	path_results = os.path.join(jobdir, path_results)
 	# assign
-	masterParams = {
+	jobParams = {
 		'date': date,
 		'schema': schema,
 		'pept2protCombinationMethod': pept2protCombinationMethod,
@@ -221,4 +237,4 @@ def getJobInput(masterConfigFilePath):
 		'mailRecipient': mailRecipient
 	}
 
-	return masterParams
+	return jobParams
