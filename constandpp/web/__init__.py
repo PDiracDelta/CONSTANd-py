@@ -1,30 +1,38 @@
-from flask import Flask, g
+"""
+Constructs the web app object and its config, and defines the database connection.
+"""
+
+from flask import Flask, g  # flask.g is a global object you can use to store data on. It persists between sessions and across contexts
 from flask_mail import Mail
 import sqlite3
-#from flask_sqlalchemy import SQLAlchemy
+from web import views
 
 app = Flask(__name__)
 app.config.from_object('web.config')
 app.config['allJobsDir'] = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/'
-app.config['DB'] = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/jobs.db'
-#
-# jobs(id text primary key not null, jobname text, htmlreport text, pdfreport text, done integer default 0, success integer default 0);
-#
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/jobs.db'
+app.config['jobDB'] = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/jobs.db'
+
 mailer = Mail(app)
 
 
 def get_db():
+	"""
+	Initialize a new database connection or pick up an existing one.
+	:return db:	sqlite3 database connection
+	"""
 	db = getattr(g, '_database', None)
 	if db is None:
-		db = g._database = sqlite3.connect(app.config.get('DB'))
+		db = g._database = sqlite3.connect(app.config.get('jobDB'))
 	return db
 
 
+# gets executed when the app is torn down.
 @app.teardown_appcontext
 def close_connection(exception):
+	"""
+	Close the database connection, possibly while catching an exception.
+	:param exception:	Exception	???
+	"""
 	db = getattr(g, '_database', None)
 	if db is not None:
 		db.close()
-
-from web import views
