@@ -18,9 +18,9 @@ def importDataFrame(path_in, delim=None, header=0, dtype=None):
 	"""
 	Get the data from disk as a Pandas DataFrame.
 	:param path_in:     string          existing path to input file
-	:param delim:       char            delimiter of the data
+	:param delim:       char            delimiter of the data fields
 	:param header:      int             row that contains the header of the data (None if no header)
-	:param dtype:       dict/object     specifies as which type each column should be interpreted
+	:param dtype:       dict/object		specifies as which type each column should be interpreted
 	:return df:         pd.dataFrame    Pandas dataFrame of the file contents
 	"""
 	assert os.path.exists(path_in)
@@ -50,18 +50,18 @@ def getIsotopicCorrectionsMatrix(path_in):
 	"""
 	Reads the isotopic corrections matrix from a file on disk through importDataFrame, and returns it as a matrix.
 	:param path_in: str         path of the isotopic corrections matrix file
-	:return icm:    pd.ndarray  isotopic corrections matrix
+	:return :    	np.ndarray  isotopic corrections matrix
 	"""
 	return np.asmatrix(importDataFrame(path_in, delim='\t', header=None)).astype('float64') # make sure its float64
 
 
 def getTMTIsotopicDistributions(path_in):
 	"""
-	Read the TMT isotope distributions table in tsv format from disk as a dataframe with the correct column headers and
-	labels as specified in the file.
-	:param path_in: str         path of the file in tsv format
-	:return :    pd.DataFrame    TMT isotope distributions. Format:
-											ICM     -2  -1  +1  +2
+	Read the TMT isotope distributions table (IDT) in tsv format from disk as a dataframe with the correct column headers and
+	labels as specified in the file. The column with the channel names and the "IDT" header is removed.
+	:param path_in:	str				path to the .tsv file with the TMT IDT
+	:return tmtid:	pd.DataFrame	TMT isotope distributions table. Format:
+											IDT     -2  -1  +1  +2
 											126     0   0   1.2 0
 											127N    1.2 3.3 2.5 0.3
 											127C    ...
@@ -80,9 +80,9 @@ def getTMTIsotopicDistributions(path_in):
 
 def getWrapper(path_in='wrapper.tsv'):
 	"""
-	Reads the wrapper from a file on disk through importDataFrame, and returns it as a list of tuples.
-	:param path_in: str            path of the wrapper file
-	:return :       nested list    wrapper specifying column name transformations
+	Reads the column header wrapper from a file on disk through importDataFrame, and returns it as a nested list.
+	:param path_in: str		path of the wrapper file
+	:return :       list	wrapper (nested list of pairs) specifying column name transformations
 	"""
 	return list(importDataFrame(path_in, header=None, dtype=str).values)
 
@@ -92,7 +92,7 @@ def parseSchemaFile(schemaPath):
 	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment. The
 	wrapper and config entries are set to None for now.
 	!!! the schema is NEVER to be changed after it has been first used !!!
-		" Keys and values are iterated over in an arbitrary order which is non-random, varies across Python implementations,
+		"Keys and values are iterated over in an arbitrary order which is non-random, varies across Python implementations,
 		and depends on the dictionary’s history of insertions and deletions. If keys, values and items views are iterated
 		over with no intervening modifications to the dictionary, the order of items will directly correspond."
 	:param schemaPath:              str     path to the schema file that the user uploaded
@@ -124,15 +124,21 @@ def parseSchemaFile(schemaPath):
 	return incompleteSchemaDict
 
 
-def writeConfig(filePath, contents):
-	file = open(filePath, 'w')
-	config = configparser.ConfigParser()
-	section = 'DEFAULT'
-	# config.add_section(section)
-	for k, v in contents.items():
-		config.set(section, k, v)
-	config.write(file)
-	file.close()
+# def writeConfig(filePath, contents):
+# 	"""
+#
+# 	:param filePath:
+# 	:param contents:
+# 	:return:
+# 	"""
+# 	file = open(filePath, 'w')
+# 	config = configparser.ConfigParser()
+# 	section = 'DEFAULT'
+# 	# config.add_section(section)
+# 	for k, v in contents.items():
+# 		config.set(section, k, v)
+# 	config.write(file)
+# 	file.close()
 
 
 def fixFixableFormatMistakes(df):
