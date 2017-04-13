@@ -71,12 +71,13 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 	Adds a 'Degeneracy' column to the dataFrame if it didn't exist already: this contains the number of peptides that
 	have been collapsed onto that (synthetic) detection.
 	Returns removedData according to the columnsToSave list.
-	:param toCollapse:              str             variable of which true duplicates are to be collapsed.
+	:param toCollapse:              	str             variable of which true duplicates are to be collapsed.
 	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
+	:param intensityColumns:			list			columns that contain the quantification values
 	:param method:                      str             defines how the new detection is to be selected/constructed
-	:param identifyingNodes:
-	:param maxRelativeReporterVariance: float           UNUSED value that restricts reporter variance
+	:param identifyingNodes:			list
 	:param undoublePSMAlgo_bool:
+	:param columnsToSave:
 	:return df:                         pd.dataFrame    without sequence duplicates according to to checkTrueDuplicates.
 	:return removedData:                pd.dataFrame    [PARENT INDEX, and, values, to, be, saved]
 	"""

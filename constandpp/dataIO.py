@@ -46,7 +46,7 @@ def importDataFrame(path_in, delim=None, header=0, dtype=None):
 	return df.dropna(how="all") # drop empty lines
 
 
-def getIsotopicCorrectionsMatrix(path_in):
+def importIsotopicCorrectionsMatrix(path_in):
 	"""
 	Reads the isotopic corrections matrix from a file on disk through importDataFrame, and returns it as a matrix.
 	:param path_in: str         path of the isotopic corrections matrix file
