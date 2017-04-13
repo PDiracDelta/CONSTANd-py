@@ -75,19 +75,20 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
 	:param intensityColumns:			list			columns that contain the quantification values
 	:param method:                      str             defines how the new detection is to be selected/constructed
-	:param identifyingNodes:			list
-	:param undoublePSMAlgo_bool:
-	:param columnsToSave:
+	:param identifyingNodes:			dict			PSM rater algorithm names and score names. Structure:
+														{"master": [NAME, SCORE_NAME], "slaves": [[NAME, SCORE_NAME], ...]}
+	:param undoublePSMAlgo_bool:		bool			Has the PSM algo redundancy already been removed?
+	:param columnsToSave:				list(str)		fields of to-be-removed entries that are saved into removedData
 	:return df:                         pd.dataFrame    without sequence duplicates according to to checkTrueDuplicates.
 	:return removedData:                pd.dataFrame    [PARENT INDEX, and, values, to, be, saved]
 	"""
 	# todo docu
 	def getDuplicates():
 		"""
-		Takes the dataFrame df and returns a nested list of duplicates per category according to the toCollapse variable.
-		Based on iterative use of the pd.DataFrame.groupby('property').groups function which returns a dict
-		{ propertyValue : [duplicateIndices] }.
-		:return this_duplicateLists:     list            [[group of duplicates] per toCollapse value in the df]
+		Takes the dataFrame df from the parent scope and returns a nested list of groups of duplicates according to
+		the toCollapse variable. Based on iterative use of the pd.DataFrame.groupby('property').groups function which
+		returns a dict { propertyValue : [duplicateIndices] }.
+		:return this_duplicateLists:     list            [[group of duplicates] per `toCollapse` value in the df]
 		"""
 
 		# todo outdated documentation
@@ -95,33 +96,34 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 		def groupByIdenticalProperties(byPropDict, remainingProperties):
 			"""
 			Takes a dictionary which is the result of a groupby(property) call on a dataFrame. Also takes a list of
-			properties, and uses the first one to do another groupby() on each dataframe consisting of one set of
+			properties, and uses the first one to do another groupby() on each dataframe slice consisting of one set of
 			duplicates in the input dictionary values. Then, iteratively calls itself again using that dictionary and
 			the other remaining properties. The result is a nested list of duplicates which all have identical
 			combination-of-properties values, but non-identical toCollapse values.
 			For instance when toCollapse=='RT':
 			[
-				[2, 4, 8], # indices of detections with (Charge1, PTM2) and unique(RT2, RT4, RT8)==True
+				[2, 4, 8], # indices of detections with (Charge2, PTM2) and unique(RT2, RT4, RT8)==True
 				[1, 5, 6], # indices of detections with (Charge1, PTM1) and unique(RT1, RT5, RT6)==True
 				[3],       # indices of detections with (Charge3, PTM3) and unique(RT3)==True
-				[7, 9],    # indices of detections with (Charge3, PTM2) and unique(RT7, RT9)==True
+				[7, 9],    # indices of detections with (Charge7, PTM7) and unique(RT7, RT9)==True
 			]
 			This function correctly groups by PSMAlgo when required and does not when it is prohibited.
-			:param byPropDict:          dict    { propertyValue : [duplicateIndices] }
-			:param remainingProperties: list no collapsePTM allowed   properties still to be grouped by
-			:return this_duplicateLists:     list    [[group of duplicates] per combination-of-properties values in the dataFrame]
+			:param byPropDict:          	dict    { propertyValue : [duplicateIndices] }
+			:param remainingProperties: 	list	properties still to be grouped by
+			:return this_duplicateLists:	list    [[group of duplicates] per combination-of-properties values in the dataFrame]
 			"""
 			# use only indices that are not single (i.e. that have a duplicate)
-			notSingleList = list(filter(lambda e: len(e) > 1, byPropDict.values()))
+			notSingleList = list(filter(lambda e: len(e) > 1, byPropDict.values()))  # [list of [lists of length > 1]]
 			if remainingProperties:  # check for more identical properties before marking as duplicates
 				for byPropIndices in notSingleList: # only if there actually is at least one group of dnp.asarray(df.locuplicates
-					## SELECT IDENTICAL <NEXTPROPERTY> ##
+					## SELECT IDENTICAL <NEXTPROPERTY> ##  # for each sublist of notSingleList
 					groupByIdenticalProperties(df.loc[byPropIndices].groupby(remainingProperties[0]).groups,
 											   remainingProperties[1:])  # first pop the [0] property to both return and remove it!
 			else:  # no more properties to check: mark groups of indices as duplicates
 				this_duplicateLists.extend(notSingleList)
 
 		this_duplicateLists = []  # [list of [list of duplicate indices] for each duplicate]
+		# list of properties
 		properties = []
 		if not undoublePSMAlgo_bool:  # only if you didn't undoublePSMAlgo
 			## SELECT IDENTICAL PSMALGO (i.e. different First Scan) ##
@@ -147,7 +149,7 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 		dataFrame df --	for each sublist into one new row of intensities for the representative that is to be their
 		replacement. This function should also flag cases where the variance between the intensities (calculated per
 		reporter channel) exceeds a maxRelativeReporterVariance.
-		:param this2_bestIndicesDict:   list    { bestIndex : [group of duplicate indices}
+		:param this2_bestIndicesDict:   dict    { bestIndex : [group of duplicate indices]}
 		:param centerMeasure:           str     specifies the method of combination
 		:return newIntensitiesDict:     dict    { bestIndex : new intensities of the representative detection }
 		"""
