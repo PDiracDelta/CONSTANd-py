@@ -208,10 +208,11 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 
 	def getIntenseIndicesDict(this_bestIndicesDict):
 		"""
-		For each sublist in the nested list of duplicates duplicateLists, calculates the total MS2 intensity according
-		to dataFrame df and returns the results as a list.
-		:param this_bestIndicesDict:    dict    { indices of best PSM match per group of duplicates : [group of duplicates] }
-		:return intenseIndicesDict:     dict    { best PSM match indices per group of duplicates : indices of most intense MS2 values }
+		Takes (the indices of) groups of duplicates associated with the index of their 'best' member through a dict, and
+		returns an analogous dict where the groups are now replaced by the index of the 'most intense' entry, according to
+		the total sum of each entry's quantification values.
+		:param this_bestIndicesDict:	dict	{ indices of best PSM entry per group of duplicates : [group of duplicates] }
+		:return intenseIndicesDict:		dict	{ best PSM entry index per group of duplicates : indices of most intense entry }
 		"""
 		intenseIndicesDict = {}
 		for bestIndex, this_duplicatesList in this_bestIndicesDict.items():
