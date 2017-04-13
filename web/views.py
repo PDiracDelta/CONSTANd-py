@@ -146,6 +146,9 @@ def jobSettings():
 
 @app.route('/jobinfo', methods=['GET', 'POST'])
 def jobInfo():
+	"""
+	Shows the status of the job specified through the URL parameter'id'.
+	"""
 	jobID = request.args.get('id', '')
 	if jobID:  # id has been set
 		cur = DB_getJobVar(jobID, 'done')
