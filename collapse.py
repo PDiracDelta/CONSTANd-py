@@ -226,11 +226,13 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 
 	def getRepresentativesDf(this_bestIndicesDict):
 		"""
-		Uses a list of indices of the best PSM matches bestIndices amongst each group of duplicates in the nested list
-		duplicateLists, all indices with respect to dataFrame df. Based on this best PSM match, generates a
-		representative detection for each group of duplicates. This is done by copying all bestMatch properties, but by
-		calculating new intensities when necessary and also updating the Degeneracy parameter.
-		:param this_bestIndicesDict:     dict           { [indices of detections with the best PSM score per group of duplicates] : [group of duplicates] }
+		Uses a list of indices of the best PSM matches bestIndices amongst each group of duplicates. Based on this best
+		PSM entry, generates a representative detection for each group of duplicates. This is done by copying all
+		bestMatch properties, while calculating new quantification values when necessary and also updating the Degeneracy
+		parameter. Indices are taken w.r.t. df from the parent scope.
+		The behaviour should not be overwritten so as to use the mostIntense indices instead, since the quantification
+		values or not of importance here, but rather the PSM properties and their reliability.
+		:param this_bestIndicesDict:     dict           { index of detection with best PSM score per group of duplicates : [group of duplicates] }
 		:return this_representativesDf:  pd.dataFrame   all representatives data that will replace the duplicate entries in the dataFrame df
 		"""
 		this_bestIndices = this_bestIndicesDict.keys()
