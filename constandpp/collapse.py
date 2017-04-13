@@ -180,7 +180,7 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 		best PSM match according to dataFrame df. Does this intelligently by taking masterPSMAlgo into account. If no
 		best index can be found (due to missing score for instance) it just takes the first in this_duplicateLists.
 		:param this_duplicateLists: list    [[group of duplicates] per toCollapse value in the df]
-		:return this_bestIndices:   dict    { [indices of detections with the best PSM score per group of duplicates] : [group of duplicates] }
+		:return this_bestIndices:   dict    { indices of detections with the best PSM score per group of duplicates : [group of duplicates] }
 		"""
 		isNanWarnedYet = False
 		noSlavePSMAlgoWarnedYet = False
