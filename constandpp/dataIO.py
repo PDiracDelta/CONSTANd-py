@@ -78,7 +78,7 @@ def getTMTIsotopicDistributions(path_in):
 	return tmtid
 
 
-def getWrapper(path_in='wrapper.tsv'):
+def importWrapper(path_in='wrapper.tsv'):
 	"""
 	Reads the column header wrapper from a file on disk through importDataFrame, and returns it as a nested list.
 	:param path_in: str		path of the wrapper file

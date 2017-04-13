@@ -270,7 +270,7 @@ def abundancesPCAHCD():
 			newIntensityCols[
 				oldIntensityCols.index('Abundances (Normalized): F' + eName[-1] + ': ' + col + ', Sample')] = col
 		df.columns = newIntensityCols
-		wrappers[eName] = getWrapper(wrapperpath + wrapperfilenames[eName])
+		wrappers[eName] = importWrapper(wrapperpath + wrapperfilenames[eName])
 		df.columns = applyWrapper(df.columns, wrapper=wrappers[eName])
 		fixFixableFormatMistakes(df)
 		dfs[eName] = df
