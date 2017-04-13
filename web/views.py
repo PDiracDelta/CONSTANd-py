@@ -3,10 +3,12 @@ from web import app
 from flask import render_template, send_from_directory, request, redirect, url_for, session, flash
 from .forms import newJobForm, experimentForm, jobSettingsForm
 from werkzeug.utils import secure_filename
-from web.web import updateSchema, DB_checkJobExist, DB_insertJob, DB_getJobVar, updateConfigs, updateWrappers, makeJobConfigFile, startJob
+from web.web import updateSchema, DB_checkJobExist, DB_insertJob, DB_getJobVar, updateConfigs, updateWrappers, \
+	makeJobConfigFile, startJob
+
 
 #############################
-#Client side
+# Client side
 #############################
 
 @app.route('/')
@@ -25,8 +27,8 @@ def htmlreport():
 	jobID = request.args.get('id', '')
 	cur = DB_getJobVar(jobID, 'htmlreport')
 	htmlreportName = os.path.basename(cur.fetchall()[0][0])
-	resultsFullPath = os.path.join(app.config.get('ALLJOBSDIR'), jobID+'/results/')
-	#htmlFileName = request.args.get('htmlreport', '')
+	resultsFullPath = os.path.join(app.config.get('ALLJOBSDIR'), jobID + '/results/')
+	# htmlFileName = request.args.get('htmlreport', '')
 	return send_from_directory(resultsFullPath, htmlreportName)
 
 
@@ -39,7 +41,7 @@ def pdfreport():
 	cur = DB_getJobVar(jobID, 'pdfreport')
 	pdfreportName = os.path.basename(cur.fetchall()[0][0])
 	resultsFullPath = os.path.join(app.config.get('ALLJOBSDIR'), jobID + '/results/')
-	#pdfFileName = request.args.get('pdfreport', '')
+	# pdfFileName = request.args.get('pdfreport', '')
 	return send_from_directory(resultsFullPath, pdfreportName, as_attachment=True)
 
 
@@ -65,8 +67,8 @@ def documentation():
 @app.route('/newjob', methods=['GET', 'POST'])
 def newJob():
 	"""
-	Show the new job page, using as an input:
-	- No data:		show fresh new job form newJobForm.
+	Show the new job page containing Form 1, using as an input:
+	- No data:		show fresh new job form newJobForm and render the page.
 	- Form 1 data:  create a job dir on disk and save+verify the uploaded schema.
 					If invalid, redirect to newJob (no data).
 					If valid, redirect to jobSettings with Form 1 data.
@@ -79,7 +81,7 @@ def newJob():
 		from web.web import newJobDir
 		jobDirPath = newJobDir(jobName)
 		session['jobDirName'] = os.path.basename(jobDirPath)
-		#schemaFileName = 'schema_'+secure_filename(request.files[form.schema.name])#form.schema.data.filename)
+		# schemaFileName = 'schema_'+secure_filename(request.files[form.schema.name])#form.schema.data.filename)
 		schemaFileName = 'schema_' + secure_filename(form.schema.data.filename)
 		schemaFilePath = os.path.join(jobDirPath, schemaFileName)
 		form.schema.data.save(schemaFilePath)
@@ -93,14 +95,17 @@ def newJob():
 			flash("Invalid schema file format. Please refer to the documentation.")
 			return redirect(url_for('newJob'))
 		return redirect(url_for('jobSettings'))
-	return render_template('newjob.html', form=form)  # you're beginning a new request on the /newjob page instead of home.
+	return render_template('newjob.html',
+						   form=form)  # you're beginning a new request on the /newjob page instead of home.
 
 
 @app.route('/jobsettings', methods=['GET', 'POST'])
 def jobSettings():
 	"""
-	
-	:return:
+	Create and show the job settings configuration page containing Form 2, using as input:
+	- Form 1 data:	first populate the Form2.1 fields (upload buttons), then render and show the page.
+	- Form 2 data:	update the schema, config and wrapper files using the data, make the jobConfig file, create an entry
+					in the job database, RUN the job, SEND a job start email and redirect to jobInfo passing the job ID.
 	"""
 	incompleteSchema = session.get('incompleteSchema')
 	eNames = list(incompleteSchema.keys())
@@ -108,7 +113,7 @@ def jobSettings():
 	# CREATE FORM
 	form = jobSettingsForm()
 	from web.web import hackExperimentNamesIntoForm, send_mail
-	if form.validate_on_submit():
+	if form.validate_on_submit():  # form has been filled already
 		jobID = session.get('jobDirName')
 		form = hackExperimentNamesIntoForm(form, eNames)
 		jobDir = os.path.join(app.config.get('allJobsDir'), jobID)
@@ -118,19 +123,21 @@ def jobSettings():
 		updateConfigs(jobDir, schema)
 		updateWrappers(jobDir, schema)
 		### STEP 4: get masterConfig from web and update it (add schema, date, path_out, path_results)
-		jobConfigFullPath = makeJobConfigFile(this_job_path=jobDir, this_jobname=session.get('jobName'), jobID=jobID, this_schema=schema, form=form)
+		jobConfigFullPath = makeJobConfigFile(this_job_path=jobDir, this_jobname=session.get('jobName'), jobID=jobID,
+											  this_schema=schema, form=form)
 		cur = DB_checkJobExist(jobID)
-		if not cur.fetchall()[0][0]: # job does not already exist --> create it in the DB and start it.
+		if not cur.fetchall()[0][0]:  # job does not already exist --> create it in the DB and start it.
 			cur = DB_insertJob(jobID, session.get('jobName'))
 			cur.close()
 			### RUN CONSTANd++ in independent subprocess ###
 			jobProcess = startJob(jobConfigFullPath)
 		### SEND JOB START MAIL ###
-		send_mail(recipient=form.mailRecipient.data, mailBodyFile='jobstartedMail', jobname=session.get('jobName'), jobID=jobID, attachment=None)
+		send_mail(recipient=form.mailRecipient.data, mailBodyFile='jobstartedMail', jobname=session.get('jobName'),
+				  jobID=jobID, attachment=None)
 		return redirect(url_for('jobInfo', id=session.get('jobDirName')))
-
-	elif len(form.experiments.entries)==0:
-		#form.experiments.label.text = 'experiment'
+	
+	elif len(form.experiments.entries) == 0:  # haven't completed the form yet: populate Form 2.1 (upload buttons)
+		# form.experiments.label.text = 'experiment'
 		for i in range(len(eNames)):
 			form.experiments.append_entry(experimentForm(prefix=eNames[i]))
 		form = hackExperimentNamesIntoForm(form, eNames)
@@ -140,14 +147,15 @@ def jobSettings():
 @app.route('/jobinfo', methods=['GET', 'POST'])
 def jobInfo():
 	jobID = request.args.get('id', '')
-	if jobID: # id has been set
+	if jobID:  # id has been set
 		cur = DB_getJobVar(jobID, 'done')
 		isDone = cur.fetchall()[0][0]
 		if isDone is not None:
 			if isDone:
 				return render_template('jobinfo.html', done=True, jobID=jobID, jobName=session.get('jobName'))
 			else:
-				return render_template('jobinfo.html', done=False, jobID=jobID, jobName=session.get('jobName'), autorefresh=5)
+				return render_template('jobinfo.html', done=False, jobID=jobID, jobName=session.get('jobName'),
+									   autorefresh=5)
 		else:
 			return "Couldn't find that job (or something else went wrong)."
 	else:
