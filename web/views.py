@@ -152,15 +152,17 @@ def jobInfo():
 	jobID = request.args.get('id', '')
 	if jobID:  # id has been set
 		cur = DB_getJobVar(jobID, 'done')
-		isDone = cur.fetchall()[0][0]
-		if isDone is not None:
+		queryResult = cur.fetchall()
+		print(queryResult)  #TEST
+		if queryResult is not None and queryResult != []:
+			isDone = queryResult[0][0]
 			if isDone:
 				return render_template('jobinfo.html', done=True, jobID=jobID, jobName=session.get('jobName'))
 			else:
 				return render_template('jobinfo.html', done=False, jobID=jobID, jobName=session.get('jobName'),
 									   autorefresh=5)
 		else:
-			return "Couldn't find that job (or something else went wrong)."
+			return "<html>Couldn't find that job (or something else went wrong).<br><a href='../jobinfo'>Go back</a></html>"
 	else:
 		return render_template('jobinfo.html')
 
