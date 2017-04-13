@@ -1,6 +1,10 @@
+"""
+Config file with all parameters used in the flask web app.
+"""
 import os
 
-WTF_CSRF_ENABLED = False # Enable CSRF protection
+#todo check CSRF because actually i think it is enabled anyway...
+WTF_CSRF_ENABLED = False  # Enable CSRF protection
 SECRET_KEY = 'azezfhbvdujhjnzeosdkohefsduiqs'
 
 basedir = os.path.abspath(os.path.dirname(__file__))
