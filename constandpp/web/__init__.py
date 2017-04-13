@@ -5,7 +5,7 @@ Constructs the web app object and its config, and defines the database connectio
 from flask import Flask, g  # flask.g is a global object you can use to store data on. It persists between sessions and across contexts
 from flask_mail import Mail
 import sqlite3
-from web import views
+
 
 app = Flask(__name__)
 app.config.from_object('web.config')
@@ -36,3 +36,6 @@ def close_connection(exception):
 	db = getattr(g, '_database', None)
 	if db is not None:
 		db.close()
+
+# this should really be at the end of the file, otherwise imports are messed up. This is just how Flask works...
+import web.views
