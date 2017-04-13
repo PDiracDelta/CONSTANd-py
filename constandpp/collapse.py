@@ -145,15 +145,14 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 
 	def combineDetections(this2_bestIndicesDict, centerMeasure):
 		"""
-		Takes a nested list of the indices of duplicates and combines the rows of the intensity matrix -- found in
-		dataFrame df --	for each sublist into one new row of intensities for the representative that is to be their
-		replacement. This function should also flag cases where the variance between the intensities (calculated per
-		reporter channel) exceeds a maxRelativeReporterVariance.
+		Takes a dict of lists of duplicate indices and combines for each list the corresponding rows of the
+		quantification matrix -- found in dataFrame df (parent scope) -- into one new row of intensities for the
+		representative entry that is to be their replacement in the complete dataframe. The method of combining
+		quantification values is specified by centerMeasure.
 		:param this2_bestIndicesDict:   dict    { bestIndex : [group of duplicate indices]}
 		:param centerMeasure:           str     specifies the method of combination
 		:return newIntensitiesDict:     dict    { bestIndex : new intensities of the representative detection }
 		"""
-		flagMaxRelativeReporterVariance = False
 		newIntensitiesDict = {}
 		for bestIndex, this_duplicatesList in this2_bestIndicesDict.items():
 			# calculate the total MS2 intensities for each duplicate
