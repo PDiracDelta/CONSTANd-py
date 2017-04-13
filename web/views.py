@@ -11,11 +11,17 @@ from web.web import updateSchema, DB_checkJobExist, DB_insertJob, DB_getJobVar, 
 
 @app.route('/')
 def home():
+	"""
+	Show the homepage with a new job form embedded into it.
+	"""
 	return render_template('index.html', reportFile='reportexample.html', form=newJobForm())
 
 
 @app.route('/report/html')
 def htmlreport():
+	"""
+	Download the html report.
+	"""
 	jobID = request.args.get('id', '')
 	cur = DB_getJobVar(jobID, 'htmlreport')
 	htmlreportName = os.path.basename(cur.fetchall()[0][0])
@@ -26,6 +32,9 @@ def htmlreport():
 
 @app.route('/report/pdf')
 def pdfreport():
+	"""
+	Download the pdf report.
+	"""
 	jobID = request.args.get('id', '')
 	cur = DB_getJobVar(jobID, 'pdfreport')
 	pdfreportName = os.path.basename(cur.fetchall()[0][0])
@@ -36,6 +45,9 @@ def pdfreport():
 
 @app.route('/file', methods=['GET', 'POST'])
 def getFile():
+	"""
+	Get any file from the server.
+	"""
 	fileFullPath = request.args.get('fileFullPath', '')
 	dirFullPath = os.path.dirname(fileFullPath)
 	fileName = os.path.basename(fileFullPath)
@@ -44,14 +56,24 @@ def getFile():
 
 @app.route('/docu')
 def documentation():
+	"""
+	Show the documentation.
+	"""
 	return render_template('documentation.html', title="Documentation")
 
 
 @app.route('/newjob', methods=['GET', 'POST'])
 def newJob():
+	"""
+	Show the new job page, using as an input:
+	- No data:		show fresh new job form newJobForm.
+	- Form 1 data:  create a job dir on disk and save+verify the uploaded schema.
+					If invalid, redirect to newJob (no data).
+					If valid, redirect to jobSettings with Form 1 data.
+	"""
 	### STEP 1: get schema and create new job
 	form = newJobForm()
-	if form.validate_on_submit():
+	if form.validate_on_submit():  # new job had already been (partially) created
 		jobName = form.jobName.data
 		session['jobName'] = jobName
 		from web.web import newJobDir
@@ -71,11 +93,15 @@ def newJob():
 			flash("Invalid schema file format. Please refer to the documentation.")
 			return redirect(url_for('newJob'))
 		return redirect(url_for('jobSettings'))
-	return render_template('newjob.html', form=form)
+	return render_template('newjob.html', form=form)  # you're beginning a new request on the /newjob page instead of home.
 
 
 @app.route('/jobsettings', methods=['GET', 'POST'])
 def jobSettings():
+	"""
+	
+	:return:
+	"""
 	incompleteSchema = session.get('incompleteSchema')
 	eNames = list(incompleteSchema.keys())
 	# eforms = {(eName, experimentForm()) for eName in incompleteSchema}
