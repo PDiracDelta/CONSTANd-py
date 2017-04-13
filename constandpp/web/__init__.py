@@ -9,8 +9,8 @@ import sqlite3
 
 app = Flask(__name__)
 app.config.from_object('web.config')
-app.config['allJobsDir'] = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/'
-app.config['jobDB'] = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/jobs.db'
+#app.config['allJobsDir'] = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/'
+#app.config['jobDB'] = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/jobs.db'
 
 mailer = Mail(app)
 
@@ -22,7 +22,7 @@ def get_db():
 	"""
 	db = getattr(g, '_database', None)
 	if db is None:
-		db = g._database = sqlite3.connect(app.config.get('jobDB'))
+		db = g._database = sqlite3.connect(app.config.get('JOBDB'))
 	return db
 
 

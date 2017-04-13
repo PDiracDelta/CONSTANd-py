@@ -116,7 +116,7 @@ def jobSettings():
 	if form.validate_on_submit():  # form has been filled already
 		jobID = session.get('jobDirName')
 		form = hackExperimentNamesIntoForm(form, eNames)
-		jobDir = os.path.join(app.config.get('allJobsDir'), jobID)
+		jobDir = os.path.join(app.config.get('ALLJOBSDIR'), jobID)
 		### STEP 2: upload data files, wrapper files, ICM files and config (files), while updating schema with their locations.
 		schema = updateSchema(jobDir, incompleteSchema, form)
 		### STEP 3: update config files and wrapper files
@@ -168,10 +168,10 @@ def jobInfo():
 # @app.route('/htmlreport/<path:jobID>', methods=['GET', 'POST'])
 # def getHtmlReport(jobID):
 # 	htmlFileName = request.args.get('htmlFileName', '')
-# 	return send_from_directory(app.config.get('allJobsDir')+jobID, htmlFileName, as_attachment=True)
+# 	return send_from_directory(app.config.get('ALLJOBSDIR')+jobID, htmlFileName, as_attachment=True)
 #
 #
 # @app.route('/pdfreport/<path:jobID>', methods=['GET', 'POST'])
 # def getPdfReport(jobID):
 # 	pdfFileName = request.args.get('pdfFileName', '')
-# 	return send_from_directory(app.config.get('allJobsDir')+jobID, pdfFileName, as_attachment=True)
+# 	return send_from_directory(app.config.get('ALLJOBSDIR')+jobID, pdfFileName, as_attachment=True)
