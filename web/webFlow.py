@@ -269,8 +269,8 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 			from dataIO import getTMTIsotopicDistributions
 			icm = TMT2ICM(getTMTIsotopicDistributions(filePath), this_channelAliasesPerCondition)
 		else:
-			from dataIO import getIsotopicCorrectionsMatrix
-			icm = getIsotopicCorrectionsMatrix(filePath)
+			from dataIO import importIsotopicCorrectionsMatrix
+			icm = importIsotopicCorrectionsMatrix(filePath)
 			raise Exception(
 				"not implemented (ICM column and row order transformation from non-TMT formatted input).")  # todo
 		this_path = os.path.abspath(os.path.join(filePath, os.pardir))
