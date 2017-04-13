@@ -124,7 +124,7 @@ def parseSchemaFile(schemaPath):
 	return incompleteSchemaDict
 
 
-# def writeConfig(filePath, contents):
+# def writeConfig(filePath, contents): # todo remove this
 # 	"""
 #
 # 	:param filePath:
@@ -161,7 +161,7 @@ def fixFixableFormatMistakes(df):
 
 def applyWrapper(columns, wrapper):
 	"""
-	Takes a Nx2 tuple wrapper and transforms the columns in the dataframe df specified by the first column entries
+	Takes a Nx2 tuple/list wrapper and transforms the columns in the dataframe df specified by the first column entries
 	in wrapper into the new column name specified by the second colmumn entries in wrapper.
 	:param columns:     pd.Index        old column names
 	:param wrapper:     list(tuples)    [(oldName, newName) for some columns]
@@ -175,27 +175,29 @@ def applyWrapper(columns, wrapper):
 
 def getData(path_in, delim=None, header=0, wrapper=None):
 	"""
-	Gets the dataframe specified by path_in from disk, applies a wrapper (optional) and fixes common format mistakes.
+	Gets the experimental data specified by path_in from disk, applies a wrapper (optional) and fixes common
+	format mistakes.
 	:param path_in:     string          existing path to input file
 	:param delim:       char            delimiter of the data
 	:param header:      int             row that contains the header of the data (None if no header)
-	:return:            pd.DataFrame    ready-to-use data
+	:return df:			pd.DataFrame    ready-to-use experimental data
 	"""
 	df = importDataFrame(path_in, delim=delim, header=header)
-	df.columns = applyWrapper(df.columns, wrapper) #todo
+	df.columns = applyWrapper(df.columns, wrapper)
 	df = fixFixableFormatMistakes(df)
 	return df
 
 
 def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=False):
 	"""
-	Save the results (normalized intensities) to disk.
-	:param data:        obj     data object to be exported to disk
-	:param dataType:    str     type of data; influences the way the data is to be stored
-	:param path_out:    string  path where data should be exported to
-	:param filename:    string  filename for the data
-	:param delim_out:       char    delimiter of the data
+	Save any type of output to disk.
+	:param data:		obj     data object to be exported to disk
+	:param dataType:	str     type of data; influences the way the data is to be stored
+	:param path_out:	string  path where data should be exported to
+	:param filename:	string  filename for the data
+	:param delim_out:	char    delimiter of the data
 	"""
+	# todo this function should call sub-functions per data type and optional arguments
 	assert os.path.exists(path_out)
 
 	extension = delim2ext(delim_out)
