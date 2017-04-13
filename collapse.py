@@ -18,14 +18,6 @@ from scipy.spatial.distance import cdist, euclidean
 columnsToSave = None
 
 
-# def setCollapseColumnsToSave(this_columnsToSave):
-# 	"""
-# 	Sets the value of the global variable columnsToSave for use in the module functions.
-# 	:param this_columnsToSave: list   names of the columns that ought to be saved when removing data in a collapse.
-# 	"""
-# 	globals()['columnsToSave'] = this_columnsToSave
-
-
 def geometricMedian(X, eps=1e-5):
 	"""
 	Returns the geometric median conform to the algorithm developed by Yehuda Vardi and Cun-Hui Zhang.
@@ -65,8 +57,12 @@ def geometricMedian(X, eps=1e-5):
 
 def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoublePSMAlgo_bool, columnsToSave):  #
 	"""
-	Generic collapse function. Looks for duplicate 'Annotated Sequence' values in the dataFrame and verifies
-	true duplication using checkTrueDuplicates function. Modifies df according to true duplicates and newly acquired
+	Generic collapse function, which removes redundancy in the data due to property toCollapse.
+	Looks for duplicate 'Annotated Sequence' values in the dataFrame and further groups by other possible properties
+	(PSMAlgo, Charge, Modifications) if necessary, while respecting the collapse order imposed in the main() function.
+	Removes each group of duplicate from the experimental data df and replaces them by a representative entry that has
+	all properties of the entry amongst them with the best PSM score, but with quantification values determined by a
+	method specified through `method`.
 	intensities (via getNewIntensities function): remove all duplicates and enter one replacement detection.
 	Adds a 'Degeneracy' column to the dataFrame if it didn't exist already: this contains the number of peptides that
 	have been collapsed onto that (synthetic) detection.
@@ -74,13 +70,18 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 	:param toCollapse:              	str             variable of which true duplicates are to be collapsed.
 	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
 	:param intensityColumns:			list			columns that contain the quantification values
-	:param method:                      str             defines how the new detection is to be selected/constructed
+	:param method:                      str             defines how the new quantification values of the representative
+														are selected/constructed:
+														bestMatch: those of the PSM with the best score
+														mostIntsene: those of the PSM with the most intense values
+														mean: the mean of all PSMs in that duplicates group
+														geametricMedian: the geometric median of all PSMs in that duplicates group
 	:param identifyingNodes:			dict			PSM rater algorithm names and score names. Structure:
 														{"master": [NAME, SCORE_NAME], "slaves": [[NAME, SCORE_NAME], ...]}
 	:param undoublePSMAlgo_bool:		bool			Has the PSM algo redundancy already been removed?
 	:param columnsToSave:				list(str)		fields of to-be-removed entries that are saved into removedData
 	:return df:                         pd.dataFrame    without sequence duplicates according to to checkTrueDuplicates.
-	:return removedData:                pd.dataFrame    [PARENT INDEX, and, values, to, be, saved]
+	:return removedData:                pd.dataFrame    [PARENT INDEX, and, fields, to, be, saved]
 	"""
 	# todo docu
 	def getDuplicates():
@@ -90,9 +91,6 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 		returns a dict { propertyValue : [duplicateIndices] }.
 		:return this_duplicateLists:     list            [[group of duplicates] per `toCollapse` value in the df]
 		"""
-
-		# todo outdated documentation
-
 		def groupByIdenticalProperties(byPropDict, remainingProperties):
 			"""
 			Takes a dictionary which is the result of a groupby(property) call on a dataFrame. Also takes a list of
