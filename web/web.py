@@ -182,6 +182,17 @@ def updateWrappers(this_job_path, this_schema):
 
 
 def makeJobConfigFile(this_job_path, this_jobname, jobID, this_schema, form):
+	"""
+	Create a jobConfig .ini file in the this_job_path dir, that includes all parameters necessary to start the job, and
+	returns its path. Writes all parameters from the fields in jobSettingsForm (except the CSRF token) as well
+	as some hardcoded (but possibly ad-hoc constructed) job parameters.
+	:param this_job_path:		str				path to the current job dir
+	:param this_jobname:		str				name of the current job
+	:param jobID:				str				ID of the current job
+	:param this_schema:			dict			schema of the experiments' hierarchy and its associated input files
+	:param form:				jobSettingsForm	Form 2 (see forms.py) which contains all user-specifiable job settings
+	:return jobConfigFullPath:	str				path to the jobConfig file in the current job dir
+	"""
 	jobConfigFullPath = os.path.join(this_job_path, 'jobConfig_'+this_jobname+'.ini')
 	with open(jobConfigFullPath, 'w+') as fout:
 		fout.write('[DEFAULT]\n') # todo enable
