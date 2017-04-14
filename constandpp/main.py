@@ -705,7 +705,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 			logging.info("Starting visualization end report generation of job: " + jobParams['jobname'] + "at " +
 						 str(datetime.datetime.now()).split('.')[0])
 			generateReport(analysisResults, jobParams, logFilePath, writeToDisk, processingParams, start)
-			DB_setJobReportRelPaths(jobDirName=jobDirName, resultpath=jobParams['path_results'],
+			DB_setJobReportRelPaths(jobID=jobDirName, resultpath=jobParams['path_results'],
 									jobName=jobParams['jobname'])
 			logging.info("Finished visualization end report generation of job: " + jobParams['jobname'] + "at " +
 						 str(datetime.datetime.now()).split('.')[0])
@@ -757,7 +757,7 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 	# jobConfigFilePath = webFlow(exptype='COON_noISO', previousjobdirName='2016-12-16 16:38:30.536344_COON_noISO')
 	# jobConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
 	# jobConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand', previousjobdirName='2016-12-20 14:39:09.476567_COON_SN_nonormnoconstand')
-		jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-04-14 10:14:53.002433_coon2test/jobConfig_coon2test.ini'
+		jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-04-14 17:46:37.527494_alleswerkt?/jobConfig_alleswerkt?.ini'
 	
 	with app.app_context():
 		jobDirName = os.path.basename(os.path.abspath(os.path.join(jobConfigFilePath, os.pardir)))
