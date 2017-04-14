@@ -95,10 +95,21 @@ def updateSchema(this_job_path, this_incompleteSchema, form):
 
 
 def DB_checkJobExist(ID):
+	"""
+	Takes a job ID and checks if it exists in the jobs.db
+	:param ID:	str				job ID
+	:return:	sqlite3.Cursor:	containing the query results
+	"""
 	return get_db().execute('SELECT EXISTS(SELECT 1 FROM jobs WHERE id="' + ID + '" LIMIT 1);')
 
 
 def DB_insertJob(jobDirName, jobName):
+	"""
+	Creates new job entry in the jobs.db with the specified job dir name and jobname; other fields default/empty.
+	:param jobDirName:	str				name of the new job dir
+	:param jobName:		str				name of the new job
+	:return:			sqlite3.Cursor:	cursor containing the query results
+	"""
 	cur = get_db().execute('INSERT INTO jobs VALUES ("' + jobDirName + '","' + jobName + '","","", 0, 0);')
 	get_db().commit()
 	return cur
