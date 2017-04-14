@@ -325,7 +325,16 @@ def TMT2ICM(TMTImpuritiesDF, order=None):
 	return icm / rowSums # normalize each row so that the sum is one
 
 
-def send_mail(recipient, mailBodyFile, jobname, jobID, attachment):  # TODO VITO credentials
+def send_mail(recipient, mailBodyFile, jobname, jobID, attachment):
+	"""
+	Sends an email via localhost:25 using flask_mail, based on a template mailBodyFile, optionally including an attachment.
+	:param recipient:		str			recipient for the email
+	:param mailBodyFile:	str			path to the file with the email body
+	:param jobname:			str			name of the current job
+	:param jobID:			str			ID of the current job
+	:param attachment:		str			path to the attachment file to be included in the mail
+	:return:				str||None	Error message string raised while sending message, or None.
+	"""
 	from flask_mail import Message
 	from socket import gaierror
 	subject = "Your CONSTANd++ job %s" % (jobname)
