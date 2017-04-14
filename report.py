@@ -303,7 +303,7 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 	numDifferentials = jobParams['numDifferentials']
 	if jobParams['minExpression_bool']:
 		if numDifferentials < len(minSortedDifferentialProteinsDF):
-			minTopDifferentials = minSortedDifferentialProteinsDF.loc[range(numDifferentials), :]
+			minTopDifferentials = minSortedDifferentialProteinsDF.head(numDifferentials)  # minSortedDifferentialProteinsDF.loc[range(numDifferentials), :]
 		else:
 			minTopDifferentials = minSortedDifferentialProteinsDF
 	else:
@@ -324,7 +324,7 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 		experiments[e]['cond1Aliases'] = experiments[e]['channelAliasesPerCondition'][0]
 	pdfhtmlreport = render_template('report.html', jobName=jobParams['jobname'], minVolcanoFullPath=minVolcanoFullPath,
 								 fullVolcanoFullPath=fullVolcanoFullPath, minExpression_bool=jobParams['minExpression_bool'],
-								 fullExpression_bool=jobParams['fullExpression_bool'], mindifferentials=minTopDifferentials,
+								 fullExpression_bool=jobParams['fullExpression_bool'], mindifferentials=minTopDifferentials.to_html(inde=False),
 								 fulldifferentials=fullTopDifferentials, PCAFileName=PCAPlotFullPath,
 								 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 								 duration=approxDuration, log=logContents, jobParams=jobParams,
@@ -337,7 +337,7 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 								 fullVolcanoFullPath=fullVolcanoFullPath,
 								 minExpression_bool=jobParams['minExpression_bool'],
 								 fullExpression_bool=jobParams['fullExpression_bool'],
-								 mindifferentials=minTopDifferentials,
+								 mindifferentials=minTopDifferentials.to_html(index=False),
 								 fulldifferentials=fullTopDifferentials, PCAFileName=PCAPlotFullPath,
 								 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 								 duration=approxDuration, log=logContents, jobParams=jobParams,
