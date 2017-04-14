@@ -211,9 +211,16 @@ def makeJobConfigFile(this_job_path, this_jobname, jobID, this_schema, form):
 	return jobConfigFullPath
 
 
-def DB_setJobReportRelPaths(jobDirName, resultpath, jobName):
+def DB_setJobReportRelPaths(jobID, resultpath, jobName):
+	"""
+	Updates the job entry specified by jobID with the relative (to the job dir) paths of their html and pdf report files.
+	:param jobID:		str				ID of the current job
+	:param resultpath:	str				relative (to the job dir) path of the results dir with report files
+	:param jobName:		str				name of the current job
+	:return:			sqlite3.Cursor	containing the query results
+	"""
 	get_db().execute('UPDATE jobs SET htmlreport = "' + os.path.join(resultpath, jobName+'_report.html')
-					 + '", pdfreport = "' + os.path.join(resultpath, jobName+'_Report.pdf') + '" WHERE id = "' + jobDirName + '";')
+					 + '", pdfreport = "' + os.path.join(resultpath, jobName+'_Report.pdf') + '" WHERE id = "' + jobID + '";')
 	get_db().commit()
 
 
