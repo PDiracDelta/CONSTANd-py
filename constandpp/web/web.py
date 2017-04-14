@@ -213,7 +213,7 @@ def makeJobConfigFile(this_job_path, this_jobname, jobID, this_schema, form):
 
 def DB_setJobReportRelPaths(jobID, resultpath, jobName):
 	"""
-	Updates the job entry specified by jobID with the relative (to the job dir) paths of their html and pdf report files.
+	Updates the jobs.db entry specified by jobID with the relative (to the job dir) paths of their html and pdf report files.
 	:param jobID:		str				ID of the current job
 	:param resultpath:	str				relative (to the job dir) path of the results dir with report files
 	:param jobName:		str				name of the current job
@@ -224,8 +224,13 @@ def DB_setJobReportRelPaths(jobID, resultpath, jobName):
 	get_db().commit()
 
 
-def DB_setJobCompleted(jobDirName):
-	get_db().execute('UPDATE jobs SET done = 1, success = 1 WHERE id = "' + jobDirName + '";')
+def DB_setJobCompleted(jobID):
+	"""
+	Update the job with given ID to be marked completed in the jobs.db
+	:param jobID:	str				ID of the current job
+	:return:		sqlite3.Cursor	containing the query results
+	"""
+	get_db().execute('UPDATE jobs SET done = 1, success = 1 WHERE id = "' + jobID + '";')
 	get_db().commit()
 
 
