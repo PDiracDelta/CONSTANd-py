@@ -158,7 +158,9 @@ def jobInfo():
 		if queryResult is not None and queryResult != []:
 			isDone = queryResult[0][0]
 			if isDone:
-				return render_template('jobinfo.html', done=True, jobID=jobID, jobName=session.get('jobName'))
+				cur = DB_getJobVar(jobID, 'success')
+				success = cur.fetchall()[0][0]
+				return render_template('jobinfo.html', done=True, success=success, jobID=jobID, jobName=session.get('jobName'))
 			else:
 				return render_template('jobinfo.html', done=False, jobID=jobID, jobName=session.get('jobName'),
 									   autorefresh=5)

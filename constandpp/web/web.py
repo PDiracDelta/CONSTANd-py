@@ -241,7 +241,7 @@ def constructMasterConfigContents(schemaDict, otherMasterParams): #todo obsolete
 				from codecs import getencoder as ge, getdecoder as gd
 				byteDelim = ge("unicode-escape")(v)[0]
 				contents[k] = gd("utf-8")(byteDelim)[0]
-			else: # not a delimiter
+			else:  # not a delimiter
 				contents[k] = v
 		else:
 			contents[k] = dumps(v)
