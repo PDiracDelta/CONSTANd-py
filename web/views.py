@@ -153,7 +153,6 @@ def jobInfo():
 	if jobID:  # id has been set
 		cur = DB_getJobVar(jobID, 'done')
 		queryResult = cur.fetchall()
-		print(queryResult)  #TEST
 		if queryResult is not None and queryResult != []:
 			isDone = queryResult[0][0]
 			if isDone:
@@ -165,15 +164,3 @@ def jobInfo():
 			return "<html>Couldn't find that job (or something else went wrong).<br><a href='../jobinfo'>Go back</a></html>"
 	else:
 		return render_template('jobinfo.html')
-
-#
-# @app.route('/htmlreport/<path:jobID>', methods=['GET', 'POST'])
-# def getHtmlReport(jobID):
-# 	htmlFileName = request.args.get('htmlFileName', '')
-# 	return send_from_directory(app.config.get('ALLJOBSDIR')+jobID, htmlFileName, as_attachment=True)
-#
-#
-# @app.route('/pdfreport/<path:jobID>', methods=['GET', 'POST'])
-# def getPdfReport(jobID):
-# 	pdfFileName = request.args.get('pdfFileName', '')
-# 	return send_from_directory(app.config.get('ALLJOBSDIR')+jobID, pdfFileName, as_attachment=True)
