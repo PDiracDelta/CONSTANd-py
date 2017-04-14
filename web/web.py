@@ -249,8 +249,9 @@ def constructMasterConfigContents(schemaDict, otherMasterParams): #todo obsolete
 	return contents
 
 
-def send_mail(recipient, mailBodyFile, jobname, jobID, attachment): # TODO VITO credentials
+def send_mail(recipient, mailBodyFile, jobname, jobID, attachment):  # TODO VITO credentials
 	from flask_mail import Message
+	from socket import gaierror
 	subject = "Your CONSTANd++ job %s" % (jobname)
 	#body = "=== English version below ===\n\n"
 	#body += "Beste {0} {1},\n\n"
@@ -265,4 +266,8 @@ def send_mail(recipient, mailBodyFile, jobname, jobID, attachment): # TODO VITO 
 		aName = os.path.basename(attachment)
 		with app.open_resource(attachment) as a:
 			msg.attach(filename=aName, content_type='application/pdf', data=a.read())
-	mailer.send(msg)
+	try:
+		mailer.send(msg)
+		return None
+	except gaierror as e:  # return an error to inform the user no e-mail was sent.
+		return "You will probably not receive an e-mail, because of the following internal error: "+str(e)

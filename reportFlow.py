@@ -125,5 +125,9 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 
 		from web.web import send_mail
 		### SEND JOB COMPLETED MAIL ###
-		send_mail(recipient=params['mailRecipient'], mailBodyFile='reportMail',
+		mailSuccess = send_mail(recipient=params['mailRecipient'], mailBodyFile='reportMail',
 				  jobname=params['jobname'], jobID=params['jobID'], attachment=pdfFullPath)
+		if mailSuccess is not None:  # something went wrong
+			import logging
+			logging.error(mailSuccess)
+			print(mailSuccess)
