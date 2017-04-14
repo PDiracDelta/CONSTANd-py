@@ -70,7 +70,14 @@ def saveFileStorage(this_path, fs, prefix=None):
 
 
 def updateSchema(this_job_path, this_incompleteSchema, form):
-	#from web.forms import FileField, FormField
+	"""
+	Adds the data, config, wrapper and isotopicCorrection_matrix entries to an incomplete job schema. Gets the
+	corresponding data from the input form (except the ICM) and saves the completed schema in this_job_path.
+	:param this_job_path:			str				path to save the complete schema
+	:param this_incompleteSchema:	dict			incomplete schema of the experiments' hierarchy
+	:param form:					experimentForm	Form 2.1 (see forms.py) containing all input files for each experiment
+	:return this_incompleteSchema:	dict			*complete* schema of the experiments' hierarchy
+	"""
 	for eName in this_incompleteSchema.keys():
 		for experimentForm in form.experiments.entries:
 			if experimentForm.name == eName:
@@ -82,7 +89,7 @@ def updateSchema(this_job_path, this_incompleteSchema, form):
 					wrapperFileName = eName + '_wrapper.tsv'
 					open(os.path.join(this_job_path, wrapperFileName), 'w').close()
 					this_incompleteSchema[eName]['wrapper'] = wrapperFileName
-				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = None
+				this_incompleteSchema[eName]['isotopicCorrection_matrix'] = None  # todo reintroduction of ICM
 
 	return this_incompleteSchema
 
