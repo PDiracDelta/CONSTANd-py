@@ -18,7 +18,7 @@
     <img src="/static/{{ minVolcanoFullPath }}"title="minimal expression volcano plot" style="width:70.0%" />
   {% endif %}
   </center>
-  <table>
+  <!--<table>
   <colgroup>
   <col width="7%" />
   <col width="4%" />
@@ -36,17 +36,18 @@
   </tr>
   </thead>
   <tbody>
-  {% for diff in mindifferentials %}
-    <tr class="odd"> <!-- even -->
+  {# {% for diff in mindifferentials %}
+    <tr class="odd"> <!-- even --><!--
     <td align="left">{{ diff['protein'] }}</td>
     <td align="left">{{ diff['significant'] }}</td>
     <td align="left">{{ diff['description'] }}</td>
     <td align="left">{{ diff['log2 fold change c1/c2'] }}</td>
     <td align="left">{{ diff['adjusted p-value'] }}</td>
     </tr>
-  {% endfor %}
+  {% endfor %} #}
   </tbody>
-  </table>
+  </table>-->
+  {{ mindifferentials|safe }}
 {% endif %}
 {% if fullExpression_bool %}
   <h3 id="full-expression"><span class="header-section-number">1.2</span> Full expression</h3>
