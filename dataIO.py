@@ -57,8 +57,8 @@ def importIsotopicCorrectionsMatrix(path_in):
 
 def getTMTIsotopicDistributions(path_in):
 	"""
-	Read the TMT isotope distributions table (IDT) in tsv format from disk as a dataframe with the correct column headers and
-	labels as specified in the file. The column with the channel names and the "IDT" header is removed.
+	Read the TMT isotope distributions table (IDT) in tsv format from disk as a dataframe with the correct column headers
+	and labels as specified in the file. The column with the channel names and the "IDT" header is removed.
 	:param path_in:	str				path to the .tsv file with the TMT IDT
 	:return tmtid:	pd.DataFrame	TMT isotope distributions table. Format:
 											IDT     -2  -1  +1  +2

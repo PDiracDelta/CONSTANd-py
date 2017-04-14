@@ -272,6 +272,7 @@ def TMT2ICM(TMTImpuritiesDF, order=None):
 											...
 	:return ICM:            np.ndarray      isotopic corrections matrix
 	"""
+	# todo reintroduce and write docu
 	# cols6plex = ['126', '127', '128', '129', '130', '131']
 	# cols8plex = ['126', '127N', '127C', '128C', '129N', '129C', '130C', '131']
 	# cols10plex = ['126', '127N', '127C', '128N', '128C', '129N', '129C', '130N', '130C', '131']
