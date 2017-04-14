@@ -87,7 +87,7 @@ def importWrapper(path_in='wrapper.tsv'):
 	return list(importDataFrame(path_in, header=None, dtype=str).values)
 
 
-def parseSchemaFile(schemaPath):
+def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistribute file manipulation files in web.py
 	"""
 	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment. The
 	wrapper and config entries are set to None for now.
