@@ -204,7 +204,7 @@ def getPCAPlot(PCAResult, schema):
 	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
 	channelColorsDict = getColours(schema, allChannelAliases)
-	channelMarkersDict = getMarkers(schema, allChannelAliases)
+	channelMarkersDict = getMarkers(schema)
 
 	for (x, y, label) in zip(PCAResult[:, 0], PCAResult[:, 1], allChannelAliases):
 		# produce scatterplot of two first principal components and annotate
