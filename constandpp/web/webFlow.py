@@ -6,7 +6,7 @@ Collection of functions that simulates the web interface, constructing a job's s
 This file is not necessary when using a real webinterface.
 """
 
-import os, datetime
+import os
 from dataIO import parseSchemaFile, unnest
 from web.web import TMT2ICM, newJobDir
 from json import dumps
