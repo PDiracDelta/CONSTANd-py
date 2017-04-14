@@ -98,7 +98,7 @@ def DB_checkJobExist(ID):
 	"""
 	Takes a job ID and checks if it exists in the jobs.db
 	:param ID:	str				job ID
-	:return:	sqlite3.Cursor:	containing the query results
+	:return:	sqlite3.Cursor	containing the query results
 	"""
 	return get_db().execute('SELECT EXISTS(SELECT 1 FROM jobs WHERE id="' + ID + '" LIMIT 1);')
 
@@ -108,7 +108,7 @@ def DB_insertJob(jobDirName, jobName):
 	Creates new job entry in the jobs.db with the specified job dir name and jobname; other fields default/empty.
 	:param jobDirName:	str				name of the new job dir
 	:param jobName:		str				name of the new job
-	:return:			sqlite3.Cursor:	cursor containing the query results
+	:return:			sqlite3.Cursor	cursor containing the query results
 	"""
 	cur = get_db().execute('INSERT INTO jobs VALUES ("' + jobDirName + '","' + jobName + '","","", 0, 0);')
 	get_db().commit()
@@ -116,11 +116,25 @@ def DB_insertJob(jobDirName, jobName):
 
 
 def DB_getJobVar(ID, varName):
+	"""
+	Takes a job ID and gets the data of field varName from the jobs.db.
+	:param ID:		str				job ID
+	:param varName: str				field in the jobs.db
+	:return: 		sqlite3.Cursor	containing the query results
+	"""
 	return get_db().execute('SELECT '+varName+' FROM jobs WHERE id="' + ID + '" LIMIT 1;')
 
 
 def updateConfigs(this_job_path, this_schema):
+	"""
+	Opens the processingConfig .ini files in the current job dir (as extracted from this_schema) and appends to it the
+	baseProcessingConfig parameters as well as parameters from this_schema, and the ad-hoc constructed output path
+	(subdir of the jobdir) and filename.
+	:param this_job_path:	str		path to the current job dir
+	:param this_schema:		dict	schema of the experiments' hierarchy and its associated input files
+	"""
 	import fileinput
+	
 	for eName in this_schema:
 		experiment = this_schema[eName]
 		configFile = os.path.join(this_job_path, experiment['config'])
