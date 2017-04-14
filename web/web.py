@@ -49,6 +49,14 @@ def hackExperimentNamesIntoForm(form, eNames):
 
 
 def saveFileStorage(this_path, fs, prefix=None):
+	"""
+	Saves a file in a FileStorage object from a WTForms FileField in the specified this_path location if a filename
+	is specified, optionally prefixed with `prefix`+'_', and returns its path.
+	:param this_path:	str			path to save the file to
+	:param fs:			FileStorage	object with file to be saved
+	:param prefix:		str			prefix to the filename
+	:return:			str			path to the saved file from inside fs
+	"""
 	if fs.filename == '':
 		return None
 	else:
