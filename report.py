@@ -292,7 +292,7 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 	from web import app
 	from os import path, pardir
 	
-	allJobdsParDir = path.abspath(path.join(app.config.get('ALLJOBSDIR'), pardir))
+	allJobsParDir = path.abspath(path.join(app.config.get('ALLJOBSDIR'), pardir))
 	
 	def injectColumnWidthHTML(DETableHTML):
 		"""
@@ -309,8 +309,14 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 	
 	
 	def hackImagePathToSymlinkInStaticDir(old_path):
+		"""
+		Removes the string allJobsParDir (the full path of the jobs dir's parent dir) plus the remaining leading '/'
+		from the old_path. This is done because the remaining path will be coupled to a job dir symlink in the static dir.
+		:param old_path:	str		path to some child of the jobs dir
+		:return:			str		tail of the input path, starting from the jobs dir.
+		"""
 		if old_path is not None:
-			return old_path.split(allJobdsParDir)[1].lstrip('/')
+			return old_path.split(allJobsParDir)[1].lstrip('/')
 		else:
 			return None
 
@@ -348,6 +354,8 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 								 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 								 duration=approxDuration, log=logContents, jobParams=jobParams,
 								 processingParams=processingParams, experiments=experiments, pdfsrc='True')
+	# get the tails of the input paths, starting from the jobs dir, so the Jinja report template can couple it to the
+	# jobs symlink in the static dir.
 	minVolcanoFullPath = hackImagePathToSymlinkInStaticDir(minVolcanoFullPath)
 	fullVolcanoFullPath = hackImagePathToSymlinkInStaticDir(fullVolcanoFullPath)
 	HCDendrogramFullPath = hackImagePathToSymlinkInStaticDir(HCDendrogramFullPath)
