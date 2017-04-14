@@ -43,7 +43,7 @@ def getColours(schema, allChannelAliases):
 	"""
 	Returns list of colours for all the channels in all experiments (based on schema) so that the channels of the same
 	condition have the same colour.
-	:param schema:  			dict    schema of the experiments' hierarchy' hierarchy
+	:param schema:  			dict    schema of the experiments' hierarchy
 	:param allChannelAliases:	list	unnested channelAliasesPercondition of all experiments, concatenated in order.
 	:return channelColoursDict:	dict    colour for each channel; a different one for each condition
 	"""
