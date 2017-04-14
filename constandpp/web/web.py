@@ -30,10 +30,11 @@ def newJobDir(this_job_name):
 
 def hackExperimentNamesIntoForm(form, eNames):
 	"""
-	
-	:param form:
-	:param eNames:
-	:return:
+	Replaces the generic "experiments-x" labels in a WTForms 'experiments' field entry by the names of the experiments as
+	specified in eNames, in unmodified order.
+	:param form:	jobSettingsForm		Form 2 instance (see views.py) with generic 'experiments' entry labels
+	:param eNames:	list(str)			names of the experiments, as extracted from job schema
+	:return:		jobSettingsForm		Form 2 instance (see views.py) 'experiments' entry labels according to eNames
 	"""
 	import re
 	
