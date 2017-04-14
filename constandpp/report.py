@@ -293,7 +293,21 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 	from os import path, pardir
 	
 	allJobdsParDir = path.abspath(path.join(app.config.get('ALLJOBSDIR'), pardir))
-
+	
+	def injectColumnWidthHTML(DETableHTML):
+		"""
+		Takes the HTML string that generates the differential proteins table and inserts a <colgroup> element before the
+		<thead> element by splitting, concatenating and rejoining. The colgroup element defines the relative column widths.
+		:param DETableHTML:	str		HTML table with the differential proteins
+		:return:			str		HTML table with the differential proteins and an extra colgroup element.
+		"""
+		columnWidthHTML = '<colgroup><col width="7%" /><col width="4%" /><col width="54%" /><col width="16%" /><col width="18%" /></colgroup>'
+		splitter = '<thead>'
+		chunks = DETableHTML.split(splitter)
+		assert len(chunks) == 2
+		return str.join(splitter, [chunks[0]+columnWidthHTML, chunks[1]])
+	
+	
 	def hackImagePathToSymlinkInStaticDir(old_path):
 		if old_path is not None:
 			return old_path.split(allJobdsParDir)[1].lstrip('/')
@@ -301,6 +315,7 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 			return None
 
 	numDifferentials = jobParams['numDifferentials']
+	
 	if jobParams['minExpression_bool']:
 		if numDifferentials < len(minSortedDifferentialProteinsDF):
 			minTopDifferentials = minSortedDifferentialProteinsDF.head(numDifferentials)  # minSortedDifferentialProteinsDF.loc[range(numDifferentials), :]
@@ -308,6 +323,8 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 			minTopDifferentials = minSortedDifferentialProteinsDF
 	else:
 		minTopDifferentials = pd.DataFrame(columns=minSortedDifferentialProteinsDF.columns)
+	minTopDifferentialsHTML = injectColumnWidthHTML(minTopDifferentials.to_html(index=False, justify='left'))
+	
 	if jobParams['fullExpression_bool']:
 		if numDifferentials < len(fullSortedDifferentialProteinsDF):
 			fullTopDifferentials = fullSortedDifferentialProteinsDF.loc[range(numDifferentials), :]
@@ -315,6 +332,8 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 			fullTopDifferentials = fullSortedDifferentialProteinsDF
 	else:
 		fullTopDifferentials = pd.DataFrame(columns=fullSortedDifferentialProteinsDF.columns)
+	fullTopDifferentialsHTML = injectColumnWidthHTML(fullTopDifferentials.to_html(index=False, justify='left'))
+
 	with open(logFilePath, 'r') as logFile:
 		logContents = logFile.readlines()
 
@@ -324,8 +343,8 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 		experiments[e]['cond1Aliases'] = experiments[e]['channelAliasesPerCondition'][0]
 	pdfhtmlreport = render_template('report.html', jobName=jobParams['jobname'], minVolcanoFullPath=minVolcanoFullPath,
 								 fullVolcanoFullPath=fullVolcanoFullPath, minExpression_bool=jobParams['minExpression_bool'],
-								 fullExpression_bool=jobParams['fullExpression_bool'], mindifferentials=minTopDifferentials.to_html(inde=False),
-								 fulldifferentials=fullTopDifferentials, PCAFileName=PCAPlotFullPath,
+								 fullExpression_bool=jobParams['fullExpression_bool'], mindifferentials=minTopDifferentialsHTML,
+								 fulldifferentials=fullTopDifferentialsHTML, PCAFileName=PCAPlotFullPath,
 								 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 								 duration=approxDuration, log=logContents, jobParams=jobParams,
 								 processingParams=processingParams, experiments=experiments, pdfsrc='True')
@@ -337,8 +356,8 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 								 fullVolcanoFullPath=fullVolcanoFullPath,
 								 minExpression_bool=jobParams['minExpression_bool'],
 								 fullExpression_bool=jobParams['fullExpression_bool'],
-								 mindifferentials=minTopDifferentials.to_html(index=False),
-								 fulldifferentials=fullTopDifferentials, PCAFileName=PCAPlotFullPath,
+								 mindifferentials=minTopDifferentialsHTML,
+								 fulldifferentials=fullTopDifferentialsHTML, PCAFileName=PCAPlotFullPath,
 								 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 								 duration=approxDuration, log=logContents, jobParams=jobParams,
 								 processingParams=processingParams, experiments=experiments)
