@@ -8,6 +8,11 @@ from subprocess import Popen, PIPE
 
 
 def newJobDir(this_job_name):
+	"""
+	Create a new job dir (as a subdir of the jobs dir) with as name the current datetime and this_job_name.
+	:param this_job_name:	str		name of the new job
+	:return:				str		full path to the dir of the new job
+	"""
 	jobBaseDir = app.config.get('ALLJOBSDIR')
 	jobPath = os.path.join(jobBaseDir, str(datetime.datetime.now()) + '_' + this_job_name)
 	os.makedirs(jobPath)
