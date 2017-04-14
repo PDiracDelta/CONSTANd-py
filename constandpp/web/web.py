@@ -162,6 +162,12 @@ def updateConfigs(this_job_path, this_schema):
 
 
 def updateWrappers(this_job_path, this_schema):
+	"""
+	Append the wrapper files with the quantification channel names-aliases mapping implicit in this_schema.
+	:param this_job_path:	str		path to the current job dir
+	:param this_schema:		dict	schema of the experiments' hierarchy and its associated input files
+	:return:
+	"""
 	# write the channel aliases to the wrapper
 	for eName in this_schema:
 		experiment = this_schema[eName]
