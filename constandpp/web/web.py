@@ -226,7 +226,7 @@ def DB_setJobReportRelPaths(jobID, resultpath, jobName):
 
 def DB_setJobCompleted(jobID):
 	"""
-	Update the job with given ID to be marked completed in the jobs.db
+	Update the job with given ID to be marked done and successful in the jobs.db
 	:param jobID:	str				ID of the current job
 	:return:		sqlite3.Cursor	containing the query results
 	"""
@@ -234,8 +234,13 @@ def DB_setJobCompleted(jobID):
 	get_db().commit()
 
 
-def DB_setJobFailed(jobDirName):
-	get_db().execute('UPDATE jobs SET done = 1, success = 0 WHERE id = "'+jobDirName+'";')
+def DB_setJobFailed(jobID):
+	"""
+	Update the job with given ID to be marked done and unsuccessful in the jobs.db
+	:param jobID:	str				ID of the current job
+	:return:		sqlite3.Cursor	containing the query results
+	"""
+	get_db().execute('UPDATE jobs SET done = 1, success = 0 WHERE id = "'+jobID+'";')
 	get_db().commit()
 
 
