@@ -127,7 +127,7 @@ def DB_getJobVar(ID, varName):
 
 def updateConfigs(this_job_path, this_schema):
 	"""
-	Opens the processingConfig .ini files in the current job dir (as extracted from this_schema) and appends to it the
+	Opens the processingConfig .ini files in the current job dir (as extracted from this_schema) and appends the
 	baseProcessingConfig parameters as well as parameters from this_schema, and the ad-hoc constructed output path
 	(subdir of the jobdir) and filename.
 	:param this_job_path:	str		path to the current job dir
