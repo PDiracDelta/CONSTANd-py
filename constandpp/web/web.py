@@ -325,32 +325,6 @@ def TMT2ICM(TMTImpuritiesDF, order=None):
 	return icm / rowSums # normalize each row so that the sum is one
 
 
-def constructMasterConfigContents(schemaDict, otherMasterParams): #todo obsolete
-	""" OBSOLETE """
-	# todo docu
-	def isNumeric(s):
-		""" Returns whether or not the argument is numeric """
-		try:
-			float(s)
-			return True
-		except ValueError:
-			return False
-	contents = {}
-	contents['schema'] = dumps(schemaDict)
-	for k, v in otherMasterParams.items():
-		if isinstance(v, str) or isNumeric(v):
-			if k.split('_')[0] == 'delim': # delimiters should be saved in a visible format
-				from codecs import getencoder as ge, getdecoder as gd
-				byteDelim = ge("unicode-escape")(v)[0]
-				contents[k] = gd("utf-8")(byteDelim)[0]
-			else:  # not a delimiter
-				contents[k] = v
-		else:
-			contents[k] = dumps(v)
-
-	return contents
-
-
 def send_mail(recipient, mailBodyFile, jobname, jobID, attachment):  # TODO VITO credentials
 	from flask_mail import Message
 	from socket import gaierror
