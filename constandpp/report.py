@@ -307,7 +307,6 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 		assert len(chunks) == 2
 		return str.join(splitter, [chunks[0]+columnWidthHTML, chunks[1]])
 	
-	
 	def hackImagePathToSymlinkInStaticDir(old_path):
 		"""
 		Removes the string allJobsParDir (the full path of the jobs dir's parent dir) plus the remaining leading '/'
