@@ -108,7 +108,6 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		HCDendrogramFullPath = exportData(HCDendrogram, dataType='fig', path_out=params['path_results'],
 				   filename=params['jobname'] + '_HCDendrogram')
 
-	# generate HTML and PDF reports # todo
 	if writeToDisk:
 		htmlReport, pdfhtmlreport = makeHTML(jobParams=params, processingParams=processingParams,
 							  minSortedDifferentialProteinsDF=minSortedDifferentialProteinsDF,
