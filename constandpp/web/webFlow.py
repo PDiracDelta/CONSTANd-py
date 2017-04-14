@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Collection of functions that simulates the web interface.
+Collection of functions that simulates the web interface, constructing a job's subdir in the jobs dir.
+This file is not necessary when using a real webinterface.
 """
 
 import os, datetime
