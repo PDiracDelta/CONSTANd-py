@@ -132,8 +132,10 @@ def jobSettings():
 			### RUN CONSTANd++ in independent subprocess ###
 			jobProcess = startJob(jobConfigFullPath)
 		### SEND JOB START MAIL ###
-		send_mail(recipient=form.mailRecipient.data, mailBodyFile='jobstartedMail', jobname=session.get('jobName'),
+		mailSuccess = send_mail(recipient=form.mailRecipient.data, mailBodyFile='jobstartedMail', jobname=session.get('jobName'),
 				  jobID=jobID, attachment=None)
+		if mailSuccess is not None:  # something went wrong
+			flash(mailSuccess)
 		return redirect(url_for('jobInfo', id=session.get('jobDirName')))
 	
 	elif len(form.experiments.entries) == 0:  # haven't completed the form yet: populate Form 2.1 (upload buttons)
