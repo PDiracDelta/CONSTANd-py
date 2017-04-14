@@ -163,7 +163,7 @@ def MAPlot(x, y, title=None):
 
 
 def compareIntensitySN(df1, df2, title=None):
-	from getInput import getProcessingInput, getJobInput
+	from getInput import getProcessingInput
 	from processingFlow import processDf
 	from processing import getIntensities
 	
