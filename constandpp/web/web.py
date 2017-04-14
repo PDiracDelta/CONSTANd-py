@@ -245,6 +245,11 @@ def DB_setJobFailed(jobID):
 
 
 def startJob(jobConfigFullPath):
+	"""
+	Starts the job by running the main function of the application, passing the current job's jobConfig file path.
+	:param jobConfigFullPath:	str					path of current job's jobConfig .ini file
+	:return:					subprocess.Popen	main application subprocess running independently
+	"""
 	return Popen(['python3', app.config.get('MAIN'), jobConfigFullPath,
 		 'True', # doProcessing
 		 'True', # doAnalysis
