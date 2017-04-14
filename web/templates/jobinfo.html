@@ -4,7 +4,11 @@
     <h3>Info for job with ID: {{ jobID }}</h3>
     {% if done %}
         Job "{{ jobName }}" is done!
+        {% if success %}
         <br>View the <a href="report/html?id={{ jobID }}">HTML report</a>, or download the <a href="report/pdf?id={{ jobID }}">PDF report</a>.
+        {% else %}
+        <br>Unfortunately, the job failed and we cannot provide any output. Please verify the integrity of your data and/or check out the documentation.
+        {% endif %}
     {% else %}
         Job "{{ jobName }}" is not done yet. This page will auto-refresh every {{ autorefresh }} seconds.
     {% endif %}
