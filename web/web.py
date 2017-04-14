@@ -1,3 +1,12 @@
+"""
+Functions employed by the web interface (real one or webFlow.py) to handle:
+* job preparation including input file modifications
+* running the job
+* database queries
+* e-mailing
+* misc. functions like TMT to ICM conversion (not available through web interface yet).
+"""
+
 import pandas as pd
 import numpy as np
 import os, datetime
@@ -20,7 +29,14 @@ def newJobDir(this_job_name):
 
 
 def hackExperimentNamesIntoForm(form, eNames):
+	"""
+	
+	:param form:
+	:param eNames:
+	:return:
+	"""
 	import re
+	
 	def replace(oldstring, eName):
 		newstring = re.sub(r'(e|E)xperiments-[0-9]*', eName, oldstring)
 		return newstring
