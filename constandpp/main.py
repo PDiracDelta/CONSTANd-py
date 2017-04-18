@@ -139,7 +139,7 @@ def scatterplot(x, y, title=None, xlab=None, ylab=None):
 	f = plt.figure(figsize=(16, 12))
 	plt.scatter(x, y)
 	if title:
-		plt.title = title
+		plt.title(title)
 	if xlab:
 		plt.xlabel(xlab)
 	if ylab:
