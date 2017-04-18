@@ -11,5 +11,5 @@ __credits__ = ["Joris Van Houtven", "Dirk Valkenborg"]
 # __license__ = "GPL"
 # __version__ = "0.1"
 __maintainer__ = "Joris Van Houtven"
-__email__ = "vanhoutvenjoris@gmail.com"
+__email__ = "joris.vanhoutven@uhasselt.be" #"vanhoutvenjoris@gmail.com"
 __status__ = "Development"
