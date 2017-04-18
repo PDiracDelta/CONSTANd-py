@@ -22,7 +22,7 @@ import numpy as np
 from numpy import nan
 
 
-def constand(data, accuracy, maxIterations):
+def constand(data, accuracy=1e-5, maxIterations=50):
 	"""
 	Return the normalized version of the input data (matrix) as an ndarray, as well as the convergence trail (residual
 	error after each iteration) and the row and column multipliers R and S.
