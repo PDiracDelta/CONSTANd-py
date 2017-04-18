@@ -137,13 +137,13 @@ def scatterplot(x, y, title=None, xlab=None, ylab=None):
 	from matplotlib import pyplot as plt
 	matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
 	f = plt.figure(figsize=(16, 12))
-	f.scatter(x, y)
+	plt.scatter(x, y)
 	if title:
-		f.title = title
+		plt.title = title
 	if xlab:
-		f.xlabel(xlab)
+		plt.xlabel(xlab)
 	if ylab:
-		f.ylabel(ylab)
+		plt.ylabel(ylab)
 	return f
 	
 
