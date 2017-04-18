@@ -132,24 +132,35 @@ def MA(x, y):
 	return M, A, m, v
 
 
-def MAPlot(x, y, title=None):
+def scatterplot(x, y, title=None, xlab=None, ylab=None):
 	import matplotlib
 	from matplotlib import pyplot as plt
 	matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
-	plt.figure(figsize=(16, 12))
+	f = plt.figure(figsize=(16, 12))
+	f.scatter(x, y)
+	if title:
+		f.title = title
+	if xlab:
+		f.xlabel(xlab)
+	if ylab:
+		f.ylabel(ylab)
+	return f
+	
+
+def MAPlot(x, y, title=None):
 	M, A, m, v = MA(x, y)
-	plt.scatter(A, M)
 	if title is None:
-		plt.title('PD2.1 Intensities versus S/N values (scaled relatively within each row/peptide)')
+		title = title('PD2.1 Intensities versus S/N values (scaled relatively within each row/peptide)')
 	elif title == '':
-		plt.title('mean(M): ' + str(m) + '; var(M):' + str(v))
+		title = title('mean(M): ' + str(m) + '; var(M):' + str(v))
 	else:
-		plt.title(title + '; mean(M): ' + str(m) + '; var(M):' + str(v))
-	plt.xlabel('A')
-	plt.ylabel('M')
+		title = title(title + '; mean(M): ' + str(m) + '; var(M):' + str(v))
+	fig = scatterplot(M, A, title)
+	# fig.xlabel('A')
+	# fig.ylabel('M')
 	# plt.xlim((-10.1,0))
 	# plt.ylim((-10.1, 10.1))
-	plt.show()
+	fig.show()
 	return M, A, m, v
 
 
