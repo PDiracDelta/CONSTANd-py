@@ -12,23 +12,6 @@ fontsize = 30
 fontweight = 'normal'
 
 
-def performanceTest():  # remove for production # TEST
-	""" Use this development method to test the performance of the CONSTANd algorithm. """
-	from constand import constand
-	from getInput import getProcessingInput
-	from time import time
-	
-	t = []
-	for i in range(100):
-		params = getProcessingInput()
-		df = pd.DataFrame(np.random.uniform(low=10 ** 3, high=10 ** 5, size=(2 * 10 ** 3, 6)), columns=list('ABCDEF'))
-		start = time()
-		constand(np.asarray(df), 1e-2, 50)
-		stop = time()
-		t.append((stop - start))
-	print("average runtime: " + str(np.mean(t)))
-
-
 def isotopicImpuritiesTest():  # TEST
 	from getInput import getProcessingInput
 	from constand import constand
