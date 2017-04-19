@@ -12,18 +12,6 @@ fontsize = 30
 fontweight = 'normal'
 
 
-def testDataComplementarity(df):
-	scannrs_init = set(df.groupby('First Scan').groups.keys())
-	main(testing=False, writeToDisk=True)
-	# SANITY CHECK if df + removedData scan numbers = total scan numbers.
-	scannrs_final = set(df.groupby('First Scan').groups.keys())
-	##### THIS IS OUTDATED SINCE COMMIT b98041f
-	removedDataLoaded = pickle.load(open('../data/MB_result_removedData', 'rb'))
-	for value in removedDataLoaded.values():
-		scannrs_final = scannrs_final.union(set(value['First Scan']))
-	print(scannrs_final == scannrs_init)
-
-
 def MA(x, y):
 	logx = np.log2(x)
 	logy = np.log2(y)
