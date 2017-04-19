@@ -172,8 +172,8 @@ def testDifferentialExpression(this_proteinDF, alpha):
 
 def applyFoldChange(proteinDF, pept2protCombinationMethod):
 	"""
-	Calculate the log2 fold change for each protein according to pept2protCombinationMethod and add it to the new
-	"log2 fold change c1/c2" column.
+	Calculate the log2 fold change of the quantification values per channel for each protein according to
+	pept2protCombinationMethod and add it to the new "log2 fold change c1/c2" column.
 	:param proteinDF:					pd.DataFrame	data on the protein level with t-test results.
 	:param pept2protCombinationMethod:  str				method for reducing peptide information into one figure per protein
 	:return proteinDF:					pd.DataFrame	data on the protein level, including fold changes
