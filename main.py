@@ -12,48 +12,6 @@ fontsize = 30
 fontweight = 'normal'
 
 
-def MA(x, y):
-	logx = np.log2(x)
-	logy = np.log2(y)
-	A = (logx + logy) * 0.5
-	M = logx - logy
-	m = np.mean(M[np.isfinite(M)])
-	v = np.var(M[np.isfinite(M)])
-	return M, A, m, v
-
-
-def scatterplot(x, y, title=None, xlab=None, ylab=None):
-	import matplotlib
-	from matplotlib import pyplot as plt
-	matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
-	f = plt.figure(figsize=(12, 9))
-	plt.scatter(x, y)
-	if title:
-		plt.title(title)
-	if xlab:
-		plt.xlabel(xlab)
-	if ylab:
-		plt.ylabel(ylab)
-	return f
-	
-
-def MAPlot(x, y, title=None):
-	M, A, m, v = MA(x, y)
-	if title is None:
-		title = title('PD2.1 Intensities versus S/N values (scaled relatively within each row/peptide)')
-	elif title == '':
-		title = title('mean(M): ' + str(m) + '; var(M):' + str(v))
-	else:
-		title = title(title + '; mean(M): ' + str(m) + '; var(M):' + str(v))
-	fig = scatterplot(M, A, title)
-	# fig.xlabel('A')
-	# fig.ylabel('M')
-	# plt.xlim((-10.1,0))
-	# plt.ylim((-10.1, 10.1))
-	fig.show()
-	return M, A, m, v
-
-
 def compareIntensitySN(df1, df2, title=None):
 	from getInput import getProcessingInput
 	from processingFlow import processDf
@@ -193,14 +151,6 @@ def compareAbundancesIntSN():
 	compareIntensitySN(abundancesInt, abundancesSN,
 					   title='')  # title="Intensities versus S/N values (normalized abundances)")
 
-
-def boxPlot(x, labels=None, ylab=None):
-	import matplotlib
-	from matplotlib import pyplot as plt
-	matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
-	plt.boxplot(x, whis=[5, 95], showmeans=True, labels=labels)
-	plt.ylabel(ylab)
-	plt.show()
 
 
 def intraInterMAPlots():
@@ -403,35 +353,6 @@ def intraInterMAPlots():
 				labels=['raw', 'CONSTANd', 'PD2.1'], ylab=r'\Delta V')
 		boxPlot([D_inter_rvars - D_intra_rvars, D_inter_cvars - D_intra_cvars, D_inter_pdvars - D_intra_pdvars],
 				labels=['raw', 'CONSTANd', 'PD2.1'], ylab=r'\Delta V')
-
-
-def RDHPlot(x, y, quantity=None):
-	import matplotlib
-	import matplotlib.pyplot as plt
-	matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
-	plt.figure(figsize=(12, 9))
-	x = np.array(x)
-	y = np.array(y)
-	# relative difference histogram
-	diff = np.abs(x - y)
-	reldiff = diff / np.maximum(x, y)
-	# finite = diff[np.isfinite(M)]
-	# np.digitize(M, np.linspace(min(M),max(M),20))
-	hist, bins = np.histogram(reldiff, bins=max(10, np.ceil(max(reldiff) - min(reldiff))),
-							  range=(0, np.ceil(max(reldiff) * 10) / 10))
-	plt.ylabel('number of proteins')
-	if quantity is None:
-		plt.xlabel('relative difference')
-	else:
-		plt.xlabel('relative difference in ' + quantity)
-	binsize = (max(bins) - min(bins)) / (len(bins) - 1)
-	plt.bar(bins[0:-1], hist, width=binsize)
-	plt.xticks(bins)
-	plt.xlim(0, min(max(bins) + binsize, 1))
-	plt.show()
-	meandiff = np.nanmean(reldiff)
-	maxdiff = np.max(reldiff)
-	return meandiff, maxdiff
 
 
 def compareDEAresults():
