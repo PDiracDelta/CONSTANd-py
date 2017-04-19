@@ -8,9 +8,6 @@ Python implementation of mass spectrometer protein data analysis using the CONST
 import sys, logging, datetime
 from dataIO import *
 
-fontsize = 30
-fontweight = 'normal'
-
 
 def compareIntensitySN(df1, df2, title=None):
 	from getInput import getProcessingInput
