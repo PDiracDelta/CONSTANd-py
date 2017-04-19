@@ -9,61 +9,6 @@ import sys, logging, datetime
 from dataIO import *
 
 
-def compareIntensitySN(df1, df2, title=None):
-	from getInput import getProcessingInput
-	from processingFlow import processDf
-	from processing import getIntensities
-	
-	filepath1 = '../data/COON data/PSMs/BR1_e_ISO.txt'
-	filepath2 = '../data/COON data/PSMs/BR1_f_ISO_SN.txt'
-	intensityColumns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
-	pickleFileName = 'job/compareIntensitySNProcessingResults'
-	constandnorm = True
-	alsoprocess = False
-	if constandnorm:
-		if alsoprocess and os.path.exists(pickleFileName):
-			processingResults = pickle.load(open(pickleFileName, 'rb'))
-		else:
-			params = getProcessingInput('job/processingConfig.ini')
-			dfs = []
-			if df1 is None and df2 is None:
-				for filepath in [filepath1, filepath2]:
-					dfs.append(importDataFrame(filepath, delim=params['delim_in'], header=params['header_in']))
-			else:
-				dfs = [df1, df2]
-			if alsoprocess:
-				processingResults = [processDf(df, params, writeToDisk=False) for df in dfs]
-				pickle.dump(processingResults, open(pickleFileName, 'wb'))
-		if alsoprocess:
-			relIntensities = getIntensities(processingResults[0][0], intensityColumns=intensityColumns)
-			relSNs = getIntensities(processingResults[1][0], intensityColumns=intensityColumns)
-		else:
-			from constand import constand
-			relIntensities, __, __, __ = constand(getIntensities(dfs[0], intensityColumns=intensityColumns), 1e-5, 50)
-			relSNs, __, __, __ = constand(getIntensities(dfs[1], intensityColumns=intensityColumns), 1e-5, 50)
-	else:
-		if df1 is None and df2 is None:
-			df1 = importDataFrame(filepath1, delim='\t', header=0)
-			df2 = importDataFrame(filepath2, delim='\t', header=0)
-		intensityColumns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
-		relIntensities = np.empty((len(df1.index), 8), dtype='float')
-		relSNs = np.empty((len(df2.index), 8), dtype='float')
-		for col in range(len(intensityColumns)):
-			relIntensities[:, col] = 1 / 8 * df1.loc[:, intensityColumns[col]] / np.nanmean(
-				df1.loc[:, intensityColumns], 1)
-			relSNs[:, col] = 1 / 8 * df2.loc[:, intensityColumns[col]] / np.nanmean(df2.loc[:, intensityColumns], 1)
-	diff = abs(relIntensities - relSNs)
-	print(np.allclose(relIntensities, relSNs, atol=1e-3, equal_nan=True))
-	print("mean over all values")
-	print(np.nanmean(np.nanmean(diff[:, 0:7], 1)))
-	print("median over all values")
-	print(np.nanmean(np.nanmedian(diff[:, 0:7], 1)))
-	print("max difference")
-	print(np.nanmax(np.nanmax(diff, 1)))
-	
-	return MAPlot(relIntensities.reshape(relIntensities.size, 1), relSNs.reshape(relSNs.size, 1), title)
-
-
 def compareICmethods():
 	PDdfFile = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/2016-12-26 10:56:10.646919_COON/BR1_output_processing/BR1_normalizedIntensities.tsv'
 	CdfFile = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/2016-12-26 10:50:42.462546_COON_noISO/BR1_output_processing/BR1_normalizedIntensities.tsv'
