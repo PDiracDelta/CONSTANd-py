@@ -13,40 +13,7 @@ fontweight = 'normal'
 
 
 def testPDIsotopicCorrectionsEffect():  # TEST
-	from processing import getIntensities
-	from constand import constand
-	filepath1 = '../data/COON data/PSMs/BR1_a.txt'
-	filepathiso = '../data/COON data/PSMs/BR1_e_ISO.txt'
-	ics = unnest([["126", "127N", "127C", "128C"], ["129N", "129C", "130C", "131"]])
-	quan = np.asmatrix(
-		constand(getIntensities(importDataFrame(filepath1, delim='\t'), intensityColumns=ics), accuracy=1e-5,
-				 maxIterations=50)[0])
-	# without constand
-	# quan = np.asmatrix(getIntensities(importDataFrame(filepath1, delim='\t'), intensityColumns=ics))
-	quanIso = np.asmatrix(
-		constand(getIntensities(importDataFrame(filepathiso, delim='\t'), intensityColumns=ics), accuracy=1e-5,
-				 maxIterations=50)[0])
-	# quandf = pd.DataFrame(quan)
-	# quanIsodf = pd.DataFrame(quanIso)
-	# for col in range(len(ics)):
-	#	quanIsodf.loc[:, col] = 1 / 8 * np.asarray(quanIsodf.loc[:, col]) / np.nanmean(np.asarray(quanIsodf), 1)
-	# relSNs[:, col] = 1 / 8 * df2.loc[:, ics[col]] / np.nanmean(df2.loc[:, ics], 1)
-	# quanIso = np.asmatrix(quanIsodf)
-	diff = abs(quan - quanIso)
-	MAPlot(quan.flatten(), quanIso.flatten(), title='')
-	# RDHPlot(quan.flatten(), quanIso.flatten())
-	# print(np.allclose(quan, quanIso, atol=1e-3, equal_nan=True))
-	print("mean over all values")
-	print(np.nanmean(np.nanmean(diff[:, 0:7], 1)))
-	print("max difference")
-	print(np.nanmax(np.nanmax(diff, 1)))
-	print("median over all values")
 
-
-# print(np.nanmean(np.nanmedian(diff[:, 0:7], 1)))
-# M=np.eye(6); M[0,0]=0.9; M[0,1]=0.1; b=np.asarray(range(6)); c=np.asarray(range(6))+5
-# print(int_out) above should be equal to:
-# [np.linalg.solve(M, b) ; np.linalg.solve(M, c)]
 
 
 def MS2IntensityDoesntMatter(df):
