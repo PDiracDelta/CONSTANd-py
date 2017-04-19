@@ -12,7 +12,7 @@ fontsize = 30
 fontweight = 'normal'
 
 
-def isotopicCorrectionsTest():  # TEST
+def testPDIsotopicCorrectionsEffect():  # TEST
 	from processing import getIntensities
 	from constand import constand
 	filepath1 = '../data/COON data/PSMs/BR1_a.txt'
