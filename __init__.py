@@ -13,3 +13,7 @@ __credits__ = ["Joris Van Houtven", "Dirk Valkenborg"]
 __maintainer__ = "Joris Van Houtven"
 __email__ = "joris.vanhoutven@uhasselt.be" #"vanhoutvenjoris@gmail.com"
 __status__ = "Development"
+
+## GLOBAL VARIABLES ##
+fontsize = 30
+fontweight = 'normal'
