@@ -9,28 +9,6 @@ import sys, logging, datetime
 from dataIO import *
 
 
-def dataSuitabilityMA():
-	# rawfile = '../jobs/2016-12-20 14:39:09.476567_COON_SN_nonormnoconstand/output_analysis/COON_SN_nonormnoconstand_CommonPeptideIntensities.tsv'
-	rawfile = '../jobs/2016-12-21 16:07:19.300450_MAX_SN_nonormnoconstand/output_analysis/MAX_SN_nonormnoconstand_CommonPeptideIntensities.tsv'
-	rawSNvalues = importDataFrame(rawfile, delim='\t', header=None)
-	if 'MAX' in rawfile:
-		plexity = 6
-	elif 'COON' in rawfile:
-		plexity = 8
-	# i = 3; j = 1
-	# MAPlot(rawSNvalues.loc[:, i], rawSNvalues.loc[:, j], title='')
-	# i=3; j=1
-	# MAPlot(rawSNvalues.loc[:, i], rawSNvalues.loc[:, j], title='')
-	# MAX
-	# i=4; j=0
-	i = 2;
-	j = 6
-	MAPlot(rawSNvalues.loc[:, i], rawSNvalues.loc[:, j], title='')
-	for i in range(plexity):
-		for j in range(i):
-			MAPlot(rawSNvalues.loc[:, i], rawSNvalues.loc[:, j], title=str(i + 1) + " versus " + str(j + 1))
-
-
 def devStuff(df, params):  # TEST
 	# performanceTest()
 	# isotopicCorrectionsTest()
