@@ -9,32 +9,6 @@ import sys, logging, datetime
 from dataIO import *
 
 
-def compareICmethods():
-	PDdfFile = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/2016-12-26 10:56:10.646919_COON/BR1_output_processing/BR1_normalizedIntensities.tsv'
-	CdfFile = '/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/2016-12-26 10:50:42.462546_COON_noISO/BR1_output_processing/BR1_normalizedIntensities.tsv'
-	from dataIO import importDataFrame
-	from main import compareIntensitySN
-	from matplotlib import pyplot as plt
-	Cdf = importDataFrame(CdfFile)
-	PDdf = importDataFrame(PDdfFile)
-	PDdf.columns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
-	Cdf.columns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
-	M, A, m, v = compareIntensitySN(PDdf, Cdf, title='')
-	print("MAD: " + str(np.nanmean(np.abs(M))))
-	Mfinite = M[np.isfinite(M)]
-	# np.digitize(M, np.linspace(min(M),max(M),20))
-	nbins = 21
-	hist, bins = np.histogram(Mfinite, bins=nbins, range=(-5, 5))
-	binwidth = bins[1] - bins[0]
-	plt.title('')
-	plt.bar(bins[0:-1], hist, width=binwidth)
-	plt.xticks(np.arange(11) - 5)
-	plt.xlim(-5, 5)
-	plt.xlabel('M')
-	plt.ylabel('amount of peptides')
-	plt.show()
-
-
 def abundancesPCAHCD():
 	from analysisFlow import getPCA, getHC
 	from analysis import getAllExperimentsIntensitiesPerCommonPeptide
