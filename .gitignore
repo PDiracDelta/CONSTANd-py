@@ -1,0 +1,5 @@
+scripts
+.idea/
+__pycache__
+web/jobs
+constandpp/web/jobs
