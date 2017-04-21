@@ -9,25 +9,6 @@ import sys, logging, datetime
 from dataIO import *
 
 
-def compareDEAresults():
-	df1file = '../jobs/2016-12-26 15:44:27.523732_MAX_noTAM/output_analysis/MAX_noTAM_results_minimal.tsv'
-	df2file = '../jobs/2016-12-22 13:07:48.663095_MAX_SN_noTAM/output_analysis/MAX_SN_noTAM_results_minimal.tsv'
-	# df1file = '../jobs/2016-12-30 14:46:02.689189_MAX_abundances_noTAM/output_analysis/MAX_abundances_noTAM_results_minimal.tsv'
-	# df2file = '../jobs/2016-12-24 12:09:28.341520_MAX_SN_abundances_noTAM/output_analysis/MAX_SN_abundances_noTAM_results_minimal.tsv'
-	df1sorted = importDataFrame(df1file, delim='\t').sort('protein')
-	df2sorted = importDataFrame(df2file, delim='\t').sort('protein')
-	assert set(df1sorted['protein']) == set(
-		df2sorted['protein'])  # else you cant compare without first matching each protein
-	# fcM, fcA, fcm, fcv =
-	fmean, fmax = RDHPlot(np.power(2, df1sorted.loc[:, 'log2 fold change c1/c2']),
-						  np.power(2, df2sorted.loc[:, 'log2 fold change c1/c2']), quantity='log2 fold change')
-	print("fc mean: " + str(fmean) + "\nmax: " + str(fmax))
-	# pM, pA, pm, pv =
-	pmean, pmax = RDHPlot(df1sorted.loc[:, 'adjusted p-value'], df2sorted.loc[:, 'adjusted p-value'],
-						  quantity='adjusted p-value')
-	print("p mean: " + str(pmean) + "\nmax: " + str(pmax))
-
-
 def dataSuitabilityMA():
 	# rawfile = '../jobs/2016-12-20 14:39:09.476567_COON_SN_nonormnoconstand/output_analysis/COON_SN_nonormnoconstand_CommonPeptideIntensities.tsv'
 	rawfile = '../jobs/2016-12-21 16:07:19.300450_MAX_SN_nonormnoconstand/output_analysis/MAX_SN_nonormnoconstand_CommonPeptideIntensities.tsv'
