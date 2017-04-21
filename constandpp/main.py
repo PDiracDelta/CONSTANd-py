@@ -9,53 +9,6 @@ import sys, logging, datetime
 from dataIO import *
 
 
-def abundancesPCAHCD():
-	from analysisFlow import getPCA, getHC
-	from analysis import getAllExperimentsIntensitiesPerCommonPeptide
-	from report import getPCAPlot, getHCDendrogram
-	import json
-	datapath = '../data/COON data/peptidegroups/'
-	wrapperpath = '../jobs/2016-12-12 22:37:48.458146_COON/'
-	schema = json.loads(
-		'{"BR4": {"channelNamesPerCondition": [["127C"], ["128C"], ["126"], ["131"], ["129C"], ["130C"], ["129N"], ["127N"]], "wrapper": "BR4_wrapper.tsv", "isotopicCorrection_matrix": null, "channelAliasesPerCondition": [["4_kidney"], ["4_cerebellum"], ["4_muscle"], ["4_cerebrum"], ["4_lung"], ["4_liver"], ["4_heart"], ["4_spleen"]], "data": "BR4_BR4_e_ISO.txt", "config": "/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/2016-12-12 22:37:48.458146_COON/BR4_coonProcessingConfig.ini"}, "BR3": {"channelNamesPerCondition": [["131"], ["130C"], ["128C"], ["129C"], ["126"], ["127C"], ["129N"], ["127N"]], "wrapper": "BR3_wrapper.tsv", "isotopicCorrection_matrix": null, "channelAliasesPerCondition": [["3_kidney"], ["3_cerebellum"], ["3_muscle"], ["3_cerebrum"], ["3_lung"], ["3_liver"], ["3_heart"], ["3_spleen"]], "data": "BR3_BR3_e_ISO.txt", "config": "/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/2016-12-12 22:37:48.458146_COON/BR3_coonProcessingConfig.ini"}, "BR1": {"channelNamesPerCondition": [["126"], ["127C"], ["127N"], ["128C"], ["129C"], ["129N"], ["130C"], ["131"]], "wrapper": "BR1_wrapper.tsv", "isotopicCorrection_matrix": null, "channelAliasesPerCondition": [["1_kidney"], ["1_cerebellum"], ["1_muscle"], ["1_cerebrum"], ["1_lung"], ["1_liver"], ["1_heart"], ["1_spleen"]], "data": "BR1_BR1_e_ISO.txt", "config": "/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/2016-12-12 22:37:48.458146_COON/BR1_coonProcessingConfig.ini"}, "BR2": {"channelNamesPerCondition": [["127N"], ["126"], ["128C"], ["130C"], ["129N"], ["127C"], ["129C"], ["131"]], "wrapper": "BR2_wrapper.tsv", "isotopicCorrection_matrix": null, "channelAliasesPerCondition": [["2_kidney"], ["2_cerebellum"], ["2_muscle"], ["2_cerebrum"], ["2_lung"], ["2_liver"], ["2_heart"], ["2_spleen"]], "data": "BR2_BR2_e_ISO.txt", "config": "/home/pdiracdelta/Documents/KUL/Master of Bioinformatics/Thesis/jobs/2016-12-12 22:37:48.458146_COON/BR2_coonProcessingConfig.ini"}}')
-	eNames = list(schema.keys())
-	datafilenames = {}
-	wrapperfilenames = {}
-	for e in eNames:
-		# datafilenames[e] = 'P_'+e+'_h_ISO_SN_norm.txt'
-		datafilenames[e] = 'P_' + e + '_g_ISO_norm.txt'
-		wrapperfilenames[e] = e + '_wrapper.tsv'
-	dfs = {}
-	wrappers = {}
-	for eName in eNames:
-		df = importDataFrame(datapath + datafilenames[eName], delim='\t')
-		intensityCols = unnest([["127C"], ["128C"], ["126"], ["131"], ["129C"], ["130C"], ["129N"], ["127N"]])
-		oldIntensityCols = list(df.columns.values)
-		newIntensityCols = oldIntensityCols.copy()
-		for col in intensityCols:
-			newIntensityCols[
-				oldIntensityCols.index('Abundances (Normalized): F' + eName[-1] + ': ' + col + ', Sample')] = col
-		df.columns = newIntensityCols
-		wrappers[eName] = importWrapper(wrapperpath + wrapperfilenames[eName])
-		df.columns = applyWrapper(df.columns, wrapper=wrappers[eName])
-		fixFixableFormatMistakes(df)
-		dfs[eName] = df
-	
-	AEIPCP = getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema)[0].astype(np.float)
-	doConstand = True
-	if doConstand:
-		from constand import constand
-		AEIPCPcorrected = constand(AEIPCP, 1e-5, 50)[0]
-	else:
-		colTotals = np.nansum(AEIPCP, axis=0)
-		multipliers = np.max(colTotals) / colTotals
-		AEIPCPcorrected = AEIPCP * multipliers
-	pca = getPCA(AEIPCPcorrected, 2)
-	hcd = getHC(AEIPCPcorrected)
-	PCAPlot = getPCAPlot(pca, schema)
-	HCDendrogram = getHCDendrogram(hcd, schema)
-
-
 def compareAbundancesIntSN():
 	abundancesIntFile = '../jobs/2016-12-20 19:03:17.450992_COON_abundances/P_BR1_output_processing/P_BR1_dataFrame.tsv'
 	abundancesSNFile = '../jobs/2016-12-20 19:02:48.246369_COON_SN_abundances/P_BR1_output_processing/P_BR1_dataFrame.tsv'
