@@ -10,7 +10,7 @@ import configparser
 import os
 from json import loads as parseExpression
 from codecs import getdecoder as gd
-from dataIO import importIsotopicCorrectionsMatrix, importWrapper
+from constandpp.dataIO import importIsotopicCorrectionsMatrix, importWrapper
 
 
 def parseDelimiter(d):

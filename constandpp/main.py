@@ -6,7 +6,7 @@ Python implementation of mass spectrometer protein data analysis using the CONST
 """
 
 import sys, logging, datetime
-from dataIO import *
+from constandpp.dataIO import *
 
 
 def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, testing):
@@ -16,12 +16,12 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 	can control	which parts of the workflow to perform.
 	"""
 	# todo proper docu
-	from getInput import getProcessingInput, getJobInput
-	from processingFlow import processDf
-	from analysisFlow import analyzeProcessingResult
-	from reportFlow import generateReport
+	from constandpp.getInput import getProcessingInput, getJobInput
+	from constandpp.processingFlow import processDf
+	from constandpp.analysisFlow import analyzeProcessingResult
+	from constandpp.reportFlow import generateReport
 	from time import time
-	from web.web import DB_setJobReportRelPaths
+	from constandpp.web.web import DB_setJobReportRelPaths
 	
 	logFilePath = os.path.abspath(os.path.join(jobConfigFilePath, os.path.join(os.pardir, 'log.txt')))
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
@@ -126,8 +126,8 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 
 
 if __name__ == '__main__':  # this should not execute if main.py is not the main module called by the python interpreter,
-	from web.web import DB_setJobCompleted, DB_setJobFailed
-	from web import app
+	from constandpp.web.web import DB_setJobCompleted, DB_setJobFailed
+	from constandpp.web import app
 	from traceback import print_exc
 	
 	args = sys.argv

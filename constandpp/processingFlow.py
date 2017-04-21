@@ -5,10 +5,10 @@
 Workflow of the processing part of CONSTANd++.
 """
 
-from processing import *
-from dataIO import exportData
-from collapse import collapse
-from constand import constand
+from constandpp.processing import *
+from constandpp.dataIO import exportData
+from constandpp.collapse import collapse
+from constandpp.constand import constand
 
 
 def processDf(df, params, writeToDisk):

@@ -5,8 +5,8 @@
 Workflow of the processing part of CONSTANd++.
 """
 
-from report import *
-from dataIO import exportData
+from constandpp.report import *
+from constandpp.dataIO import exportData
 
 
 def generateReport(analysisResults, params, logFilePath, writeToDisk, processingParams, startTime):

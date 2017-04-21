@@ -5,8 +5,8 @@
 Workflow of the analysis part of CONSTANd++.
 """
 
-from analysis import *
-from dataIO import exportData
+from constandpp.analysis import *
+from constandpp.dataIO import exportData
 
 
 def analyzeProcessingResult(processingResults, params, writeToDisk):
