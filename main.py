@@ -9,21 +9,6 @@ import sys, logging, datetime
 from dataIO import *
 
 
-def devStuff(df, params):  # TEST
-	# performanceTest()
-	# isotopicCorrectionsTest()
-	# MS2IntensityDoesntMatter(df)
-	# testDataComplementarity(df)
-	# compareIntensitySN(None, None, title='')
-	# abundancesPCAHCD()
-	# compareICmethods()
-	compareAbundancesIntSN()
-	# intraInterMAPlots()
-	# compareDEAresults()
-	# dataSuitabilityMA()
-	pass
-
-
 def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, testing):
 	"""
 	For now this is just stuff for debugging and testing. Later:
@@ -47,99 +32,95 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 	processingResults = {}
 	experimentNames = list(jobParams['schema'].keys())
 	
-	if not testing:
-		for eName in experimentNames:
-			""" Data processing """
-			# get all input parameters
-			processingParams[eName] = getProcessingInput(jobParams['schema'][eName]['config'])
-			# get the dataframes
-			dfs[eName] = importExperimentData(processingParams[eName]['data'], delim=processingParams[eName]['delim_in'],
-											  header=processingParams[eName]['header_in'],
-											  wrapper=processingParams[eName]['wrapper'])
-			processing_path_out = processingParams[eName]['path_out']
-			processingResultsDumpFilename = os.path.join(processing_path_out, 'processingResultsDump_' + str(eName))
-			if doProcessing:
-				print('Starting processing of ' + eName + '...')
-				# prepare the output directories
-				if not os.path.exists(os.path.abspath(processing_path_out)):  # do not overwrite dir
-					assert os.path.exists(
-						os.path.abspath(os.path.join(processing_path_out, os.path.pardir)))  # parent dir must exist
-					os.makedirs(processing_path_out)
-				else:
-					if jobConfigFilePath != 'job/jobConfig.ini':  # TEST
-						raise Exception(
-							"Output path " + os.path.abspath(processing_path_out) + " already exists! Aborting.")
-				
-				# process every input dataframe
-				logging.info(
-					"Starting processing of experiment '" + eName + "' of job '" + jobParams['jobname'] + "' at " +
-					str(datetime.datetime.now()).split('.')[0])
-				processingResults[eName] = processDf(dfs[eName], processingParams[eName], writeToDisk)
-				logging.info(
-					"Finished processing of experiment '" + eName + "' of job '" + jobParams['jobname'] + "' at " +
-					str(datetime.datetime.now()).split('.')[0])
-				pickle.dump(processingResults[eName], open(processingResultsDumpFilename, 'wb'))  # TEST
-			elif doAnalysis:
-				try:
-					processingResults[eName] = pickle.load(open(processingResultsDumpFilename, 'rb'))
-				except FileNotFoundError:
-					raise FileNotFoundError(
-						"There is no previously processed data in this path: " + processingResultsDumpFilename)
-			else:
-				logging.warning(
-					"No processing step performed nor processing file loaded for experiment " + str(eName) + "!")
-		
-		""" Data analysis """
-		analysis_path_out = jobParams['path_out']
-		analysisResultsDumpFilename = os.path.join(analysis_path_out, 'analysisResultsDump')
-		if doAnalysis:
-			print('Starting analysis...')
+	for eName in experimentNames:
+		""" Data processing """
+		# get all input parameters
+		processingParams[eName] = getProcessingInput(jobParams['schema'][eName]['config'])
+		# get the dataframes
+		dfs[eName] = importExperimentData(processingParams[eName]['data'], delim=processingParams[eName]['delim_in'],
+										  header=processingParams[eName]['header_in'],
+										  wrapper=processingParams[eName]['wrapper'])
+		processing_path_out = processingParams[eName]['path_out']
+		processingResultsDumpFilename = os.path.join(processing_path_out, 'processingResultsDump_' + str(eName))
+		if doProcessing:
+			print('Starting processing of ' + eName + '...')
 			# prepare the output directories
-			if not os.path.exists(analysis_path_out):  # do not overwrite dir
+			if not os.path.exists(os.path.abspath(processing_path_out)):  # do not overwrite dir
 				assert os.path.exists(
-					os.path.abspath(os.path.join(analysis_path_out, os.path.pardir)))  # parent dir must exist
-				os.makedirs(analysis_path_out)
+					os.path.abspath(os.path.join(processing_path_out, os.path.pardir)))  # parent dir must exist
+				os.makedirs(processing_path_out)
+			else:
+				if jobConfigFilePath != 'job/jobConfig.ini':  # TEST
+					raise Exception(
+						"Output path " + os.path.abspath(processing_path_out) + " already exists! Aborting.")
 			
-			# perform analysis
-			logging.info("Starting analysis of job: " + jobParams['jobname'] + " at " +
-						 str(datetime.datetime.now()).split('.')[0])
-			analysisResults = analyzeProcessingResult(processingResults, jobParams, writeToDisk)
-			logging.info("Finished analysis of job: " + jobParams['jobname'] + " at " +
-						 str(datetime.datetime.now()).split('.')[0])
-			pickle.dump(analysisResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
-		elif doReport:
+			# process every input dataframe
+			logging.info(
+				"Starting processing of experiment '" + eName + "' of job '" + jobParams['jobname'] + "' at " +
+				str(datetime.datetime.now()).split('.')[0])
+			processingResults[eName] = processDf(dfs[eName], processingParams[eName], writeToDisk)
+			logging.info(
+				"Finished processing of experiment '" + eName + "' of job '" + jobParams['jobname'] + "' at " +
+				str(datetime.datetime.now()).split('.')[0])
+			pickle.dump(processingResults[eName], open(processingResultsDumpFilename, 'wb'))  # TEST
+		elif doAnalysis:
 			try:
-				analysisResults = pickle.load(open(analysisResultsDumpFilename, 'rb'))
+				processingResults[eName] = pickle.load(open(processingResultsDumpFilename, 'rb'))
 			except FileNotFoundError:
 				raise FileNotFoundError(
-					"There is no previously analyzed data in this path: " + analysisResultsDumpFilename)
+					"There is no previously processed data in this path: " + processingResultsDumpFilename)
 		else:
-			logging.warning("No analysis step performed nor analysis file loaded!")
-		
-		""" Visualize and generate report """
-		results_path_out = jobParams['path_results']
-		
-		if doReport:
-			print('Starting visualization and report generation...')
-			# prepare the output directories
-			if not os.path.exists(results_path_out):  # do not overwrite dir
-				assert os.path.exists(
-					os.path.abspath(os.path.join(results_path_out, os.path.pardir)))  # parent dir must exist
-				os.makedirs(results_path_out)
-			
-			# visualize and make a report
-			logging.info("Starting visualization end report generation of job: " + jobParams['jobname'] + "at " +
-						 str(datetime.datetime.now()).split('.')[0])
-			generateReport(analysisResults, jobParams, logFilePath, writeToDisk, processingParams, start)
-			DB_setJobReportRelPaths(jobID=jobDirName, resultpath=jobParams['path_results'],
-									jobName=jobParams['jobname'])
-			logging.info("Finished visualization end report generation of job: " + jobParams['jobname'] + "at " +
-						 str(datetime.datetime.now()).split('.')[0])
-		else:
-			logging.warning("No report generated!")
+			logging.warning(
+				"No processing step performed nor processing file loaded for experiment " + str(eName) + "!")
 	
-	elif testing:
-		devStuff(dfs, processingParams)
+	""" Data analysis """
+	analysis_path_out = jobParams['path_out']
+	analysisResultsDumpFilename = os.path.join(analysis_path_out, 'analysisResultsDump')
+	if doAnalysis:
+		print('Starting analysis...')
+		# prepare the output directories
+		if not os.path.exists(analysis_path_out):  # do not overwrite dir
+			assert os.path.exists(
+				os.path.abspath(os.path.join(analysis_path_out, os.path.pardir)))  # parent dir must exist
+			os.makedirs(analysis_path_out)
+		
+		# perform analysis
+		logging.info("Starting analysis of job: " + jobParams['jobname'] + " at " +
+					 str(datetime.datetime.now()).split('.')[0])
+		analysisResults = analyzeProcessingResult(processingResults, jobParams, writeToDisk)
+		logging.info("Finished analysis of job: " + jobParams['jobname'] + " at " +
+					 str(datetime.datetime.now()).split('.')[0])
+		pickle.dump(analysisResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
+	elif doReport:
+		try:
+			analysisResults = pickle.load(open(analysisResultsDumpFilename, 'rb'))
+		except FileNotFoundError:
+			raise FileNotFoundError(
+				"There is no previously analyzed data in this path: " + analysisResultsDumpFilename)
+	else:
+		logging.warning("No analysis step performed nor analysis file loaded!")
+	
+	""" Visualize and generate report """
+	results_path_out = jobParams['path_results']
+	
+	if doReport:
+		print('Starting visualization and report generation...')
+		# prepare the output directories
+		if not os.path.exists(results_path_out):  # do not overwrite dir
+			assert os.path.exists(
+				os.path.abspath(os.path.join(results_path_out, os.path.pardir)))  # parent dir must exist
+			os.makedirs(results_path_out)
+		
+		# visualize and make a report
+		logging.info("Starting visualization end report generation of job: " + jobParams['jobname'] + "at " +
+					 str(datetime.datetime.now()).split('.')[0])
+		generateReport(analysisResults, jobParams, logFilePath, writeToDisk, processingParams, start)
+		DB_setJobReportRelPaths(jobID=jobDirName, resultpath=jobParams['path_results'],
+								jobName=jobParams['jobname'])
+		logging.info("Finished visualization end report generation of job: " + jobParams['jobname'] + "at " +
+					 str(datetime.datetime.now()).split('.')[0])
+	else:
+		logging.warning("No report generated!")
 	stop = time()
 	print(stop - start)
 
