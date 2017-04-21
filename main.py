@@ -9,19 +9,6 @@ import sys, logging, datetime
 from dataIO import *
 
 
-def compareAbundancesIntSN():
-	abundancesIntFile = '../jobs/2016-12-20 19:03:17.450992_COON_abundances/P_BR1_output_processing/P_BR1_dataFrame.tsv'
-	abundancesSNFile = '../jobs/2016-12-20 19:02:48.246369_COON_SN_abundances/P_BR1_output_processing/P_BR1_dataFrame.tsv'
-	abundancesInt = importDataFrame(abundancesIntFile, delim='\t')
-	abundancesSN = importDataFrame(abundancesSNFile, delim='\t')
-	intensityColumns = ["126", "127N", "127C", "128C", "129N", "129C", "130C", "131"]
-	abundancesInt.columns = intensityColumns
-	abundancesSN.columns = intensityColumns
-	compareIntensitySN(abundancesInt, abundancesSN,
-					   title='')  # title="Intensities versus S/N values (normalized abundances)")
-
-
-
 def intraInterMAPlots():
 	# calculate all intra- and inter-MA plots for the Max data set (Intensities only)
 	# on the PEPTIDE LEVEL
