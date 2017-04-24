@@ -24,6 +24,7 @@ from constandpp import fontweight, fontsize, figwidth, figheight
 
 # adjust font size globally
 matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
+matplotlib.use('GTK3Agg')
 
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
 

@@ -59,7 +59,9 @@ def MA(x, y):
 def scatterplot(x, y, title=None, xlab=None, ylab=None):
 	import matplotlib.rcParams.update
 	from matplotlib import pyplot as plt
+	matplotlib.use('GTK3Agg')
 	matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
+	
 	f = plt.figure(figsize=(figwidth, figheight))
 	plt.scatter(x, y)
 	if title:
