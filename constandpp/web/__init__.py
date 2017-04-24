@@ -38,4 +38,4 @@ def close_connection(exception):
 		db.close()
 
 # this should really be at the end of the file, otherwise imports are messed up. This is just how Flask works...
-import web.views
+import constandpp.web.views

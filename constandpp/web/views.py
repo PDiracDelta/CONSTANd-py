@@ -1,9 +1,9 @@
 import os
-from web import app
+from constandpp.web import app
 from flask import render_template, send_from_directory, request, redirect, url_for, session, flash
 from .forms import newJobForm, experimentForm, jobSettingsForm
 from werkzeug.utils import secure_filename
-from web.web import updateSchema, DB_checkJobExist, DB_insertJob, DB_getJobVar, updateConfigs, updateWrappers, \
+from constandpp.web.web import updateSchema, DB_checkJobExist, DB_insertJob, DB_getJobVar, updateConfigs, updateWrappers, \
 	makeJobConfigFile, startJob
 
 
@@ -78,14 +78,14 @@ def newJob():
 	if form.validate_on_submit():  # new job had already been (partially) created
 		jobName = form.jobName.data
 		session['jobName'] = jobName
-		from web.web import newJobDir
+		from constandpp.web.web import newJobDir
 		jobDirPath = newJobDir(jobName)
 		session['jobDirName'] = os.path.basename(jobDirPath)
 		# schemaFileName = 'schema_'+secure_filename(request.files[form.schema.name])#form.schema.data.filename)
 		schemaFileName = 'schema_' + secure_filename(form.schema.data.filename)
 		schemaFilePath = os.path.join(jobDirPath, schemaFileName)
 		form.schema.data.save(schemaFilePath)
-		from dataIO import parseSchemaFile
+		from constandpp.dataIO import parseSchemaFile
 		try:
 			session['incompleteSchema'] = parseSchemaFile(schemaFilePath)
 		except Exception:  # remove file and job dir if something went wrong
@@ -112,7 +112,7 @@ def jobSettings():
 	# eforms = {(eName, experimentForm()) for eName in incompleteSchema}
 	# CREATE FORM
 	form = jobSettingsForm()
-	from web.web import hackExperimentNamesIntoForm, send_mail
+	from constandpp.web.web import hackExperimentNamesIntoForm, send_mail
 	if form.validate_on_submit():  # form has been filled already
 		jobID = session.get('jobDirName')
 		form = hackExperimentNamesIntoForm(form, eNames)

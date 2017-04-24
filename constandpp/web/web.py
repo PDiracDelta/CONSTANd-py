@@ -10,9 +10,9 @@ Functions employed by the web interface (real one or webFlow.py) to handle:
 import pandas as pd
 import numpy as np
 import os, datetime
-from dataIO import unnest
+from constandpp.tools import unnest
 from json import dumps
-from web import app, mailer, get_db, close_connection
+from constandpp.web import app, mailer, get_db, close_connection
 from subprocess import Popen, PIPE
 
 

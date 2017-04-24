@@ -7,17 +7,18 @@ This file is not necessary when using a real webinterface.
 """
 
 import os
-from dataIO import parseSchemaFile, unnest
-from web.web import TMT2ICM, newJobDir
+from constandpp.dataIO import parseSchemaFile
+from constandpp.web.web import TMT2ICM, newJobDir
+from constandpp.tools import unnest
 from json import dumps
 from shutil import copyfile
-from web.web import updateConfigs, updateWrappers
+from constandpp.web.web import updateConfigs, updateWrappers
 
 
 def webFlow(exptype='dummy', previousjobdirName=None):
 	jobsPath = '../jobs'
 	jobConfigNameSuffix = '_jobConfig.ini'
-	if previousjobdirName is not None: # work on previously processed/analyzed data
+	if previousjobdirName is not None:  # work on previously processed/analyzed data
 		previousjobdir = os.path.join(jobsPath, previousjobdirName)
 		if os.path.exists(previousjobdir):
 			jobName = '_'.join(os.path.basename(previousjobdir).split('_')[1:]) # haha this looks funky
@@ -265,12 +266,12 @@ def webFlow(exptype='dummy', previousjobdirName=None):
 			return os.path.basename(destinationData)
 
 	def transformICM(filePath, this_isTMTICM, this_channelAliasesPerCondition):
-		from dataIO import exportData
+		from constandpp.dataIO import exportData
 		if this_isTMTICM:
-			from dataIO import getTMTIsotopicDistributions
+			from constandpp.dataIO import getTMTIsotopicDistributions
 			icm = TMT2ICM(getTMTIsotopicDistributions(filePath), this_channelAliasesPerCondition)
 		else:
-			from dataIO import importIsotopicCorrectionsMatrix
+			from constandpp.dataIO import importIsotopicCorrectionsMatrix
 			icm = importIsotopicCorrectionsMatrix(filePath)
 			raise Exception(
 				"not implemented (ICM column and row order transformation from non-TMT formatted input).")  # todo
