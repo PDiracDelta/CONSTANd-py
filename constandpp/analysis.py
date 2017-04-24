@@ -237,7 +237,7 @@ def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 	return peptidesDf.loc[:, allChannelAliases], uncommonPeptides
 
 
-def getPCA(intensities, nComponents):
+def getPCA(intensities, nComponents=2):
 	"""
 	Returns the nComponents Principal Component scores for the transposed intensity matrix. This means the reporter
 	channels are "observations" with each protein intensity as a variable/attribute. The fast randomized method by Halko
