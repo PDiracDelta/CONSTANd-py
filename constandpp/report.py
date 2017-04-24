@@ -56,8 +56,11 @@ def getColours(schema, allChannelAliases, hex=False):
 	colours = []
 	for experiment in schema.values():
 		# repeat each distColour as many times as there are channels in the current condition, and repeat for each experiment
-		conditions = experiment['channelAliasesPerCondition']
-		colours.append([np.tile(distColours[c], (len(conditions[c]), 1)).tolist() for c in range(numConditions)])
+		perCondition = experiment['channelAliasesPerCondition']
+		colours.append([np.tile(distColours[c], (len(perCondition[c]), 1)).tolist() for c in range(numConditions)])
+	if hex:
+		# colours are for some reason extra nested after converting to hex.
+		colours = unnest(colours)
 	channelColoursDict = dict(zip(allChannelAliases, unnest(unnest(colours))))
 	return channelColoursDict
 
