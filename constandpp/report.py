@@ -18,6 +18,7 @@ from scipy.cluster.hierarchy import dendrogram
 import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib import markers
+from matplotlib.colors import to_hex
 #from adjustText import adjust_text
 
 # adjust font size globally
@@ -39,7 +40,7 @@ def distinguishableColours(n, type='jet'):
 	return cmap(np.linspace(0, 1.0, n))
 
 
-def getColours(schema, allChannelAliases):
+def getColours(schema, allChannelAliases, hex=False):
 	"""
 	Returns list of colours for all the channels in all experiments (based on schema) so that the channels of the same
 	condition have the same colour.
@@ -49,11 +50,14 @@ def getColours(schema, allChannelAliases):
 	"""
 	numConditions = len(list(schema.values())[0]['channelAliasesPerCondition'])
 	distColours = distinguishableColours(numConditions)
+	if hex:
+		# transform into hex values
+		distColours = [to_hex(x) for x in distColours]
 	colours = []
 	for experiment in schema.values():
-		# repeat each channel's distColour as many times as there are channels in the current condition, and repeat for each experiment
+		# repeat each distColour as many times as there are channels in the current condition, and repeat for each experiment
 		conditions = experiment['channelAliasesPerCondition']
-		colours.append([np.tile(distColours[c], (len(conditions[c]),1)).tolist() for c in range(numConditions)])
+		colours.append([np.tile(distColours[c], (len(conditions[c]), 1)).tolist() for c in range(numConditions)])
 	channelColoursDict = dict(zip(allChannelAliases, unnest(unnest(colours))))
 	return channelColoursDict
 
@@ -249,7 +253,8 @@ def getHCDendrogram(HCResult, schema):
 	plt.xlabel('distance', figure=HCDendrogram)
 	plt.ylabel('reporter channel', figure=HCDendrogram)
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
-	channelColorsDict = getColours(schema, allChannelAliases)
+	# first transform to hex code because the dendrogram() function only takes strings.
+	channelColorsDict = getColours(schema, allChannelAliases, hex=True)
 	dendrogram(HCResult, orientation='right', leaf_rotation=0., leaf_font_size=24, labels=allChannelAliases,
 			   link_color_func=lambda x: channelColorsDict[allChannelAliases[x]] if x < len(allChannelAliases) else 'k',
 			   above_threshold_color='k')
