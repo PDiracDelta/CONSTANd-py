@@ -1,5 +1,8 @@
 """ Collection of handy tools used by various modules of the CONSTANd++ workflow. """
 
+import numpy as np
+from constandpp import fontsize, fontweight
+
 
 def unnest(x):
 	""" returns un-nested version of level 1 nested list x."""
@@ -34,8 +37,7 @@ def setIntensities(df, intensities, intensityColumns):
 	:param intensityColumns:list			columns that contain the quantification values
 	:return df:             pd.dataFrame    output dataframe with updated intensities
 	"""
-	import numpy.ndarray as ndarray
-	if isinstance(intensities, ndarray):
+	if isinstance(intensities, np.ndarray):
 		assert df.loc[:, intensityColumns].shape == intensities.shape
 		df.loc[:, intensityColumns] = intensities
 	elif isinstance(intensities, dict):
