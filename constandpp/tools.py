@@ -1,7 +1,7 @@
 """ Collection of handy tools used by various modules of the CONSTANd++ workflow. """
 
 import numpy as np
-from constandpp import fontsize, fontweight
+from constandpp import fontsize, fontweight, figheight, figwidth
 
 
 def unnest(x):
@@ -60,7 +60,7 @@ def scatterplot(x, y, title=None, xlab=None, ylab=None):
 	import matplotlib.rcParams.update
 	from matplotlib import pyplot as plt
 	matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
-	f = plt.figure(figsize=(12, 9))
+	f = plt.figure(figsize=(figwidth, figheight))
 	plt.scatter(x, y)
 	if title:
 		plt.title(title)

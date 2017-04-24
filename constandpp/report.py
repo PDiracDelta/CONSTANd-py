@@ -19,11 +19,10 @@ import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib import markers
 from matplotlib.colors import to_hex
+from constandpp import fontweight, fontsize, figwidth, figheight
 #from adjustText import adjust_text
 
 # adjust font size globally
-fontsize = 30
-fontweight = 'normal'
 matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
 
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
@@ -136,7 +135,7 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	:return volcanoPlot:	plt.figure		volcano plot as a matplotlib figure object
 	"""
 	# todo add protein ID labels according to sorted list entry ID
-	volcanoPlot = plt.figure(figsize=(12, 9))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
+	volcanoPlot = plt.figure(figsize=(figwidth, figheight))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
 	#mng = plt.get_current_fig_manager()
 	#mng.full_screen_toggle()
@@ -201,7 +200,7 @@ def getPCAPlot(PCAResult, schema):
 	:param schema:		dict			schema of the experiments' hierarchy
 	:return PCAPlot:	plt.figure		PCA plot as a matplotlib figure object
 	"""
-	PCAPlot = plt.figure(figsize=(12, 9))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
+	PCAPlot = plt.figure(figsize=(figwidth, figheight))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
 	plt.title('Principal Component scores', figure=PCAPlot)
 	plt.xlabel('First PC', figure=PCAPlot)
@@ -248,7 +247,7 @@ def getHCDendrogram(HCResult, schema):
 	"""
 	# hierarchical clustering dendrogram
 	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
-	HCDendrogram = plt.figure(figsize=(12, 9)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
+	HCDendrogram = plt.figure(figsize=(figwidth, figheight)) # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
 	#mng = plt.get_current_fig_manager()
 	#mng.full_screen_toggle()

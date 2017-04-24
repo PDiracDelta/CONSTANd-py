@@ -17,3 +17,5 @@ __status__ = "Development"
 ## GLOBAL VARIABLES ##
 fontsize = 30
 fontweight = 'normal'
+figwidth = 14
+figheight = 10.5
