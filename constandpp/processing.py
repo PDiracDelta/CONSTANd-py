@@ -20,7 +20,6 @@ Removed data is always saved into a removedData dataFrame.
 
 import numpy as np
 import logging
-from pandas import Series
 
 
 def removeObsoleteColumns(df, wantedColumns):
@@ -140,8 +139,8 @@ def undoublePSMAlgo(df, identifyingNodes, exclusive, intensityColumns, removalCo
 	:return removedData:    		pd.dataFrame    basic info about the removed entries
 	"""
 	if len(identifyingNodes['slaves']) == 0: # do NOT execute this method: there is only a single PSMAlgo!!!
-		import pandas as pd
-		return df, pd.DataFrame()
+		import pandas.DataFrame as DataFrame
+		return df, DataFrame()
 	masterName = identifyingNodes['master'][0]
 	slaveScoreName = identifyingNodes['slaves'][0][1]
 	byIdentifyingNodeDict = df.groupby('Identifying Node Type').groups # {Identifying Node Type : [list of indices]}
@@ -193,7 +192,8 @@ def getIntensities(df, intensityColumns, indices=None):
 	:param indices:         list                        indices of the entries for which to obtain the intensities
 	:return intensities:    np.ndarray                  matrix of quantification values
 	"""
-	if isinstance(df, Series): # this is a dataframe with only 1 entry: indexing [:, cols] doesnt work.
+	import pandas.Series as Series
+	if isinstance(df, Series):  # this is a dataframe with only 1 entry: indexing [:, cols] doesnt work.
 		return np.asarray(df.loc[intensityColumns])
 	elif indices is None:
 		return np.asarray(df.loc[:, intensityColumns])
