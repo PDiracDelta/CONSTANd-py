@@ -18,7 +18,7 @@ def getIntensities(df, intensityColumns, indices=None):
 	:return intensities:    np.ndarray                  matrix of quantification values
 	"""
 	import numpy as np
-	import pandas.Series as Series
+	from pandas import Series
 	if isinstance(df, Series):  # this is a dataframe with only 1 entry: indexing [:, cols] doesnt work.
 		return np.asarray(df.loc[intensityColumns])
 	elif indices is None:
@@ -57,7 +57,7 @@ def MA(x, y):
 
 
 def scatterplot(x, y, title=None, xlab=None, ylab=None):
-	import matplotlib
+	import matplotlib.rcParams.update
 	from matplotlib import pyplot as plt
 	matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
 	f = plt.figure(figsize=(12, 9))
