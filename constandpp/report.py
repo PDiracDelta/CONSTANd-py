@@ -193,17 +193,19 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	return volcanoPlot
 
 
-def getPCAPlot(PCAResult, schema):
+def getPCAPlot(PCAResult, schema, title=None):
 	"""
 	Generates a 2D plot of each quantification channel's first 2 PC scores. Identical colour means identical condition,
 	and identical marker means identical experiment.
 	:param PCAResult:	np.ndarray		PC scores of the channels for each protein (see getPCA() in analysis.py)
 	:param schema:		dict			schema of the experiments' hierarchy
+	:param title:		str				title for the plot
 	:return PCAPlot:	plt.figure		PCA plot as a matplotlib figure object
 	"""
 	PCAPlot = plt.figure(figsize=(figwidth, figheight))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
-	plt.title('Principal Component scores', figure=PCAPlot)
+	if title is None:
+		plt.title('Principal Component scores', figure=PCAPlot)
 	plt.xlabel('First PC', figure=PCAPlot)
 	plt.ylabel('Second PC', figure=PCAPlot)
 
@@ -238,7 +240,7 @@ def getPCAPlot(PCAResult, schema):
 	return PCAPlot
 
 
-def getHCDendrogram(HCResult, schema):
+def getHCDendrogram(HCResult, schema, title=None):
 	"""
 	Generates a hierarchical clustering dendrogram (horizontal) using the NxN linkage matrix HCResult. Each leaf
 	corresponds to a quantification channel. Identical colour means identical condition, and experiment labels are shown.
@@ -252,7 +254,8 @@ def getHCDendrogram(HCResult, schema):
 	# maximize figure
 	#mng = plt.get_current_fig_manager()
 	#mng.full_screen_toggle()
-	plt.title('Hierarchical Clustering Dendrogram', figure=HCDendrogram)
+	if title is None:
+		plt.title('Hierarchical Clustering Dendrogram', figure=HCDendrogram)
 	plt.xlabel('distance', figure=HCDendrogram)
 	plt.ylabel('reporter channel', figure=HCDendrogram)
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
