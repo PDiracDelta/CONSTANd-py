@@ -205,7 +205,8 @@ def getPCAPlot(PCAResult, schema, title=None):
 	PCAPlot = plt.figure(figsize=(figwidth, figheight))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
 	if title is None:
-		plt.title('Principal Component scores', figure=PCAPlot)
+		title = 'Principal Component scores'
+	plt.title(title, figure=PCAPlot)
 	plt.xlabel('First PC', figure=PCAPlot)
 	plt.ylabel('Second PC', figure=PCAPlot)
 
@@ -255,7 +256,8 @@ def getHCDendrogram(HCResult, schema, title=None):
 	#mng = plt.get_current_fig_manager()
 	#mng.full_screen_toggle()
 	if title is None:
-		plt.title('Hierarchical Clustering Dendrogram', figure=HCDendrogram)
+		title = 'Hierarchical Clustering Dendrogram'
+	plt.title(title, figure=HCDendrogram)
 	plt.xlabel('distance', figure=HCDendrogram)
 	plt.ylabel('reporter channel', figure=HCDendrogram)
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
