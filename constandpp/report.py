@@ -190,8 +190,8 @@ def getPCAPlot(PCAResult, schema):
 	"""
 	Generates a 2D plot of each quantification channel's first 2 PC scores. Identical colour means identical condition,
 	and identical marker means identical experiment.
-	:param PCAResult:	np.ndarray	PC scores of the channels for each protein (see getPCA() in analysis.py)
-	:param schema:		dict	schema of the experiments' hierarchy
+	:param PCAResult:	np.ndarray		PC scores of the channels for each protein (see getPCA() in analysis.py)
+	:param schema:		dict			schema of the experiments' hierarchy
 	:return PCAPlot:	plt.figure		PCA plot as a matplotlib figure object
 	"""
 	PCAPlot = plt.figure(figsize=(16, 12))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
@@ -235,8 +235,8 @@ def getHCDendrogram(HCResult, schema):
 	"""
 	Generates a hierarchical clustering dendrogram (horizontal) using the NxN linkage matrix HCResult. Each leaf
 	corresponds to a quantification channel. Identical colour means identical condition, and experiment labels are shown.
-	:param HCResult:		np.ndarray	NxN linkage matrix (N=#channels)
-	:param schema:			dict	schema of the experiments' hierarchy
+	:param HCResult:		np.ndarray		NxN linkage matrix (N=#channels)
+	:param schema:			dict			schema of the experiments' hierarchy
 	:return HCDendrogram:	plt.figure		HC dendrogram as a matplotlib figure object
 	"""
 	# hierarchical clustering dendrogram
