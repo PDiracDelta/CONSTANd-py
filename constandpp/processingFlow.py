@@ -6,6 +6,7 @@ Workflow of the processing part of CONSTANd++.
 """
 
 from constandpp.processing import *
+from constandpp.tools import setIntensities
 from constandpp.dataIO import exportData
 from constandpp.collapse import collapse
 from constandpp.constand import constand

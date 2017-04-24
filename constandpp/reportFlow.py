@@ -38,7 +38,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	testInterexperimentalOnPeptideLevel = False
 	proteinLevelMAPlots = False
 	if testInterexperimentalOnPeptideLevel:
-		from main import MAPlot
+		from constandpp.tools import MAPlot
 		org3data = allExperimentsIntensitiesPerCommonPeptide[:, 17]
 		#MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 11],
 		#       'org2 exp [1] vs org2 exp [1]')
@@ -47,7 +47,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 26],
 			   'org2 exp [2] vs org3 exp [3]')
 	if proteinLevelMAPlots:
-		from main import MAPlot
+		from constandpp.tools import MAPlot
 		MAPlot(minProteinDF.loc[:, '3_muscle'], minProteinDF.loc[:, '4_muscle'],
 			   'org2 exp [2] vs org3 exp [2]')
 		MAPlot(minProteinDF.loc[:, '3_muscle'], minProteinDF.loc[:, '4_cerebrum'],
@@ -122,7 +122,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 
 		pdfFullPath = HTMLtoPDF(pdfhtmlFullPath)
 
-		from web.web import send_mail
+		from constandpp.web.web import send_mail
 		### SEND JOB COMPLETED MAIL ###
 		mailSuccess = send_mail(recipient=params['mailRecipient'], mailBodyFile='reportMail',
 				  jobname=params['jobname'], jobID=params['jobID'], attachment=pdfFullPath)

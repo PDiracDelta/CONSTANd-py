@@ -18,6 +18,7 @@ Excludes (see collapse.py):
 Removed data is always saved into a removedData dataFrame.
 """
 
+from constandpp.tools import getIntensities
 import numpy as np
 import logging
 

@@ -42,3 +42,4 @@ def setIntensities(df, intensities, intensityColumns):
 		for index in intensities.keys():
 			df.loc[index, intensityColumns] = intensities[index]
 	return df
+
