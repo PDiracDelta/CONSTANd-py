@@ -304,8 +304,10 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 	from time import time
 	from constandpp_web import app
 	from os import path, pardir
+	from pandas import set_option
 	
 	allJobsParDir = path.abspath(path.join(app.config.get('ALLJOBSDIR'), pardir))
+	set_option('display.max_colwidth', -1)  # otherwise the Description column text is truncated.
 	
 	def injectColumnWidthHTML(DETableHTML):
 		"""
