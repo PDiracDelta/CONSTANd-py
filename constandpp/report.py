@@ -395,7 +395,7 @@ def HTMLtoPDF(htmlReportFullPath):
 	#:param htmlReportFullPath:	str		path to the HTML report file
 	#:return pdfReportFullPath:	str		path to the PDF report file
 	#"""
-	#from subprocess import run
+	from subprocess import run
 	from weasyprint import HTML, CSS
 	#from os import path
 	#from constandpp_web import config
@@ -405,6 +405,6 @@ def HTMLtoPDF(htmlReportFullPath):
 	#command = 'weasyprint "'+htmlReportFullPath+'" "'+pdfReportFullPath+'"'# -s "'+path.abspath(config.__file__+'/../static/css/style.css')+'"'
 	#run(command, shell=True
 	HTML(htmlReportFullPath).write_pdf(pdfReportFullPath, stylesheets=[CSS(string='@page { size: A4; margin: 1cm; }')])
-	#rmcmd = 'rm -f "'+htmlReportFullPath+'"'
-	#run(rmcmd, shell=True)
+	rmcmd = 'rm -f "'+htmlReportFullPath+'"'
+	run(rmcmd, shell=True)
 	return pdfReportFullPath
