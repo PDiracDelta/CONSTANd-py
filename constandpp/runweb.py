@@ -10,7 +10,7 @@ __maintainer__ = "Joris Van Houtven"
 __email__ = "vanhoutvenjoris@gmail.com"
 
 
-from constandpp.web import app
+from constandpp_web import app
 
 # host=0.0.0.0 makes the server publicly available.
 app.run(debug=True, host='0.0.0.0')
