@@ -302,7 +302,7 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 	"""
 	from flask import render_template
 	from time import time
-	from constandpp_web import app
+	from constandpp_web.constandpp_web import app
 	from os import path, pardir
 	from pandas import set_option
 	
