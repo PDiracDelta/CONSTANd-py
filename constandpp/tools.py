@@ -67,6 +67,15 @@ def MA(x, y):
 
 
 def scatterplot(x, y, title=None, xlab=None, ylab=None):
+	"""
+	Return a scatterplot for the given data, with the constandpp-specific plot settings (fonts, figsizes, ...).
+	:param x:		list		x data
+	:param y:		list		y data
+	:param title:	str			scatterplot title
+	:param xlab:	str			label for the x-axis
+	:param ylab:	str			label for the y-axis
+	:return f:		plt.figure	scatterplot as a matplotlib figure object
+	"""
 	import matplotlib.rcParams.update
 	from matplotlib import pyplot as plt
 	matplotlib.use('GTK3Agg')
@@ -84,6 +93,17 @@ def scatterplot(x, y, title=None, xlab=None, ylab=None):
 
 
 def MAPlot(x, y, title=None):
+	"""
+	Return an MA plot for the given data, with the constandpp-specific plot settings (fonts, figsizes, ...) by calling
+	MA() and then scatterplot().
+	:param x:		list	x data
+	:param y:		list	y data
+	:param title:	str		MA plot title
+	:return M:		list	logx - logy
+	:return A:		list	(logx + logy) * 0.5
+	:return m:		float64	mean(M)
+	:return v:		float64	var(M)
+	"""
 	M, A, m, v = MA(x, y)
 	if title is None:
 		title = title('PD2.1 Intensities versus S/N values (scaled relatively within each row/peptide)')
