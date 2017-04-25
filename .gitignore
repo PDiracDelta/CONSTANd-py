@@ -2,4 +2,5 @@ scripts
 .idea/
 __pycache__
 constandpp/web/jobs
-constandpp-web
+constandpp-webconstandpp_web
+constandpp_web
