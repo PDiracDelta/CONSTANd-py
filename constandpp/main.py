@@ -150,21 +150,22 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		
 		# jobConfigFilePath = 'job/jobConfig.ini' # TEST
 		jobConfigFilePath = '../jobs/2017-01-23 02:40:26.553814_two/jobConfig_two.ini'
-	# jobConfigFilePath = webFlow(exptype='COON')
-	# jobConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-26 10:56:10.646919_COON')
-	# jobConfigFilePath = webFlow(exptype='COON_SN')
-	# jobConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-20 14:21:47.786288_COON_SN')
-	# jobConfigFilePath = webFlow(exptype='COON_norm') # todo constand uitzetten
-	# jobConfigFilePath = webFlow(exptype='COON_norm', previousjobdirName='2016-12-12 22:43:38.030716_COON_norm')
-	# jobConfigFilePath = webFlow(exptype='COON_SN_norm')  # todo constand uitzetten
-	# jobConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 22:48:30.701250_COON_SN_norm')
-	# jobConfigFilePath = webFlow(exptype='COON_nonormnoconstand')  # todo constand uitzetten
-	# jobConfigFilePath = webFlow(exptype='COON_nonormnoconstand', previousjobdirName='2016-12-20 14:31:47.045927_COON_nonormnoconstand')
-	# jobConfigFilePath = webFlow(exptype='COON_noISO')
-	# jobConfigFilePath = webFlow(exptype='COON_noISO', previousjobdirName='2016-12-16 16:38:30.536344_COON_noISO')
-	# jobConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
-	# jobConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand', previousjobdirName='2016-12-20 14:39:09.476567_COON_SN_nonormnoconstand')
-		jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-04-14 17:46:37.527494_alleswerkt?/jobConfig_alleswerkt?.ini'
+		# jobConfigFilePath = webFlow(exptype='COON')
+		# jobConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-26 10:56:10.646919_COON')
+		# jobConfigFilePath = webFlow(exptype='COON_SN')
+		# jobConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-20 14:21:47.786288_COON_SN')
+		# jobConfigFilePath = webFlow(exptype='COON_norm') # todo constand uitzetten
+		# jobConfigFilePath = webFlow(exptype='COON_norm', previousjobdirName='2016-12-12 22:43:38.030716_COON_norm')
+		# jobConfigFilePath = webFlow(exptype='COON_SN_norm')  # todo constand uitzetten
+		# jobConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 22:48:30.701250_COON_SN_norm')
+		# jobConfigFilePath = webFlow(exptype='COON_nonormnoconstand')  # todo constand uitzetten
+		# jobConfigFilePath = webFlow(exptype='COON_nonormnoconstand', previousjobdirName='2016-12-20 14:31:47.045927_COON_nonormnoconstand')
+		# jobConfigFilePath = webFlow(exptype='COON_noISO')
+		# jobConfigFilePath = webFlow(exptype='COON_noISO', previousjobdirName='2016-12-16 16:38:30.536344_COON_noISO')
+		# jobConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')  # todo constand uitzetten
+		# jobConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand', previousjobdirName='2016-12-20 14:39:09.476567_COON_SN_nonormnoconstand')
+		#jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-04-14 17:46:37.527494_alleswerkt?/jobConfig_alleswerkt?.ini'
+		jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-04-14 18:11:41.620222_geenvraagteken/jobConfig_geenvraagteken.ini'
 	
 	with app.app_context():
 		jobDirName = os.path.basename(os.path.abspath(os.path.join(jobConfigFilePath, os.pardir)))

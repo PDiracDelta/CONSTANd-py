@@ -386,15 +386,25 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 
 def HTMLtoPDF(htmlReportFullPath):
 	"""
-	Generate a PDF file by converting the HTML report using the linux wkhtml2pdf package in a subprocess.
+	Generate a PDF file by converting the HTML report using weasyprint.
 	:param htmlReportFullPath:	str		path to the HTML report file
 	:return pdfReportFullPath:	str		path to the PDF report file
 	"""
-	from subprocess import run
+	#"""
+	#Generate a PDF file by converting the HTML report using the linux wkhtml2pdf package in a subprocess.
+	#:param htmlReportFullPath:	str		path to the HTML report file
+	#:return pdfReportFullPath:	str		path to the PDF report file
+	#"""
+	#from subprocess import run
+	from weasyprint import HTML, CSS
+	#from os import path
+	#from constandpp_web import config
 
 	pdfReportFullPath = htmlReportFullPath[0:-4]+'pdf'
-	command = 'wkhtmltopdf -L 1cm -R 1cm -T 1cm -B 1cm "'+htmlReportFullPath+'" "'+pdfReportFullPath+'"'
-	run(command, shell=True)
-	rmcmd = 'rm -f "'+htmlReportFullPath+'"'
-	run(rmcmd, shell=True)
+	#command = 'wkhtmltopdf -L 1cm -R 1cm -T 1cm -B 1cm "'+htmlReportFullPath+'" "'+pdfReportFullPath+'"'
+	#command = 'weasyprint "'+htmlReportFullPath+'" "'+pdfReportFullPath+'"'# -s "'+path.abspath(config.__file__+'/../static/css/style.css')+'"'
+	#run(command, shell=True)
+	HTML(htmlReportFullPath).write_pdf(pdfReportFullPath, stylesheets=[CSS(string='@page { size: A4; margin: 1cm }')])
+	#rmcmd = 'rm -f "'+htmlReportFullPath+'"'
+	#run(rmcmd, shell=True)
 	return pdfReportFullPath
