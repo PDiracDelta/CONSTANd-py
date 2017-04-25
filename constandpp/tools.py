@@ -47,6 +47,16 @@ def setIntensities(df, intensities, intensityColumns):
 
 
 def MA(x, y):
+	"""
+	Returns for (x,y) the corresponding M and A values as defined for the MA (minus-additive) plot, as well as the
+	average and variance of the M values.
+	:param x:	list	input values x
+	:param y:	list	input values y
+	:return M:	list	logx - logy
+	:return A:	list	(logx + logy) * 0.5
+	:return m:	float64	mean(M)
+	:return v:	float64	var(M)
+	"""
 	logx = np.log2(x)
 	logy = np.log2(y)
 	A = (logx + logy) * 0.5
