@@ -403,8 +403,8 @@ def HTMLtoPDF(htmlReportFullPath):
 	pdfReportFullPath = htmlReportFullPath[0:-4]+'pdf'
 	#command = 'wkhtmltopdf -L 1cm -R 1cm -T 1cm -B 1cm "'+htmlReportFullPath+'" "'+pdfReportFullPath+'"'
 	#command = 'weasyprint "'+htmlReportFullPath+'" "'+pdfReportFullPath+'"'# -s "'+path.abspath(config.__file__+'/../static/css/style.css')+'"'
-	#run(command, shell=True)
-	HTML(htmlReportFullPath).write_pdf(pdfReportFullPath, stylesheets=[CSS(string='@page { size: A4; margin: 1cm }')])
+	#run(command, shell=True
+	HTML(htmlReportFullPath).write_pdf(pdfReportFullPath, stylesheets=[CSS(string='@page { size: A4; margin: 1cm; }')])
 	#rmcmd = 'rm -f "'+htmlReportFullPath+'"'
 	#run(rmcmd, shell=True)
 	return pdfReportFullPath

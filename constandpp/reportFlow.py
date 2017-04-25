@@ -121,6 +121,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 				   filename=params['jobname'] + '_Report')
 
 		pdfFullPath = HTMLtoPDF(pdfhtmlFullPath)
+		# todo possibly remove need for special pdfhtml if weasyprint fetches the HTML from the web server via URL instead
 
 		from constandpp_web.web import send_mail
 		### SEND JOB COMPLETED MAIL ###
