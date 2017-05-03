@@ -51,11 +51,12 @@ def removeMissing(df, noMissingValuesColumns, intensityColumns):
 	# get the indices of all detections which have no quan values at all (those have their nansum equal to zero)
 	noIntensitiesBool = np.nansum(getIntensities(df=df, intensityColumns=intensityColumns), axis=1) == 0.
 	toDelete.extend(df.index[noIntensitiesBool])
-
+	
 	toDelete = np.unique(toDelete)
 	removedData = df.loc[toDelete]
 	if toDelete.size > 0:
-		logging.warning("Some detections have been removed from the workflow due to missing values: see removedData['missing'].")
+		logging.warning(
+			"Some detections have been removed from the workflow due to missing values: see removedData['missing'].")
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 
@@ -96,7 +97,7 @@ def removeIsolationInterference(df, threshold, removalColumnsToSave):
 	:return removedData:    		pd.dataFrame    basic info about the removed values
 	"""
 	columnsToSave = ['Isolation Interference [%]'] + removalColumnsToSave
-	toDelete = df.loc[df['Isolation Interference [%]'] > threshold].index # indices of rows to delete
+	toDelete = df.loc[df['Isolation Interference [%]'] > threshold].index  # indices of rows to delete
 	removedData = df.loc[toDelete, columnsToSave]
 	df.drop(toDelete, inplace=True)
 	return df, removedData
@@ -116,10 +117,13 @@ def setMasterProteinDescriptions(df):
 		# [[all descriptions] per peptide]
 		descriptionsLists = df.loc[:, 'Protein Descriptions'].astype(str).apply(lambda x: x.split('; '))
 		# [[indices of master descriptions with respect to list of all descriptions] per peptide]
-		correctIndicesLists = [[proteins.index(masterProtein) for masterProtein in list(filter(lambda x: x.lower()!='nan', masterProteins))]
-						  for masterProteins, proteins in zip(masterProteinsLists, proteinsLists)]
+		correctIndicesLists = [[proteins.index(masterProtein) for masterProtein in
+								list(filter(lambda x: x.lower() != 'nan', masterProteins))]
+							   for masterProteins, proteins in zip(masterProteinsLists, proteinsLists)]
 		# [[master descriptions] per peptide]
-		df.loc[:, 'Protein Descriptions'] = ['; '.join([descriptionsList[i] for i in correctIndices]) for (descriptionsList, correctIndices) in zip(descriptionsLists, correctIndicesLists)]
+		df.loc[:, 'Protein Descriptions'] = ['; '.join([descriptionsList[i] for i in correctIndices]) for
+											 (descriptionsList, correctIndices) in
+											 zip(descriptionsLists, correctIndicesLists)]
 		df.drop('Protein Accessions', axis=1, inplace=True)
 	else:
 		logging.warning("No 'Protein Accessions' column found; leaving all 'Protein Descriptions' intact.")
@@ -139,12 +143,12 @@ def undoublePSMAlgo(df, identifyingNodes, exclusive, intensityColumns, removalCo
 	:return df:             		pd.dataFrame    data without double First Scan numbers due to PSMAlgo redundancy
 	:return removedData:    		pd.dataFrame    basic info about the removed entries
 	"""
-	if len(identifyingNodes['slaves']) == 0: # do NOT execute this method: there is only a single PSMAlgo!!!
+	if len(identifyingNodes['slaves']) == 0:  # do NOT execute this method: there is only a single PSMAlgo!!!
 		import pandas.DataFrame as DataFrame
 		return df, DataFrame()
 	masterName = identifyingNodes['master'][0]
 	slaveScoreName = identifyingNodes['slaves'][0][1]
-	byIdentifyingNodeDict = df.groupby('Identifying Node Type').groups # {Identifying Node Type : [list of indices]}
+	byIdentifyingNodeDict = df.groupby('Identifying Node Type').groups  # {Identifying Node Type : [list of indices]}
 	columnsToSave = [slaveScoreName] + removalColumnsToSave + intensityColumns
 	masterIndices = set(byIdentifyingNodeDict[masterName])
 	toDelete = set(df.index.values).difference(masterIndices)  # all indices of detections not done by MASTER
@@ -155,10 +159,10 @@ def undoublePSMAlgo(df, identifyingNodes, exclusive, intensityColumns, removalCo
 		singlesNotByMasterIndices = singles.difference(masterIndices)
 		toDelete = toDelete.difference(singlesNotByMasterIndices)  # keep only indices not discovered by SLAVE
 	removedData = df.loc[toDelete, columnsToSave]
-	dflen=df.shape[0] # TEST
+	dflen = df.shape[0]  # TEST
 	df.drop(toDelete, inplace=True)
-	assert(dflen == df.shape[0]+removedData.shape[0]) # TEST
-
+	assert (dflen == df.shape[0] + removedData.shape[0])  # TEST
+	
 	return df, removedData
 
 
@@ -178,9 +182,10 @@ def isotopicCorrection(intensities, correctionsMatrix):
 			correctedIntensities.append(np.linalg.solve(correctionsMatrix, row))
 		else:
 			correctedIntensities.append(row)
-			noCorrectionIndices.append(np.where(intensities == row)[0][0]) # np.where()[0][0] is numpy equivalent van .index()
+			noCorrectionIndices.append(
+				np.where(intensities == row)[0][0])  # np.where()[0][0] is numpy equivalent van .index()
 			if not warnedYet:
-				logging.warning("Cannot correct isotope impurities for detections with NaN reporter intensities; skipping those.")
+				logging.warning(
+					"Cannot correct isotope impurities for detections with NaN reporter intensities; skipping those.")
 				warnedYet = True
 	return np.asarray(correctedIntensities), noCorrectionIndices
-
