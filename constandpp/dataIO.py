@@ -55,7 +55,7 @@ def importIsotopicCorrectionsMatrix(path_in):
 	return np.asmatrix(importDataFrame(path_in, delim='\t', header=None)).astype('float64') # make sure its float64
 
 
-def getTMTIsotopicDistributions(path_in):
+def importTMTIsotopicDistributions(path_in):
 	"""
 	Read the TMT isotope distributions table (IDT) in tsv format from disk as a dataframe with the correct column headers
 	and labels as specified in the file. The column with the channel names and the "IDT" header is removed.
