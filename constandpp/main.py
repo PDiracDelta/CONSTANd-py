@@ -44,15 +44,15 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 		processingResultsDumpFilename = os.path.join(processing_path_out, 'processingResultsDump_' + str(eName))
 		if doProcessing:
 			print('Starting processing of ' + eName + '...')
-			# prepare the output directories
-			if not os.path.exists(os.path.abspath(processing_path_out)):  # do not overwrite dir
-				assert os.path.exists(
-					os.path.abspath(os.path.join(processing_path_out, os.path.pardir)))  # parent dir must exist
-				os.makedirs(processing_path_out)
-			else:
-				if jobConfigFilePath != 'job/jobConfig.ini':  # TEST
-					raise Exception(
-						"Output path " + os.path.abspath(processing_path_out) + " already exists! Aborting.")
+			if writeToDisk:  # prepare the output directories
+				if not os.path.exists(os.path.abspath(processing_path_out)):  # do not overwrite dir
+					assert os.path.exists(
+						os.path.abspath(os.path.join(processing_path_out, os.path.pardir)))  # parent dir must exist
+					os.makedirs(processing_path_out)
+				else:
+					if jobConfigFilePath != 'job/jobConfig.ini':  # TEST
+						raise Exception(
+							"Output path " + os.path.abspath(processing_path_out) + " already exists! Aborting.")
 			
 			# process every input dataframe
 			logging.info(
@@ -78,11 +78,11 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 	analysisResultsDumpFilename = os.path.join(analysis_path_out, 'analysisResultsDump')
 	if doAnalysis:
 		print('Starting analysis...')
-		# prepare the output directories
-		if not os.path.exists(analysis_path_out):  # do not overwrite dir
-			assert os.path.exists(
-				os.path.abspath(os.path.join(analysis_path_out, os.path.pardir)))  # parent dir must exist
-			os.makedirs(analysis_path_out)
+		if writeToDisk:  # prepare the output directories
+			if not os.path.exists(analysis_path_out):  # do not overwrite dir
+				assert os.path.exists(
+					os.path.abspath(os.path.join(analysis_path_out, os.path.pardir)))  # parent dir must exist
+				os.makedirs(analysis_path_out)
 		
 		# perform analysis
 		logging.info("Starting analysis of job: " + jobParams['jobname'] + " at " +
@@ -105,11 +105,11 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 	
 	if doReport:
 		print('Starting visualization and report generation...')
-		# prepare the output directories
-		if not os.path.exists(results_path_out):  # do not overwrite dir
-			assert os.path.exists(
-				os.path.abspath(os.path.join(results_path_out, os.path.pardir)))  # parent dir must exist
-			os.makedirs(results_path_out)
+		if writeToDisk:  # prepare the output directories
+			if not os.path.exists(results_path_out):  # do not overwrite dir
+				assert os.path.exists(
+					os.path.abspath(os.path.join(results_path_out, os.path.pardir)))  # parent dir must exist
+				os.makedirs(results_path_out)
 		
 		# visualize and make a report
 		logging.info("Starting visualization end report generation of job: " + jobParams['jobname'] + "at " +
