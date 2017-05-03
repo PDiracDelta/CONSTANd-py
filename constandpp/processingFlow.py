@@ -75,7 +75,7 @@ def processDf(df, params, writeToDisk):
 	else:
 		intensities = getIntensities(df, intensityColumns=params['intensityColumns'])
 
-	doConstand = True # todo # TEST
+	doConstand = True  # todo # TEST
 	if doConstand:
 		# perform the CONSTANd algorithm;
 		normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])

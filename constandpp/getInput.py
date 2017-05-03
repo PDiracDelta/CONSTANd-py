@@ -19,7 +19,7 @@ def parseDelimiter(d):
 	if d is None:
 		return d
 	else:
-		return gd("unicode_escape")(d)[0] # treat delimiters correctly: ignore first escape
+		return gd("unicode_escape")(d)[0]  # treat delimiters correctly: ignore first escape
 
 
 def getProcessingInput(configFilePath):
@@ -34,50 +34,50 @@ def getProcessingInput(configFilePath):
 	# TODO add all parameters in docstring
 	# add this prefix to all file paths
 	jobdir = os.path.abspath(os.path.join(configFilePath, os.pardir))
-
+	
 	# read the config file to obtain the defaults
 	config = configparser.ConfigParser(allow_no_value=True, comment_prefixes=';',
 									   inline_comment_prefixes='@')  # TODO split up CONFIG and DEFAULT (user input files vs workflow params)
-	config.optionxform = str # so that strings dont automatically get .lower()-ed
+	config.optionxform = str  # so that strings dont automatically get .lower()-ed
 	config.read(configFilePath, encoding='utf-8')
-
+	
 	# get variables from config
-	data = config.get('DEFAULT','data')
-	delim_in = parseDelimiter(config.get('DEFAULT', 'delim_in')) # treat delimiters correctly: ignore first escape
-	header_in = config.getint('DEFAULT','header_in')
-	wrapper = config.get('DEFAULT','wrapper')
-	removedDataInOneFile_bool = config.getboolean('DEFAULT','removedDataInOneFile_bool')
+	data = config.get('DEFAULT', 'data')
+	delim_in = parseDelimiter(config.get('DEFAULT', 'delim_in'))  # treat delimiters correctly: ignore first escape
+	header_in = config.getint('DEFAULT', 'header_in')
+	wrapper = config.get('DEFAULT', 'wrapper')
+	removedDataInOneFile_bool = config.getboolean('DEFAULT', 'removedDataInOneFile_bool')
 	# channelNamesPerCondition = parseExpression(config.get('DEFAULT', 'channelNamesPerCondition'))
 	intensityColumns = parseExpression(config.get('DEFAULT', 'intensityColumns'))
 	wantedColumns = parseExpression(config.get('DEFAULT', 'wantedColumns'))
 	noMissingValuesColumns = parseExpression(config.get('DEFAULT', 'noMissingValuesColumns'))
 	removalColumnsToSave = parseExpression(config.get('DEFAULT', 'removalColumnsToSave'))
 	collapseColumnsToSave = parseExpression(config.get('DEFAULT', 'collapseColumnsToSave'))
-	removeBadConfidence_bool = config.getboolean('DEFAULT','removeBadConfidence_bool')
-	removeBadConfidence_minimum = config.get('DEFAULT','removeBadConfidence_minimum')
-	removeIsolationInterference_bool = config.getboolean('DEFAULT','removeIsolationInterference_bool')
-	removeIsolationInterference_threshold = config.getfloat('DEFAULT','removeIsolationInterference_threshold')
+	removeBadConfidence_bool = config.getboolean('DEFAULT', 'removeBadConfidence_bool')
+	removeBadConfidence_minimum = config.get('DEFAULT', 'removeBadConfidence_minimum')
+	removeIsolationInterference_bool = config.getboolean('DEFAULT', 'removeIsolationInterference_bool')
+	removeIsolationInterference_threshold = config.getfloat('DEFAULT', 'removeIsolationInterference_threshold')
 	collapse_method = config.get('DEFAULT', 'collapse_method')
 	identifyingNodes = parseExpression(config.get('DEFAULT', 'identifyingNodes'))
-	undoublePSMAlgo_bool = config.getboolean('DEFAULT','undoublePSMAlgo_bool')
-	undoublePSMAlgo_exclusive_bool = config.getboolean('DEFAULT','undoublePSMAlgo_exclusive_bool')
-	collapseCharge_bool = config.getboolean('DEFAULT','collapseCharge_bool')
-	collapsePTM_bool = config.getboolean('DEFAULT','collapsePTM_bool')
-	isotopicCorrection_bool = config.getboolean('DEFAULT','isotopicCorrection_bool')
-	isotopicCorrection_matrix = config.get('DEFAULT','isotopicCorrection_matrix')
-	accuracy = config.getfloat('DEFAULT','accuracy')
-	maxIterations = config.getint('DEFAULT','maxIterations')
-	path_out = config.get('DEFAULT','path_out')
-	filename_out = config.get('DEFAULT','filename_out')
-	delim_out = parseDelimiter(config.get('DEFAULT', 'delim_out')) # treat delimiters correctly: ignore first escape
-
+	undoublePSMAlgo_bool = config.getboolean('DEFAULT', 'undoublePSMAlgo_bool')
+	undoublePSMAlgo_exclusive_bool = config.getboolean('DEFAULT', 'undoublePSMAlgo_exclusive_bool')
+	collapseCharge_bool = config.getboolean('DEFAULT', 'collapseCharge_bool')
+	collapsePTM_bool = config.getboolean('DEFAULT', 'collapsePTM_bool')
+	isotopicCorrection_bool = config.getboolean('DEFAULT', 'isotopicCorrection_bool')
+	isotopicCorrection_matrix = config.get('DEFAULT', 'isotopicCorrection_matrix')
+	accuracy = config.getfloat('DEFAULT', 'accuracy')
+	maxIterations = config.getint('DEFAULT', 'maxIterations')
+	path_out = config.get('DEFAULT', 'path_out')
+	filename_out = config.get('DEFAULT', 'filename_out')
+	delim_out = parseDelimiter(config.get('DEFAULT', 'delim_out'))  # treat delimiters correctly: ignore first escape
+	
 	# perform checks on the validity of the parameters and raise exceptions if necessary
 	# DO NOT change the value of variables here!
 	# TODO the 'is None' checks are obsolete. remove them (keep the error messages for later, now).
-	if not os.path.exists(os.path.join(jobdir, data)): # TODO for all files
-		raise FileNotFoundError("File "+data+" not found.")
-	if not os.path.exists(os.path.join(jobdir, wrapper)): # TODO for all files
-		raise FileNotFoundError("File "+wrapper+" not found.")
+	if not os.path.exists(os.path.join(jobdir, data)):  # TODO for all files
+		raise FileNotFoundError("File " + data + " not found.")
+	if not os.path.exists(os.path.join(jobdir, wrapper)):  # TODO for all files
+		raise FileNotFoundError("File " + wrapper + " not found.")
 	if delim_in is not None:
 		if not (len(delim_in) == 1 and isinstance(delim_in, str)):
 			raise Exception("Delimiter of input file must be a character (string of length one).")
@@ -86,20 +86,23 @@ def getProcessingInput(configFilePath):
 	if intensityColumns is None:
 		raise Exception("Please indicate which columns contain the MS2 reporter intensities.")
 	if wantedColumns is None:
-		raise Exception("Please indicate which columns (in addition to the intensities) you would like to have output for.")
+		raise Exception(
+			"Please indicate which columns (in addition to the intensities) you would like to have output for.")
 	if collapseColumnsToSave is None:
 		raise Exception("Please indicate which columns (in addition to the intensities) to save for removed data.")
 	if removeBadConfidence_bool is None:
-		raise Exception("Please indicate whether you would like to remove detections with confidence lower than certain "
-						"threshold.")
+		raise Exception(
+			"Please indicate whether you would like to remove detections with confidence lower than certain "
+			"threshold.")
 	if removeBadConfidence_bool and removeBadConfidence_minimum not in ['High', 'Medium']:
-		raise Exception("Invalid minimum confidence level: "+removeBadConfidence_minimum+". Must select 'Medium' or 'High'.")
+		raise Exception(
+			"Invalid minimum confidence level: " + removeBadConfidence_minimum + ". Must select 'Medium' or 'High'.")
 	if removeIsolationInterference_bool is None:
 		raise Exception("Please indicate whether you would like to remove high Isolation Interference detections.")
 	if not (0 < removeIsolationInterference_threshold < 100 or removeIsolationInterference_bool is None):
 		raise Exception("Isolation Interference Threshold should be either 'None' or between 0 and 100 (percentage).")
 	if collapse_method not in ('bestMatch', 'mostIntense', 'mean', 'geometricMedian', 'weighted'):
-		raise Exception("Invalid collapse method: '"+collapse_method+"'. Please pick 'max', 'mean' or 'median'.")
+		raise Exception("Invalid collapse method: '" + collapse_method + "'. Please pick 'max', 'mean' or 'median'.")
 	if undoublePSMAlgo_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PSM Algorithms.")
 	if undoublePSMAlgo_exclusive_bool is None:
@@ -118,14 +121,14 @@ def getProcessingInput(configFilePath):
 	#	raise Exception("Determinant of isotopic corrections matrix is zero; cannot solve the linear system.")
 	if not (accuracy > 0):
 		raise Exception("Accuracy must be strictly greater than zero.")
-	if not (maxIterations > 0 and isinstance(maxIterations,int)):
+	if not (maxIterations > 0 and isinstance(maxIterations, int)):
 		raise Exception("Maximum number of iterations must be an integer strictly greater than zero.")
 	if not (len(delim_out) == 1 and isinstance(delim_out, str)):
 		raise Exception("Delimiter of output file must be a character (string of length one).")
-
+	
 	# assign the TYPOGRAPHICALLY CORRECT values to the params dict and modify them if necessary.
 	# modify
-	#intensityColumns = [item for sublist in channelNamesPerCondition for item in sublist]
+	# intensityColumns = [item for sublist in channelNamesPerCondition for item in sublist]
 	wrapper = importWrapper(os.path.join(jobdir, wrapper))
 	if isotopicCorrection_matrix is not None:
 		isotopicCorrection_matrix = importIsotopicCorrectionsMatrix(os.path.join(jobdir, isotopicCorrection_matrix))
@@ -140,10 +143,10 @@ def getProcessingInput(configFilePath):
 		'removedDataInOneFile_bool': removedDataInOneFile_bool,
 		'channelNamesPerCondition': intensityColumns,
 		'intensityColumns': intensityColumns,
-		'wantedColumns': wantedColumns+intensityColumns, # needs to include intensitycolumns
+		'wantedColumns': wantedColumns + intensityColumns,  # needs to include intensitycolumns
 		'noMissingValuesColumns': noMissingValuesColumns,
-		'removalColumnsToSave': removalColumnsToSave+intensityColumns, # needs to include intensitycolumns
-		'collapseColumnsToSave': collapseColumnsToSave+intensityColumns, # needs to include intensitycolumns
+		'removalColumnsToSave': removalColumnsToSave + intensityColumns,  # needs to include intensitycolumns
+		'collapseColumnsToSave': collapseColumnsToSave + intensityColumns,  # needs to include intensitycolumns
 		'removeBadConfidence_bool': removeBadConfidence_bool,
 		'removeBadConfidence_minimum': removeBadConfidence_minimum,
 		'removeIsolationInterference_bool': removeIsolationInterference_bool,
@@ -162,12 +165,12 @@ def getProcessingInput(configFilePath):
 		'filename_out': filename_out,
 		'delim_out': delim_out
 	}
-
+	
 	# check if you forgot to hardcode new parameters
 	for param in config._defaults.keys():
 		if param not in params.keys():
-			raise Exception("You forgot to include "+param+" in the params dictionary.")
-
+			raise Exception("You forgot to include " + param + " in the params dictionary.")
+	
 	return params
 
 
@@ -184,15 +187,16 @@ def getJobInput(jobConfigFilePath):
 	
 	# add this prefix to all file paths
 	jobdir = os.path.abspath(os.path.join(jobConfigFilePath, os.pardir))
-
+	
 	config = configparser.ConfigParser(allow_no_value=True, comment_prefixes=';',
 									   inline_comment_prefixes='$')
 	config.optionxform = str  # so that strings dont automatically get .lower()-ed
 	config.read(jobConfigFilePath, encoding='utf-8')
-
+	
 	# get variables from config in correct typography
 	date = config.get('DEFAULT', 'date')
-	schema = parseExpression(config.get('DEFAULT', 'schema'), object_pairs_hook=OrderedDict) # use ordered dict so the items() order is always the same
+	schema = parseExpression(config.get('DEFAULT', 'schema'),
+							 object_pairs_hook=OrderedDict)  # use ordered dict so the items() order is always the same
 	pept2protCombinationMethod = config.get('DEFAULT', 'pept2protCombinationMethod')
 	minExpression_bool = config.getboolean('DEFAULT', 'minExpression_bool')
 	fullExpression_bool = config.getboolean('DEFAULT', 'fullExpression_bool')
@@ -205,14 +209,15 @@ def getJobInput(jobConfigFilePath):
 	path_results = config.get('DEFAULT', 'path_results')
 	jobname = config.get('DEFAULT', 'jobname')
 	jobID = config.get('DEFAULT', 'jobID')
-	delim_out = gd("unicode_escape")(config.get('DEFAULT', 'delim_out'))[0]  # treat delimiters correctly: ignore first escape
+	delim_out = gd("unicode_escape")(config.get('DEFAULT', 'delim_out'))[
+		0]  # treat delimiters correctly: ignore first escape
 	mailRecipient = config.get('DEFAULT', 'mailRecipient')
 	
 	# perform checks on the validity of the parameters and raise exceptions if necessary
 	# DO NOT change the value of variables here!
 	if PCA_components < 2:
 		raise Exception("Minimum number of principal coponents is 2.")
-
+	
 	# assign the TYPOGRAPHICALLY CORRECT values to the params dict and modify them if necessary.
 	# modify
 	path_out = os.path.join(jobdir, path_out)
@@ -236,5 +241,5 @@ def getJobInput(jobConfigFilePath):
 		'delim_out': delim_out,
 		'mailRecipient': mailRecipient
 	}
-
+	
 	return jobParams
