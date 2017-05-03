@@ -12,7 +12,7 @@ from constandpp.collapse import collapse
 from constandpp.constand import constand
 
 
-def processDf(df, params, writeToDisk):
+def processDf(df, params, writeToDisk, doConstand=True):
 	"""
 	Calls all the necessary functions to process the dataframe of one experiment and prepare the analysis input objects.
 	Cleans the input data, removes redundancy due to PSM algorithm, charge (optional) and PTMs (optional), then corrects
@@ -75,7 +75,6 @@ def processDf(df, params, writeToDisk):
 	else:
 		intensities = getIntensities(df, intensityColumns=params['intensityColumns'])
 
-	doConstand = True  # todo # TEST
 	if doConstand:
 		# perform the CONSTANd algorithm;
 		normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
