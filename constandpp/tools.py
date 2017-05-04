@@ -110,7 +110,7 @@ def MAPlot(x, y, title=None):
 	elif title == '':
 		title = 'mean(M): ' + str(m) + '; var(M):' + str(v)
 	else:
-		title = title + '; mean(M): ' + str(m) + '; var(M):' + str(v)
+		title = title + '\nmean(M): ' + str(m) + '; var(M):' + str(v)
 	fig = scatterplot(M, A, title=title)
 	# fig.xlabel('A')
 	# fig.ylabel('M')
