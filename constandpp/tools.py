@@ -106,12 +106,12 @@ def MAPlot(x, y, title=None):
 	"""
 	M, A, m, v = MA(x, y)
 	if title is None:
-		title = title('PD2.1 Intensities versus S/N values (scaled relatively within each row/peptide)')
+		title = 'PD2.1 Intensities versus S/N values (scaled relatively within each row/peptide)'
 	elif title == '':
-		title = title('mean(M): ' + str(m) + '; var(M):' + str(v))
+		title = 'mean(M): ' + str(m) + '; var(M):' + str(v)
 	else:
-		title = title(title + '; mean(M): ' + str(m) + '; var(M):' + str(v))
-	fig = scatterplot(M, A, title)
+		title = title + '; mean(M): ' + str(m) + '; var(M):' + str(v)
+	fig = scatterplot(M, A, title=title)
 	# fig.xlabel('A')
 	# fig.ylabel('M')
 	# plt.xlim((-10.1,0))
