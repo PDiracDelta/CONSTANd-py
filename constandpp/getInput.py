@@ -47,7 +47,6 @@ def getProcessingInput(configFilePath):
 	header_in = config.getint('DEFAULT', 'header_in')
 	wrapper = config.get('DEFAULT', 'wrapper')
 	removedDataInOneFile_bool = config.getboolean('DEFAULT', 'removedDataInOneFile_bool')
-	# channelNamesPerCondition = parseExpression(config.get('DEFAULT', 'channelNamesPerCondition'))
 	intensityColumns = parseExpression(config.get('DEFAULT', 'intensityColumns'))
 	wantedColumns = parseExpression(config.get('DEFAULT', 'wantedColumns'))
 	noMissingValuesColumns = parseExpression(config.get('DEFAULT', 'noMissingValuesColumns'))
@@ -141,7 +140,6 @@ def getProcessingInput(configFilePath):
 		'header_in': header_in,
 		'wrapper': wrapper,
 		'removedDataInOneFile_bool': removedDataInOneFile_bool,
-		'channelNamesPerCondition': intensityColumns,
 		'intensityColumns': intensityColumns,
 		'wantedColumns': wantedColumns + intensityColumns,  # needs to include intensitycolumns
 		'noMissingValuesColumns': noMissingValuesColumns,
