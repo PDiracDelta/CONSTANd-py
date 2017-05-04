@@ -36,8 +36,10 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 		""" Data processing """
 		# get all input parameters
 		processingParams[eName] = getProcessingInput(jobParams['schema'][eName]['config'])
-		# get the dataframes # todo move this step to processingFlow
-		dfs[eName] = importExperimentData(processingParams[eName]['data'], delim=processingParams[eName]['delim_in'],
+		# get the dataframes
+		# todo move this step to processingFlow --> NO because everything inside the Flow.py files should reside in memory, not on disk.
+		dfs[eName] = importExperimentData(processingParams[eName]['data'],
+										  delim=processingParams[eName]['delim_in'],
 										  header=processingParams[eName]['header_in'],
 										  wrapper=processingParams[eName]['wrapper'])
 		processing_path_out = processingParams[eName]['path_out']
