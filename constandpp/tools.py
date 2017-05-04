@@ -76,10 +76,10 @@ def scatterplot(x, y, title=None, xlab=None, ylab=None):
 	:param ylab:	str			label for the y-axis
 	:return f:		plt.figure	scatterplot as a matplotlib figure object
 	"""
-	import matplotlib.rcParams.update
+	import matplotlib as mpl
 	from matplotlib import pyplot as plt
-	matplotlib.use('GTK3Agg')
-	matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
+	mpl.use('GTK3Agg')
+	mpl.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
 	
 	f = plt.figure(figsize=(figwidth, figheight))
 	plt.scatter(x, y)
