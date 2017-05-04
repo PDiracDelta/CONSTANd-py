@@ -70,6 +70,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 
 	if params['isotopicCorrection_bool']:
 		# perform isotopic corrections but do NOT apply them to df because this information is sensitive (copyright i-TRAQ)
+		# You can work around this by setting doConstand = False
 		intensities, noCorrectionIndices = isotopicCorrection(getIntensities(df, intensityColumns=params['intensityColumns']),
 															  correctionsMatrix=params['isotopicCorrection_matrix'])
 	else:
@@ -82,8 +83,9 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	else:
 		# TEST do NOT perform CONSTANd
 		logging.warning("+++++++++++++++++++++++++++++++CONSTAND NOT PERFORMED+++++++++++++++++++++++++++++++++")
-		normalizedIntensities=[0]
-		normalizedDf = df
+		normalizedIntensities = [0]
+		# WORKAROUND: apply isotopically corrected intensities to df
+		normalizedDf = setIntensities(df, intensities=intensities, intensityColumns=params['intensityColumns'])
 
 	""" save results """
 	if writeToDisk:
