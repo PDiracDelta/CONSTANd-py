@@ -205,6 +205,7 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 	
 	if dataType == 'txt':
 		np.savetxt(fullPath, data, delimiter=delim_out)
+		return fullPath
 	elif dataType == 'obj':
 		pickle.dump(data, open(fullPath, 'wb'))
 	elif dataType == 'df':
@@ -212,7 +213,7 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 			if inOneFile:  # save all removedData in one file.
 				removedData = pd.DataFrame().append(list(data.values()))
 				# data['missing'].columns contains all possible columns
-				removedData.to_csv(path_out + '/' + filename + extension, sep=delim_out, index=False,
+				removedData.to_csv(fullPath, sep=delim_out, index=False,
 								   columns=data['missing'].columns)
 			else:  # save all removedData in separate files per category.
 				for frameName, frame in data.items():
@@ -221,6 +222,7 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 		else:
 			assert isinstance(data, pd.DataFrame)
 			data.to_csv(fullPath, sep=delim_out, index=False)
+			return fullPath
 	elif dataType == 'fig':
 		outFileFullPathNoExt = os.path.join(path_out, filename)
 		with open(outFileFullPathNoExt + '.pkl', "wb") as fout:
