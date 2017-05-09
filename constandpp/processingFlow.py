@@ -57,9 +57,11 @@ def processDf(df, params, writeToDisk, doConstand=True):
 		correctedIntensities, noCorrectionIndices = isotopicCorrection(getIntensities(df, intensityColumns=params['intensityColumns']),
 															  correctionsMatrix=params['isotopicCorrection_matrix'])
 		df = setIntensities(df, intensities=correctedIntensities, intensityColumns=params['intensityColumns'])
+		# TEST remove the negative quan value rows
+		# from scripts.tools import removeRowsWithNeg
+		# df = removeRowsWithNeg(df, params['intensityColumns'])
 	
 	# collapse peptide list redundancy due to multiple detections at different RT
-	# TEST here the intensity columns are alraedy lost
 	df, removedData['RT'] = collapse('RT', df, intensityColumns=params['intensityColumns'], method=params['collapse_method'],
 									 identifyingNodes=params['identifyingNodes'],
 									 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
