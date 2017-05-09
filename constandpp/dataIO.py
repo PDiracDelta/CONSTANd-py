@@ -52,7 +52,8 @@ def importIsotopicCorrectionsMatrix(path_in):
 	:param path_in: str         path of the isotopic corrections matrix file
 	:return :    	np.ndarray  isotopic corrections matrix
 	"""
-	return np.asmatrix(importDataFrame(path_in, delim='\t', header=None)).astype('float64')  # make sure its float64
+	# return np.asmatrix(importDataFrame(path_in, delim='\t', header=None)).astype('float64')  # make sure its float64
+	return np.genfromtxt(path_in, delimiter='\t').astype('float64')  # make sure its float64
 
 
 def importTMTIsotopicDistributions(path_in):
