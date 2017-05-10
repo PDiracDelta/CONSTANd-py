@@ -111,7 +111,7 @@ def MAPlot(x, y, title=None):
 		title = 'mean(M): ' + str(m) + '; var(M):' + str(v)
 	else:
 		title = title + '\nmean(M): ' + str(m) + '; var(M):' + str(v)
-	fig = scatterplot(M, A, title=title, xlab='A', ylab='M')
+	fig = scatterplot(A, M, title=title, xlab='A', ylab='M')
 	# plt.xlim((-10.1,0))
 	# plt.ylim((-10.1, 10.1))
 	fig.show()
