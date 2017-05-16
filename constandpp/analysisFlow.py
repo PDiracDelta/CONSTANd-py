@@ -51,7 +51,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for
 												  eName in noCorrectionIndicess.keys()], keys=experimentNames)
 	except ValueError:
-		pass # not a single noCorrectionIndices was found. OK.
+		pass  # not a single noCorrectionIndices was found. OK.
 	# record RT isolation statistics. Future: flag. Multi-indexed on experiment names and old indices!
 	metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for
 											 eName in experimentNames], keys=experimentNames)
