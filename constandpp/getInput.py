@@ -187,7 +187,7 @@ def getJobInput(jobConfigFilePath):
 	jobdir = os.path.abspath(os.path.join(jobConfigFilePath, os.pardir))
 	
 	config = configparser.ConfigParser(allow_no_value=True, comment_prefixes=';',
-									   inline_comment_prefixes='$')
+									   inline_comment_prefixes='@')
 	config.optionxform = str  # so that strings dont automatically get .lower()-ed
 	config.read(jobConfigFilePath, encoding='utf-8')
 	
