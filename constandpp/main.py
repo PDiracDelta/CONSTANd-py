@@ -142,7 +142,7 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		testing = (args[6] == 'True')
 	# so if you start main.py from within web.py or something, this won't be executed
 	else:
-		doProcessing = True
+		doProcessing = False
 		doAnalysis = True
 		doReport = True
 		writeToDisk = True

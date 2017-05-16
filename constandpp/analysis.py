@@ -19,7 +19,7 @@ from scipy.spatial.distance import pdist
 from scipy.cluster.hierarchy import linkage
 
 
-@profile  # kernprof / line_profiler decorator
+# @profile  # kernprof / line_profiler decorator
 def getRTIsolationInfo(removedData_RT):
 	"""
 	Returns dataFrame with the mean, standard deviation, and max-min value of the RT values for each duplicate_group
