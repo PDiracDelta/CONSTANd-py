@@ -49,7 +49,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# This is done here instead of the processing flow because back then there was no metadata variable yet.
 	try:
 		metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for
-												  eName in noCorrectionIndicess.keys()], keys=experimentNames)
+												  eName in noCorrectionIndicess.keys()], keys=experimentNames)  # todo ugly
 	except ValueError:
 		pass  # not a single noCorrectionIndices was found. OK.
 	# record RT isolation statistics. Future: flag. Multi-indexed on experiment names and old indices!
@@ -57,7 +57,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 											 eName in experimentNames], keys=experimentNames)
 
 	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe as an outer join
-	allExperimentsDF = combineExperimentDFs(dfs) #, params['schema'])
+	allExperimentsDF = combineExperimentDFs(dfs)  #, params['schema'])
 
 	nConditions = len(list(params['schema'].values())[0]['channelAliasesPerCondition'])
 	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2

@@ -21,7 +21,7 @@ Removed data is always saved into a removedData dataFrame.
 from constandpp.tools import getIntensities
 import numpy as np
 import logging
-
+from pandas import DataFrame
 
 def removeObsoleteColumns(df, wantedColumns):
 	"""
@@ -144,7 +144,7 @@ def undoublePSMAlgo(df, identifyingNodes, exclusive, intensityColumns, removalCo
 	:return removedData:    		pd.dataFrame    basic info about the removed entries
 	"""
 	if len(identifyingNodes['slaves']) == 0:  # do NOT execute this method: there is only a single PSMAlgo!!!
-		import pandas.DataFrame as DataFrame
+		#from pandas import DataFrame
 		return df, DataFrame()
 	masterName = identifyingNodes['master'][0]
 	slaveScoreName = identifyingNodes['slaves'][0][1]

@@ -49,7 +49,7 @@ def getNoIsotopicCorrection(df, noCorrectionIndices):
 	return df.loc[noCorrectionIndices, ['First Scan', 'Identifying Node Type', 'Annotated Sequence', 'Master Protein Accessions']]
 
 
-def combineExperimentDFs(dfs):
+def combineExperimentDFs(dfs):  # todo how are PSMs combined with multiple charge states for instance?
 	"""
 	Merge dataframes of all experiments into one multi-indexed (eName, oldIndex) dataframe, by performing an outer join.
 	The intensity columns are non-identical across different dataframes and resulting empty fields are valued NaN.
@@ -127,7 +127,7 @@ def getProteinDF(df, proteinPeptidesDict, schema):
 		condition1Intensities = pd.Series()
 		condition2Intensities = pd.Series()
 		# per experiment, get the a list of indices per channel for both conditions, and concatenate the corresponding df values.
-		for eName in peptideIndices.levels[0]: # peptideIndices.levels[0] is the experimentName part of the index.
+		for eName in peptideIndices.levels[0]:  # peptideIndices.levels[0] is the experimentName part of the index.
 			# get the indices of the current experiment
 			peptideIndicesPerExperiment = peptideIndices.values[peptideIndices.get_level_values(0) == eName]
 			# get a list of dfs, to sort the intensities per channel.
