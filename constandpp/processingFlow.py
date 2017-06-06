@@ -28,7 +28,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	"""
 	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
 	# remove detections where (essential) data is missing.
-	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['intensityColumns'])
+	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['quanColumns'])
 	
 	if params['removeBadConfidence_bool']:
 		df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'], params['removalColumnsToSave'])
@@ -46,7 +46,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 		# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
 		df, removedData['PSMAlgo'] = undoublePSMAlgo(df, identifyingNodes=params['identifyingNodes'],
 													 exclusive=params['undoublePSMAlgo_exclusive_bool'],
-													 intensityColumns=params['intensityColumns'],
+													 quanColumns=params['quanColumns'],
 													 removalColumnsToSave=params['removalColumnsToSave'])
 		# SANITY CHECK: no detections with the same scan number may exist after undoublePSMAlgo()
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
@@ -54,27 +54,27 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	if params['isotopicCorrection_bool']:
 		# perform isotopic corrections and then apply them to the dataframe. No i-TRAQ copyright issues as of 2017-05-04
 		# (see logboek.txt or git history)
-		correctedIntensities, noCorrectionIndices = isotopicCorrection(getIntensities(df, intensityColumns=params['intensityColumns']),
+		correctedIntensities, noCorrectionIndices = isotopicCorrection(getIntensities(df, quanColumns=params['quanColumns']),
 															  correctionsMatrix=params['isotopicCorrection_matrix'])
-		df = setIntensities(df, intensities=correctedIntensities, intensityColumns=params['intensityColumns'])
+		df = setIntensities(df, intensities=correctedIntensities, quanColumns=params['quanColumns'])
 		# TEST remove the negative quan value rows
 		# from scripts.tools import removeRowsWithNeg
-		# df = removeRowsWithNeg(df, params['intensityColumns'])
+		# df = removeRowsWithNeg(df, params['quanColumns'])
 	
 	# collapse peptide list redundancy due to multiple detections at different RT
-	df, removedData['RT'] = collapse('RT', df, intensityColumns=params['intensityColumns'], method=params['collapse_method'],
+	df, removedData['RT'] = collapse('RT', df, quanColumns=params['quanColumns'], method=params['collapse_method'],
 									 identifyingNodes=params['identifyingNodes'],
 									 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
 	
 	if params['collapseCharge_bool']:
 		# collapse peptide list redundancy due to different charges (optional)
-		df, removedData['charge'] = collapse('Charge', df, intensityColumns=params['intensityColumns'], method=params['collapse_method'],
+		df, removedData['charge'] = collapse('Charge', df, quanColumns=params['quanColumns'], method=params['collapse_method'],
 											 identifyingNodes=params['identifyingNodes'],
 											 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
 	
 	if params['collapsePTM_bool']:
 		# collapse peptide list redundancy due to different charges (optional)
-		df, removedData['modifications'] = collapse('PTM', df, intensityColumns=params['intensityColumns'], method=params['collapse_method'],
+		df, removedData['modifications'] = collapse('PTM', df, quanColumns=params['quanColumns'], method=params['collapse_method'],
 													identifyingNodes=params['identifyingNodes'],
 													undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
 
@@ -85,9 +85,9 @@ def processDf(df, params, writeToDisk, doConstand=True):
 
 	if doConstand:
 		# perform the CONSTANd algorithm;
-		intensities = getIntensities(df, intensityColumns=params['intensityColumns'])
+		intensities = getIntensities(df, quanColumns=params['quanColumns'])
 		normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
-		normalizedDf = setIntensities(df, intensities=normalizedIntensities, intensityColumns=params['intensityColumns'])
+		normalizedDf = setIntensities(df, intensities=normalizedIntensities, quanColumns=params['quanColumns'])
 	else:
 		# TEST do NOT perform CONSTANd
 		logging.warning("+++++++++++++++++++++++++++++++CONSTAND NOT PERFORMED+++++++++++++++++++++++++++++++++")

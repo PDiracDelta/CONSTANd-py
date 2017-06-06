@@ -47,7 +47,7 @@ def getProcessingInput(configFilePath):
 	header_in = config.getint('DEFAULT', 'header_in')
 	wrapper = config.get('DEFAULT', 'wrapper')
 	removedDataInOneFile_bool = config.getboolean('DEFAULT', 'removedDataInOneFile_bool')
-	intensityColumns = parseExpression(config.get('DEFAULT', 'intensityColumns'))
+	quanColumns = parseExpression(config.get('DEFAULT', 'quanColumns'))
 	wantedColumns = parseExpression(config.get('DEFAULT', 'wantedColumns'))
 	noMissingValuesColumns = parseExpression(config.get('DEFAULT', 'noMissingValuesColumns'))
 	removalColumnsToSave = parseExpression(config.get('DEFAULT', 'removalColumnsToSave'))
@@ -82,7 +82,7 @@ def getProcessingInput(configFilePath):
 			raise Exception("Delimiter of input file must be a character (string of length one).")
 	if not ((isinstance(header_in, int) and header_in >= 0) or header_in is None):
 		raise Exception("Header parameter of the input file must be a non-negative integer or of type None.")
-	if intensityColumns is None:
+	if quanColumns is None:
 		raise Exception("Please indicate which columns contain the MS2 reporter intensities.")
 	if wantedColumns is None:
 		raise Exception(
@@ -127,7 +127,7 @@ def getProcessingInput(configFilePath):
 	
 	# assign the TYPOGRAPHICALLY CORRECT values to the params dict and modify them if necessary.
 	# modify
-	# intensityColumns = [item for sublist in channelNamesPerCondition for item in sublist]
+	# quanColumns = [item for sublist in channelNamesPerCondition for item in sublist]
 	wrapper = importWrapper(os.path.join(jobdir, wrapper))
 	if isotopicCorrection_matrix is not None:
 		isotopicCorrection_matrix = importIsotopicCorrectionsMatrix(os.path.join(jobdir, isotopicCorrection_matrix))
@@ -140,11 +140,11 @@ def getProcessingInput(configFilePath):
 		'header_in': header_in,
 		'wrapper': wrapper,
 		'removedDataInOneFile_bool': removedDataInOneFile_bool,
-		'intensityColumns': intensityColumns,
-		'wantedColumns': wantedColumns + intensityColumns,  # needs to include intensitycolumns
+		'quanColumns': quanColumns,
+		'wantedColumns': wantedColumns + quanColumns,  # needs to include intensitycolumns
 		'noMissingValuesColumns': noMissingValuesColumns,
-		'removalColumnsToSave': removalColumnsToSave + intensityColumns,  # needs to include intensitycolumns
-		'collapseColumnsToSave': collapseColumnsToSave + intensityColumns,  # needs to include intensitycolumns
+		'removalColumnsToSave': removalColumnsToSave + quanColumns,  # needs to include intensitycolumns
+		'collapseColumnsToSave': collapseColumnsToSave + quanColumns,  # needs to include intensitycolumns
 		'removeBadConfidence_bool': removeBadConfidence_bool,
 		'removeBadConfidence_minimum': removeBadConfidence_minimum,
 		'removeIsolationInterference_bool': removeIsolationInterference_bool,

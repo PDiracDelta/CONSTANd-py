@@ -34,12 +34,12 @@ def removeObsoleteColumns(df, wantedColumns):
 	return df.drop(list(obsolete), axis=1)
 
 
-def removeMissing(df, noMissingValuesColumns, intensityColumns):
+def removeMissing(df, noMissingValuesColumns, quanColumns):
 	"""
 	Removes detections for which entries in essential columns is missing, or which have no quan values or labels.
 	:param df:  					pd.dataFrame    data with missing values
 	:param noMissingValuesColumns:	list			columns which may not contain missing values
-	:param intensityColumns:		list			columns that contain the quantification values
+	:param quanColumns:		list			columns that contain the quantification values
 	:return df:						pd.dataFrame    data without missing values
 	"""
 	toDelete = []
@@ -49,7 +49,7 @@ def removeMissing(df, noMissingValuesColumns, intensityColumns):
 	# delete all detections that have a missing value in both columns: XCorr and Ions Score
 	toDelete.extend(df.loc[[x and y for x, y in zip(df['XCorr'].isnull(), df['Ions Score'].isnull())]].index)
 	# get the indices of all detections which have no quan values at all (those have their nansum equal to zero)
-	noIntensitiesBool = np.nansum(getIntensities(df=df, intensityColumns=intensityColumns), axis=1) == 0.
+	noIntensitiesBool = np.nansum(getIntensities(df=df, quanColumns=quanColumns), axis=1) == 0.
 	toDelete.extend(df.index[noIntensitiesBool])
 	
 	toDelete = np.unique(toDelete)
@@ -130,7 +130,7 @@ def setMasterProteinDescriptions(df):
 	return df
 
 
-def undoublePSMAlgo(df, identifyingNodes, exclusive, intensityColumns, removalColumnsToSave):
+def undoublePSMAlgo(df, identifyingNodes, exclusive, quanColumns, removalColumnsToSave):
 	"""
 	Removes redundant data due to different PSM algorithms producing the same peptide match. The 'master' algorithm
 	values are preferred over the 'slave' algorithm values, the latter whom are removed and have their basic information
@@ -138,7 +138,7 @@ def undoublePSMAlgo(df, identifyingNodes, exclusive, intensityColumns, removalCo
 	:param df:              	pd.dataFrame    data with double First Scan numbers due to PSMAlgo redundancy
 	:param identifyingNodes:		dict            master-slave PSM algorithm specifier
 	:param exclusive:       		bool            save master data exclusively or include slave data where necessary?
-	:param intensityColumns:		list			columns that contain the quantification values
+	:param quanColumns:		list			columns that contain the quantification values
 	:param removalColumnsToSave:	list			fields to save if an entry gets removed
 	:return df:             		pd.dataFrame    data without double First Scan numbers due to PSMAlgo redundancy
 	:return removedData:    		pd.dataFrame    basic info about the removed entries
@@ -149,7 +149,7 @@ def undoublePSMAlgo(df, identifyingNodes, exclusive, intensityColumns, removalCo
 	masterName = identifyingNodes['master'][0]
 	slaveScoreName = identifyingNodes['slaves'][0][1]
 	byIdentifyingNodeDict = df.groupby('Identifying Node Type').groups  # {Identifying Node Type : [list of indices]}
-	columnsToSave = [slaveScoreName] + removalColumnsToSave + intensityColumns
+	columnsToSave = [slaveScoreName] + removalColumnsToSave + quanColumns
 	masterIndices = set(byIdentifyingNodeDict[masterName])
 	toDelete = set(df.index.values).difference(masterIndices)  # all indices of detections not done by MASTER
 	if not exclusive:  # remove unique SLAVE scans from the toDelete list

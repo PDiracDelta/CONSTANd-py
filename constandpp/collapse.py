@@ -55,7 +55,7 @@ def geometricMedian(X, eps=1e-5):
 		y = y1
 
 
-def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoublePSMAlgo_bool, columnsToSave):  #
+def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMAlgo_bool, columnsToSave):  #
 	"""
 	Generic collapse function, which removes redundancy in the data due to property toCollapse.
 	Looks for duplicate 'Annotated Sequence' values in the dataFrame and further groups by other possible properties
@@ -69,7 +69,7 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 	Returns removedData according to the columnsToSave list.
 	:param toCollapse:              	str             variable of which true duplicates are to be collapsed.
 	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
-	:param intensityColumns:			list			columns that contain the quantification values
+	:param quanColumns:			list			columns that contain the quantification values
 	:param method:                      str             defines how the new quantification values of the representative
 														are selected/constructed:
 														bestMatch: those of the PSM with the best score
@@ -154,7 +154,7 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 		newIntensitiesDict = {}
 		for bestIndex, this_duplicatesList in this2_bestIndicesDict.items():
 			# calculate the total MS2 intensities for each duplicate
-			allMS2Intensities = getIntensities(df, intensityColumns=intensityColumns, indices = this_duplicatesList)
+			allMS2Intensities = getIntensities(df, quanColumns=quanColumns, indices = this_duplicatesList)
 
 			if allMS2Intensities is None: # TEST
 				print('hoi')
@@ -247,11 +247,11 @@ def collapse(toCollapse, df, intensityColumns, method, identifyingNodes, undoubl
 			# generate { bestIndex : [mostIntense intensities] }
 			intensitiesDict = dict((ind_best, getIntensities(df.loc[ind_intense, :])) for (ind_best, ind_intense) in intenseIndicesDict.items())
 			# set the representative intensities to be the most intense intensities
-			this_representativesDf = setIntensities(this_representativesDf, intensityColumns=intensityColumns, intensities=intensitiesDict)
+			this_representativesDf = setIntensities(this_representativesDf, quanColumns=quanColumns, intensities=intensitiesDict)
 		else:  # method == 'centerMeasure'
 			newIntensitiesDict = combineDetections(this_bestIndicesDict, centerMeasure=method)
 			# set the representative intensities to be the most intense intensities
-			this_representativesDf = setIntensities(this_representativesDf, intensityColumns=intensityColumns, intensities=newIntensitiesDict)
+			this_representativesDf = setIntensities(this_representativesDf, quanColumns=quanColumns, intensities=newIntensitiesDict)
 
 		# reindex this_representativesDf so it can be concatenated properly with new indices
 		this_representativesDf.index = list(range(max(df.index)+1, max(df.index)+1 + len(this_representativesDf.index)))
