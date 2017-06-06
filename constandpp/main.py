@@ -36,6 +36,8 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 		""" Data processing """
 		# get all input parameters
 		processingParams[eName] = getProcessingInput(jobParams['schema'][eName]['config'])
+		# todo get baseProcessingConfig as a separate file (no hardcoded combining and writing to new file in webFlow)
+		#  and add its contents to params FIRST (users can overwrite config params if they know what they are doing)
 		# get the dataframes
 		# todo move this step to processingFlow --> NO because everything inside the Flow.py files should reside in memory, not on disk.
 		dfs[eName] = importExperimentData(processingParams[eName]['data'],
