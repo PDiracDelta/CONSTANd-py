@@ -207,6 +207,7 @@ def getPCAPlot(PCAResult, schema, title=None):
 	:param title:		str				title for the plot
 	:return PCAPlot:	plt.figure		PCA plot as a matplotlib figure object
 	"""
+	# todo also show percentage variance explained per PC
 	PCAPlot = plt.figure(
 		figsize=(figwidth, figheight))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
