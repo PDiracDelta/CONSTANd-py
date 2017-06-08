@@ -123,7 +123,7 @@ def getSortedProteinExpressionsDF(df):
 	reportColumns = ['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value']
 	# significantIndices = list(df[df['significant'] == 'yes'].index) + list(df[df['significant'] == 'p'].index)
 	# significantDf = df.loc[significantIndices, :]
-	return df.loc[reportColumns, :].sort(columns='adjusted p-value', ascending=True)
+	return df.loc[reportColumns, :].sort_values(by='adjusted p-value', ascending=True)
 
 
 def getTopDifferentials(sortedDifferentialsDF, numDifferentials):
