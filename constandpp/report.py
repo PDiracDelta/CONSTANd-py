@@ -126,6 +126,21 @@ def getSortedProteinExpressionsDF(df):
 	return df.loc[reportColumns, :].sort(columns='adjusted p-value', ascending=True)
 
 
+def getTopDifferentials(sortedDifferentialsDF, numDifferentials):
+	"""
+	Takes a sorted protein differentials dataframe and returns the top `numDifferentials` entries according to the order.
+	:param sortedDifferentialsDF:	pd.DataFrame	all sorted proteins (normally according to adjusted p-value)
+	:param numDifferentials:		int				number of top DE proteins to select
+	:return:						pd.DataFrame	top X sorted proteins (normally according to adjusted p-value)
+	"""
+	if numDifferentials < len(sortedDifferentialsDF):
+		topDifferentials = sortedDifferentialsDF.head(
+			numDifferentials)  # minSortedDifferentialProteinsDF.loc[range(numDifferentials), :]
+	else:
+		topDifferentials = sortedDifferentialsDF
+	return topDifferentials
+
+
 def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	"""
 	Generates a volcano plot using the log2 fold changes and adjusted p-values of the differential protein data. It is
@@ -346,20 +361,13 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 	numDifferentials = jobParams['numDifferentials']
 	
 	if jobParams['minExpression_bool']:
-		if numDifferentials < len(minSortedDifferentialProteinsDF):
-			minTopDifferentials = minSortedDifferentialProteinsDF.head(
-				numDifferentials)  # minSortedDifferentialProteinsDF.loc[range(numDifferentials), :]
-		else:
-			minTopDifferentials = minSortedDifferentialProteinsDF
-	else:
+		minTopDifferentials = getTopDifferentials(minSortedDifferentialProteinsDF, jobParams['numDifferentials'])
+	else:  # todo in this case (and also for fullExpression_bool) just let the jinja template handle the None variable.
 		minTopDifferentials = pd.DataFrame(columns=minSortedDifferentialProteinsDF.columns)
 	minTopDifferentialsHTML = injectColumnWidthHTML(minTopDifferentials.to_html(index=False, justify='left'))
 	
 	if jobParams['fullExpression_bool']:
-		if numDifferentials < len(fullSortedDifferentialProteinsDF):
-			fullTopDifferentials = fullSortedDifferentialProteinsDF.loc[range(numDifferentials), :]
-		else:
-			fullTopDifferentials = fullSortedDifferentialProteinsDF
+		fullTopDifferentials = getTopDifferentials(fullSortedDifferentialProteinsDF, jobParams['numDifferentials'])
 	else:
 		fullTopDifferentials = pd.DataFrame(columns=fullSortedDifferentialProteinsDF.columns)
 	fullTopDifferentialsHTML = injectColumnWidthHTML(fullTopDifferentials.to_html(index=False, justify='left'))
