@@ -58,7 +58,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	if nConditions == 2:
 		# generate sorted (on p-value) list of differentials
 		if params['minExpression_bool']:
-			minSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(minProteinDF)
+			minSortedDifferentialProteinsDF = getSortedProteinExpressionsDF(minProteinDF)
 			minSet = set(minSortedDifferentialProteinsDF['protein'])
 			# data visualization
 			minVolcanoPlot = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
@@ -66,7 +66,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		else:
 			minSortedDifferentialProteinsDF = pd.DataFrame()
 		if params['fullExpression_bool']:
-			fullSortedDifferentialProteinsDF = getSortedDifferentialProteinsDF(fullProteinDF)
+			fullSortedDifferentialProteinsDF = getSortedProteinExpressionsDF(fullProteinDF)
 			fullSet = set(fullSortedDifferentialProteinsDF['protein'])
 			# data visualization
 			fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],

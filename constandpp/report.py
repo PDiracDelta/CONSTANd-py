@@ -112,7 +112,7 @@ def getMarkers(schema):
 	return channelMarkersDict
 
 
-def getSortedDifferentialProteinsDF(df):
+def getSortedProteinExpressionsDF(df):
 	"""
 	Sorts the differential protein data according to adjusted p-value and resets the index. Returns only the columns
 	specified.
