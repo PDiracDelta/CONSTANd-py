@@ -298,8 +298,7 @@ def getHCDendrogram(HCResult, schema, title=None):
 	return HCDendrogram
 
 
-def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullSortedDifferentialProteinsDF,
-			 minVolcanoFullPath,
+def makeHTML(jobParams, processingParams, minTopDifferentialsDF, fullTopDifferentialsDF,minVolcanoFullPath,
 			 fullVolcanoFullPath, PCAPlotFullPath, HCDendrogramFullPath, metadata, logFilePath, startTime):
 	"""
 	Pour all report visualizations, the list(s) of differentials, metadata and job parameters into an HTML file.
@@ -358,19 +357,8 @@ def makeHTML(jobParams, processingParams, minSortedDifferentialProteinsDF, fullS
 		else:
 			return None
 	
-	numDifferentials = jobParams['numDifferentials']
-	
-	if jobParams['minExpression_bool']:
-		minTopDifferentials = getTopDifferentials(minSortedDifferentialProteinsDF, jobParams['numDifferentials'])
-	else:  # todo in this case (and also for fullExpression_bool) just let the jinja template handle the None variable.
-		minTopDifferentials = pd.DataFrame(columns=minSortedDifferentialProteinsDF.columns)
-	minTopDifferentialsHTML = injectColumnWidthHTML(minTopDifferentials.to_html(index=False, justify='left'))
-	
-	if jobParams['fullExpression_bool']:
-		fullTopDifferentials = getTopDifferentials(fullSortedDifferentialProteinsDF, jobParams['numDifferentials'])
-	else:
-		fullTopDifferentials = pd.DataFrame(columns=fullSortedDifferentialProteinsDF.columns)
-	fullTopDifferentialsHTML = injectColumnWidthHTML(fullTopDifferentials.to_html(index=False, justify='left'))
+	minTopDifferentialsHTML = injectColumnWidthHTML(minTopDifferentialsDF.to_html(index=False, justify='left'))
+	fullTopDifferentialsHTML = injectColumnWidthHTML(fullTopDifferentialsDF.to_html(index=False, justify='left'))
 	
 	with open(logFilePath, 'r') as logFile:
 		logContents = logFile.readlines()

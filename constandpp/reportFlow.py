@@ -60,19 +60,29 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		if params['minExpression_bool']:
 			minSortedDifferentialProteinsDF = getSortedProteinExpressionsDF(minProteinDF)
 			minSet = set(minSortedDifferentialProteinsDF['protein'])
+			# get top X differentials
+			minTopDifferentialsDF = getTopDifferentials(minSortedDifferentialProteinsDF, params['numDifferentials'])
 			# data visualization
 			minVolcanoPlot = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
 											params['labelVolcanoPlotAreas'])
-		else:
+
+		else:  # todo in this case (and also for fullExpression_bool) just let the jinja template handle the None variable.
+			# but don't make a fake on here and then pass it onto makeHTML() like is done now.
 			minSortedDifferentialProteinsDF = pd.DataFrame()
+			minTopDifferentialsDF = pd.DataFrame(columns=minSortedDifferentialProteinsDF.columns)
+		
 		if params['fullExpression_bool']:
 			fullSortedDifferentialProteinsDF = getSortedProteinExpressionsDF(fullProteinDF)
 			fullSet = set(fullSortedDifferentialProteinsDF['protein'])
+			# get top X differentials
+			fullTopDifferentialsDF = getTopDifferentials(fullSortedDifferentialProteinsDF, params['numDifferentials'])
 			# data visualization
 			fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
 											 params['labelVolcanoPlotAreas'])
 		else:
 			fullSortedDifferentialProteinsDF = pd.DataFrame()
+			fullTopDifferentialsDF = pd.DataFrame(columns=fullSortedDifferentialProteinsDF.columns)
+		
 		if params['minExpression_bool'] and params['fullExpression_bool']:
 			# list( [in min but not in full], [in full but not in min] )
 			metadata['diffMinFullProteins'] = [list(minSet.difference(fullSet)), list(fullSet.difference(minSet))]
@@ -110,11 +120,12 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 
 	if writeToDisk:
 		htmlReport, pdfhtmlreport = makeHTML(jobParams=params, processingParams=processingParams,
-							  minSortedDifferentialProteinsDF=minSortedDifferentialProteinsDF,
-							  fullSortedDifferentialProteinsDF=fullSortedDifferentialProteinsDF,
-							  minVolcanoFullPath=minVolcanoFullPath, fullVolcanoFullPath=fullVolcanoFullPath,
-							  PCAPlotFullPath=PCAPlotFullPath, HCDendrogramFullPath=HCDendrogramFullPath,
-							  metadata=metadata, logFilePath=logFilePath, startTime=startTime)
+											 minTopDifferentialsDF=minTopDifferentialsDF,
+											 fullTopDifferentialsDF=fullTopDifferentialsDF,
+											 minVolcanoFullPath=minVolcanoFullPath,
+											 fullVolcanoFullPath=fullVolcanoFullPath,
+											 PCAPlotFullPath=PCAPlotFullPath, HCDendrogramFullPath=HCDendrogramFullPath,
+											 metadata=metadata, logFilePath=logFilePath, startTime=startTime)
 		htmlFullPath = exportData(htmlReport, dataType='html', path_out=params['path_results'],
 				   filename=params['jobname'] + '_report')
 		pdfhtmlFullPath = exportData(pdfhtmlreport, dataType='html', path_out=params['path_results'],
