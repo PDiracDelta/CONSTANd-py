@@ -114,16 +114,16 @@ def getMarkers(schema):
 
 def getSortedProteinExpressionsDF(df):
 	"""
-	Sorts the differential protein data according to adjusted p-value and resets the index. Returns only the columns
-	specified.
+	Sorts the differential protein data according to adjusted p-value (high p-value should also mean high DE) and resets
+	the index. Returns only the columns	specified.
+	Later in the workflow, the head() function will called to get the top X differentials from this df.
 	:param df:  pd.DataFrame    unsorted DE analysis results on the protein level
 	:return:    pd.DataFrame    sorted according to adjusted p-value and only specified columns
 	"""
 	reportColumns = ['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value']
-	significantIndices = list(df[df['significant'] == 'yes'].index) + list(df[df['significant'] == 'p'].index)
-	significantDf = df.loc[significantIndices, :]
-	return significantDf.reindex(significantDf['adjusted p-value'].sort_values(ascending=True).index).loc[:,
-		   reportColumns]
+	# significantIndices = list(df[df['significant'] == 'yes'].index) + list(df[df['significant'] == 'p'].index)
+	# significantDf = df.loc[significantIndices, :]
+	return df.loc[reportColumns, :].sort(columns='adjusted p-value', ascending=True)
 
 
 def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
