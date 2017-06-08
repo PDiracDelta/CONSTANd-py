@@ -362,7 +362,11 @@ def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDiffe
 			return old_path.split(allJobsParDir)[1].lstrip('/')
 		else:
 			return None
+		
+	minTopDifferentialsDF = minTopDifferentialsDF.drop('significant', axis=1, inplace=False)
+	fullTopDifferentialsDF = fullTopDifferentialsDF.drop('significant', axis=1, inplace=False)
 	
+	# generate list of differentials HTML code separately because Jinja cant do this
 	minTopDifferentialsHTML = injectColumnWidthHTML(minTopDifferentialsDF.to_html(index=False, justify='left'))
 	fullTopDifferentialsHTML = injectColumnWidthHTML(fullTopDifferentialsDF.to_html(index=False, justify='left'))
 	

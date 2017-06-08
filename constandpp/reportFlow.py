@@ -68,7 +68,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 
 		else:  # todo in this case (and also for fullExpression_bool) just let the jinja template handle the None variable.
 			# but don't make a fake on here and then pass it onto makeHTML() like is done now.
-			minSortedDifferentialProteinsDF = pd.DataFrame()
+			minSortedDifferentialProteinsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value'])
 			minTopDifferentialsDF = pd.DataFrame(columns=minSortedDifferentialProteinsDF.columns)
 		
 		if params['fullExpression_bool']:
@@ -80,7 +80,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
 											 params['labelVolcanoPlotAreas'], topIndices=fullTopDifferentialsDF.index)
 		else:
-			fullSortedDifferentialProteinsDF = pd.DataFrame()
+			fullSortedDifferentialProteinsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value'])
 			fullTopDifferentialsDF = pd.DataFrame(columns=fullSortedDifferentialProteinsDF.columns)
 		
 		if params['minExpression_bool'] and params['fullExpression_bool']:
