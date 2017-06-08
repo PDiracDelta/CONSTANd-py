@@ -298,30 +298,30 @@ def getHCDendrogram(HCResult, schema, title=None):
 	return HCDendrogram
 
 
-def makeHTML(jobParams, processingParams, minTopDifferentialsDF, fullTopDifferentialsDF,minVolcanoFullPath,
+def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDifferentialsDF, minVolcanoFullPath,
 			 fullVolcanoFullPath, PCAPlotFullPath, HCDendrogramFullPath, metadata, logFilePath, startTime):
 	"""
 	Pour all report visualizations, the list(s) of differentials, metadata and job parameters into an HTML file.
 	A second HTML file used for conversion to PDF is generated slightly different from the one used	for actual HTML
 	representation, for technical reasons to do with image representation.
-	:param jobParams:
-	:param processingParams:
-	:param minSortedDifferentialProteinsDF:     pd.DataFrame	differential protein data (minimal expression, injective)
+	:param jobParams:				dict			job (global) parameters
+	:param allProcessingParams:		dict			per experiment, all parameters for the processing step
+	:param minTopDifferentialsDF:	pd.DataFrame	top X differential protein data (minimal expression, injective)
 																sorted on adjusted p-value and only specified columns
-	:param fullSortedDifferentialProteinsDF:    pd.DataFrame	differential protein data (full expression, non-injective)
+	:param fullTopDifferentialsDF:	pd.DataFrame	top X differential protein data (full expression, non-injective)
 																sorted on adjusted p-value and only specified columns
-	:param minVolcanoFullPath:					str				path to the volcano plot image (minimal expression)
-	:param fullVolcanoFullPath:					str				path to the volcano plot image (full expression)
-	:param PCAPlotFullPath: 					str				path to the PCA plot image
-	:param HCDendrogramFullPath: 				str				path to the HC dendrogram image
-	:param metadata:							dict			[noIsotopicCorrection, RTIsolationInfo, noMasterProteinAccession,
-																minSingleConditionProteins, fullSingleConditionProteins,
-																uncommonPeptides, commonNanValues]
-	:param logFilePath:							str				path to the log file with information about each
-																processingFlow and analysisFlow call
-	:param startTime:							float			UNIX epoch timestamp at which the reportFlow was started
-	:return htmlReport:							str				report HTML (for actual HTML representation)
-	:return pdfhtmlreport:						str				report HTML (for conversion to PDF)
+	:param minVolcanoFullPath:		str				path to the volcano plot image (minimal expression)
+	:param fullVolcanoFullPath:		str				path to the volcano plot image (full expression)
+	:param PCAPlotFullPath: 		str				path to the PCA plot image
+	:param HCDendrogramFullPath: 	str				path to the HC dendrogram image
+	:param metadata:				dict			[noIsotopicCorrection, RTIsolationInfo, noMasterProteinAccession,
+													minSingleConditionProteins, fullSingleConditionProteins,
+													uncommonPeptides, commonNanValues]
+	:param logFilePath:				str				path to the log file with information about each
+													processingFlow and analysisFlow call
+	:param startTime:				float			UNIX epoch timestamp at which the reportFlow was started
+	:return htmlReport:				str				report HTML (for actual HTML representation)
+	:return pdfhtmlreport:			str				report HTML (for conversion to PDF)
 	"""
 	from flask import render_template
 	from time import time
@@ -375,7 +375,7 @@ def makeHTML(jobParams, processingParams, minTopDifferentialsDF, fullTopDifferen
 									fulldifferentials=fullTopDifferentialsHTML, PCAFileName=PCAPlotFullPath,
 									HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 									duration=approxDuration, log=logContents, jobParams=jobParams,
-									processingParams=processingParams, experiments=experiments, pdfsrc='True')
+									allProcessingParams=allProcessingParams, experiments=experiments, pdfsrc='True')
 	# get the tails of the input paths, starting from the jobs dir, so the Jinja report template can couple it to the
 	# jobs symlink in the static dir.
 	minVolcanoFullPath = hackImagePathToSymlinkInStaticDir(minVolcanoFullPath)
@@ -390,7 +390,7 @@ def makeHTML(jobParams, processingParams, minTopDifferentialsDF, fullTopDifferen
 								 fulldifferentials=fullTopDifferentialsHTML, PCAFileName=PCAPlotFullPath,
 								 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 								 duration=approxDuration, log=logContents, jobParams=jobParams,
-								 processingParams=processingParams, experiments=experiments)
+								 allProcessingParams=allProcessingParams, experiments=experiments)
 	return htmlReport, pdfhtmlreport
 
 
