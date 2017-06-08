@@ -143,9 +143,9 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		writeToDisk = (args[5] == 'True')
 		testing = (args[6] == 'True')
 	# so if you start main.py from within web.py or something, this won't be executed
-	else:
+	else:  # you didn't call main.py from the command line but from pycharm
 		doProcessing = False
-		doAnalysis = True
+		doAnalysis = False
 		doReport = True
 		writeToDisk = True
 		testing = False
@@ -170,7 +170,8 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-04-14 18:11:41.620222_geenvraagteken/jobConfig_geenvraagteken.ini'
 		# jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-04-14 10:14:53.002433_coon2test/jobConfig_coon2test.ini'
 		# jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-05-05 16:55:09.046951_testIDT_COON/jobConfig_testIDT_COON.ini'
-		jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-05-16 profiler_test_COON/jobConfig_testRemoveNegsIC_COON.ini'
+		# jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-05-16 profiler_test_COON/jobConfig_testRemoveNegsIC_COON.ini'
+		jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-06-08 16:17:13.072338_testVolcanoTopXLabels_COON_2cond/jobConfig_testVolcanoTopXLabels_COON_2cond.ini'
 	
 	with app.app_context():
 		jobDirName = os.path.basename(os.path.abspath(os.path.join(jobConfigFilePath, os.pardir)))

@@ -123,7 +123,7 @@ def getSortedProteinExpressionsDF(df):
 	reportColumns = ['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value']
 	# significantIndices = list(df[df['significant'] == 'yes'].index) + list(df[df['significant'] == 'p'].index)
 	# significantDf = df.loc[significantIndices, :]
-	return df.loc[reportColumns, :].sort_values(by='adjusted p-value', ascending=True)
+	return df.loc[:, reportColumns].sort_values(by='adjusted p-value', ascending=True)
 
 
 def getTopDifferentials(sortedDifferentialsDF, numDifferentials):
@@ -137,20 +137,21 @@ def getTopDifferentials(sortedDifferentialsDF, numDifferentials):
 		topDifferentials = sortedDifferentialsDF.head(
 			numDifferentials)  # minSortedDifferentialProteinsDF.loc[range(numDifferentials), :]
 	else:
-		topDifferentials = sortedDifferentialsDF
+		topDifferentials = sortedDifferentialsDF  # todo log this
 	return topDifferentials
 
 
-def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
+def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4, topIndices=None):
 	"""
 	Generates a volcano plot using the log2 fold changes and adjusted p-values of the differential protein data. It is
 	divided in several regions according to the indicated significance level (as can be determined by alpha and FCThreshold)
-	and colours each region differently.
+	and colours each region differently. Optionally, it only shows the labels of the proteins specified by topIndices.
 	The IDs of the protein data points each region may be annotated if so specified by labelPlot.
 	:param df:				pd.DataFrame	DE analysis results data on the protein level.
 	:param alpha:			float			significance level used in the t-test of the DE analysis
 	:param FCThreshold:		float			log2 fold change threshold used in the DE analysis
-	:param labelPlot:		[ bool ]		label the data in the different significance regions: [ yes, p, fc, no ]
+	:param labelPlot:		[ bool ]		label all proteins in the different significance regions: [ yes, p, fc, no ]
+	:param topIndices:		list			indices of proteins for which to show the label exclusively
 	:return volcanoPlot:	plt.figure		volcano plot as a matplotlib figure object
 	"""
 	# todo add protein ID labels according to sorted list entry ID
@@ -172,7 +173,6 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	# YES
 	xdataYES = df.loc[significantIndices_yes, 'log2 fold change c1/c2']
 	ydataYES = -np.log10(df.loc[significantIndices_yes, 'adjusted p-value'])
-	
 	labelsYES = df.loc[significantIndices_yes, 'protein']
 	plt.scatter(xdataYES, ydataYES, color='r', figure=volcanoPlot)
 	# P
@@ -190,6 +190,12 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4):
 	ydataNO = -np.log10(df.loc[significantIndices_no, 'adjusted p-value'])
 	labelsNO = df.loc[significantIndices_no, 'protein']
 	plt.scatter(xdataNO, ydataNO, color='k', figure=volcanoPlot)
+	
+	if topIndices is not None:  # remove labels of non-top X differentially expressed proteins
+		labelsYES.loc[~labelsYES.index.isin(topIndices)] = ''
+		labelsP.loc[~labelsP.index.isin(topIndices)] = ''
+		labelsFC.loc[~labelsFC.index.isin(topIndices)] = ''
+		labelsNO.loc[~labelsNO.index.isin(topIndices)] = ''
 	
 	# adjust limits
 	try:

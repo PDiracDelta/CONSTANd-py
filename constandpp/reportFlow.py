@@ -64,7 +64,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			minTopDifferentialsDF = getTopDifferentials(minSortedDifferentialProteinsDF, params['numDifferentials'])
 			# data visualization
 			minVolcanoPlot = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
-											params['labelVolcanoPlotAreas'])
+											params['labelVolcanoPlotAreas'], topIndices=minTopDifferentialsDF.index)
 
 		else:  # todo in this case (and also for fullExpression_bool) just let the jinja template handle the None variable.
 			# but don't make a fake on here and then pass it onto makeHTML() like is done now.
@@ -78,7 +78,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			fullTopDifferentialsDF = getTopDifferentials(fullSortedDifferentialProteinsDF, params['numDifferentials'])
 			# data visualization
 			fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
-											 params['labelVolcanoPlotAreas'])
+											 params['labelVolcanoPlotAreas'], topIndices=fullTopDifferentialsDF.index)
 		else:
 			fullSortedDifferentialProteinsDF = pd.DataFrame()
 			fullTopDifferentialsDF = pd.DataFrame(columns=fullSortedDifferentialProteinsDF.columns)
@@ -104,8 +104,8 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			else:
 				fullVolcanoFullPath = None
 	else:
-		minSortedDifferentialProteinsDF = pd.DataFrame()
-		fullSortedDifferentialProteinsDF = pd.DataFrame()
+		minTopDifferentialsDF = pd.DataFrame()
+		fullTopDifferentialsDF = pd.DataFrame()
 		minVolcanoFullPath = None
 		fullVolcanoFullPath = None
 
@@ -119,7 +119,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 				   filename=params['jobname'] + '_HCDendrogram')
 
 	if writeToDisk:
-		htmlReport, pdfhtmlreport = makeHTML(jobParams=params, processingParams=processingParams,
+		htmlReport, pdfhtmlreport = makeHTML(jobParams=params, allProcessingParams=processingParams,
 											 minTopDifferentialsDF=minTopDifferentialsDF,
 											 fullTopDifferentialsDF=fullTopDifferentialsDF,
 											 minVolcanoFullPath=minVolcanoFullPath,
