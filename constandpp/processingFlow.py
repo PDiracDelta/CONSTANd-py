@@ -27,9 +27,11 @@ def processDf(df, params, writeToDisk, doConstand=True):
 														PSMAlgo, RT, charge, modifications]
 	"""
 	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
-	# remove detections where (essential) data is missing.
+	
+	# get a set of all master proteins detected in at least one PSM.
 	allMasterProteins = getAllPresentProteins(df)
 	
+	# remove detections where (essential) data is missing.
 	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['quanColumns'])
 	
 	if params['removeBadConfidence_bool']:
@@ -113,6 +115,6 @@ def processDf(df, params, writeToDisk, doConstand=True):
 		# save the DE analysis results
 
 	if params['isotopicCorrection_bool']:
-		return normalizedDf, normalizedIntensities, removedData, noCorrectionIndices  # todo find better solution than 2 returns
+		return normalizedDf, normalizedIntensities, removedData, allMasterProteins, noCorrectionIndices  # todo find better solution than 2 returns
 	else:
-		return normalizedDf, normalizedIntensities, removedData  #todo add noCorrectionIndices variable that is empty
+		return normalizedDf, normalizedIntensities, removedData, allMasterProteins  #todo add noCorrectionIndices variable that is empty

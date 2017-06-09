@@ -36,15 +36,21 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	dfs = dict((eName, result[0]) for eName, result in processingResultsItems)
 	normalizedIntensitiess = dict((eName, result[1]) for eName, result in processingResultsItems)
 	removedDatas = dict((eName, result[2]) for eName, result in processingResultsItems)
+	allMasterProteinss = dict((eName, result[3]) for eName, result in processingResultsItems)
 	noCorrectionIndicess = {}
 	for eName, result in processingResultsItems:
-		if len(result) > 3: # if noCorrectionIndices exists in results
+		if len(result) > 4:  # if noCorrectionIndices exists in results
 			noCorrectionIndicess[eName] = result[3]
 
 	experimentNames = processingResults.keys()
 	# contains statistics and metadata (like the parameters) about the analysis.
 	metadata = {}
 	metadata['numeric'] = pd.DataFrame()
+	# Compile a list of all master proteins found at least in 1 PSM and at least in 1 experiment:
+	allObservedProteins = set(unnest(allMasterProteinss.values()))
+	metadata['numeric'].loc[0, 'numObservedProteins'] = len(allObservedProteins)
+	metadata['allObservedProteins'] = allObservedProteins
+	
 	# record detections without isotopic correction applied. Multi-indexed on experiment names and old indices!
 	# This is done here instead of the processing flow because back then there was no metadata variable yet.
 	try:
