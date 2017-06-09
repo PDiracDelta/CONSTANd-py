@@ -144,12 +144,13 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		testing = (args[6] == 'True')
 	# so if you start main.py from within web.py or something, this won't be executed
 	else:  # you didn't call main.py from the command line but from pycharm
-		doProcessing = False
-		doAnalysis = False
+		doProcessing = True
+		doAnalysis = True
 		doReport = True
 		writeToDisk = True
 		testing = False
 		
+		from constandpp_web.config import ALLJOBSDIR
 		# jobConfigFilePath = 'job/jobConfig.ini' # TEST
 		jobConfigFilePath = '../jobs/2017-01-23 02:40:26.553814_two/jobConfig_two.ini'
 		# jobConfigFilePath = webFlow(exptype='COON')
@@ -171,7 +172,9 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-04-14 10:14:53.002433_coon2test/jobConfig_coon2test.ini'
 		# jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-05-05 16:55:09.046951_testIDT_COON/jobConfig_testIDT_COON.ini'
 		# jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-05-16 profiler_test_COON/jobConfig_testRemoveNegsIC_COON.ini'
-		jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-06-08 16:17:13.072338_testVolcanoTopXLabels_COON_2cond/jobConfig_testVolcanoTopXLabels_COON_2cond.ini'
+		jobConfigFilePath = '2017-06-09 16:27:58.613049_testCSVallProteinsAndAttachment_COON_2cond/jobConfig_testCSVallProteinsAndAttachment_COON_2cond.ini'
+		
+		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	
 	with app.app_context():
 		jobDirName = os.path.basename(os.path.abspath(os.path.join(jobConfigFilePath, os.pardir)))
