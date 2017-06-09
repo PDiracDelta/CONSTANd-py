@@ -126,6 +126,20 @@ def getSortedProteinExpressionsDF(df):
 	return df.loc[:, reportColumns].sort_values(by='adjusted p-value', ascending=True)
 
 
+def addMissingObservedProteins(sortedProteinExpressionsDF, allProteinsSet):
+	"""
+	Add all proteins in allProteinsSet that are not present -- due to missing values or whatever -- in the proteins
+	column of the DEA output, for completeness. The other columns for these entries are NaN.
+	:param sortedProteinExpressionsDF:	pd.DataFrame	DEA output table with only useful entries
+	:param allProteinsSet:				Set				all proteins observed in at least 1 PSM of at least 1 experiment
+	:return sortedProteinExpressionsDF:	pd.DataFrame	DEA output table including proteins without DE results
+	"""
+	presentProteinsSet = set(sortedProteinExpressionsDF.loc[:, 'proteins'])
+	missingProteinsList = list(allProteinsSet.difference(presentProteinsSet))
+	sortedProteinExpressionsDF.append(pd.Series({'protein': missingProteinsList}), ignore_index=True)
+	return sortedProteinExpressionsDF
+
+
 def getTopDifferentials(sortedDifferentialsDF, numDifferentials):
 	"""
 	Takes a sorted protein differentials dataframe and returns the top `numDifferentials` entries according to the order.
