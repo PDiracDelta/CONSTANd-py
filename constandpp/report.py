@@ -197,15 +197,6 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4, topIndices=N
 		labelsFC.loc[~labelsFC.index.isin(topIndices)] = ''
 		labelsNO.loc[~labelsNO.index.isin(topIndices)] = ''
 	
-	# adjust limits
-	try:
-		plt.xlim([int(min(min(xdataFC), min(xdataYES))), np.ceil(max(max(xdataFC), max(xdataYES)))])
-	except ValueError:
-		plt.xlim([-5, 5])
-	try:
-		plt.ylim([0, np.ceil(max(max(ydataP), max(ydataYES)) / 5) * 5])  # int(base * round(float(x)/base))
-	except ValueError:
-		plt.ylim([0, 100])  # int(base * round(float(x)/base))
 	# annotate where requested
 	for labelPlotBool, xdata, ydata, labels in zip(labelPlot, [xdataYES, xdataP, xdataFC, xdataNO],
 												   [ydataYES, ydataP, ydataFC, ydataNO],
@@ -214,6 +205,19 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4, topIndices=N
 			for x, y, label in zip(xdata, ydata, labels):
 				plt.annotate(label, xy=(x, y), xytext=(-1, 1), textcoords='offset points', ha='right', va='bottom',
 							 fontsize=20)
+				
+	# adjust limits
+	allXdata = pd.concat([xdataFC, xdataYES, xdataNO, xdataP])
+	allYdata = pd.concat([ydataFC, ydataYES, ydataNO, ydataP])
+	try:
+		Xabsmax = max(abs(np.floor(min(allXdata))), abs(np.ceil(max(allXdata))))
+		plt.xlim([-Xabsmax, Xabsmax])
+	except ValueError:
+		plt.xlim([-5, 5])
+	try:
+		plt.ylim([0, np.ceil(max(allYdata) / 5) * 5])  # int(base * round(float(x)/base))
+	except ValueError:
+		plt.ylim([0, 100])  # int(base * round(float(x)/base))
 	
 	# plt.show() # TEST
 	return volcanoPlot
