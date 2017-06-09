@@ -49,7 +49,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# Compile a list of all master proteins found at least in 1 PSM and at least in 1 experiment:
 	allObservedProteins = set(unnest(allMasterProteinss.values()))
 	metadata['numeric'].loc[0, 'numObservedProteins'] = len(allObservedProteins)
-	metadata['allObservedProteins'] = pd.DataFrame({'proteins': allObservedProteins})
+	metadata['allObservedProteins'] = pd.DataFrame({'protein': allObservedProteins})
 	
 	# record detections without isotopic correction applied. Multi-indexed on experiment names and old indices!
 	# This is done here instead of the processing flow because back then there was no metadata variable yet.
