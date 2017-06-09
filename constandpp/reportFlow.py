@@ -58,30 +58,30 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	if nConditions == 2:
 		# generate sorted (on p-value) list of differentials
 		if params['minExpression_bool']:
-			minSortedDifferentialProteinsDF = getSortedProteinExpressionsDF(minProteinDF)
-			minSet = set(minSortedDifferentialProteinsDF['protein'])
+			minSortedProteinExpressionsDF = getSortedProteinExpressionsDF(minProteinDF)
+			minSet = set(minSortedProteinExpressionsDF['protein'])
 			# get top X differentials
-			minTopDifferentialsDF = getTopDifferentials(minSortedDifferentialProteinsDF, params['numDifferentials'])
+			minTopDifferentialsDF = getTopDifferentials(minSortedProteinExpressionsDF, params['numDifferentials'])
 			# data visualization
 			minVolcanoPlot = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
 											params['labelVolcanoPlotAreas'], topIndices=minTopDifferentialsDF.index)
 
 		else:  # todo in this case (and also for fullExpression_bool) just let the jinja template handle the None variable.
 			# but don't make a fake on here and then pass it onto makeHTML() like is done now.
-			minSortedDifferentialProteinsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value'])
-			minTopDifferentialsDF = pd.DataFrame(columns=minSortedDifferentialProteinsDF.columns)
+			minSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value'])
+			minTopDifferentialsDF = pd.DataFrame(columns=minSortedProteinExpressionsDF.columns)
 		
 		if params['fullExpression_bool']:
-			fullSortedDifferentialProteinsDF = getSortedProteinExpressionsDF(fullProteinDF)
-			fullSet = set(fullSortedDifferentialProteinsDF['protein'])
+			fullSortedProteinExpressionsDF = getSortedProteinExpressionsDF(fullProteinDF)
+			fullSet = set(fullSortedProteinExpressionsDF['protein'])
 			# get top X differentials
-			fullTopDifferentialsDF = getTopDifferentials(fullSortedDifferentialProteinsDF, params['numDifferentials'])
+			fullTopDifferentialsDF = getTopDifferentials(fullSortedProteinExpressionsDF, params['numDifferentials'])
 			# data visualization
 			fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
 											 params['labelVolcanoPlotAreas'], topIndices=fullTopDifferentialsDF.index)
 		else:
-			fullSortedDifferentialProteinsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value'])
-			fullTopDifferentialsDF = pd.DataFrame(columns=fullSortedDifferentialProteinsDF.columns)
+			fullSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value'])
+			fullTopDifferentialsDF = pd.DataFrame(columns=fullSortedProteinExpressionsDF.columns)
 		
 		if params['minExpression_bool'] and params['fullExpression_bool']:
 			# list( [in min but not in full], [in full but not in min] )
@@ -89,18 +89,21 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			# todo combine into one
 
 		if writeToDisk:
+			allDEResultsFullPaths = []  # paths to later pass on for mail attachments
 			if params['minExpression_bool']:
-				exportData(minSortedDifferentialProteinsDF, dataType='df', path_out=params['path_results'],
-						   filename=params['jobname'] + '_minSortedDifferentials', delim_out='\t')
+				minDEResultsFullPath = exportData(minSortedProteinExpressionsDF, dataType='df', path_out=params['path_results'],
+						   filename=params['jobname'] + '_minSortedDifferentials', delim_out=params['delim_out'])
 				minVolcanoFullPath = exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
 						   filename=params['jobname'] + '_minVolcanoPlot')
+				allDEResultsFullPaths.append(minDEResultsFullPath)
 			else:
 				minVolcanoFullPath = None
 			if params['fullExpression_bool']:
-				exportData(fullSortedDifferentialProteinsDF, dataType='df', path_out=params['path_results'],
-						   filename=params['jobname'] + '_fullSortedDifferentials', delim_out='\t')
+				fullDEResultsFullPath = exportData(fullSortedProteinExpressionsDF, dataType='df', path_out=params['path_results'],
+						   filename=params['jobname'] + '_fullSortedDifferentials', delim_out=params['delim_out'])
 				fullVolcanoFullPath = exportData(fullVolcanoPlot, dataType='fig', path_out=params['path_results'],
 						   filename=params['jobname'] + '_fullVolcanoPlot')
+				allDEResultsFullPaths.append(fullDEResultsFullPath)
 			else:
 				fullVolcanoFullPath = None
 	else:
@@ -137,7 +140,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		from constandpp_web.web import send_mail
 		### SEND JOB COMPLETED MAIL ###
 		mailSuccess = send_mail(recipient=params['mailRecipient'], mailBodyFile='reportMail',
-				  jobname=params['jobname'], jobID=params['jobID'], attachment=pdfFullPath)
+				  jobname=params['jobname'], jobID=params['jobID'], attachments=[pdfFullPath]+allDEResultsFullPaths)
 		if mailSuccess is not None:  # something went wrong
 			import logging
 			logging.error(mailSuccess)
