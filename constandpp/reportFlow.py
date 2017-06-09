@@ -65,7 +65,8 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			# data visualization
 			minVolcanoPlot = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
 											params['labelVolcanoPlotAreas'], topIndices=minTopDifferentialsDF.index)
-
+			# add protein IDs that were observed at least once but got removed, for completeness in the output csv.
+			minSortedProteinExpressionsDF = addMissingObservedProteins(minSortedProteinExpressionsDF, metadata['allObservedProteins'])
 		else:  # todo in this case (and also for fullExpression_bool) just let the jinja template handle the None variable.
 			# but don't make a fake on here and then pass it onto makeHTML() like is done now.
 			minSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value'])
@@ -79,6 +80,8 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			# data visualization
 			fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
 											 params['labelVolcanoPlotAreas'], topIndices=fullTopDifferentialsDF.index)
+			# add protein IDs that were observed at least once but got removed, for completeness in the output csv.
+			fullSortedProteinExpressionsDF = addMissingObservedProteins(fullSortedProteinExpressionsDF, metadata['allObservedProteins'])
 		else:
 			fullSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value'])
 			fullTopDifferentialsDF = pd.DataFrame(columns=fullSortedProteinExpressionsDF.columns)
