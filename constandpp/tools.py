@@ -9,6 +9,18 @@ def unnest(x):
 	return [e for sublist in x for e in sublist]
 
 
+def partition(pred, iterable):
+	""" Partition an iterable into a list of trues and list of falses according to some conditional function pred. """
+	trues = []
+	falses = []
+	for item in iterable:
+		if pred(item):
+			trues.append(item)
+		else:
+			falses.append(item)
+	return trues, falses
+
+
 def getIntensities(df, quanColumns, indices=None):
 	"""
 	Extracts the (absolute) matrix of quantification values from the dataFrame as an ndarray.
