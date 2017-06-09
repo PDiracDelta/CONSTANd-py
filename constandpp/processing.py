@@ -23,6 +23,21 @@ import numpy as np
 import logging
 from pandas import DataFrame
 
+
+def getAllPresentProteins(df):
+	""" Returns the set of all master proteins appearing in at least one PSM, regardless of the PSM usefulness. """
+	from constandpp.tools import partition, unnest
+	if 'Master Protein Accessions' in df.columns.values:
+		allMPAStrings = df.loc[:, 'Master Protein Accessions'].astype(str)
+		allMPAListsAndItems = [x.split('; ') for x in allMPAStrings]
+		allMPALists, allMPAElements = partition(lambda x: isinstance(x, list), allMPAListsAndItems)
+		allMPAListElements = unnest(allMPALists)
+		return set(allMPAElements.extend(allMPAListElements))
+	else:
+		logging.warning("No master protein accessions found! You will not get a useful differential expression result.")
+		return None
+
+
 def removeObsoleteColumns(df, wantedColumns):
 	"""
 	Returns a dataFrame with only the specified columns of the input dataFrame, IF they exist.

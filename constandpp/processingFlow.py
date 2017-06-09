@@ -28,6 +28,8 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	"""
 	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
 	# remove detections where (essential) data is missing.
+	allMasterProteins = getAllPresentProteins(df)
+	
 	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['quanColumns'])
 	
 	if params['removeBadConfidence_bool']:
