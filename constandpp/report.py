@@ -134,7 +134,7 @@ def addMissingObservedProteins(sortedProteinExpressionsDF, allProteinsSet):
 	:param allProteinsSet:				Set				all proteins observed in at least 1 PSM of at least 1 experiment
 	:return sortedProteinExpressionsDF:	pd.DataFrame	DEA output table including proteins without DE results
 	"""
-	presentProteinsSet = set(sortedProteinExpressionsDF.loc[:, 'proteins'])
+	presentProteinsSet = set(sortedProteinExpressionsDF.loc[:, 'protein'])
 	missingProteinsList = list(allProteinsSet.difference(presentProteinsSet))
 	sortedProteinExpressionsDF.append(pd.Series({'protein': missingProteinsList}), ignore_index=True)
 	return sortedProteinExpressionsDF
