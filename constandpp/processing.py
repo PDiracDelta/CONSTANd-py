@@ -30,9 +30,10 @@ def getAllPresentProteins(df):
 	if 'Master Protein Accessions' in df.columns.values:
 		allMPAStrings = df.loc[:, 'Master Protein Accessions'].astype(str)
 		allMPAListsAndItems = [x.split('; ') for x in allMPAStrings]
-		allMPALists, allMPAElements = partition(lambda x: isinstance(x, list), allMPAListsAndItems)
-		allMPAListElements = unnest(allMPALists)
-		return set(allMPAElements.extend(allMPAListElements))
+		# allMPALists, allMPAElements = partition(lambda x: len(x) > 1, allMPAListsAndItems)  # sort into
+		# allMPAListElements = unnest(allMPALists)
+		# return set(unnest(allMPAElements).extend(allMPAListElements))
+		return set(unnest(allMPAListsAndItems))
 	else:
 		logging.warning("No master protein accessions found! You will not get a useful differential expression result.")
 		return None
