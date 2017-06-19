@@ -54,8 +54,10 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			   'org2 exp [2] vs org3 exp [3]')
 
 	nConditions = len(list(params['schema'].values())[0]['channelAliasesPerCondition'])
+	allDEResultsFullPaths = []  # paths to later pass on for mail attachments
 	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
 	if nConditions == 2:
+		# todo split off these steps in a separate function which you call for min and full analysis
 		# generate sorted (on p-value) list of differentials
 		if params['minExpression_bool']:
 			minSortedProteinExpressionsDF = getSortedProteinExpressionsDF(minProteinDF)
@@ -66,7 +68,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			minVolcanoPlot = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
 											params['labelVolcanoPlotAreas'], topIndices=minTopDifferentialsDF.index)
 			# add protein IDs that were observed at least once but got removed, for completeness in the output csv.
-			minSortedProteinExpressionsDF = addMissingObservedProteins(minSortedProteinExpressionsDF, metadata['allObservedProteins'].loc[:, 'protein'])
+			minSortedProteinExpressionsDF = addMissingObservedProteins(minSortedProteinExpressionsDF, metadata['allObservedProteins'].loc[:, 'protein'][0])
 		else:  # todo in this case (and also for fullExpression_bool) just let the jinja template handle the None variable.
 			# but don't make a fake on here and then pass it onto makeHTML() like is done now.
 			minSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value'])
@@ -81,7 +83,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
 											 params['labelVolcanoPlotAreas'], topIndices=fullTopDifferentialsDF.index)
 			# add protein IDs that were observed at least once but got removed, for completeness in the output csv.
-			fullSortedProteinExpressionsDF = addMissingObservedProteins(fullSortedProteinExpressionsDF, set(metadata['allObservedProteins'].loc[:, 'protein']))
+			fullSortedProteinExpressionsDF = addMissingObservedProteins(fullSortedProteinExpressionsDF, metadata['allObservedProteins'].loc[:, 'protein'][0])
 		else:
 			fullSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value'])
 			fullTopDifferentialsDF = pd.DataFrame(columns=fullSortedProteinExpressionsDF.columns)
@@ -92,7 +94,6 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			# todo combine into one
 
 		if writeToDisk:
-			allDEResultsFullPaths = []  # paths to later pass on for mail attachments
 			if params['minExpression_bool']:
 				minDEResultsFullPath = exportData(minSortedProteinExpressionsDF, dataType='df', path_out=params['path_results'],
 						   filename=params['jobname'] + '_minSortedDifferentials', delim_out=params['delim_out'])
