@@ -352,6 +352,7 @@ def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDiffe
 	from constandpp_web import app
 	from os import path, pardir
 	from pandas import set_option
+	import logging
 	
 	allJobsParDir = path.abspath(path.join(app.config.get('ALLJOBSDIR'), pardir))
 	set_option('display.max_colwidth', -1)  # otherwise the Description column text is truncated.
@@ -381,8 +382,14 @@ def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDiffe
 		else:
 			return None
 		
-	minTopDifferentialsDF = minTopDifferentialsDF.drop('significant', axis=1, inplace=False)
-	fullTopDifferentialsDF = fullTopDifferentialsDF.drop('significant', axis=1, inplace=False)
+	if 'significant' in minTopDifferentialsDF.columns:
+		minTopDifferentialsDF = minTopDifferentialsDF.drop('significant', axis=1, inplace=False)
+	else:
+		logging.warning("I cannot remove the 'significant' column from the minDE dataframe (it doesn't exist).")
+	if 'significant' in fullTopDifferentialsDF.columns:
+		fullTopDifferentialsDF = fullTopDifferentialsDF.drop('significant', axis=1, inplace=False)
+	else:
+		logging.warning("I cannot remove the 'significant' column from the fullDE dataframe (it doesn't exist).")
 	
 	# generate list of differentials HTML code separately because Jinja cant do this
 	minTopDifferentialsHTML = injectColumnWidthHTML(minTopDifferentialsDF.to_html(index=False, justify='left'))
