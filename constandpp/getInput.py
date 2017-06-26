@@ -195,6 +195,7 @@ def getJobInput(jobConfigFilePath):
 	date = config.get('DEFAULT', 'date')
 	schema = parseExpression(config.get('DEFAULT', 'schema'),
 							 object_pairs_hook=OrderedDict)  # use ordered dict so the items() order is always the same
+	getRTIsolationInfo_bool = config.getboolean('DEFAULT', 'getRTIsolationInfo_bool')
 	pept2protCombinationMethod = config.get('DEFAULT', 'pept2protCombinationMethod')
 	minExpression_bool = config.getboolean('DEFAULT', 'minExpression_bool')
 	fullExpression_bool = config.getboolean('DEFAULT', 'fullExpression_bool')
@@ -224,6 +225,7 @@ def getJobInput(jobConfigFilePath):
 	jobParams = {
 		'date': date,
 		'schema': schema,
+		'getRTIsolationInfo_bool': getRTIsolationInfo_bool,
 		'pept2protCombinationMethod': pept2protCombinationMethod,
 		'minExpression_bool': minExpression_bool,
 		'fullExpression_bool': fullExpression_bool,

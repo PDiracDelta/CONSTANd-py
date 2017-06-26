@@ -59,11 +59,12 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	except ValueError:
 		pass  # not a single noCorrectionIndices was found. OK.
 	# record RT isolation statistics. Future: flag. Multi-indexed on experiment names and old indices!
-	metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for
-											 eName in experimentNames], keys=experimentNames)
+	if params['getRTIsolationInfo_bool']:
+		metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for
+												 eName in experimentNames], keys=experimentNames)
 
 	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe as an outer join
-	allExperimentsDF = combineExperimentDFs(dfs)  #, params['schema'])
+	allExperimentsDF = combineExperimentDFs(dfs)
 
 	nConditions = len(list(params['schema'].values())[0]['channelAliasesPerCondition'])
 	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
