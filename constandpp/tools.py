@@ -2,6 +2,8 @@
 
 import numpy as np
 from constandpp import fontsize, fontweight, figheight, figwidth
+import matplotlib as mpl
+from matplotlib import pyplot as plt
 
 
 def unnest(x):
@@ -88,8 +90,6 @@ def scatterplot(x, y, title=None, xlab=None, ylab=None):
 	:param ylab:	str			label for the y-axis
 	:return f:		plt.figure	scatterplot as a matplotlib figure object
 	"""
-	import matplotlib as mpl
-	from matplotlib import pyplot as plt
 	mpl.use('GTK3Agg')
 	mpl.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
 	
