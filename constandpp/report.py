@@ -183,7 +183,7 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4, topIndices=N
 	significantIndices_fc = df[df['significant'] == 'fc'].index
 	significantIndices_no = df[df['significant'] == 'no'].index
 	
-	# produce scatterplot for each category of significance
+	# produce scatterPlot for each category of significance
 	# YES
 	xdataYES = df.loc[significantIndices_yes, 'log2 fold change c1/c2']
 	ydataYES = -np.log10(df.loc[significantIndices_yes, 'adjusted p-value'])
@@ -263,7 +263,7 @@ def getPCAPlot(PCAResult, schema, title=None):
 	channelMarkersDict = getMarkers(schema)
 	
 	for (x, y, label) in zip(PCAResult[:, 0], PCAResult[:, 1], allChannelAliases):
-		# produce scatterplot of two first principal components and annotate
+		# produce scatterPlot of two first principal components and annotate
 		plt.scatter(x, y, color=channelColorsDict[label], marker=channelMarkersDict[label], figure=PCAPlot, s=80)
 		plt.annotate(label, xy=(x, y), xytext=(-1, 1),
 					 textcoords='offset points', ha='right', va='bottom', fontsize=20)

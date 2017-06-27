@@ -3,7 +3,7 @@
 import numpy as np
 from constandpp import fontsize, fontweight, figheight, figwidth
 import matplotlib as mpl
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 
 
 def unnest(x):
@@ -80,15 +80,15 @@ def MA(x, y):
 	return M, A, m, v
 
 
-def scatterplot(x, y, title=None, xlab=None, ylab=None):
+def scatterPlot(x, y, title=None, xlab=None, ylab=None):
 	"""
-	Return a scatterplot for the given data, with the constandpp-specific plot settings (fonts, figsizes, ...).
+	Return a scatterPlot for the given data, with the constandpp-specific plot settings (fonts, figsizes, ...).
 	:param x:		list		x data
 	:param y:		list		y data
-	:param title:	str			scatterplot title
+	:param title:	str			scatterPlot title
 	:param xlab:	str			label for the x-axis
 	:param ylab:	str			label for the y-axis
-	:return f:		plt.figure	scatterplot as a matplotlib figure object
+	:return f:		plt.figure	scatterPlot as a matplotlib figure object
 	"""
 	mpl.use('GTK3Agg')
 	mpl.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
@@ -107,7 +107,7 @@ def scatterplot(x, y, title=None, xlab=None, ylab=None):
 def MAPlot(x, y, title=None):
 	"""
 	Return an MA plot for the given data, with the constandpp-specific plot settings (fonts, figsizes, ...) by calling
-	MA() and then scatterplot().
+	MA() and then scatterPlot().
 	:param x:		list	x data
 	:param y:		list	y data
 	:param title:	str		MA plot title
@@ -123,7 +123,7 @@ def MAPlot(x, y, title=None):
 		title = 'mean(M): ' + str(m) + '; var(M):' + str(v)
 	else:
 		title = title + '\nmean(M): ' + str(m) + '; var(M):' + str(v)
-	fig = scatterplot(A, M, title=title, xlab='A', ylab='M')
+	fig = scatterPlot(A, M, title=title, xlab='A', ylab='M')
 	# plt.xlim((-10.1,0))
 	# plt.ylim((-10.1, 10.1))
 	fig.show()
