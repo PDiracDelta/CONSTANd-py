@@ -364,7 +364,7 @@ def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDiffe
 		:param DETableHTML:	str		HTML table with the differential proteins
 		:return:			str		HTML table with the differential proteins and an extra colgroup element.
 		"""
-		columnWidthHTML = '<colgroup><col width="7%" /><col width="4%" /><col width="54%" /><col width="16%" /><col width="18%" /></colgroup>'
+		columnWidthHTML = '<colgroup><col width="8%" /><col width="55%" /><col width="17%" /><col width="19%" /></colgroup>'
 		splitter = '<thead>'
 		chunks = DETableHTML.split(splitter)
 		assert len(chunks) == 2
