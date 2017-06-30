@@ -184,15 +184,18 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 		noSlavePSMAlgoWarnedYet = False
 		this_bestIndicesDict = {}
 		masterScoreName = identifyingNodes['master'][1]
-		slaveScoreName = identifyingNodes['slaves'][0][1]
+		if len(identifyingNodes['slaves']) > 0:  # if there is at least one PSMAlgo Slave
+			slaveScoreName = identifyingNodes['slaves'][0][1]
+		else:  # if there are no PSMAlgo Slaves
+			slaveScoreName = None
 
 		for this_duplicatesList in this_duplicateLists:
 			bestIndex = df.loc[this_duplicatesList, masterScoreName].idxmax(axis=0, skipna=True)
-			if np.isnan(bestIndex):  # no MASTER scores found --> take best SLAVE
+			if np.isnan(bestIndex) and slaveScoreName is not None:  # no MASTER scores found --> take best SLAVE (if it exists)
 				try:
 					bestIndex = df.loc[this_duplicatesList, slaveScoreName].idxmax(axis=0, skipna=True)
-				except KeyError: # if no slave score column is present in the data set
-					if not noSlavePSMAlgoWarnedYet:
+				except KeyError:  # if no slave score column is present in the data set
+					if not noSlavePSMAlgoWarnedYet:  # I haven't thrown this warning yet
 						logging.warning("No slave PSMAlgo score column ('"+slaveScoreName+"') present in data set. ")
 						noSlavePSMAlgoWarnedYet = True
 				if np.isnan(bestIndex) and not isNanWarnedYet:
