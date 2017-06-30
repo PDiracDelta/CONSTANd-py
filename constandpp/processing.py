@@ -150,35 +150,33 @@ def undoublePSMAlgo(df, identifyingNodes, exclusive, quanColumns, removalColumns
 	"""
 	Removes redundant data due to different PSM algorithms producing the same peptide match. The 'master' algorithm
 	values are preferred over the 'slave' algorithm values, the latter whom are removed and have their basic information
-	saved in removedData. If exclusive=true, this function only keeps master data (and saves slave(s) basic info).
+	saved in removedData. If exclusive=True, this function only keeps master data and never slave data.
+	If no slave algorithm was specified, the algorithm proceeds as if exclusive==True.
 	:param df:              	pd.dataFrame    data with double First Scan numbers due to PSMAlgo redundancy
 	:param identifyingNodes:		dict            master-slave PSM algorithm specifier
 	:param exclusive:       		bool            save master data exclusively or include slave data where necessary?
-	:param quanColumns:		list			columns that contain the quantification values
+	:param quanColumns:				list			columns that contain the quantification values
 	:param removalColumnsToSave:	list			fields to save if an entry gets removed
 	:return df:             		pd.dataFrame    data without double First Scan numbers due to PSMAlgo redundancy
 	:return removedData:    		pd.dataFrame    basic info about the removed entries
 	"""
-	if len(identifyingNodes['slaves']) == 0:  # do NOT execute this method: there is only a single PSMAlgo!!!
-		#from pandas import DataFrame
-		return df, DataFrame()
 	masterName = identifyingNodes['master'][0]
-	slaveScoreName = identifyingNodes['slaves'][0][1]
 	byIdentifyingNodeDict = df.groupby('Identifying Node Type').groups  # {Identifying Node Type : [list of indices]}
-	columnsToSave = [slaveScoreName] + removalColumnsToSave + quanColumns
 	masterIndices = set(byIdentifyingNodeDict[masterName])
 	toDelete = set(df.index.values).difference(masterIndices)  # all indices of detections not done by MASTER
-	if not exclusive:  # remove unique SLAVE scans from the toDelete list
+	columnsToSave = removalColumnsToSave + quanColumns
+	# check whether some slave data should be kept.
+	if len(identifyingNodes['slaves']) != 0 and not exclusive:  # a SLAVE was specified: save its information in
+		# removedData. ALso, KEEP UNIQUE SLAVE scans by removing them from the toDelete list
 		byFirstScanDict = df.groupby('First Scan').groups
 		singles = set(map(lambda e: e[0], filter(lambda e: len(e) == 1,
 												 byFirstScanDict.values())))  # indices of detections done by only 1 PSMAlgo
 		singlesNotByMasterIndices = singles.difference(masterIndices)
 		toDelete = toDelete.difference(singlesNotByMasterIndices)  # keep only indices not discovered by SLAVE
+		slaveScoreName = identifyingNodes['slaves'][0][1]
+		columnsToSave.append(slaveScoreName)
 	removedData = df.loc[toDelete, columnsToSave]
-	dflen = df.shape[0]  # TEST
-	df.drop(toDelete, inplace=True)
-	assert (dflen == df.shape[0] + removedData.shape[0])  # TEST
-	
+	df.drop(toDelete, inplace=True)  # drop all or some non-master data.
 	return df, removedData
 
 
