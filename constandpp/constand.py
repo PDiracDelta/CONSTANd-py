@@ -22,12 +22,12 @@ import numpy as np
 from numpy import nan
 
 
-def constand(data, accuracy=1e-5, maxIterations=50):
+def constand(data, precision=1e-5, maxIterations=50):
 	"""
 	Return the normalized version of the input data (matrix) as an ndarray, as well as the convergence trail (residual
 	error after each iteration) and the row and column multipliers R and S.
 	:param data:                np.ndArray  (N,6) absolute intensities
-	:param accuracy:            float       combined allowed deviation (residual error) of col and row means from 1/6
+	:param precision:            float       combined allowed deviation (residual error) of col and row means from 1/6
 	:param maxIterations:       int         maximum amount of iterations (1x row and 1x col per iteration)
 	:return normalizedData:     np.ndArray  (N,6) normalized intensities
 	:return convergenceTrail:   np.ndArray  list of the residual error after each iteration
@@ -35,7 +35,7 @@ def constand(data, accuracy=1e-5, maxIterations=50):
 	:return S:                  np.ndArray  (6,) column multipliers
 	"""
 	assert isinstance(data, np.ndarray) and data.dtype in ['float64', 'int64']
-	assert accuracy > 0
+	assert precision > 0
 	assert maxIterations > 0
 
 	# initialize variables
@@ -50,7 +50,7 @@ def constand(data, accuracy=1e-5, maxIterations=50):
 	S = np.ones((Ncols))  # S matrix diagonal from RAS
 	# main loop; iterates until convergence is reached (i.e., L1-norm below variable <h>) or the maximum number of
 	# iteration cycles is surpassed.
-	while convergence > accuracy and i < maxIterations:
+	while convergence > precision and i < maxIterations:
 
 		# fit the rows
 		Ri = 1/Ncols * np.asarray(1/np.nanmean(normalizedData, 1)).reshape(Nrows,)

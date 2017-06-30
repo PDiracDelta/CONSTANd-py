@@ -64,7 +64,7 @@ def getProcessingInput(configFilePath):
 	collapsePTM_bool = config.getboolean('DEFAULT', 'collapsePTM_bool')
 	isotopicCorrection_bool = config.getboolean('DEFAULT', 'isotopicCorrection_bool')
 	isotopicCorrection_matrix = config.get('DEFAULT', 'isotopicCorrection_matrix')
-	accuracy = config.getfloat('DEFAULT', 'accuracy')
+	precision = config.getfloat('DEFAULT', 'precision')
 	maxIterations = config.getint('DEFAULT', 'maxIterations')
 	path_out = config.get('DEFAULT', 'path_out')
 	filename_out = config.get('DEFAULT', 'filename_out')
@@ -118,7 +118,7 @@ def getProcessingInput(configFilePath):
 	# 	raise Exception("Isotopic corrections matrix row values do not add up to 1.")
 	# if np.linalg.det(isotopicCorrection_matrix) == 0: # if Det(cM) = 0 no solution can be found.
 	#	raise Exception("Determinant of isotopic corrections matrix is zero; cannot solve the linear system.")
-	if not (accuracy > 0):
+	if not (precision > 0):
 		raise Exception("Accuracy must be strictly greater than zero.")
 	if not (maxIterations > 0 and isinstance(maxIterations, int)):
 		raise Exception("Maximum number of iterations must be an integer strictly greater than zero.")
@@ -157,7 +157,7 @@ def getProcessingInput(configFilePath):
 		'collapsePTM_bool': collapsePTM_bool,
 		'isotopicCorrection_bool': isotopicCorrection_bool,
 		'isotopicCorrection_matrix': isotopicCorrection_matrix,
-		'accuracy': accuracy,
+		'precision': precision,
 		'maxIterations': maxIterations,
 		'path_out': path_out,
 		'filename_out': filename_out,

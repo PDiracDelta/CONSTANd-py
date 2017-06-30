@@ -90,7 +90,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	if doConstand:
 		# perform the CONSTANd algorithm;
 		intensities = getIntensities(df, quanColumns=params['quanColumns'])
-		normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['accuracy'], params['maxIterations'])
+		normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['precision'], params['maxIterations'])
 		normalizedDf = setIntensities(df, intensities=normalizedIntensities, quanColumns=params['quanColumns'])
 	else:
 		# TEST do NOT perform CONSTANd
