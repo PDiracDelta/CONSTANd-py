@@ -71,7 +71,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			minSortedProteinExpressionsDF = addMissingObservedProteins(minSortedProteinExpressionsDF, metadata['allObservedProteins'].loc[:, 'protein'][0])
 		else:  # todo in this case (and also for fullExpression_bool) just let the jinja template handle the None variable.
 			# but don't make a fake on here and then pass it onto makeHTML() like is done now.
-			minSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value'])
+			minSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'fold change log2(c1/c2)', 'adjusted p-value'])
 			minTopDifferentialsDF = pd.DataFrame(columns=minSortedProteinExpressionsDF.columns)
 		
 		if params['fullExpression_bool']:
@@ -85,7 +85,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			# add protein IDs that were observed at least once but got removed, for completeness in the output csv.
 			fullSortedProteinExpressionsDF = addMissingObservedProteins(fullSortedProteinExpressionsDF, metadata['allObservedProteins'].loc[:, 'protein'][0])
 		else:
-			fullSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value'])
+			fullSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'fold change log2(c1/c2)', 'adjusted p-value'])
 			fullTopDifferentialsDF = pd.DataFrame(columns=fullSortedProteinExpressionsDF.columns)
 		
 		if params['minExpression_bool'] and params['fullExpression_bool']:

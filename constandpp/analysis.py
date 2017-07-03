@@ -174,15 +174,15 @@ def testDifferentialExpression(this_proteinDF, alpha):
 def applyFoldChange(proteinDF, pept2protCombinationMethod):
 	"""
 	Calculate the log2 fold change of the quantification values per channel for each protein according to
-	pept2protCombinationMethod and add it to the new "log2 fold change c1/c2" column.
+	pept2protCombinationMethod and add it to the new "fold change log2(c1/c2)" column.
 	:param proteinDF:					pd.DataFrame	data on the protein level with t-test results.
 	:param pept2protCombinationMethod:  str				method for reducing peptide information into one figure per protein
 	:return proteinDF:					pd.DataFrame	data on the protein level, including fold changes
 	"""
 	if pept2protCombinationMethod == 'mean':
-		proteinDF['log2 fold change c1/c2'] = proteinDF.apply(lambda x: np.log2(np.nanmean(x['condition 1'])/np.nanmean(x['condition 2'])), axis=1)
+		proteinDF['fold change log2(c1/c2)'] = proteinDF.apply(lambda x: np.log2(np.nanmean(x['condition 1'])/np.nanmean(x['condition 2'])), axis=1)
 	elif pept2protCombinationMethod == 'median':
-		proteinDF['log2 fold change c1/c2'] = proteinDF.apply(lambda x: np.log2(np.nanmedian(x['condition 1']) / np.nanmedian(x['condition 2'])), axis=1)
+		proteinDF['fold change log2(c1/c2)'] = proteinDF.apply(lambda x: np.log2(np.nanmedian(x['condition 1']) / np.nanmedian(x['condition 2'])), axis=1)
 	return proteinDF
 
 
@@ -197,7 +197,7 @@ def applySignificance(df, alpha, FCThreshold):
 	"""
 	def significant(x):
 		pvalueSignificant = x['adjusted p-value'] < alpha
-		FCSignificant = abs(x['log2 fold change c1/c2']) > FCThreshold
+		FCSignificant = abs(x['fold change log2(c1/c2)']) > FCThreshold
 		if pvalueSignificant & FCSignificant:
 			return 'yes'
 		elif pvalueSignificant:

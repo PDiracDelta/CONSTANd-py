@@ -132,7 +132,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	HCResult = getHC(allExperimentsIntensitiesPerCommonPeptide)
 
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
-	handyColumnOrder = ['protein', 'significant', 'adjusted p-value', 'log2 fold change c1/c2', 'description', 'p-value', '#peptides (c1, c2)', 'peptides', 'condition 1', 'condition 2']
+	handyColumnOrder = ['protein', 'significant', 'adjusted p-value', 'fold change log2(c1/c2)', 'description', 'p-value', '#peptides (c1, c2)', 'peptides', 'condition 1', 'condition 2']
 	minProteinDF.reset_index(level=0, inplace=True)
 	fullProteinDF.reset_index(level=0, inplace=True)
 	minProteinDF = minProteinDF.reindex_axis(handyColumnOrder, axis=1)

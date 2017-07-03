@@ -120,7 +120,7 @@ def getSortedProteinExpressionsDF(proteinDF):
 	:param proteinDF:	pd.DataFrame    unsorted DE analysis results on the protein level
 	:return:    		pd.DataFrame    sorted according to adjusted p-value and only specified columns
 	"""
-	reportColumns = ['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value', '#peptides (c1, c2)']
+	reportColumns = ['protein', 'significant', 'description', 'fold change log2(c1/c2)', 'adjusted p-value', '#peptides (c1, c2)']
 	return proteinDF.loc[:, reportColumns].sort_values(by='adjusted p-value', ascending=True)
 
 
@@ -183,22 +183,22 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4, topIndices=N
 	
 	# produce scatterPlot for each category of significance
 	# YES
-	xdataYES = df.loc[significantIndices_yes, 'log2 fold change c1/c2']
+	xdataYES = df.loc[significantIndices_yes, 'fold change log2(c1/c2)']
 	ydataYES = -np.log10(df.loc[significantIndices_yes, 'adjusted p-value'])
 	labelsYES = df.loc[significantIndices_yes, 'protein']
 	plt.scatter(xdataYES, ydataYES, color='r', figure=volcanoPlot)
 	# P
-	xdataP = df.loc[significantIndices_p, 'log2 fold change c1/c2']
+	xdataP = df.loc[significantIndices_p, 'fold change log2(c1/c2)']
 	ydataP = -np.log10(df.loc[significantIndices_p, 'adjusted p-value'])
 	labelsP = df.loc[significantIndices_p, 'protein']
 	plt.scatter(xdataP, ydataP, color='b', figure=volcanoPlot)
 	# FC
-	xdataFC = df.loc[significantIndices_fc, 'log2 fold change c1/c2']
+	xdataFC = df.loc[significantIndices_fc, 'fold change log2(c1/c2)']
 	ydataFC = -np.log10(df.loc[significantIndices_fc, 'adjusted p-value'])
 	labelsFC = df.loc[significantIndices_fc, 'protein']
 	plt.scatter(xdataFC, ydataFC, color='g', figure=volcanoPlot)
 	# NO
-	xdataNO = df.loc[significantIndices_no, 'log2 fold change c1/c2']
+	xdataNO = df.loc[significantIndices_no, 'fold change log2(c1/c2)']
 	ydataNO = -np.log10(df.loc[significantIndices_no, 'adjusted p-value'])
 	labelsNO = df.loc[significantIndices_no, 'protein']
 	plt.scatter(xdataNO, ydataNO, color='k', figure=volcanoPlot)
