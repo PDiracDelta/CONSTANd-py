@@ -213,14 +213,15 @@ def applySignificance(df, alpha, FCThreshold):
 
 def addNumberOfRepresentingPeptides(proteinDF):
 	"""
-	Adds a column '#peptides observed (c1, c2)' to the proteinDF by zipping the lengths of the list of observed
-	quantification values for each condition.
+	Adds a column '#peptides (c1, c2)' to the proteinDF by zipping the lengths of the list of observed quantification
+	values for each condition.
 	:param proteinDF:	pd.DataFrame	proteinDF with quantification values per condition
 	:return proteinDF:	pd.DataFrame	proteinDF including column with amount of peptides per condition
 	"""
-	c1Lengths = proteinDF.loc[:, 'condition 1'].dropna().apply(len)
-	c2Lengths = proteinDF.loc[:, 'condition 2'].dropna().apply(len)
-	proteinDF.loc[:, '#peptides observed (c1, c2)'] = zip(c1Lengths, c2Lengths)
+	c1Lengths = proteinDF.loc[:, 'condition 1'].apply(lambda x: len(pd.Series(x).dropna()))
+	c2Lengths = proteinDF.loc[:, 'condition 2'].apply(lambda x: len(pd.Series(x).dropna()))
+	# if you don't do series(list(x)).values it gives an Error or makes it into nans... god knows why
+	proteinDF['#peptides (c1, c2)'] = pd.Series(list(zip(c1Lengths, c2Lengths))).values
 	return proteinDF
 
 
