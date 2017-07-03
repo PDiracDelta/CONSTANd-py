@@ -211,6 +211,19 @@ def applySignificance(df, alpha, FCThreshold):
 	return df
 
 
+def addNumberOfRepresentingPeptides(proteinDF):
+	"""
+	Adds a column '#peptides observed (c1, c2)' to the proteinDF by zipping the lengths of the list of observed
+	quantification values for each condition.
+	:param proteinDF:	pd.DataFrame	proteinDF with quantification values per condition
+	:return proteinDF:	pd.DataFrame	proteinDF including column with amount of peptides per condition
+	"""
+	c1Lengths = proteinDF.loc[:, 'condition 1'].dropna().apply(len)
+	c2Lengths = proteinDF.loc[:, 'condition 2'].dropna().apply(len)
+	proteinDF.loc[:, '#peptides observed (c1, c2)'] = zip(c1Lengths, c2Lengths)
+	return proteinDF
+
+
 def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 	"""
 	Takes a list of dataframes and selects only the sequence and intensities, then inner joins them on sequence.

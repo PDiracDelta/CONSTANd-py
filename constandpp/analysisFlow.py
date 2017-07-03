@@ -90,6 +90,9 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 
 			# indicate significance based on given thresholds alpha and FCThreshold
 			minProteinDF = applySignificance(minProteinDF, params['alpha'], params['FCThreshold'])
+			
+			# add number of peptides that represent each protein (per condition)
+			minProteinDF = addNumberOfRepresentingPeptides(minProteinDF)
 		else:
 			minProteinDF = pd.DataFrame()
 
@@ -108,6 +111,9 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 
 			# indicate significance based on given thresholds alpha and FCThreshold
 			fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
+			
+			# add number of peptides that represent each protein (per condition)
+			fullProteinDF = addNumberOfRepresentingPeptides(fullProteinDF)
 		else:
 			fullProteinDF = pd.DataFrame()
 	else:

@@ -112,32 +112,16 @@ def getMarkers(schema):
 	return channelMarkersDict
 
 
-def getSortedProteinExpressionsDF(df):
+def getSortedProteinExpressionsDF(proteinDF):
 	"""
 	Sorts the differential protein data according to adjusted p-value (high p-value should also mean high DE) and resets
 	the index. Returns only the columns	specified.
 	Later in the workflow, the head() function will called to get the top X differentials from this df.
-	:param df:  pd.DataFrame    unsorted DE analysis results on the protein level
-	:return:    pd.DataFrame    sorted according to adjusted p-value and only specified columns
+	:param proteinDF:	pd.DataFrame    unsorted DE analysis results on the protein level
+	:return:    		pd.DataFrame    sorted according to adjusted p-value and only specified columns
 	"""
-	reportColumns = ['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value']
-	# significantIndices = list(df[df['significant'] == 'yes'].index) + list(df[df['significant'] == 'p'].index)
-	# significantDf = df.loc[significantIndices, :]
-	return df.loc[:, reportColumns].sort_values(by='adjusted p-value', ascending=True)
-
-
-def addMissingObservedProteins(sortedProteinExpressionsDF, allProteinsSet):
-	"""
-	Add all proteins in allProteinsSet that are not present -- due to missing values or whatever -- in the proteins
-	column of the DEA output, for completeness. The other columns for these entries are NaN.
-	:param sortedProteinExpressionsDF:	pd.DataFrame	DEA output table with only useful entries
-	:param allProteinsSet:				Set				all proteins observed in at least 1 PSM of at least 1 experiment
-	:return sortedProteinExpressionsDF:	pd.DataFrame	DEA output table including proteins without DE results
-	"""
-	presentProteinsSet = set(sortedProteinExpressionsDF.loc[:, 'protein'])
-	missingProteinsList = list(allProteinsSet.difference(presentProteinsSet))
-	sortedProteinExpressionsDF.append(pd.Series({'protein': missingProteinsList}), ignore_index=True)
-	return sortedProteinExpressionsDF
+	reportColumns = ['protein', 'significant', 'description', 'log2 fold change c1/c2', 'adjusted p-value', '#peptides observed (c1, c2)']
+	return proteinDF.loc[:, reportColumns].sort_values(by='adjusted p-value', ascending=True)
 
 
 def getTopDifferentials(sortedDifferentialsDF, numDifferentials):
@@ -364,7 +348,7 @@ def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDiffe
 		:param DETableHTML:	str		HTML table with the differential proteins
 		:return:			str		HTML table with the differential proteins and an extra colgroup element.
 		"""
-		columnWidthHTML = '<colgroup><col width="8%" /><col width="55%" /><col width="17%" /><col width="19%" /></colgroup>'
+		columnWidthHTML = '<colgroup><col width="8%" /><col width="52%" /><col width="16%" /><col width="16%" /><col width="8%" /></colgroup>'
 		splitter = '<thead>'
 		chunks = DETableHTML.split(splitter)
 		assert len(chunks) == 2
