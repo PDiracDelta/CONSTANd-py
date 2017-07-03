@@ -144,7 +144,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		from constandpp_web.web import send_mail
 		### SEND JOB COMPLETED MAIL ###
 		mailSuccess = send_mail(recipient=params['mailRecipient'], mailBodyFile='reportMail',
-				  jobname=params['jobname'], jobID=params['jobID'], attachments=[pdfFullPath]+allDEResultsFullPaths)
+				  jobName=params['jobname'], jobID=params['jobID'], attachments=[pdfFullPath]+allDEResultsFullPaths)
 		if mailSuccess is not None:  # something went wrong
 			import logging
 			logging.error(mailSuccess)
