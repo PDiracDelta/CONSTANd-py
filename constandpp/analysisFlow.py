@@ -136,16 +136,16 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	if writeToDisk:
 		# save the protein-level dataframes
 		exportData(minProteinDF, dataType='df', path_out=params['path_out'],
-				   filename=params['jobname'] + '_results_minimal', delim_out=params['delim_out'])
+				   filename=params['jobName'] + '_results_minimal', delim_out=params['delim_out'])
 		exportData(fullProteinDF, dataType='df', path_out=params['path_out'],
-				   filename=params['jobname'] + '_results_full', delim_out=params['delim_out'])
+				   filename=params['jobName'] + '_results_full', delim_out=params['delim_out'])
 		# save the intensity matrix of all COMMON peptides
 		exportData(allExperimentsIntensitiesPerCommonPeptide, dataType='df', path_out=params['path_out'],
-				   filename=params['jobname'] + '_CommonPeptideIntensities',
+				   filename=params['jobName'] + '_CommonPeptideIntensities',
 				   delim_out=params['delim_out'], inOneFile=False)
 		# save the metadata
 		exportData(metadata, dataType='df', path_out=params['path_out'],
-				   filename=params['jobname'] + '_metadata',
+				   filename=params['jobName'] + '_metadata',
 				   delim_out=params['delim_out'], inOneFile=False)
 
 	return minProteinDF, fullProteinDF, PCAResult, HCResult, allExperimentsIntensitiesPerCommonPeptide, metadata

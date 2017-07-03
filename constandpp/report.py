@@ -402,7 +402,7 @@ def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDiffe
 	experiments = jobParams['schema']
 	for e in experiments:
 		experiments[e]['cond1Aliases'] = experiments[e]['channelAliasesPerCondition'][0]
-	pdfhtmlreport = render_template('report.html', jobName=jobParams['jobname'], minVolcanoFullPath=minVolcanoFullPath,
+	pdfhtmlreport = render_template('report.html', jobName=jobParams['jobName'], minVolcanoFullPath=minVolcanoFullPath,
 									fullVolcanoFullPath=fullVolcanoFullPath,
 									minExpression_bool=jobParams['minExpression_bool'],
 									fullExpression_bool=jobParams['fullExpression_bool'],
@@ -417,7 +417,7 @@ def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDiffe
 	fullVolcanoFullPath = hackImagePathToSymlinkInStaticDir(fullVolcanoFullPath)
 	HCDendrogramFullPath = hackImagePathToSymlinkInStaticDir(HCDendrogramFullPath)
 	PCAPlotFullPath = hackImagePathToSymlinkInStaticDir(PCAPlotFullPath)
-	htmlReport = render_template('report.html', jobName=jobParams['jobname'], minVolcanoFullPath=minVolcanoFullPath,
+	htmlReport = render_template('report.html', jobName=jobParams['jobName'], minVolcanoFullPath=minVolcanoFullPath,
 								 fullVolcanoFullPath=fullVolcanoFullPath,
 								 minExpression_bool=jobParams['minExpression_bool'],
 								 fullExpression_bool=jobParams['fullExpression_bool'],

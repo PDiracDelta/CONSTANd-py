@@ -206,7 +206,7 @@ def getJobInput(jobConfigFilePath):
 	numDifferentials = config.getint('DEFAULT', 'numDifferentials')
 	path_out = config.get('DEFAULT', 'path_out')
 	path_results = config.get('DEFAULT', 'path_results')
-	jobname = config.get('DEFAULT', 'jobname')
+	jobName = config.get('DEFAULT', 'jobName')
 	jobID = config.get('DEFAULT', 'jobID')
 	delim_out = gd("unicode_escape")(config.get('DEFAULT', 'delim_out'))[
 		0]  # treat delimiters correctly: ignore first escape
@@ -236,7 +236,7 @@ def getJobInput(jobConfigFilePath):
 		'numDifferentials': numDifferentials,
 		'path_out': path_out,
 		'path_results': path_results,
-		'jobname': jobname,
+		'jobName': jobName,
 		'jobID': jobID,
 		'delim_out': delim_out,
 		'mailRecipient': mailRecipient

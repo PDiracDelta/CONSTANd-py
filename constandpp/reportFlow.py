@@ -96,17 +96,17 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		if writeToDisk:
 			if params['minExpression_bool']:
 				minDEResultsFullPath = exportData(minSortedProteinExpressionsDF, dataType='df', path_out=params['path_results'],
-						   filename=params['jobname'] + '_minSortedDifferentials', delim_out=params['delim_out'])
+						   filename=params['jobName'] + '_minSortedDifferentials', delim_out=params['delim_out'])
 				minVolcanoFullPath = exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
-						   filename=params['jobname'] + '_minVolcanoPlot')
+						   filename=params['jobName'] + '_minVolcanoPlot')
 				allDEResultsFullPaths.append(minDEResultsFullPath)
 			else:
 				minVolcanoFullPath = None
 			if params['fullExpression_bool']:
 				fullDEResultsFullPath = exportData(fullSortedProteinExpressionsDF, dataType='df', path_out=params['path_results'],
-						   filename=params['jobname'] + '_fullSortedDifferentials', delim_out=params['delim_out'])
+						   filename=params['jobName'] + '_fullSortedDifferentials', delim_out=params['delim_out'])
 				fullVolcanoFullPath = exportData(fullVolcanoPlot, dataType='fig', path_out=params['path_results'],
-						   filename=params['jobname'] + '_fullVolcanoPlot')
+						   filename=params['jobName'] + '_fullVolcanoPlot')
 				allDEResultsFullPaths.append(fullDEResultsFullPath)
 			else:
 				fullVolcanoFullPath = None
@@ -119,11 +119,11 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	PCAPlot = getPCAPlot(PCAResult, params['schema'])
 	if writeToDisk:
 		PCAPlotFullPath = exportData(PCAPlot, dataType='fig', path_out=params['path_results'],
-				   filename=params['jobname'] + '_PCAPlot')
+				   filename=params['jobName'] + '_PCAPlot')
 	HCDendrogram = getHCDendrogram(HCResult, params['schema'])
 	if writeToDisk:
 		HCDendrogramFullPath = exportData(HCDendrogram, dataType='fig', path_out=params['path_results'],
-				   filename=params['jobname'] + '_HCDendrogram')
+				   filename=params['jobName'] + '_HCDendrogram')
 
 	if writeToDisk:
 		htmlReport, pdfhtmlreport = makeHTML(jobParams=params, allProcessingParams=processingParams,
@@ -134,9 +134,9 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 											 PCAPlotFullPath=PCAPlotFullPath, HCDendrogramFullPath=HCDendrogramFullPath,
 											 metadata=metadata, logFilePath=logFilePath, startTime=startTime)
 		htmlFullPath = exportData(htmlReport, dataType='html', path_out=params['path_results'],
-				   filename=params['jobname'] + '_report')
+				   filename=params['jobName'] + '_report')
 		pdfhtmlFullPath = exportData(pdfhtmlreport, dataType='html', path_out=params['path_results'],
-				   filename=params['jobname'] + '_Report')
+				   filename=params['jobName'] + '_Report')
 
 		pdfFullPath = HTMLtoPDF(pdfhtmlFullPath)
 		# todo possibly remove need for special pdfhtml if weasyprint fetches the HTML from the web server via URL instead
@@ -144,7 +144,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		from constandpp_web.web import send_mail
 		### SEND JOB COMPLETED MAIL ###
 		mailSuccess = send_mail(recipient=params['mailRecipient'], mailBodyFile='reportMail',
-				  jobName=params['jobname'], jobID=params['jobID'], attachments=[pdfFullPath]+allDEResultsFullPaths)
+				  jobName=params['jobName'], jobID=params['jobID'], attachments=[pdfFullPath]+allDEResultsFullPaths)
 		if mailSuccess is not None:  # something went wrong
 			import logging
 			logging.error(mailSuccess)

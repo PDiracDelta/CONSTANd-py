@@ -56,11 +56,11 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 			
 			# process every input dataframe
 			logging.info(
-				"Starting processing of experiment '" + eName + "' of job '" + jobParams['jobname'] + "' at " +
+				"Starting processing of experiment '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.now()).split('.')[0])
 			processingResults[eName] = processDf(dfs[eName], processingParams[eName], writeToDisk)
 			logging.info(
-				"Finished processing of experiment '" + eName + "' of job '" + jobParams['jobname'] + "' at " +
+				"Finished processing of experiment '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.now()).split('.')[0])
 			pickle.dump(processingResults[eName], open(processingResultsDumpFilename, 'wb'))  # TEST
 		elif doAnalysis:
@@ -85,10 +85,10 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 				os.makedirs(analysis_path_out)
 		
 		# perform analysis
-		logging.info("Starting analysis of job: " + jobParams['jobname'] + " at " +
+		logging.info("Starting analysis of job: " + jobParams['jobName'] + " at " +
 					 str(datetime.datetime.now()).split('.')[0])
 		analysisResults = analyzeProcessingResult(processingResults, jobParams, writeToDisk)
-		logging.info("Finished analysis of job: " + jobParams['jobname'] + " at " +
+		logging.info("Finished analysis of job: " + jobParams['jobName'] + " at " +
 					 str(datetime.datetime.now()).split('.')[0])
 		pickle.dump(analysisResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
 	elif doReport:
@@ -111,12 +111,12 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 				os.makedirs(results_path_out)
 		
 		# visualize and make a report
-		logging.info("Starting visualization end report generation of job: " + jobParams['jobname'] + "at " +
+		logging.info("Starting visualization end report generation of job: " + jobParams['jobName'] + "at " +
 					 str(datetime.datetime.now()).split('.')[0])
 		generateReport(analysisResults, jobParams, logFilePath, writeToDisk, processingParams, start)
 		DB_setJobReportRelPaths(jobID=jobDirName, resultpath=jobParams['path_results'],
-								jobName=jobParams['jobname'])
-		logging.info("Finished visualization end report generation of job: " + jobParams['jobname'] + "at " +
+								jobName=jobParams['jobName'])
+		logging.info("Finished visualization end report generation of job: " + jobParams['jobName'] + "at " +
 					 str(datetime.datetime.now()).split('.')[0])
 	else:
 		logging.warning("No report generated!")
