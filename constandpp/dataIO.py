@@ -105,10 +105,19 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	# import schema file as dataframe and replace nan values by empty strings
 	schemaDF = importDataFrame(schemaPath, delim='\t', header=None, dtype=str).replace(np.nan, '', regex=True)
 	incompleteSchemaDict = OrderedDict()  # use ordered dict so the items() order is always the same
+	numCols = len(schemaDF.columns)
+	numConds = numCols-1
+	numRows = len(schemaDF)
 	if not (np.mod(len(schemaDF), 2) == 0):  # schema must have even number of lines
 		raise Exception("schema must have even number of lines (one for declarations and one for aliases, which may be empty but should exist.)")
-	if not (len(schemaDF.columns) > 2):  # at least 3 columns
+	else:
+		evenRows = list(range(1,numRows,2))
+		unevenRows = list(range(0,numRows,2))
+	if not (numCols > 2):  # at least 3 columns
 		raise Exception("schema must have at least 3 columns EXPERIMENT\\tCONDITION 1\\tCONDITION 2 (separated by tabs)")
+	# check if experiment names and aliases are unique
+	if not (len(set(schemaDF.loc[unevenRows,0]))+len(set(schemaDF.loc[evenRows,0]))==numRows):
+		raise Exception("Experiment names and/or aliases contain duplicates. Please provide unique names and aliases.")
 	for i in range(int(len(schemaDF) / 2)):
 		thisRow = schemaDF.loc[2 * i, :]
 		experimentName = str(thisRow[0])
