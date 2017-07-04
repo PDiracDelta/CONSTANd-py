@@ -32,6 +32,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	:return metadata:			pd.DataFrame	metadata: [noIsotopicCorrection, RTIsolationInfo, noMasterProteinAccession,
 												minSingleConditionProteins, fullSingleConditionProteins, uncommonPeptides, commonNanValues]
 	"""
+	""" Preparation and metadata gathering """
 	processingResultsItems = processingResults.items()
 	dfs = dict((eName, result[0]) for eName, result in processingResultsItems)
 	normalizedIntensitiess = dict((eName, result[1]) for eName, result in processingResultsItems)
@@ -63,6 +64,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for
 												 eName in experimentNames], keys=experimentNames)
 
+	""" Differential Expression Analysis """
 	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe as an outer join
 	allExperimentsDF = combineExperimentDFs(dfs)
 
@@ -81,23 +83,6 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 			# Execute the differential expression analysis and gather some metadata
 			minProteinDF, metadata['minSingleConditionProteins'], metadata['numeric'].loc[0, 'minNumProteins'] = \
 				DEA(allExperimentsDF, minProteinPeptidesDict, params)
-			# ### TEST: BELOW IS NOW REDUNANT
-			# # execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
-			# minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema'])
-			#
-			# # perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
-			# # nan values for a certain condition and keep the removed ones in metadata
-			# minProteinDF, metadata['minSingleConditionProteins'] = testDifferentialExpression(minProteinDF, params['alpha'])
-			# metadata['numeric'].loc[0, 'minNumProteins'] = len(minProteinDF)
-			#
-			# # calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
-			# minProteinDF = applyFoldChange(minProteinDF, params['pept2protCombinationMethod'])
-			#
-			# # indicate significance based on given thresholds alpha and FCThreshold
-			# minProteinDF = applySignificance(minProteinDF, params['alpha'], params['FCThreshold'])
-			#
-			# # add number of peptides that represent each protein (per condition)
-			# minProteinDF = addNumberOfRepresentingPeptides(minProteinDF)
 		else:
 			minProteinDF = pd.DataFrame()
 
@@ -106,30 +91,13 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 			# Execute the differential expression analysis and gather some metadata
 			fullProteinDF, metadata['fullSingleConditionProteins'], metadata['numeric'].loc[0, 'fullNumProteins'] = \
 				DEA(allExperimentsDF, fullProteinPeptidesDict, params)
-			# ### TEST: BELOW IS NOW REDUNANT
-			# # execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
-			# fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema'])
-			#
-			# # perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
-			# # nan values for a certain condition and keep the removed ones in metadata
-			# fullProteinDF, metadata['fullSingleConditionProteins'] = testDifferentialExpression(fullProteinDF,
-			# 																					 params['alpha'])
-			# metadata['numeric'].loc[0, 'fullNumProteins'] = len(fullProteinDF)
-			#
-			# # calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
-			# fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
-			#
-			# # indicate significance based on given thresholds alpha and FCThreshold
-			# fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
-			#
-			# # add number of peptides that represent each protein (per condition)
-			# fullProteinDF = addNumberOfRepresentingPeptides(fullProteinDF)
 		else:
 			fullProteinDF = pd.DataFrame()
 	else:
 		minProteinDF = pd.DataFrame()
 		fullProteinDF = pd.DataFrame()
-
+	
+	""" Quality Control """
 	# dataframe with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
 	allExperimentsIntensitiesPerCommonPeptide, metadata['uncommonPeptides'] = getAllExperimentsIntensitiesPerCommonPeptide(dfs, params['schema'])
 	metadata['numeric'].loc[0, 'numUnCommonPeptides'] = len(metadata['uncommonPeptides'])
