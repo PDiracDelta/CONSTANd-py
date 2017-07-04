@@ -59,6 +59,41 @@ def combineExperimentDFs(dfs):  # todo how are PSMs combined with multiple charg
 	return pd.concat(dfs.values(), keys=dfs.keys())
 
 
+def DEA(allExperimentsDF, proteinPeptidesDict, params):
+	"""
+	Bring the data to the protein level in the case of [minimal]{full} expression (shared peptides are [not allowed]{allowed}).
+	Execute the differential expression analysis (t-test + B-H correction, compute log2 fold change and some useful
+	extra columns) and gather some metadata.
+	:param allExperimentsDF:			pd.DataFrame	dataframe containing an outer join of all the experiment dataframes
+	:param proteinPeptidesDict:			dict			{ protein : all associated peptide indices (non-injective) }
+	:param params:						dict			job (global) parameters
+	:return proteinDF:					pd.DataFrame	Transformed and selected data on the protein level.
+														Structure (not necessarily in that order):
+														['protein', 'significant', 'adjusted p-value',
+														'fold change log2(c1/c2)', 'description', 'p-value',
+														'#peptides (c1, c2)', 'peptides', 'condition 1', 'condition 2']
+	:return singleConditionProteins:	pd.DataFrame	protein entries removed due to invalid t-test results
+	:return numProteins:				int				number of proteins taken into account in the DEA
+	"""
+	# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
+	proteinDF = getProteinDF(allExperimentsDF, proteinPeptidesDict, params['schema'])
+	
+	# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
+	# nan values for a certain condition and keep the removed ones in metadata
+	proteinDF, singleConditionProteins = testDifferentialExpression(proteinDF, params['alpha'])
+	numProteins = len(proteinDF)
+	
+	# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
+	proteinDF = applyFoldChange(proteinDF, params['pept2protCombinationMethod'])
+	
+	# indicate significance based on given thresholds alpha and FCThreshold
+	proteinDF = applySignificance(proteinDF, params['alpha'], params['FCThreshold'])
+	
+	# add number of peptides that represent each protein (per condition)
+	proteinDF = addNumberOfRepresentingPeptides(proteinDF)
+	return proteinDF, singleConditionProteins, numProteins
+
+
 def getProteinPeptidesDicts(df, fullExpression_bool):
 	"""
 	Returns two dicts with the peptide indices (w.r.t. dataframe df) associated with each protein in the df as a

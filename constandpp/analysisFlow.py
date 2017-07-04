@@ -71,49 +71,59 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	if nConditions == 2:
 		# get min and max protein-peptide mappings
 		if params['fullExpression_bool']:
-			minProteinPeptidesDict, maxProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
+			minProteinPeptidesDict, fullProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
 		else:
 			minProteinPeptidesDict, __, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
 		metadata['numeric'].loc[0, 'numNoMasterProteinAccession'] = len(metadata['noMasterProteinAccession'])
 
 		if params['minExpression_bool']:
-			# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
-			minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema'])
-
-			# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
-			# nan values for a certain condition and keep the removed ones in metadata
-			minProteinDF, metadata['minSingleConditionProteins'] = testDifferentialExpression(minProteinDF, params['alpha'])
-			metadata['numeric'].loc[0, 'minNumProteins'] = len(minProteinDF)
-
-			# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
-			minProteinDF = applyFoldChange(minProteinDF, params['pept2protCombinationMethod'])
-
-			# indicate significance based on given thresholds alpha and FCThreshold
-			minProteinDF = applySignificance(minProteinDF, params['alpha'], params['FCThreshold'])
-			
-			# add number of peptides that represent each protein (per condition)
-			minProteinDF = addNumberOfRepresentingPeptides(minProteinDF)
+			# Bring the data to the protein level in the case of minimal expression (no shared peptides allowed).
+			# Execute the differential expression analysis and gather some metadata
+			minProteinDF, metadata['minSingleConditionProteins'], metadata['numeric'].loc[0, 'minNumProteins'] = \
+				DEA(allExperimentsDF, minProteinPeptidesDict, params)
+			# ### TEST: BELOW IS NOW REDUNANT
+			# # execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
+			# minProteinDF = getProteinDF(allExperimentsDF, minProteinPeptidesDict, params['schema'])
+			#
+			# # perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
+			# # nan values for a certain condition and keep the removed ones in metadata
+			# minProteinDF, metadata['minSingleConditionProteins'] = testDifferentialExpression(minProteinDF, params['alpha'])
+			# metadata['numeric'].loc[0, 'minNumProteins'] = len(minProteinDF)
+			#
+			# # calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
+			# minProteinDF = applyFoldChange(minProteinDF, params['pept2protCombinationMethod'])
+			#
+			# # indicate significance based on given thresholds alpha and FCThreshold
+			# minProteinDF = applySignificance(minProteinDF, params['alpha'], params['FCThreshold'])
+			#
+			# # add number of peptides that represent each protein (per condition)
+			# minProteinDF = addNumberOfRepresentingPeptides(minProteinDF)
 		else:
 			minProteinDF = pd.DataFrame()
 
 		if params['fullExpression_bool']:
-			# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
-			fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema'])
-
-			# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
-			# nan values for a certain condition and keep the removed ones in metadata
-			fullProteinDF, metadata['fullSingleConditionProteins'] = testDifferentialExpression(fullProteinDF,
-																								 params['alpha'])
-			metadata['numeric'].loc[0, 'fullNumProteins'] = len(fullProteinDF)
-
-			# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
-			fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
-
-			# indicate significance based on given thresholds alpha and FCThreshold
-			fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
-			
-			# add number of peptides that represent each protein (per condition)
-			fullProteinDF = addNumberOfRepresentingPeptides(fullProteinDF)
+			# Bring the data to the protein level in the case of full expression (shared peptides allowed).
+			# Execute the differential expression analysis and gather some metadata
+			fullProteinDF, metadata['fullSingleConditionProteins'], metadata['numeric'].loc[0, 'fullNumProteins'] = \
+				DEA(allExperimentsDF, fullProteinPeptidesDict, params)
+			# ### TEST: BELOW IS NOW REDUNANT
+			# # execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
+			# fullProteinDF = getProteinDF(allExperimentsDF, maxProteinPeptidesDict, params['schema'])
+			#
+			# # perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
+			# # nan values for a certain condition and keep the removed ones in metadata
+			# fullProteinDF, metadata['fullSingleConditionProteins'] = testDifferentialExpression(fullProteinDF,
+			# 																					 params['alpha'])
+			# metadata['numeric'].loc[0, 'fullNumProteins'] = len(fullProteinDF)
+			#
+			# # calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
+			# fullProteinDF = applyFoldChange(fullProteinDF, params['pept2protCombinationMethod'])
+			#
+			# # indicate significance based on given thresholds alpha and FCThreshold
+			# fullProteinDF = applySignificance(fullProteinDF, params['alpha'], params['FCThreshold'])
+			#
+			# # add number of peptides that represent each protein (per condition)
+			# fullProteinDF = addNumberOfRepresentingPeptides(fullProteinDF)
 		else:
 			fullProteinDF = pd.DataFrame()
 	else:
