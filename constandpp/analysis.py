@@ -56,7 +56,7 @@ def combineExperimentDFs(dfs):  # todo how are PSMs combined with multiple charg
 	:param dfs:     [pd.DataFrame]	dataframes from multiple experiments
 	:return: 		pd.DataFrame	dataframe containing an outer join of the input list of dataframes
 	"""
-	return pd.concat(dfs.values(), keys=dfs.keys())
+	return pd.concat(dfs.values(), keys=dfs.keys(), join='outer')
 
 
 def DEA(allExperimentsDF, proteinPeptidesDict, params):
