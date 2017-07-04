@@ -91,10 +91,12 @@ def importWrapper(path_in='wrapper.tsv'):
 def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistribute file manipulation files(functions?) in web.py
 	"""
 	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment. The
-	wrapper and config entries are set to None for now.
+	wrapper and config entries are set to None for now. The structure of the schema should be as follows:
+		long_name	cond1:df_col1,df_col2		cond2:df_col3,df_col4
+		short_name	cond1Alias:alias1,alias2	cond2Alias:alias3,alias4
 	:param schemaPath:              str     path to the schema file that the user uploaded
 	:return incompleteSchemaDict:   dict    schema in dict format, without config and wrapper information, in the format
-											{ experiment: { channels: [[channels] per condition], aliases: [[channels] per condition] }
+											{ experiment: { channels: { condition: [channels] }, aliases: { condition_alias: [aliases] } }
 	"""
 	from collections import OrderedDict
 	# import schema file as dataframe and replace nan values by empty strings
