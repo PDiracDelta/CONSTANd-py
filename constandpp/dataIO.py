@@ -88,14 +88,10 @@ def importWrapper(path_in='wrapper.tsv'):
 	return list(importDataFrame(path_in, header=None, dtype=str).values)
 
 
-def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistribute file manipulation files in web.py
+def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistribute file manipulation files(functions?) in web.py
 	"""
 	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment. The
 	wrapper and config entries are set to None for now.
-	!!! the schema is NEVER to be changed after it has been first used !!!
-		"Keys and values are iterated over in an arbitrary order which is non-random, varies across Python implementations,
-		and depends on the dictionary’s history of insertions and deletions. If keys, values and items views are iterated
-		over with no intervening modifications to the dictionary, the order of items will directly correspond."
 	:param schemaPath:              str     path to the schema file that the user uploaded
 	:return incompleteSchemaDict:   dict    schema in dict format, without config and wrapper information, in the format
 											{ experiment: { channels: [[channels] per condition], aliases: [[channels] per condition] }
