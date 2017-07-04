@@ -98,12 +98,17 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	:return incompleteSchemaDict:   dict    schema in dict format, without config and wrapper information, in the format
 											{ experiment: { channels: { condition: [channels] }, aliases: { condition_alias: [aliases] } }
 	"""
+	def validateSchema(parsedSchema):
+		pass  #todo
+		
 	from collections import OrderedDict
 	# import schema file as dataframe and replace nan values by empty strings
 	schemaDF = importDataFrame(schemaPath, delim='\t', header=None, dtype=str).replace(np.nan, '', regex=True)
 	incompleteSchemaDict = OrderedDict()  # use ordered dict so the items() order is always the same
-	assert np.mod(len(schemaDF), 2) == 0  # schema must have even number of lines
-	assert len(schemaDF.columns) > 2  # at least 3 columns
+	if not (np.mod(len(schemaDF), 2) == 0):  # schema must have even number of lines
+		raise Exception("schema must have even number of lines (one for declarations and one for aliases, which may be empty but should exist.)")
+	if not (len(schemaDF.columns) > 2):  # at least 3 columns
+		raise Exception("schema must have at least 3 columns EXPERIMENT\\tCONDITION 1\\tCONDITION 2 (separated by tabs)")
 	for i in range(int(len(schemaDF) / 2)):
 		thisRow = schemaDF.loc[2 * i, :]
 		experimentName = str(thisRow[0])
@@ -120,6 +125,8 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 		
 		incompleteSchemaDict[experimentName] = {'channelNamesPerCondition': channelNamesPerCondition,
 												'channelAliasesPerCondition': channelAliasesPerCondition}
+	# if this step succeeds the schema is valid.
+	validateSchema(incompleteSchemaDict)
 	return incompleteSchemaDict
 
 
