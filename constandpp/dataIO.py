@@ -99,6 +99,19 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	:return incompleteSchemaDict:   dict    schema in dict format, without config and wrapper information, in the format
 											{ experiment: { channels: { condition: [channels] }, aliases: { condition_alias: [aliases] } }
 	"""
+	def extractAliases(rowElement):
+		"""
+		Tries to extract the comma-separated channelAliases from a schemaDF row element and returns '' if it fails.
+		:param rowElement:			list	element in a schemaDF row. Structure: [ condition : channelNames : channelAliases ]
+		:return channelAliasesList:	list	comma-separated list of [ channelAliases ]
+		"""
+		try:  # allow that no aliases are provided
+			this_channelAliases = rowElement.split(':')[2]
+		except IndexError:
+			this_channelAliases = ''  # return '' because that's what is also returned if the substring is empty.
+		return this_channelAliases
+	
+	""" import schema as dataframe """
 	from collections import OrderedDict
 	# import schema file as dataframe and replace nan values by empty strings
 	schemaDF = importDataFrame(schemaPath, delim='\t', header=None, dtype=str).replace(np.nan, '', regex=True)
@@ -112,50 +125,56 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	if not len(schemaDF.loc[:, 0].unique()) == numRows:
 		raise Exception("Experiment names and/or aliases contain duplicates. Please provide unique names and aliases.")
 	
-	""" Construct (incomplete) schema dict"""
-	allConditions = set()
+	""" construct schema dict """
 	allChannelNames = set()
 	allChannelAliases = set()
 	numAllChannelNames = 0
 	numAllChannelAliases = 0
-	for row in schemaDF:
+	for __, row in schemaDF.iterrows():
+		experimentChannelNames = []
 		experimentName = str(row[0])
 		incompleteSchemaDict[experimentName] = OrderedDict()
 		conditionsList = [str(element).split(':')[0] for element in row[1:]]
-		channelNamesList = [str(element).split(':')[1] for element in row[1:]]
+		try:
+			channelNamesList = [str(element).split(':')[1] for element in row[1:]]
+		except IndexError:
+			raise Exception("Couldn't find any experiment information. Do you have a line in your schema that's (nearly) empty?")
 		# check if condition names unique
 		if not len(set(conditionsList)) == len(conditionsList):
 			raise Exception("Same condition name used multiple times for same experiment. Please define each condition only once per experiment.")
-		try:  # allow that no aliases are provided
-			channelAliasesList = [str(element).split(':')[2] for element in row[1:]]
-		except IndexError:
-			channelAliasesList = ['']*len(channelNamesList)
+		channelAliasesList = [extractAliases(element) for element in row[1:]]
 		# store each condition and its channelNames in the dict
 		for condition, channelNamesString, channelAliasesString in zip(conditionsList, channelNamesList, channelAliasesList):
 			incompleteSchemaDict[experimentName][condition] = OrderedDict()
 			channelNames = channelNamesString.split(',')
+			if '' in channelNames:
+				raise Exception("Channel names cannot be empty strings. Maybe you placed an extra comma somewhere?")
 			incompleteSchemaDict[experimentName][condition]['channelNames'] = channelNames
 			if channelAliasesString == '':  # no channelAliases provided: construct yourself
-				channelAliases = [experimentName + '_' + condition + '_' + channelName for channelName in channelNamesList]
+				channelAliases = [experimentName + '_' + condition + '_' + channelName for channelName in channelNames]
+			else:  # channelAliases are provided.
+				channelAliases = channelAliasesString.split(',')
+			if '' in channelAliases:
+				raise Exception("Channel aliases cannot be empty strings (if you define one alias, you should define all aliases in that condition). Maybe you placed an extra comma somewhere?")
 			incompleteSchemaDict[experimentName][condition]['channelAliases'] = channelAliases
 			numNames = len(channelNames)
 			numAliases = len(channelAliases)
 			numAllChannelNames += numNames
 			numAllChannelAliases += numAliases
+			experimentChannelNames += channelNames  # channel names must be tested for uniqueness per experiment
 			allChannelNames.update(channelNames)
 			allChannelAliases.update(channelAliases)
-			# check if channel names unique
-			if not len(set(channelNames)) == numNames:
-				raise Exception("Same channel name used multiple times for same experiment. Please define each condition only once per experiment.")
-			
-	""" validate schema """
-	# check if there are as many names as aliases
-	if not numAllChannelNames == numAllChannelAliases:
-		raise Exception("Amount of channel names and channel aliases must either be equal, or no aliases should be provided.")
+			# check if there are as many names as aliases
+			if not numNames == numAliases:
+				raise Exception("Amount of channel names and channel aliases must either be equal, or no aliases should be provided.")
+		# check if channel names unique
+		if not len(set(experimentChannelNames)) == len(experimentChannelNames):
+			raise Exception("Same channel name used multiple times for same experiment. Please define each condition only once per experiment.")
 	# check if channel aliases unique
 	if not len(allChannelAliases) == numAllChannelAliases:
 		raise Exception("Same alias name used multiple times for same experiment. Please define each condition only once per experiment.")
 	# channelNames already checked per experiment, and are allowed to be non-unique across experiments since they get replaced anyway.
+	
 	return incompleteSchemaDict
 
 
