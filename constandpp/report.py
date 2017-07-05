@@ -50,20 +50,24 @@ def getColours(schema, allChannelAliases, hex=False):
 	:param allChannelAliases:	list	unnested channelAliasesPercondition of all experiments, concatenated in order.
 	:return channelColoursDict:	dict    colour for each channel; a different one for each condition
 	"""
-	numConditions = len(list(schema.values())[0]['channelAliasesPerCondition'])
+	numConditions = len(schema['allConditions'])
 	distColours = distinguishableColours(numConditions)
 	if hex:
 		# transform into hex values
 		distColours = [to_hex(x) for x in distColours]
-	colours = []
-	for experiment in schema.values():
-		# repeat each distColour as many times as there are channels in the current condition, and repeat for each experiment
-		perCondition = experiment['channelAliasesPerCondition']
-		colours.append([np.tile(distColours[c], (len(perCondition[c]), 1)).tolist() for c in range(numConditions)])
-	if hex:
-		# colours are for some reason extra nested after converting to hex.
-		colours = unnest(colours)
-	channelColoursDict = dict(zip(allChannelAliases, unnest(unnest(colours))))
+	# colours = []
+	channelColoursDict = dict()
+	c = 0  # colour counter
+	for cond in schema['allConditions']:
+		for eName in schema['allExperiments']:
+			if cond in schema[eName]:
+				channelColoursDict.update(dict(zip(schema[eName][cond]['channelAliases'], distColours[c])))
+		c += 1
+	assert c == numConditions-1
+	# if hex:
+	# 	# colours are for some reason extra nested after converting to hex.
+	# 	colours = unnest(colours)
+	# channelColoursDict = dict(zip(allChannelAliases, unnest(unnest(colours))))
 	return channelColoursDict
 
 
