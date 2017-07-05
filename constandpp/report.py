@@ -298,7 +298,7 @@ def getHCDendrogram(HCResult, schema, title=None):
 	:return HCDendrogram:	plt.figure		HC dendrogram as a matplotlib figure object
 	"""
 	# hierarchical clustering dendrogram
-	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
+	allChannelAliases = unnest([schema[eName]['allExperimentChannelAliases'] for eName in schema['allExperiments']])
 	HCDendrogram = plt.figure(
 		figsize=(figwidth, figheight))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
