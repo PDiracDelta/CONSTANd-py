@@ -403,9 +403,9 @@ def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDiffe
 		logContents = logFile.readlines()
 	
 	approxDuration = time() - startTime
-	experiments = jobParams['schema']
-	for e in experiments:
-		experiments[e]['cond1Aliases'] = experiments[e]['channelAliasesPerCondition'][0]
+	# experiments = jobParams['schema']  # todo remove
+	# for e in experiments:
+	# 	experiments[e]['cond1Aliases'] = experiments[e]['channelAliasesPerCondition'][0]
 	pdfhtmlreport = render_template('report.html', jobName=jobParams['jobName'], minVolcanoFullPath=minVolcanoFullPath,
 									fullVolcanoFullPath=fullVolcanoFullPath,
 									minExpression_bool=jobParams['minExpression_bool'],
@@ -414,7 +414,7 @@ def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDiffe
 									fulldifferentials=fullTopDifferentialsHTML, PCAFileName=PCAPlotFullPath,
 									HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 									duration=approxDuration, log=logContents, jobParams=jobParams,
-									allProcessingParams=allProcessingParams, experiments=experiments, pdfsrc='True')
+									allProcessingParams=allProcessingParams, pdfsrc='True')#, experiments=experiments)
 	# get the tails of the input paths, starting from the jobs dir, so the Jinja report template can couple it to the
 	# jobs symlink in the static dir.
 	minVolcanoFullPath = hackImagePathToSymlinkInStaticDir(minVolcanoFullPath)
@@ -429,7 +429,7 @@ def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDiffe
 								 fulldifferentials=fullTopDifferentialsHTML, PCAFileName=PCAPlotFullPath,
 								 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 								 duration=approxDuration, log=logContents, jobParams=jobParams,
-								 allProcessingParams=allProcessingParams, experiments=experiments)
+								 allProcessingParams=allProcessingParams)#, experiments=experiments)
 	return htmlReport, pdfhtmlreport
 
 
