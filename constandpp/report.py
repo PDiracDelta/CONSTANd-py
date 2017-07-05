@@ -255,7 +255,7 @@ def getPCAPlot(PCAResult, schema, title=None):
 	plt.ylabel('Second PC', figure=PCAPlot)
 	
 	# labels for annotation
-	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
+	allChannelAliases = unnest([schema[eName]['allExperimentChannelAliases'] for eName in schema['allExperiments']])
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
 	channelColorsDict = getColours(schema, allChannelAliases)
 	channelMarkersDict = getMarkers(schema)
@@ -267,12 +267,12 @@ def getPCAPlot(PCAResult, schema, title=None):
 					 textcoords='offset points', ha='right', va='bottom', fontsize=20)
 	legendHandles = []
 	legendStrings = []
-	# look for corresponding experiment name
+	# look up the corresponding experiment name for each marker to construct the legend
 	markersToCheck = set(channelMarkersDict.values())
 	for channel, marker in channelMarkersDict.items():
 		if marker in markersToCheck:
-			for eName, experiment in schema.items():
-				if channel in unnest(experiment['channelAliasesPerCondition']):
+			for eName in schema['allExperiments']:
+				if channel in unnest(schema[eName]['allExperimentChannelAliases']):
 					handle = plt.scatter([], [], color='k', marker=marker, s=160)
 					legendHandles.append(handle)
 					legendStrings.append(eName)
