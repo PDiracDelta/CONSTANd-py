@@ -276,7 +276,7 @@ def getPCAPlot(PCAResult, schema, title=None):
 	for channel, marker in channelMarkersDict.items():
 		if marker in markersToCheck:
 			for eName in schema['allExperiments']:
-				if channel in unnest(schema[eName]['allExperimentChannelAliases']):
+				if channel in schema[eName]['allExperimentChannelAliases']:
 					handle = plt.scatter([], [], color='k', marker=marker, s=160)
 					legendHandles.append(handle)
 					legendStrings.append(eName)
