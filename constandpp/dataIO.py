@@ -97,7 +97,8 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	EXPERIMENTNAME_CONDITION_COLNAME.
 	:param schemaPath:              str     path to the schema file that the user uploaded
 	:return incompleteSchemaDict:   dict    schema in dict format, without config and wrapper information, in the format
-											{ allConditions: [conditions] ,
+											{ allExperiments: [experiments] ,
+											  allConditions: [conditions] ,
 											  experiment: {
 												allExperimentChannelNames: [channelNames] ,
 												allExperimentChannelAliases: [channelAliases] ,
@@ -123,7 +124,6 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	schemaDF = importDataFrame(schemaPath, delim='\t', header=None, dtype=str).replace(np.nan, '', regex=True)
 	incompleteSchemaDict = OrderedDict()  # use ordered dict so the items() order is always the same
 	numCols = len(schemaDF.columns)
-	numConds = numCols-1
 	numRows = len(schemaDF)
 	if not (numCols > 2):  # at least 3 columns
 		raise Exception("Schema must have at least 3 columns EXPERIMENT\\tCONDITION 1\\tCONDITION 2 (separated by tabs)")
@@ -137,11 +137,13 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	allChannelAliases = set()
 	numAllChannelNames = 0
 	numAllChannelAliases = 0
+	incompleteSchemaDict['allExperiments'] = []
 	for __, row in schemaDF.iterrows():
 		experimentChannelNames = []
 		experimentChannelAliases = []
 		experimentName = str(row[0])
 		incompleteSchemaDict[experimentName] = OrderedDict()
+		incompleteSchemaDict['allExperiments'].append(experimentName)
 		conditionsList = [str(element).split(':')[0] for element in row[1:]]
 		allConditions.update(conditionsList)
 		try:

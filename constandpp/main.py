@@ -30,7 +30,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 	processingParams = {}  # specific params for each experiment
 	dfs = {}
 	processingResults = {}
-	experimentNames = list(jobParams['schema'].keys())
+	experimentNames = jobParams['schema']['allExperiments']
 	
 	for eName in experimentNames:
 		""" Data processing """
