@@ -153,8 +153,8 @@ def getProteinDF(df, proteinPeptidesDict, schema):
 	proteinDFColumns = ['protein', 'peptides', 'description', 'condition 1', 'condition 2']
 	proteinDF = pd.DataFrame([list(proteinPeptidesDict.keys())].extend([[None], ]*len(proteinDFColumns)),
 							 columns=proteinDFColumns).set_index('protein')
-	# define channelAliasesPerConditionDict so that it contains the channels of ALL experiments
-	channelAliasesPerConditionDict = dict((eName, experiment['channelAliasesPerCondition']) for eName, experiment in schema.items())
+	condition1 = schema['allConditions'][0]  # TEST todo
+	condition2 = schema['allConditions'][1]  # TEST todo
 	for protein, peptideIndices in proteinPeptidesDict.items():
 		# interpret as multi index so that you can call .levels and .get_level_values()
 		peptideIndices = pd.MultiIndex.from_tuples(peptideIndices)
@@ -167,9 +167,9 @@ def getProteinDF(df, proteinPeptidesDict, schema):
 			peptideIndicesPerExperiment = peptideIndices.values[peptideIndices.get_level_values(0) == eName]
 			# get a list of dfs, to sort the intensities per channel.
 			condition1intensitiesPerChannel = [df.loc[peptideIndicesPerExperiment, channel] for channel in
-											   channelAliasesPerConditionDict[eName][0]]
+											   schema[eName][condition1]]
 			condition2intensitiesPerChannel = [df.loc[peptideIndicesPerExperiment, channel] for channel in
-											   channelAliasesPerConditionDict[eName][1]]
+											   schema[eName][condition2]]
 			condition1Intensities = pd.concat([condition1Intensities] + condition1intensitiesPerChannel, axis=0, ignore_index=True)
 			condition2Intensities = pd.concat([condition2Intensities] + condition2intensitiesPerChannel, axis=0, ignore_index=True)
 		# fill new dataframe on protein level, per condition
