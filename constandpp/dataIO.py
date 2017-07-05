@@ -129,7 +129,7 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 		raise Exception("Schema must have at least 3 columns EXPERIMENT\\tCONDITION 1\\tCONDITION 2 (separated by tabs)")
 	# check if experiment names are unique
 	if not len(schemaDF.loc[:, 0].unique()) == numRows:
-		raise Exception("Experiment names and/or aliases contain duplicates. Please provide unique names and aliases.")
+		raise Exception("Experiment names contain duplicates. Please provide unique names.")
 	
 	""" construct schema dict """
 	allConditions = set()
