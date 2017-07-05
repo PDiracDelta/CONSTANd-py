@@ -109,8 +109,8 @@ def getMarkers(schema):
 	distMarkers = distinguishableMarkers(len(schema))
 	channelMarkersDict = {}
 	i = 0
-	for experiment in schema.values():
-		for alias in unnest(experiment['channelAliasesPerCondition']):
+	for eName in schema['allExperiments']:
+		for alias in schema[eName]['allExperimentChannelAliases']:
 			channelMarkersDict[alias] = distMarkers[i]
 		i += 1
 	return channelMarkersDict
