@@ -97,8 +97,12 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	EXPERIMENTNAME_CONDITION_COLNAME.
 	:param schemaPath:              str     path to the schema file that the user uploaded
 	:return incompleteSchemaDict:   dict    schema in dict format, without config and wrapper information, in the format
-											{ experiment: { condition: { channelNames: [names] , channelAliases: [aliases] } } ,
-											  allConditions: [conditions] }
+											{ experiment:
+												allConditions: [conditions] ,
+												allExperimentChannelNames: [channelNames] ,
+												allExperimentChannelAliases: [channelAliases] ,
+												{ condition: { channelNames: [names] , channelAliases: [aliases] } } ,
+											}
 	"""
 	def extractAliases(rowElement):
 		"""
@@ -134,6 +138,7 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	numAllChannelAliases = 0
 	for __, row in schemaDF.iterrows():
 		experimentChannelNames = []
+		experimentChannelAliases = []
 		experimentName = str(row[0])
 		incompleteSchemaDict[experimentName] = OrderedDict()
 		conditionsList = [str(element).split(':')[0] for element in row[1:]]
@@ -165,11 +170,14 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 			numAllChannelNames += numNames
 			numAllChannelAliases += numAliases
 			experimentChannelNames += channelNames  # channel names must be tested for uniqueness per experiment
+			experimentChannelAliases += channelAliases
 			allChannelNames.update(channelNames)
 			allChannelAliases.update(channelAliases)
 			# check if there are as many names as aliases
 			if not numNames == numAliases:
 				raise Exception("Amount of channel names and channel aliases must either be equal, or no aliases should be provided.")
+		incompleteSchemaDict[experimentName]['allExperimentChannelNames'] = experimentChannelNames
+		incompleteSchemaDict[experimentName]['allExperimentChannelAliases'] = experimentChannelAliases
 		# check if channel names unique
 		if not len(set(experimentChannelNames)) == len(experimentChannelNames):
 			raise Exception("Same channel name used multiple times for same experiment. Please define each condition only once per experiment.")
