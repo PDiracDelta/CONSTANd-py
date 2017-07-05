@@ -97,11 +97,12 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	EXPERIMENTNAME_CONDITION_COLNAME.
 	:param schemaPath:              str     path to the schema file that the user uploaded
 	:return incompleteSchemaDict:   dict    schema in dict format, without config and wrapper information, in the format
-											{ experiment:
-												allConditions: [conditions] ,
+											{ allConditions: [conditions] ,
+											  experiment: {
 												allExperimentChannelNames: [channelNames] ,
 												allExperimentChannelAliases: [channelAliases] ,
-												{ condition: { channelNames: [names] , channelAliases: [aliases] } } ,
+												{ condition: { channelNames: [names] , channelAliases: [aliases] } }
+											  }
 											}
 	"""
 	def extractAliases(rowElement):
