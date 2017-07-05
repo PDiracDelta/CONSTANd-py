@@ -97,7 +97,8 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	EXPERIMENTNAME_CONDITION_COLNAME.
 	:param schemaPath:              str     path to the schema file that the user uploaded
 	:return incompleteSchemaDict:   dict    schema in dict format, without config and wrapper information, in the format
-											{ experiment: { channels: { condition: [channels] }, aliases: { condition_alias: [aliases] } }
+											{ experiment: { condition: { channelNames: [names] , channelAliases: [aliases] } } ,
+											  allConditions: [conditions] }
 	"""
 	def extractAliases(rowElement):
 		"""
@@ -126,6 +127,7 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 		raise Exception("Experiment names and/or aliases contain duplicates. Please provide unique names and aliases.")
 	
 	""" construct schema dict """
+	allConditions = set()
 	allChannelNames = set()
 	allChannelAliases = set()
 	numAllChannelNames = 0
@@ -135,6 +137,7 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 		experimentName = str(row[0])
 		incompleteSchemaDict[experimentName] = OrderedDict()
 		conditionsList = [str(element).split(':')[0] for element in row[1:]]
+		allConditions.update(conditionsList)
 		try:
 			channelNamesList = [str(element).split(':')[1] for element in row[1:]]
 		except IndexError:
@@ -174,6 +177,7 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	if not len(allChannelAliases) == numAllChannelAliases:
 		raise Exception("Same alias name used multiple times for same experiment. Please define each condition only once per experiment.")
 	# channelNames already checked per experiment, and are allowed to be non-unique across experiments since they get replaced anyway.
+	incompleteSchemaDict['allConditions'] = list(allConditions)
 	
 	return incompleteSchemaDict
 
