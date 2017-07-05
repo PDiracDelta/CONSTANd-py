@@ -92,15 +92,13 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	"""
 	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment. The
 	wrapper and config entries are set to None for now. The structure of the schema should be as follows:
-		long_name	cond1:df_col1,df_col2		cond2:df_col3,df_col4
-		short_name	cond1Alias:alias1,alias2	cond2Alias:alias3,alias4
+		experiment_name	cond1:df_col1,df_col2:alias1,alias2		cond2:df_col3,df_col4:alias3,alias4
+	IF aliases are provided for a certain row, they must all be provided. Else they are generated automatically as
+	EXPERIMENTNAME_CONDITION_COLNAME.
 	:param schemaPath:              str     path to the schema file that the user uploaded
 	:return incompleteSchemaDict:   dict    schema in dict format, without config and wrapper information, in the format
 											{ experiment: { channels: { condition: [channels] }, aliases: { condition_alias: [aliases] } }
 	"""
-	def validateSchema(parsedSchema):
-		pass  #todo
-		
 	from collections import OrderedDict
 	# import schema file as dataframe and replace nan values by empty strings
 	schemaDF = importDataFrame(schemaPath, delim='\t', header=None, dtype=str).replace(np.nan, '', regex=True)
@@ -108,52 +106,57 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	numCols = len(schemaDF.columns)
 	numConds = numCols-1
 	numRows = len(schemaDF)
-	if not (np.mod(len(schemaDF), 2) == 0):  # schema must have even number of lines
-		raise Exception("schema must have even number of lines (one for declarations and one for aliases, which may be empty but should exist.)")
-	else:
-		evenRows = list(range(1,numRows,2))
-		unevenRows = list(range(0,numRows,2))
 	if not (numCols > 2):  # at least 3 columns
-		raise Exception("schema must have at least 3 columns EXPERIMENT\\tCONDITION 1\\tCONDITION 2 (separated by tabs)")
-	# check if experiment names and aliases are unique
-	if not (len(set(schemaDF.loc[unevenRows,0]))+len(set(schemaDF.loc[evenRows,0]))==numRows):
+		raise Exception("Schema must have at least 3 columns EXPERIMENT\\tCONDITION 1\\tCONDITION 2 (separated by tabs)")
+	# check if experiment names are unique
+	if not len(schemaDF.loc[:, 0].unique()) == numRows:
 		raise Exception("Experiment names and/or aliases contain duplicates. Please provide unique names and aliases.")
-	for i in range(int(len(schemaDF) / 2)):
-		thisRow = schemaDF.loc[2 * i, :]
-		experimentName = str(thisRow[0])
-		numConditions = len(thisRow) - 1
-		channelNamesPerCondition = [str(thisRow[c]).split(',') for c in range(1, numConditions + 1)]
-		nextRow = schemaDF.loc[2 * i + 1, :]
-		# if the next row contains just as many values (that are not empty); aliases are provided
-		if len(nextRow) == len(thisRow) and np.sum(nextRow == '') == 0:
-			channelAliasesPerCondition = [str(nextRow[c]).split(',') for c in range(1, numConditions + 1)]
-		else:  # aliases not (properly) provided
-			shortExperimentName = str(nextRow[0])
-			channelAliasesPerCondition = [[shortExperimentName + '_' + channelName for channelName in condition]
-										  for condition in channelNamesPerCondition]
-		
-		incompleteSchemaDict[experimentName] = {'channelNamesPerCondition': channelNamesPerCondition,
-												'channelAliasesPerCondition': channelAliasesPerCondition}
-	# if this step succeeds the schema is valid.
-	validateSchema(incompleteSchemaDict)
+	
+	""" Construct (incomplete) schema dict"""
+	allConditions = set()
+	allChannelNames = set()
+	allChannelAliases = set()
+	numAllChannelNames = 0
+	numAllChannelAliases = 0
+	for row in schemaDF:
+		experimentName = str(row[0])
+		incompleteSchemaDict[experimentName] = OrderedDict()
+		conditionsList = [str(element).split(':')[0] for element in row[1:]]
+		channelNamesList = [str(element).split(':')[1] for element in row[1:]]
+		# check if condition names unique
+		if not len(set(conditionsList)) == len(conditionsList):
+			raise Exception("Same condition name used multiple times for same experiment. Please define each condition only once per experiment.")
+		try:  # allow that no aliases are provided
+			channelAliasesList = [str(element).split(':')[2] for element in row[1:]]
+		except IndexError:
+			channelAliasesList = ['']*len(channelNamesList)
+		# store each condition and its channelNames in the dict
+		for condition, channelNamesString, channelAliasesString in zip(conditionsList, channelNamesList, channelAliasesList):
+			incompleteSchemaDict[experimentName][condition] = OrderedDict()
+			channelNames = channelNamesString.split(',')
+			incompleteSchemaDict[experimentName][condition]['channelNames'] = channelNames
+			if channelAliasesString == '':  # no channelAliases provided: construct yourself
+				channelAliases = [experimentName + '_' + condition + '_' + channelName for channelName in channelNamesList]
+			incompleteSchemaDict[experimentName][condition]['channelAliases'] = channelAliases
+			numNames = len(channelNames)
+			numAliases = len(channelAliases)
+			numAllChannelNames += numNames
+			numAllChannelAliases += numAliases
+			allChannelNames.update(channelNames)
+			allChannelAliases.update(channelAliases)
+			# check if channel names unique
+			if not len(set(channelNames)) == numNames:
+				raise Exception("Same channel name used multiple times for same experiment. Please define each condition only once per experiment.")
+			
+	""" validate schema """
+	# check if there are as many names as aliases
+	if not numAllChannelNames == numAllChannelAliases:
+		raise Exception("Amount of channel names and channel aliases must either be equal, or no aliases should be provided.")
+	# check if channel aliases unique
+	if not len(allChannelAliases) == numAllChannelAliases:
+		raise Exception("Same alias name used multiple times for same experiment. Please define each condition only once per experiment.")
+	# channelNames already checked per experiment, and are allowed to be non-unique across experiments since they get replaced anyway.
 	return incompleteSchemaDict
-
-
-# def writeConfig(filePath, contents): # todo remove this
-# 	"""
-#
-# 	:param filePath:
-# 	:param contents:
-# 	:return:
-# 	"""
-# 	file = open(filePath, 'w')
-# 	config = configparser.ConfigParser()
-# 	section = 'DEFAULT'
-# 	# config.add_section(section)
-# 	for k, v in contents.items():
-# 		config.set(section, k, v)
-# 	config.write(file)
-# 	file.close()
 
 
 def fixFixableFormatMistakes(df):
