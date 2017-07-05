@@ -127,9 +127,14 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	numRows = len(schemaDF)
 	if not (numCols > 2):  # at least 3 columns
 		raise Exception("Schema must have at least 3 columns EXPERIMENT\\tCONDITION 1\\tCONDITION 2 (separated by tabs)")
+	incompleteSchemaDict['allExperiments'] = list(schemaDF.loc[:, 0])
 	# check if experiment names are unique
-	if not len(schemaDF.loc[:, 0].unique()) == numRows:
+	if not len(set(incompleteSchemaDict['allExperiments'])) == numRows:
 		raise Exception("Experiment names contain duplicates. Please provide unique names.")
+	forbiddenExperimentNames = {'allExperiments', 'allConditions'}
+	# check if no experiment names are forbidden
+	if set(incompleteSchemaDict['allExperiments']) & forbiddenExperimentNames:
+		raise Exception("Please do not use the following as experiment names: "+str(list(forbiddenExperimentNames)))
 	
 	""" construct schema dict """
 	allConditions = set()
@@ -137,13 +142,11 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	allChannelAliases = set()
 	numAllChannelNames = 0
 	numAllChannelAliases = 0
-	incompleteSchemaDict['allExperiments'] = []
 	for __, row in schemaDF.iterrows():
 		experimentChannelNames = []
 		experimentChannelAliases = []
 		experimentName = str(row[0])
 		incompleteSchemaDict[experimentName] = OrderedDict()
-		incompleteSchemaDict['allExperiments'].append(experimentName)
 		conditionsList = [str(element).split(':')[0] for element in row[1:]]
 		allConditions.update(conditionsList)
 		try:
