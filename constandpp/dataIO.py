@@ -157,6 +157,7 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 		if not len(set(conditionsList)) == len(conditionsList):
 			raise Exception("Same condition name used multiple times for same experiment. Please define each condition only once per experiment.")
 		channelAliasesList = [extractAliases(element) for element in row[1:]]
+		
 		# store each condition and its channelNames in the dict
 		for condition, channelNamesString, channelAliasesString in zip(conditionsList, channelNamesList, channelAliasesList):
 			incompleteSchemaDict[experimentName][condition] = OrderedDict()
@@ -182,16 +183,24 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 			# check if there are as many names as aliases
 			if not numNames == numAliases:
 				raise Exception("Amount of channel names and channel aliases must either be equal, or no aliases should be provided.")
+		
 		incompleteSchemaDict[experimentName]['allExperimentChannelNames'] = experimentChannelNames
 		incompleteSchemaDict[experimentName]['allExperimentChannelAliases'] = experimentChannelAliases
 		# check if channel names unique
 		if not len(set(experimentChannelNames)) == len(experimentChannelNames):
 			raise Exception("Same channel name used multiple times for same experiment. Please define each condition only once per experiment.")
+	
 	# check if channel aliases unique
 	if not len(allChannelAliases) == numAllChannelAliases:
 		raise Exception("Same alias name used multiple times for same experiment. Please define each condition only once per experiment.")
+	
 	# channelNames already checked per experiment, and are allowed to be non-unique across experiments since they get replaced anyway.
 	incompleteSchemaDict['allConditions'] = list(allConditions)
+	
+	# check if some of the conditions provided do not actually have forbidden names (union not empty)
+	forbiddenConditionNames = {'data', 'config', 'isotopicCorrection_matrix', 'wrapper'}
+	if allConditions & {'data', 'config', 'isotopicCorrection_matrix', 'wrapper'}:
+		raise Exception("Please do not use as condition names any of the following: " + str(list(forbiddenConditionNames)))
 	
 	return incompleteSchemaDict
 
