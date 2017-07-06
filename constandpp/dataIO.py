@@ -200,7 +200,7 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	incompleteSchemaDict['allConditions'] = list(allConditions)
 	
 	# check if some of the conditions provided do not actually have forbidden names (union not empty)
-	forbiddenConditionNames = {'data', 'config', 'isotopicCorrection_matrix', 'wrapper'}
+	forbiddenConditionNames = {'data', 'config', 'isotopicCorrection_matrix', 'wrapper', 'allExperimentConditions'}
 	if allConditions & {'data', 'config', 'isotopicCorrection_matrix', 'wrapper'}:
 		raise Exception("Please do not use as condition names any of the following: " + str(list(forbiddenConditionNames)))
 	
