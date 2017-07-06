@@ -100,6 +100,7 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 											{ allExperiments: [experiments] ,
 											  allConditions: [conditions] ,
 											  experiment: {
+											    allExperimentConditions: [conditions] ,
 												allExperimentChannelNames: [channelNames] ,
 												allExperimentChannelAliases: [channelAliases] ,
 												{ condition: { channelNames: [names] , channelAliases: [aliases] } }
@@ -184,6 +185,7 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 			if not numNames == numAliases:
 				raise Exception("Amount of channel names and channel aliases must either be equal, or no aliases should be provided.")
 		
+		incompleteSchemaDict[experimentName]['allExperimentConditions'] = conditionsList
 		incompleteSchemaDict[experimentName]['allExperimentChannelNames'] = experimentChannelNames
 		incompleteSchemaDict[experimentName]['allExperimentChannelAliases'] = experimentChannelAliases
 		# check if channel names unique
