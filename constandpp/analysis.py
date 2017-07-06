@@ -167,9 +167,9 @@ def getProteinDF(df, proteinPeptidesDict, schema):
 			peptideIndicesPerExperiment = peptideIndices.values[peptideIndices.get_level_values(0) == eName]
 			# get a list of dfs, to sort the intensities per channel.
 			condition1intensitiesPerChannel = [df.loc[peptideIndicesPerExperiment, channel] for channel in
-											   schema[eName][condition1]]
+											   schema[eName][condition1]['channelAliases']]
 			condition2intensitiesPerChannel = [df.loc[peptideIndicesPerExperiment, channel] for channel in
-											   schema[eName][condition2]]
+											   schema[eName][condition2]['channelAliases']]
 			condition1Intensities = pd.concat([condition1Intensities] + condition1intensitiesPerChannel, axis=0, ignore_index=True)
 			condition2Intensities = pd.concat([condition2Intensities] + condition2intensitiesPerChannel, axis=0, ignore_index=True)
 		# fill new dataframe on protein level, per condition
