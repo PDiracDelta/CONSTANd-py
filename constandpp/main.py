@@ -5,7 +5,7 @@
 Python implementation of mass spectrometer protein data analysis using the CONSTANd_RAS algorithm.
 """
 
-import sys, logging, datetime
+import sys, logging, datetime, traceback
 from constandpp.dataIO import *
 
 
@@ -186,4 +186,7 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 			DB_setJobCompleted(jobDirName)
 		except:
 			DB_setJobFailed(jobDirName)
+			logging.error("\n=====\n===== A FATAL ERROR OCCURRED; PLEASE FIND THE STACK TRACE BELOW =====\n=====\n")
+			logFilePath = os.path.abspath(os.path.join(jobConfigFilePath, os.path.join(os.pardir, 'log.txt')))
+			traceback.print_exc(file=open(logFilePath, "a"))
 			print_exc()
