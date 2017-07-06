@@ -42,20 +42,17 @@ def distinguishableColours(n, type='jet'):
 	return cmap(np.linspace(0, 1.0, n))
 
 
-def getColours(schema, allChannelAliases, hex=False):
+def getColours(schema, hex=False):
 	"""
 	Returns list of colours for all the channels in all experiments (based on schema) so that the channels of the same
 	condition have the same colour.
 	:param schema:  			dict    schema of the experiments' hierarchy
-	:param allChannelAliases:	list	unnested channelAliasesPercondition of all experiments, concatenated in order.
 	:return channelColoursDict:	dict    colour for each channel; a different one for each condition
 	"""
 	numConditions = len(schema['allConditions'])
 	distColours = distinguishableColours(numConditions)
 	if hex:
-		# transform into hex values
 		distColours = [to_hex(x) for x in distColours]
-	# colours = []
 	channelColoursDict = dict()
 	c = 0  # colour counter
 	for cond in schema['allConditions']:
@@ -65,10 +62,6 @@ def getColours(schema, allChannelAliases, hex=False):
 				channelColoursDict.update(dict(zip(schema[eName][cond]['channelAliases'], np.tile(distColours[c], (numChannels, 1)))))
 		c += 1
 	assert c == numConditions
-	# if hex:
-	# 	# colours are for some reason extra nested after converting to hex.
-	# 	colours = unnest(colours)
-	# channelColoursDict = dict(zip(allChannelAliases, unnest(unnest(colours))))
 	return channelColoursDict
 
 
@@ -262,7 +255,7 @@ def getPCAPlot(PCAResult, schema, title=None):
 	# labels for annotation
 	allChannelAliases = unnest([schema[eName]['allExperimentChannelAliases'] for eName in schema['allExperiments']])
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
-	channelColorsDict = getColours(schema, allChannelAliases)
+	channelColorsDict = getColours(schema)
 	channelMarkersDict = getMarkers(schema)
 	
 	for (x, y, label) in zip(PCAResult[:, 0], PCAResult[:, 1], allChannelAliases):
@@ -312,7 +305,7 @@ def getHCDendrogram(HCResult, schema, title=None):
 	plt.ylabel('reporter channel', figure=HCDendrogram)
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
 	# first transform to hex code because the dendrogram() function only takes strings.
-	channelColorsDict = getColours(schema, allChannelAliases, hex=False)
+	channelColorsDict = getColours(schema, hex=False)
 	dendrogram(HCResult, orientation='right', leaf_rotation=0., leaf_font_size=24, labels=allChannelAliases,
 			   link_color_func=lambda x: channelColorsDict[allChannelAliases[x]] if x < len(allChannelAliases) else 'k',
 			   above_threshold_color='k')
