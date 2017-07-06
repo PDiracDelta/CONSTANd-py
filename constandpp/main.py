@@ -5,7 +5,7 @@
 Python implementation of mass spectrometer protein data analysis using the CONSTANd_RAS algorithm.
 """
 
-import sys, logging, datetime
+import sys, logging, datetime, traceback
 from constandpp.dataIO import *
 
 
@@ -30,7 +30,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, tes
 	processingParams = {}  # specific params for each experiment
 	dfs = {}
 	processingResults = {}
-	experimentNames = list(jobParams['schema'].keys())
+	experimentNames = jobParams['schema']['allExperiments']
 	
 	for eName in experimentNames:
 		""" Data processing """
@@ -172,7 +172,9 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '2017-06-09 16:27:58.613049_testCSVallProteinsAndAttachment_COON_2cond/jobConfig_testCSVallProteinsAndAttachment_COON_2cond.ini'
 		# jobConfigFilePath = '2017-07-03 14:36:26.266664_testNumPeptsCol/jobConfig_testNumPeptsCol.ini'
 		# jobConfigFilePath = '2017-07-04 13:20:00.950020_prims_2_3/jobConfig_prims_2_3.ini'
-		jobConfigFilePath = '2017-07-04 13:44:15.358353_prims_2_3/jobConfig_prims_2_3.ini'
+		# jobConfigFilePath = '2017-07-04 13:44:15.358353_prims_2_3/jobConfig_prims_2_3.ini'
+		# jobConfigFilePath = '2017-07-06 09:44:57.809888_test_newSchema_MAX/jobConfig_test_newSchema_MAX.ini'
+		jobConfigFilePath = '2017-07-06 11:05:47.378532_test_newschema_MAX_2cond/jobConfig_test_newschema_MAX_2cond.ini'
 		
 		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	
@@ -185,4 +187,7 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 			DB_setJobCompleted(jobDirName)
 		except:
 			DB_setJobFailed(jobDirName)
+			logging.error("\n=====\n===== A FATAL ERROR OCCURRED; PLEASE FIND THE STACK TRACE BELOW =====\n=====\n")
+			logFilePath = os.path.abspath(os.path.join(jobConfigFilePath, os.path.join(os.pardir, 'log.txt')))
+			traceback.print_exc(file=open(logFilePath, "a"))
 			print_exc()

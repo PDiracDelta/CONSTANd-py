@@ -42,28 +42,26 @@ def distinguishableColours(n, type='jet'):
 	return cmap(np.linspace(0, 1.0, n))
 
 
-def getColours(schema, allChannelAliases, hex=False):
+def getColours(schema, hex=False):
 	"""
 	Returns list of colours for all the channels in all experiments (based on schema) so that the channels of the same
 	condition have the same colour.
 	:param schema:  			dict    schema of the experiments' hierarchy
-	:param allChannelAliases:	list	unnested channelAliasesPercondition of all experiments, concatenated in order.
 	:return channelColoursDict:	dict    colour for each channel; a different one for each condition
 	"""
-	numConditions = len(list(schema.values())[0]['channelAliasesPerCondition'])
+	numConditions = len(schema['allConditions'])
 	distColours = distinguishableColours(numConditions)
 	if hex:
-		# transform into hex values
 		distColours = [to_hex(x) for x in distColours]
-	colours = []
-	for experiment in schema.values():
-		# repeat each distColour as many times as there are channels in the current condition, and repeat for each experiment
-		perCondition = experiment['channelAliasesPerCondition']
-		colours.append([np.tile(distColours[c], (len(perCondition[c]), 1)).tolist() for c in range(numConditions)])
-	if hex:
-		# colours are for some reason extra nested after converting to hex.
-		colours = unnest(colours)
-	channelColoursDict = dict(zip(allChannelAliases, unnest(unnest(colours))))
+	channelColoursDict = dict()
+	c = 0  # colour counter
+	for cond in schema['allConditions']:
+		for eName in schema['allExperiments']:
+			if cond in schema[eName]:
+				numChannels = len(schema[eName][cond]['channelAliases'])
+				channelColoursDict.update(dict(zip(schema[eName][cond]['channelAliases'], np.tile(distColours[c], (numChannels, 1)))))
+		c += 1
+	assert c == numConditions
 	return channelColoursDict
 
 
@@ -105,8 +103,8 @@ def getMarkers(schema):
 	distMarkers = distinguishableMarkers(len(schema))
 	channelMarkersDict = {}
 	i = 0
-	for experiment in schema.values():
-		for alias in unnest(experiment['channelAliasesPerCondition']):
+	for eName in schema['allExperiments']:
+		for alias in schema[eName]['allExperimentChannelAliases']:
 			channelMarkersDict[alias] = distMarkers[i]
 		i += 1
 	return channelMarkersDict
@@ -255,9 +253,9 @@ def getPCAPlot(PCAResult, schema, title=None):
 	plt.ylabel('Second PC', figure=PCAPlot)
 	
 	# labels for annotation
-	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
+	allChannelAliases = unnest([schema[eName]['allExperimentChannelAliases'] for eName in schema['allExperiments']])
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
-	channelColorsDict = getColours(schema, allChannelAliases)
+	channelColorsDict = getColours(schema)
 	channelMarkersDict = getMarkers(schema)
 	
 	for (x, y, label) in zip(PCAResult[:, 0], PCAResult[:, 1], allChannelAliases):
@@ -267,12 +265,12 @@ def getPCAPlot(PCAResult, schema, title=None):
 					 textcoords='offset points', ha='right', va='bottom', fontsize=20)
 	legendHandles = []
 	legendStrings = []
-	# look for corresponding experiment name
+	# look up the corresponding experiment name for each marker to construct the legend
 	markersToCheck = set(channelMarkersDict.values())
 	for channel, marker in channelMarkersDict.items():
 		if marker in markersToCheck:
-			for eName, experiment in schema.items():
-				if channel in unnest(experiment['channelAliasesPerCondition']):
+			for eName in schema['allExperiments']:
+				if channel in schema[eName]['allExperimentChannelAliases']:
 					handle = plt.scatter([], [], color='k', marker=marker, s=160)
 					legendHandles.append(handle)
 					legendStrings.append(eName)
@@ -294,7 +292,7 @@ def getHCDendrogram(HCResult, schema, title=None):
 	:return HCDendrogram:	plt.figure		HC dendrogram as a matplotlib figure object
 	"""
 	# hierarchical clustering dendrogram
-	allChannelAliases = unnest([unnest(experiments['channelAliasesPerCondition']) for experiments in schema.values()])
+	allChannelAliases = unnest([schema[eName]['allExperimentChannelAliases'] for eName in schema['allExperiments']])
 	HCDendrogram = plt.figure(
 		figsize=(figwidth, figheight))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
@@ -307,7 +305,7 @@ def getHCDendrogram(HCResult, schema, title=None):
 	plt.ylabel('reporter channel', figure=HCDendrogram)
 	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
 	# first transform to hex code because the dendrogram() function only takes strings.
-	channelColorsDict = getColours(schema, allChannelAliases, hex=True)
+	channelColorsDict = getColours(schema, hex=False)
 	dendrogram(HCResult, orientation='right', leaf_rotation=0., leaf_font_size=24, labels=allChannelAliases,
 			   link_color_func=lambda x: channelColorsDict[allChannelAliases[x]] if x < len(allChannelAliases) else 'k',
 			   above_threshold_color='k')
@@ -399,9 +397,9 @@ def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDiffe
 		logContents = logFile.readlines()
 	
 	approxDuration = time() - startTime
-	experiments = jobParams['schema']
-	for e in experiments:
-		experiments[e]['cond1Aliases'] = experiments[e]['channelAliasesPerCondition'][0]
+	# experiments = jobParams['schema']  # todo remove
+	# for e in experiments:
+	# 	experiments[e]['cond1Aliases'] = experiments[e]['channelAliasesPerCondition'][0]
 	pdfhtmlreport = render_template('report.html', jobName=jobParams['jobName'], minVolcanoFullPath=minVolcanoFullPath,
 									fullVolcanoFullPath=fullVolcanoFullPath,
 									minExpression_bool=jobParams['minExpression_bool'],
@@ -410,7 +408,7 @@ def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDiffe
 									fulldifferentials=fullTopDifferentialsHTML, PCAFileName=PCAPlotFullPath,
 									HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 									duration=approxDuration, log=logContents, jobParams=jobParams,
-									allProcessingParams=allProcessingParams, experiments=experiments, pdfsrc='True')
+									allProcessingParams=allProcessingParams, pdfsrc='True')#, experiments=experiments)
 	# get the tails of the input paths, starting from the jobs dir, so the Jinja report template can couple it to the
 	# jobs symlink in the static dir.
 	minVolcanoFullPath = hackImagePathToSymlinkInStaticDir(minVolcanoFullPath)
@@ -425,7 +423,7 @@ def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDiffe
 								 fulldifferentials=fullTopDifferentialsHTML, PCAFileName=PCAPlotFullPath,
 								 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 								 duration=approxDuration, log=logContents, jobParams=jobParams,
-								 allProcessingParams=allProcessingParams, experiments=experiments)
+								 allProcessingParams=allProcessingParams)#, experiments=experiments)
 	return htmlReport, pdfhtmlreport
 
 

@@ -199,6 +199,7 @@ def getJobInput(jobConfigFilePath):
 	pept2protCombinationMethod = config.get('DEFAULT', 'pept2protCombinationMethod')
 	minExpression_bool = config.getboolean('DEFAULT', 'minExpression_bool')
 	fullExpression_bool = config.getboolean('DEFAULT', 'fullExpression_bool')
+	referenceCondition = config.get('DEFAULT', 'referenceCondition')
 	alpha = config.getfloat('DEFAULT', 'alpha')
 	FCThreshold = config.getfloat('DEFAULT', 'FCThreshold')
 	labelVolcanoPlotAreas = parseExpression(config.get('DEFAULT', 'labelVolcanoPlotAreas'))
@@ -229,6 +230,7 @@ def getJobInput(jobConfigFilePath):
 		'pept2protCombinationMethod': pept2protCombinationMethod,
 		'minExpression_bool': minExpression_bool,
 		'fullExpression_bool': fullExpression_bool,
+		'referenceCondition': referenceCondition,
 		'alpha': alpha,
 		'FCThreshold': FCThreshold,
 		'labelVolcanoPlotAreas': labelVolcanoPlotAreas,

@@ -53,7 +53,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		MAPlot(minProteinDF.loc[:, '3_muscle'], minProteinDF.loc[:, '4_cerebrum'],
 			   'org2 exp [2] vs org3 exp [3]')
 
-	nConditions = len(list(params['schema'].values())[0]['channelAliasesPerCondition'])
+	nConditions = len(params['schema']['allConditions'])
 	allDEResultsFullPaths = []  # paths to later pass on for mail attachments
 	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
 	if nConditions == 2:
