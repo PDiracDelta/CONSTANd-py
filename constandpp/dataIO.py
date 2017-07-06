@@ -91,51 +91,120 @@ def importWrapper(path_in='wrapper.tsv'):
 def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistribute file manipulation files(functions?) in web.py
 	"""
 	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment. The
-	wrapper and config entries are set to None for now.
+	wrapper and config entries are set to None for now. The structure of the schema should be as follows:
+		experiment_name	cond1:df_col1,df_col2:alias1,alias2		cond2:df_col3,df_col4:alias3,alias4
+	IF aliases are provided for a certain row, they must all be provided. Else they are generated automatically as
+	EXPERIMENTNAME_CONDITION_COLNAME.
 	:param schemaPath:              str     path to the schema file that the user uploaded
 	:return incompleteSchemaDict:   dict    schema in dict format, without config and wrapper information, in the format
-											{ experiment: { channels: [[channels] per condition], aliases: [[channels] per condition] }
+											{ allExperiments: [experiments] ,
+											  allConditions: [conditions] ,
+											  experiment: {
+											    allExperimentConditions: [conditions] ,
+												allExperimentChannelNames: [channelNames] ,
+												allExperimentChannelAliases: [channelAliases] ,
+												{ condition: { channelNames: [names] , channelAliases: [aliases] } }
+											  }
+											}
 	"""
+	def extractAliases(rowElement):
+		"""
+		Tries to extract the comma-separated channelAliases from a schemaDF row element and returns '' if it fails.
+		:param rowElement:			list	element in a schemaDF row. Structure: [ condition : channelNames : channelAliases ]
+		:return channelAliasesList:	list	comma-separated list of [ channelAliases ]
+		"""
+		try:  # allow that no aliases are provided
+			this_channelAliases = rowElement.split(':')[2]
+		except IndexError:
+			this_channelAliases = ''  # return '' because that's what is also returned if the substring is empty.
+		return this_channelAliases
+	
+	""" import schema as dataframe """
 	from collections import OrderedDict
 	# import schema file as dataframe and replace nan values by empty strings
 	schemaDF = importDataFrame(schemaPath, delim='\t', header=None, dtype=str).replace(np.nan, '', regex=True)
 	incompleteSchemaDict = OrderedDict()  # use ordered dict so the items() order is always the same
-	assert np.mod(len(schemaDF), 2) == 0  # schema must have even number of lines
-	assert len(schemaDF.columns) > 2  # at least 3 columns
-	for i in range(int(len(schemaDF) / 2)):
-		thisRow = schemaDF.loc[2 * i, :]
-		experimentName = str(thisRow[0])
-		numConditions = len(thisRow) - 1
-		channelNamesPerCondition = [str(thisRow[c]).split(',') for c in range(1, numConditions + 1)]
-		nextRow = schemaDF.loc[2 * i + 1, :]
-		# if the next row contains just as many values (that are not empty); aliases are provided
-		if len(nextRow) == len(thisRow) and np.sum(nextRow == '') == 0:
-			channelAliasesPerCondition = [str(nextRow[c]).split(',') for c in range(1, numConditions + 1)]
-		else:  # aliases not (properly) provided
-			shortExperimentName = str(nextRow[0])
-			channelAliasesPerCondition = [[shortExperimentName + '_' + channelName for channelName in condition]
-										  for condition in channelNamesPerCondition]
+	numCols = len(schemaDF.columns)
+	numRows = len(schemaDF)
+	if not (numCols > 2):  # at least 3 columns
+		raise Exception("Schema must have at least 3 columns EXPERIMENT\\tCONDITION 1\\tCONDITION 2 (separated by tabs)")
+	incompleteSchemaDict['allExperiments'] = list(schemaDF.loc[:, 0])
+	# check if experiment names are unique
+	if not len(set(incompleteSchemaDict['allExperiments'])) == numRows:
+		raise Exception("Experiment names contain duplicates. Please provide unique names.")
+	forbiddenExperimentNames = {'allExperiments', 'allConditions'}
+	# check if no experiment names are forbidden
+	if set(incompleteSchemaDict['allExperiments']) & forbiddenExperimentNames:
+		raise Exception("Please do not use the following as experiment names: "+str(list(forbiddenExperimentNames)))
+	
+	""" construct schema dict """
+	allConditions = set()
+	allChannelNames = set()
+	allChannelAliases = set()
+	numAllChannelNames = 0
+	numAllChannelAliases = 0
+	for __, row in schemaDF.iterrows():
+		experimentChannelNames = []
+		experimentChannelAliases = []
+		experimentName = str(row[0])
+		incompleteSchemaDict[experimentName] = OrderedDict()
+		conditionsList = [str(element).split(':')[0] for element in row[1:]]
+		allConditions.update(conditionsList)
+		try:
+			channelNamesList = [str(element).split(':')[1] for element in row[1:]]
+		except IndexError:
+			raise Exception("Couldn't find any experiment information. Do you have a line in your schema that's (nearly) empty?")
+		# check if condition names unique
+		if not len(set(conditionsList)) == len(conditionsList):
+			raise Exception("Same condition name used multiple times for same experiment. Please define each condition only once per experiment.")
+		channelAliasesList = [extractAliases(element) for element in row[1:]]
 		
-		incompleteSchemaDict[experimentName] = {'channelNamesPerCondition': channelNamesPerCondition,
-												'channelAliasesPerCondition': channelAliasesPerCondition}
+		# store each condition and its channelNames in the dict
+		for condition, channelNamesString, channelAliasesString in zip(conditionsList, channelNamesList, channelAliasesList):
+			incompleteSchemaDict[experimentName][condition] = OrderedDict()
+			channelNames = channelNamesString.split(',')
+			if '' in channelNames:
+				raise Exception("Channel names cannot be empty strings. Maybe you placed an extra comma somewhere?")
+			incompleteSchemaDict[experimentName][condition]['channelNames'] = channelNames
+			if channelAliasesString == '':  # no channelAliases provided: construct yourself
+				channelAliases = [experimentName + '_' + condition + '_' + channelName for channelName in channelNames]
+			else:  # channelAliases are provided.
+				channelAliases = channelAliasesString.split(',')
+			if '' in channelAliases:
+				raise Exception("Channel aliases cannot be empty strings (if you define one alias, you should define all aliases in that condition). Maybe you placed an extra comma somewhere?")
+			incompleteSchemaDict[experimentName][condition]['channelAliases'] = channelAliases
+			numNames = len(channelNames)
+			numAliases = len(channelAliases)
+			numAllChannelNames += numNames
+			numAllChannelAliases += numAliases
+			experimentChannelNames += channelNames  # channel names must be tested for uniqueness per experiment
+			experimentChannelAliases += channelAliases
+			allChannelNames.update(channelNames)
+			allChannelAliases.update(channelAliases)
+			# check if there are as many names as aliases
+			if not numNames == numAliases:
+				raise Exception("Amount of channel names and channel aliases must either be equal, or no aliases should be provided.")
+		
+		incompleteSchemaDict[experimentName]['allExperimentConditions'] = conditionsList
+		incompleteSchemaDict[experimentName]['allExperimentChannelNames'] = experimentChannelNames
+		incompleteSchemaDict[experimentName]['allExperimentChannelAliases'] = experimentChannelAliases
+		# check if channel names unique
+		if not len(set(experimentChannelNames)) == len(experimentChannelNames):
+			raise Exception("Same channel name used multiple times for same experiment. Please define each condition only once per experiment.")
+	
+	# check if channel aliases unique
+	if not len(allChannelAliases) == numAllChannelAliases:
+		raise Exception("Same alias name used multiple times for same experiment. Please define each condition only once per experiment.")
+	
+	# channelNames already checked per experiment, and are allowed to be non-unique across experiments since they get replaced anyway.
+	incompleteSchemaDict['allConditions'] = list(allConditions)
+	
+	# check if some of the conditions provided do not actually have forbidden names (union not empty)
+	forbiddenConditionNames = {'data', 'config', 'isotopicCorrection_matrix', 'wrapper', 'allExperimentConditions'}
+	if allConditions & {'data', 'config', 'isotopicCorrection_matrix', 'wrapper'}:
+		raise Exception("Please do not use as condition names any of the following: " + str(list(forbiddenConditionNames)))
+	
 	return incompleteSchemaDict
-
-
-# def writeConfig(filePath, contents): # todo remove this
-# 	"""
-#
-# 	:param filePath:
-# 	:param contents:
-# 	:return:
-# 	"""
-# 	file = open(filePath, 'w')
-# 	config = configparser.ConfigParser()
-# 	section = 'DEFAULT'
-# 	# config.add_section(section)
-# 	for k, v in contents.items():
-# 		config.set(section, k, v)
-# 	config.write(file)
-# 	file.close()
 
 
 def fixFixableFormatMistakes(df):

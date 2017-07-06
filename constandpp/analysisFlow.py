@@ -68,7 +68,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe as an outer join
 	allExperimentsDF = combineExperimentDFs(dfs)
 
-	nConditions = len(list(params['schema'].values())[0]['channelAliasesPerCondition'])
+	nConditions = len(params['schema']['allConditions'])
 	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
 	if nConditions == 2:
 		# get min and max protein-peptide mappings
