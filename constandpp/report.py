@@ -63,7 +63,7 @@ def getColours(schema, allChannelAliases, hex=False):
 			if cond in schema[eName]:
 				channelColoursDict.update(dict(zip(schema[eName][cond]['channelAliases'], distColours[c])))
 		c += 1
-	assert c == numConditions-1
+	assert c == numConditions
 	# if hex:
 	# 	# colours are for some reason extra nested after converting to hex.
 	# 	colours = unnest(colours)
