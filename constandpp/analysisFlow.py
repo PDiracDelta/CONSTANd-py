@@ -68,34 +68,34 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe as an outer join
 	allExperimentsDF = combineExperimentDFs(dfs)
 
-	nConditions = len(params['schema']['allConditions'])
-	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
-	if nConditions == 2:
-		# get min and max protein-peptide mappings
-		if params['fullExpression_bool']:
-			minProteinPeptidesDict, fullProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
-		else:
-			minProteinPeptidesDict, __, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
-		metadata['numeric'].loc[0, 'numNoMasterProteinAccession'] = len(metadata['noMasterProteinAccession'])
+	# nConditions = len(params['schema']['allConditions'])
+	# # ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
+	# if nConditions == 2:
+	# get min and max protein-peptide mappings
+	if params['fullExpression_bool']:
+		minProteinPeptidesDict, fullProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
+	else:
+		minProteinPeptidesDict, __, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
+	metadata['numeric'].loc[0, 'numNoMasterProteinAccession'] = len(metadata['noMasterProteinAccession'])
 
-		if params['minExpression_bool']:
-			# Bring the data to the protein level in the case of minimal expression (no shared peptides allowed).
-			# Execute the differential expression analysis and gather some metadata
-			minProteinDF, metadata['minSingleConditionProteins'], metadata['numeric'].loc[0, 'minNumProteins'] = \
-				DEA(allExperimentsDF, minProteinPeptidesDict, params)
-		else:
-			minProteinDF = pd.DataFrame()
-
-		if params['fullExpression_bool']:
-			# Bring the data to the protein level in the case of full expression (shared peptides allowed).
-			# Execute the differential expression analysis and gather some metadata
-			fullProteinDF, metadata['fullSingleConditionProteins'], metadata['numeric'].loc[0, 'fullNumProteins'] = \
-				DEA(allExperimentsDF, fullProteinPeptidesDict, params)
-		else:
-			fullProteinDF = pd.DataFrame()
+	if params['minExpression_bool']:
+		# Bring the data to the protein level in the case of minimal expression (no shared peptides allowed).
+		# Execute the differential expression analysis and gather some metadata
+		minProteinDF, metadata['minSingleConditionProteins'], metadata['numeric'].loc[0, 'minNumProteins'] = \
+			DEA(allExperimentsDF, minProteinPeptidesDict, params)
 	else:
 		minProteinDF = pd.DataFrame()
+
+	if params['fullExpression_bool']:
+		# Bring the data to the protein level in the case of full expression (shared peptides allowed).
+		# Execute the differential expression analysis and gather some metadata
+		fullProteinDF, metadata['fullSingleConditionProteins'], metadata['numeric'].loc[0, 'fullNumProteins'] = \
+			DEA(allExperimentsDF, fullProteinPeptidesDict, params)
+	else:
 		fullProteinDF = pd.DataFrame()
+	# else:
+	# 	minProteinDF = pd.DataFrame()
+	# 	fullProteinDF = pd.DataFrame()
 	
 	""" Quality Control """
 	# dataframe with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]

@@ -76,7 +76,7 @@ def DEA(allExperimentsDF, proteinPeptidesDict, params):
 	:return numProteins:				int				number of proteins taken into account in the DEA
 	"""
 	# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
-	proteinDF = getProteinDF(allExperimentsDF, proteinPeptidesDict, params['schema'])
+	proteinDF = getProteinDF(allExperimentsDF, proteinPeptidesDict, params['schema'], params['referenceCondition'])
 	
 	# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
 	# nan values for a certain condition and keep the removed ones in metadata
@@ -137,47 +137,56 @@ def getProteinPeptidesDicts(df, fullExpression_bool):
 		return minProteinPeptidesDict, None, df.loc[noMasterProteinAccession, ['First Scan', 'Annotated Sequence']]
 
 
-def getProteinDF(df, proteinPeptidesDict, schema):
+def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition):
 	"""
 	Transform the data index from the peptide to the protein level by using the associations in proteinPeptidesDict, and
 	select only relevant information. The resulting dataframe is indexed on the Master Protein Accessions.
-	Quantification values from all associated unique modified peptides are kept in a list per condition (max: 2) for
-	each protein.
+	Quantification values from all associated unique modified peptides are kept in a list per condition for each protein.
 	:param df:					pd.DataFrame				outer join of all experiments.
 	:param proteinPeptidesDict:	{protein: [peptide ids]}	proteins and their associated peptide ids.
 	:param schema:				dict                		schema of the experiments' hierarchy.
+	:param referenceCondition:				str							reference condition for the fold change calculation.
 	:return proteinDF:			pd.DataFrame				transformed and selected data on the protein level.
 															Structure:
 															['protein', 'peptides', 'description', 'condition 1', 'condition 2']
 	"""
-	proteinDFColumns = ['protein', 'peptides', 'description', 'condition 1', 'condition 2']
+	if 'Protein Descriptions' not in df.columns.values:  # in case there was no Descriptions column in the input
+		df['Protein Descriptions'] = pd.Series()
+	proteinDFColumns = ['protein', 'peptides', 'description']
+	allConditions = schema['allConditions']
+	# append reference condition first, and then the other conditions
+	proteinDFColumns.append(referenceCondition)
+	otherConditions = list(allConditions)
+	otherConditions.remove(referenceCondition)
+	proteinDFColumns.extend(otherConditions)
 	proteinDF = pd.DataFrame([list(proteinPeptidesDict.keys())].extend([[None], ]*len(proteinDFColumns)),
 							 columns=proteinDFColumns).set_index('protein')
-	condition1 = schema['allConditions'][0]  # TEST todo
-	condition2 = schema['allConditions'][1]  # TEST todo
+	
 	for protein, peptideIndices in proteinPeptidesDict.items():
+		# construct the new protein entry, with empty quan lists for now, and add it to the proteinDF
+		proteinEntry = [df.loc[peptideIndices, 'Annotated Sequence'].tolist(),
+						df.loc[peptideIndices, 'Protein Descriptions'][0]]
+		numFilledProteinEntries = len(proteinEntry)  # for easy adding later on
+		proteinEntry.extend([None, ]*len(allConditions))
+		
+		proteinQuanPerCondition = dict(zip(allConditions, [pd.Series(), ] * len(allConditions)))
 		# interpret as multi index so that you can call .levels and .get_level_values()
 		peptideIndices = pd.MultiIndex.from_tuples(peptideIndices)
-		# combine all channels into one channel per condition.
-		condition1Intensities = pd.Series()
-		condition2Intensities = pd.Series()
-		# per experiment, get the a list of indices per channel for both conditions, and concatenate the corresponding df values.
+		# per experiment, get the list of indices and append the corresponding df values to the right quanPerCondition.
 		for eName in peptideIndices.levels[0]:  # peptideIndices.levels[0] is the experimentName part of the index.
 			# get the indices of the current experiment
 			peptideIndicesPerExperiment = peptideIndices.values[peptideIndices.get_level_values(0) == eName]
-			# get a list of dfs, to sort the intensities per channel.
-			condition1intensitiesPerChannel = [df.loc[peptideIndicesPerExperiment, channel] for channel in
-											   schema[eName][condition1]['channelAliases']]
-			condition2intensitiesPerChannel = [df.loc[peptideIndicesPerExperiment, channel] for channel in
-											   schema[eName][condition2]['channelAliases']]
-			condition1Intensities = pd.concat([condition1Intensities] + condition1intensitiesPerChannel, axis=0, ignore_index=True)
-			condition2Intensities = pd.concat([condition2Intensities] + condition2intensitiesPerChannel, axis=0, ignore_index=True)
-		# fill new dataframe on protein level, per condition
-		if 'Protein Descriptions' not in df.columns.values:
-			df['Protein Descriptions'] = pd.Series()
-		proteinDF.loc[protein, :] = [df.loc[peptideIndices, 'Annotated Sequence'].tolist(),
-									 df.loc[peptideIndices, 'Protein Descriptions'][0],
-									 condition1Intensities.tolist(), condition2Intensities.tolist()]
+			# for each condition in the experiment, append all its channels to the quanPerCondition Series.
+			for condition in schema[eName]['allExperimentConditions']:
+				for channel in schema[eName][condition]:
+					proteinQuanPerCondition[condition].append(df.loc[peptideIndicesPerExperiment, channel])
+		# add quan lists to protein entry and then add proteinEntry to dataframe (faster than accessing dataframe twice)
+		proteinEntry[numFilledProteinEntries] = proteinQuanPerCondition[referenceCondition]
+		for i in range(len(otherConditions)):  # preserve order of otherConditions
+			proteinEntry[numFilledProteinEntries+1+i] = proteinQuanPerCondition[otherConditions[i]]
+		# fill new dataframe
+		proteinDF.loc[protein, :] = proteinEntry
+	
 	return proteinDF
 
 
