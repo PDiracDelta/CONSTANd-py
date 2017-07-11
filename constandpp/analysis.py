@@ -186,7 +186,7 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 			# for each condition in the experiment, append all its channels to the quanPerCondition Series.
 			for condition in schema[eName]['allExperimentConditions']:
 				for channel in schema[eName][condition]['channelAliases']:
-					proteinQuanPerCondition[condition].append(df.loc[peptideIndicesPerExperiment, channel])
+					proteinQuanPerCondition[condition] = proteinQuanPerCondition[condition].append(df.loc[peptideIndicesPerExperiment, channel])
 		# add quan lists to protein entry and then add proteinEntry to dataframe (faster than accessing dataframe twice)
 		proteinEntry[numFilledProteinEntries] = proteinQuanPerCondition[referenceCondition]
 		for i in range(len(otherConditions)):  # preserve order of otherConditions
