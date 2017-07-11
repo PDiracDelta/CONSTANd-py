@@ -43,7 +43,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		:return this_volcanoPlot:					plt.figure		volcano plot as a matplotlib figure object
 		:return this_set:							set				all proteins represented in the results
 		"""
-		this_sortedProteinExpressionsDF = getSortedProteinExpressionsDF(this_proteinDF, this_schema)
+		this_sortedProteinExpressionsDFs = getSortedProteinExpressionsDFs(this_proteinDF, this_schema)
 		this_set = set(this_sortedProteinExpressionsDF['protein'])
 		# get top X differentials
 		this_topDifferentialsDF = getTopDifferentials(this_sortedProteinExpressionsDF, params['numDifferentials'])
