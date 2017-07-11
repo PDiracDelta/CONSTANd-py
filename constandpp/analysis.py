@@ -87,7 +87,7 @@ def DEA(allExperimentsDF, proteinPeptidesDict, params):
 	proteinDF = applyFoldChange(proteinDF, params['pept2protCombinationMethod'])
 	
 	# indicate significance based on given thresholds alpha and FCThreshold
-	proteinDF = applySignificance(proteinDF, params['alpha'], params['FCThreshold'])
+	# proteinDF = applySignificance(proteinDF, params['alpha'], params['FCThreshold'])
 	
 	# add number of peptides that represent each protein (per condition)
 	proteinDF = addNumberOfRepresentingPeptides(proteinDF)
