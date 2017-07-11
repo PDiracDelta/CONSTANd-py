@@ -75,6 +75,7 @@ def DEA(allExperimentsDF, proteinPeptidesDict, params):
 	:return singleConditionProteins:	pd.DataFrame	protein entries removed due to invalid t-test results
 	:return numProteins:				int				number of proteins taken into account in the DEA
 	"""
+	# todo redo docu dataframe structure
 	# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
 	proteinDF = getProteinDF(allExperimentsDF, proteinPeptidesDict, params['schema'], params['referenceCondition'])
 	
@@ -84,7 +85,7 @@ def DEA(allExperimentsDF, proteinPeptidesDict, params):
 	numProteins = len(proteinDF)
 	
 	# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
-	proteinDF = applyFoldChange(proteinDF, params['pept2protCombinationMethod'])
+	proteinDF = applyFoldChange(proteinDF, params['pept2protCombinationMethod'], params['referenceCondition'], params['schema']['allConditions'])
 	
 	# indicate significance based on given thresholds alpha and FCThreshold
 	# proteinDF = applySignificance(proteinDF, params['alpha'], params['FCThreshold'])
@@ -220,18 +221,23 @@ def testDifferentialExpression(this_proteinDF, alpha, referenceCondition, allCon
 	return this_proteinDF, removedData
 
 
-def applyFoldChange(proteinDF, pept2protCombinationMethod):
+def applyFoldChange(proteinDF, pept2protCombinationMethod, referenceCondition, allConditions):
 	"""
 	Calculate the log2 fold change of the quantification values per channel for each protein according to
-	pept2protCombinationMethod and add it to the new "fold change log2(c1/c2)" column.
+	pept2protCombinationMethod and add it to the new "log2 fold change (conditionName)" columns.
 	:param proteinDF:					pd.DataFrame	data on the protein level with t-test results.
 	:param pept2protCombinationMethod:  str				method for reducing peptide information into one figure per protein
 	:return proteinDF:					pd.DataFrame	data on the protein level, including fold changes
 	"""
-	if pept2protCombinationMethod == 'mean':
-		proteinDF['fold change log2(c1/c2)'] = proteinDF.apply(lambda x: np.log2(np.nanmean(x['condition 1'])/np.nanmean(x['condition 2'])), axis=1)
-	elif pept2protCombinationMethod == 'median':
-		proteinDF['fold change log2(c1/c2)'] = proteinDF.apply(lambda x: np.log2(np.nanmedian(x['condition 1']) / np.nanmedian(x['condition 2'])), axis=1)
+	otherConditions = allConditions
+	otherConditions.remove(referenceCondition)
+	for condition in otherConditions:
+		if pept2protCombinationMethod == 'mean':
+			proteinDF['log2 fold change ('+condition+')'] = proteinDF.apply(lambda x: np.log2(np.nanmean(x[condition])/np.nanmean(x[referenceCondition])), axis=1)
+		elif pept2protCombinationMethod == 'median':
+			proteinDF['log2 fold change ('+condition+')'] = proteinDF.apply(lambda x: np.log2(np.nanmedian(x[condition]) / np.nanmedian(x[referenceCondition])), axis=1)
+		else:
+			raise Exception("Illegal pept2protCombinationMethod '"+str(pept2protCombinationMethod)+"'.")
 	return proteinDF
 
 
