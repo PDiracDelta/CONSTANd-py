@@ -30,7 +30,6 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	fullProteinDF = analysisResults[1]
 	PCAResult = analysisResults[2]
 	HCResult = analysisResults[3]
-	allExperimentsIntensitiesPerCommonPeptide = np.asarray(analysisResults[4])
 	metadata = analysisResults[5]
 
 	def getExpressionResults(this_proteinDF):
