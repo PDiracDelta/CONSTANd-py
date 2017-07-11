@@ -59,7 +59,7 @@ def combineExperimentDFs(dfs):  # todo how are PSMs combined with multiple charg
 	return pd.concat(dfs.values(), keys=dfs.keys(), join='outer')
 
 
-def DEA(allExperimentsDF, proteinPeptidesDict, params):
+def DEA(allExperimentsDF, proteinPeptidesDict, params):  # todo move function to analysisFlow
 	"""
 	Bring the data to the protein level in the case of [minimal]{full} expression (shared peptides are [not allowed]{allowed}).
 	Execute the differential expression analysis (t-test + B-H correction, compute log2 fold change and some useful
