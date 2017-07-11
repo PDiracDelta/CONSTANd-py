@@ -197,10 +197,12 @@ def testDifferentialExpression(this_proteinDF, alpha, referenceCondition, allCon
 	Perform a t-test for independent samples for each protein on its (2) associated lists of peptide quantifications,
 	do a Benjamini-Hochberg correction and store the results in new "p-values" and "adjusted p-values" columns in the
 	dataframe. If a test returns NaN or masked values (e.g. due to sample size==1) the corresponding protein is removed.
-	:param this_proteinDF:	pd.DataFrame	data from all experiments on the protein level
-	:param alpha:			float			confidence level for the t-test
-	:return this_proteinDF:	pd.DataFrame	data on protein level, with statistical test information
-	:return removedData:	pd.DataFrame	protein entries removed due to invalid t-test results
+	:param this_proteinDF:		pd.DataFrame	data from all experiments on the protein level
+	:param alpha:				float			confidence level for the t-test
+	:param referenceCondition:	str				name of the condition to be used as the reference
+	:param allConditions:		list 			all conditions in the experiment
+	:return this_proteinDF:		pd.DataFrame	data on protein level, with statistical test information
+	:return removedData:		pd.DataFrame	protein entries removed due to invalid t-test results
 	"""
 	# { protein : indices of (uniquely/all) associated peptides }
 	# perform t-test on the intensities lists of both conditions of each protein, assuming data is independent.
@@ -227,6 +229,8 @@ def applyFoldChange(proteinDF, pept2protCombinationMethod, referenceCondition, a
 	pept2protCombinationMethod and add it to the new "log2 fold change (conditionName)" columns.
 	:param proteinDF:					pd.DataFrame	data on the protein level with t-test results.
 	:param pept2protCombinationMethod:  str				method for reducing peptide information into one figure per protein
+	:param referenceCondition:	str				name of the condition to be used as the reference
+	:param allConditions:		list 			all conditions in the experiment
 	:return proteinDF:					pd.DataFrame	data on the protein level, including fold changes
 	"""
 	otherConditions = allConditions
