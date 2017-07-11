@@ -80,7 +80,7 @@ def DEA(allExperimentsDF, proteinPeptidesDict, params):
 	
 	# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
 	# nan values for a certain condition and keep the removed ones in metadata
-	proteinDF, singleConditionProteins = testDifferentialExpression(proteinDF, params['alpha'])
+	proteinDF, singleConditionProteins = testDifferentialExpression(proteinDF, params['alpha'], params['referenceCondition'], params['schema']['allConditions'])
 	numProteins = len(proteinDF)
 	
 	# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
@@ -148,7 +148,8 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition):
 	:param referenceCondition:				str							reference condition for the fold change calculation.
 	:return proteinDF:			pd.DataFrame				transformed and selected data on the protein level.
 															Structure:
-															['protein', 'peptides', 'description', 'condition 1', 'condition 2']
+															['protein', 'peptides', 'description',
+															referenceCondition, condition 1, condition 2, ...]
 	"""
 	if 'Protein Descriptions' not in df.columns.values:  # in case there was no Descriptions column in the input
 		df['Protein Descriptions'] = pd.Series()
@@ -190,7 +191,7 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition):
 	return proteinDF
 
 
-def testDifferentialExpression(this_proteinDF, alpha):
+def testDifferentialExpression(this_proteinDF, alpha, referenceCondition, allConditions):
 	"""
 	Perform a t-test for independent samples for each protein on its (2) associated lists of peptide quantifications,
 	do a Benjamini-Hochberg correction and store the results in new "p-values" and "adjusted p-values" columns in the
@@ -202,16 +203,20 @@ def testDifferentialExpression(this_proteinDF, alpha):
 	"""
 	# { protein : indices of (uniquely/all) associated peptides }
 	# perform t-test on the intensities lists of both conditions of each protein, assuming data is independent.
-	this_proteinDF['p-value'] = this_proteinDF.apply(lambda x: ttest(x['condition 1'], x['condition 2'], nan_policy='omit')[1], axis=1)
-	# remove masked values
-	this_proteinDF.loc[:, 'p-value'] = this_proteinDF.loc[:, 'p-value'].apply(lambda x: np.nan if x is np.ma.masked or x == 0.0 else x)
-	toDeleteProteins = this_proteinDF[np.isnan(this_proteinDF['p-value'])].index
-	removedData = this_proteinDF.loc[toDeleteProteins, :].copy()
-	this_proteinDF.drop(toDeleteProteins, inplace=True)
-	# Benjamini-Hochberg correction
-	# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
-	__, this_proteinDF['adjusted p-value'], __, __ = multipletests(pvals=np.asarray(this_proteinDF.loc[:, 'p-value']),
-																   alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
+	otherConditions = allConditions
+	otherConditions.remove(referenceCondition)
+	for condition in otherConditions:
+		pValueColumn = 'p-value (' + condition + ')'
+		this_proteinDF[pValueColumn] = this_proteinDF.apply(lambda x: ttest(x[referenceCondition], x[condition], nan_policy='omit')[1], axis=1)
+		# remove masked values
+		this_proteinDF.loc[:, pValueColumn] = this_proteinDF.loc[:, pValueColumn].apply(lambda x: np.nan if x is np.ma.masked or x == 0.0 else x)
+		toDeleteProteins = this_proteinDF[np.isnan(this_proteinDF[pValueColumn])].index
+		removedData = this_proteinDF.loc[toDeleteProteins, :].copy()
+		this_proteinDF.drop(toDeleteProteins, inplace=True)
+		# Benjamini-Hochberg correction
+		# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
+		__, this_proteinDF['adjusted '+pValueColumn], __, __ = multipletests(pvals=np.asarray(this_proteinDF.loc[:, pValueColumn]),
+																	   alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
 	return this_proteinDF, removedData
 
 
