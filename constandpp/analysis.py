@@ -76,12 +76,14 @@ def DEA(allExperimentsDF, proteinPeptidesDict, params):
 	:return numProteins:				int				number of proteins taken into account in the DEA
 	"""
 	referenceCondition = params['referenceCondition']
-	allConditions = params['schema']['allConditions']
+	# use list() so that the new variable is not an alias
+	allConditions = list(params['schema']['allConditions'])
 	otherConditions = allConditions
 	otherConditions.remove(referenceCondition)
 	# todo redo docu dataframe structure
 	# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
-	proteinDF = getProteinDF(allExperimentsDF, proteinPeptidesDict, params['schema'], params['referenceCondition'])
+	proteinDF = getProteinDF(allExperimentsDF, proteinPeptidesDict, params['schema'],
+							 referenceCondition=referenceCondition, otherConditions=otherConditions)
 	
 	# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
 	# nan values for a certain condition and keep the removed ones in metadata
@@ -142,7 +144,7 @@ def getProteinPeptidesDicts(df, fullExpression_bool):
 		return minProteinPeptidesDict, None, df.loc[noMasterProteinAccession, ['First Scan', 'Annotated Sequence']]
 
 
-def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition):
+def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherConditions):
 	"""
 	Transform the data index from the peptide to the protein level by using the associations in proteinPeptidesDict, and
 	select only relevant information. The resulting dataframe is indexed on the Master Protein Accessions.
@@ -150,7 +152,8 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition):
 	:param df:					pd.DataFrame				outer join of all experiments.
 	:param proteinPeptidesDict:	{protein: [peptide ids]}	proteins and their associated peptide ids.
 	:param schema:				dict                		schema of the experiments' hierarchy.
-	:param referenceCondition:				str							reference condition for the fold change calculation.
+	:param referenceCondition:	str							reference condition for the fold change calculation.
+	:param otherConditions:		list 						all non-reference conditions in the experiment
 	:return proteinDF:			pd.DataFrame				transformed and selected data on the protein level.
 															Structure:
 															['protein', 'peptides', 'description',
@@ -159,11 +162,9 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition):
 	if 'Protein Descriptions' not in df.columns.values:  # in case there was no Descriptions column in the input
 		df['Protein Descriptions'] = pd.Series()
 	proteinDFColumns = ['protein', 'peptides', 'description']
-	allConditions = schema['allConditions']
+	allConditions = [referenceCondition]+otherConditions
 	# append reference condition first, and then the other conditions
 	proteinDFColumns.append(referenceCondition)
-	otherConditions = list(allConditions)
-	otherConditions.remove(referenceCondition)
 	proteinDFColumns.extend(otherConditions)
 	proteinDF = pd.DataFrame([list(proteinPeptidesDict.keys())].extend([[None], ]*len(proteinDFColumns)),
 							 columns=proteinDFColumns).set_index('protein')
