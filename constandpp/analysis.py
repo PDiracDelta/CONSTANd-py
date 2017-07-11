@@ -281,7 +281,7 @@ def addNumberOfRepresentingPeptides(proteinDF, referenceCondition, otherConditio
 	:return proteinDF:			pd.DataFrame	proteinDF including column with amount of peptides per condition
 	"""
 	# order is important: referenceCondition first
-	allConditions = referenceCondition + otherConditions
+	allConditions = [referenceCondition] + otherConditions
 	lengths = []
 	for condition in allConditions:
 		lengths.append(proteinDF.loc[:, condition].apply(lambda x: len(pd.Series(x).dropna())))
