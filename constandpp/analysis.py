@@ -279,10 +279,14 @@ def addNumberOfRepresentingPeptides(proteinDF, referenceCondition, otherConditio
 	:param otherConditions:		list 			all non-reference conditions in the experiment
 	:return proteinDF:			pd.DataFrame	proteinDF including column with amount of peptides per condition
 	"""
-	c1Lengths = proteinDF.loc[:, 'condition 1'].apply(lambda x: len(pd.Series(x).dropna()))
-	c2Lengths = proteinDF.loc[:, 'condition 2'].apply(lambda x: len(pd.Series(x).dropna()))
+	# order is important: referenceCondition first
+	allConditions = referenceCondition + otherConditions
+	lengths = []
+	for condition in allConditions:
+		lengths.append(proteinDF.loc[:, condition].apply(lambda x: len(pd.Series(x).dropna())))
 	# if you don't do series(list(x)).values it gives an Error or makes it into nans... god knows why
-	proteinDF['#peptides '+str(allConditions)] = pd.Series(list(zip(c1Lengths, c2Lengths))).values
+	# use * for the pointer of `lengths` because zip doesn't take a list of lists as an argument.
+	proteinDF['#peptides '+str(allConditions)] = pd.Series(list(zip(*lengths))).values
 	return proteinDF
 
 
