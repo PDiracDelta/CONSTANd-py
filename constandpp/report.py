@@ -12,7 +12,7 @@ Functions involved in generating the report that includes:
 """
 import pandas as pd
 import numpy as np
-from constandpp.tools import unnest
+from constandpp.tools import unnest, getOtherConditions
 from warnings import warn
 from scipy.cluster.hierarchy import dendrogram
 import matplotlib
@@ -118,10 +118,7 @@ def getSortedProteinExpressionsDF(proteinDF, schema):
 	:param proteinDF:	pd.DataFrame    unsorted DE analysis results on the protein level
 	:return:    		pd.DataFrame    sorted according to adjusted p-value and only specified columns
 	"""
-	allConditions = schema['allConditions']
-	referenceCondition = schema['referenceCondition']
-	otherConditions = allConditions
-	otherConditions.remove(referenceCondition)
+	otherConditions = getOtherConditions(schema)
 	reportColumns = ['protein', 'description']
 	
 	# add fold change and p-value columns for each condition

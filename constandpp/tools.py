@@ -60,6 +60,19 @@ def setIntensities(df, intensities, quanColumns):
 	return df
 
 
+def getOtherConditions(schema):
+	"""
+	Takes a schema and returns the non-reference conditions.
+	:param schema:			dict	schema of the experiments' hierarchy
+	:return otherConditions:list	non-reference conditions
+	"""
+	allConditions = schema['allConditions']
+	referenceCondition = schema['referenceCondition']
+	otherConditions = allConditions
+	otherConditions.remove(referenceCondition)
+	return otherConditions
+
+
 def MA(x, y):
 	"""
 	Returns for (x,y) the corresponding M and A values as defined for the MA (minus-additive) plot, as well as the

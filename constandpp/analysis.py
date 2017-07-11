@@ -9,7 +9,7 @@ Performs a differential expression analysis on the normalized intensities as pro
 import numpy as np
 import pandas as pd
 import logging
-from constandpp.tools import unnest
+from constandpp.tools import unnest, getOtherConditions
 # from constandpp.tools import getIntensities
 from collections import defaultdict
 from statsmodels.sandbox.stats.multicomp import multipletests
@@ -77,9 +77,7 @@ def DEA(allExperimentsDF, proteinPeptidesDict, params):  # todo move function to
 	"""
 	referenceCondition = params['referenceCondition']
 	# use list() so that the new variable is not an alias
-	allConditions = list(params['schema']['allConditions'])
-	otherConditions = allConditions
-	otherConditions.remove(referenceCondition)
+	otherConditions = getOtherConditions(params['schema'])
 	# todo redo docu dataframe structure
 	# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
 	proteinDF = getProteinDF(allExperimentsDF, proteinPeptidesDict, params['schema'],
