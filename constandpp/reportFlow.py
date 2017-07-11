@@ -32,7 +32,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	HCResult = analysisResults[3]
 	metadata = analysisResults[5]
 
-	def getExpressionResults(this_proteinDF):
+	def getExpressionResults(this_proteinDF, this_schema):
 		"""
 		Sorts the protein dataframe, calculates the set of proteins in the results, generates a volcano plot and selects the
 		top differentials by calling functions from report.py
@@ -43,7 +43,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		:return this_volcanoPlot:					plt.figure		volcano plot as a matplotlib figure object
 		:return this_set:							set				all proteins represented in the results
 		"""
-		this_sortedProteinExpressionsDF = getSortedProteinExpressionsDF(this_proteinDF)
+		this_sortedProteinExpressionsDF = getSortedProteinExpressionsDF(this_proteinDF, this_schema)
 		this_set = set(this_sortedProteinExpressionsDF['protein'])
 		# get top X differentials
 		this_topDifferentialsDF = getTopDifferentials(this_sortedProteinExpressionsDF, params['numDifferentials'])
@@ -58,7 +58,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	allDEResultsFullPaths = []  # paths to later pass on for mail attachments
 	# do MINIMAL expression
 	if params['minExpression_bool']:
-		minSortedProteinExpressionsDF, minTopDifferentialsDF, minVolcanoPlot, minSet = getExpressionResults(minProteinDF)
+		minSortedProteinExpressionsDF, minTopDifferentialsDF, minVolcanoPlot, minSet = getExpressionResults(minProteinDF, schema)
 		# save results
 		minDEResultsFullPath = exportData(minSortedProteinExpressionsDF, dataType='df', path_out=params['path_results'],
 										  filename=params['jobName'] + '_minSortedDifferentials',
@@ -75,7 +75,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	
 	# do FULL expression
 	if params['fullExpression_bool']:
-		fullSortedProteinExpressionsDF, fullTopDifferentialsDF, fullVolcanoPlot, fullSet = getExpressionResults(fullProteinDF)
+		fullSortedProteinExpressionsDF, fullTopDifferentialsDF, fullVolcanoPlot, fullSet = getExpressionResults(fullProteinDF, schema)
 		# save results
 		fullDEResultsFullPath = exportData(fullSortedProteinExpressionsDF, dataType='df',
 										   path_out=params['path_results'],

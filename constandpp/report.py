@@ -110,7 +110,7 @@ def getMarkers(schema):
 	return channelMarkersDict
 
 
-def getSortedProteinExpressionsDF(proteinDF):
+def getSortedProteinExpressionsDF(proteinDF, schema):
 	"""
 	Sorts the differential protein data according to adjusted p-value (high p-value should also mean high DE) and resets
 	the index. Returns only the columns	specified.
@@ -118,7 +118,24 @@ def getSortedProteinExpressionsDF(proteinDF):
 	:param proteinDF:	pd.DataFrame    unsorted DE analysis results on the protein level
 	:return:    		pd.DataFrame    sorted according to adjusted p-value and only specified columns
 	"""
-	reportColumns = ['protein', 'significant', 'description', 'fold change log2(c1/c2)', 'adjusted p-value', '#peptides (c1, c2)']
+	allConditions = schema['allConditions']
+	referenceCondition = schema['referenceCondition']
+	otherConditions = allConditions
+	otherConditions.remove(referenceCondition)
+	reportColumns = ['protein', 'description']
+	
+	# add fold change and p-value columns for each condition
+	for condition in otherConditions:
+		adjustedPValueColumn = 'adjusted p-value (' + condition + ')'
+		FCColumn = 'log2 fold change ('+condition+')'
+		reportColumns.extend([FCColumn, adjustedPValueColumn])
+	
+	# add column with #peptides per condition
+	for col in proteinDF.columns:
+		if '#peptides (' in col:
+			reportColumns.append(col)
+			break
+	
 	return proteinDF.loc[:, reportColumns].sort_values(by='adjusted p-value', ascending=True)
 
 
