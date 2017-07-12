@@ -37,23 +37,31 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		Sorts the protein dataframe, calculates the set of proteins in the results, generates a volcano plot and selects the
 		top differentials by calling functions from report.py
 		:param this_proteinDF:						pd.DataFrame    unsorted DE analysis results on the protein level
-		:return this_sortedProteinExpressionsDF:	pd.DataFrame	DEA output table sorted according to adjusted p-value,
-																	including proteins without DE results
-		:return this_topDifferentialsDF:			pd.DataFrame	top X sorted proteins (normally according to adjusted p-value)
-		:return this_volcanoPlot:					plt.figure		volcano plot as a matplotlib figure object
+		:return this_sortedProteinExpressionsDF:	dict			DEA output table sorted according to adjusted p-value,
+																	including proteins without DE results, per condition
+		:return this_topDifferentialsDFs:			dict			top X sorted (on adjusted p-value) proteins, per condition
+		:return this_volcanoPlot:					dict			plt.figure volcano plot, per condition
 		:return this_set:							set				all proteins represented in the results
 		"""
+		# { condition: sortedProteinExpressionsDF }
 		this_sortedProteinExpressionsDFs = getSortedProteinExpressionsDFs(this_proteinDF, this_schema)
-		this_set = set(this_sortedProteinExpressionsDF['protein'])
-		# get top X differentials
-		this_topDifferentialsDF = getTopDifferentials(this_sortedProteinExpressionsDF, params['numDifferentials'])
-		# data visualization
-		this_volcanoPlot = getVolcanoPlot(this_proteinDF, params['alpha'], params['FCThreshold'],
-										params['labelVolcanoPlotAreas'], topIndices=this_topDifferentialsDF.index)
-		# add protein IDs that were observed at least once but got removed, for completeness in the output csv.
-		this_sortedProteinExpressionsDF = addMissingObservedProteins(this_sortedProteinExpressionsDF,
-																   metadata['allObservedProteins'].loc[:, 'protein'][0])
-		return this_sortedProteinExpressionsDF, this_topDifferentialsDF, this_volcanoPlot, this_set
+		this_set = set()
+		otherConditions = getOtherConditions(this_schema)
+		this_topDifferentialsDFs = dict()  # { condition: topDifferentialsDF }
+		this_volcanoPlots = dict()  # { condition: volcanoPlot }
+		# get the Expression results for each condition separately
+		for otherCondition in otherConditions:
+			this_set.update(set(this_sortedProteinExpressionsDFs[otherCondition]['protein']))
+			# get top X differentials
+			this_topDifferentialsDFs[otherCondition] = getTopDifferentials(this_sortedProteinExpressionsDFs[otherCondition], params['numDifferentials'])
+			# data visualization
+			this_volcanoPlots[otherCondition] = getVolcanoPlot(this_proteinDF, params['alpha'], params['FCThreshold'],
+															 params['labelVolcanoPlotAreas'],
+															 topIndices=this_topDifferentialsDFs[otherCondition].index)
+			# add protein IDs that were observed at least once but got removed, for completeness in the output csv.
+			this_sortedProteinExpressionsDFs[otherCondition] = addMissingObservedProteins(this_sortedProteinExpressionsDFs[otherCondition],
+																						  metadata['allObservedProteins'].loc[:, 'protein'][0])
+		return this_sortedProteinExpressionsDFs, this_topDifferentialsDFs, this_volcanoPlots, this_set
 	
 	allDEResultsFullPaths = []  # paths to later pass on for mail attachments
 	# do MINIMAL expression
