@@ -284,7 +284,7 @@ def addNumberOfRepresentingPeptides(proteinDF, referenceCondition, otherConditio
 	for condition in allConditions:
 		# lengths.append(proteinDF.loc[:, condition].apply(lambda x: len(pd.Series(x).dropna())))
 		# EDIT: just do one column per condition, because we want to be able to split them in the report afterwards.
-		proteinDF['#peptides (' + str(condition) + ')']
+		proteinDF['#peptides (' + str(condition) + ')'] = proteinDF.loc[:, condition].apply(lambda x: len(pd.Series(x).dropna()))
 	# # if you don't do series(list(x)).values it gives an Error or makes it into nans... god knows why
 	# # use * for the pointer of `lengths` because zip doesn't take a list of lists as an argument.
 	# proteinDF['#peptides '+str(allConditions)] = pd.Series(list(zip(*lengths))).values
