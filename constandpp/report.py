@@ -342,20 +342,20 @@ def getHCDendrogram(HCResult, schema, title=None):
 	return HCDendrogram
 
 
-def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDifferentialsDF, minVolcanoFullPath,
-			 fullVolcanoFullPath, PCAPlotFullPath, HCDendrogramFullPath, metadata, logFilePath, startTime):
+def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferentialsDFs, fullTopDifferentialsDFs, minVolcanoFullPaths,
+			 fullVolcanoFullPaths, PCAPlotFullPath, HCDendrogramFullPath, metadata, logFilePath, startTime):
 	"""
 	Pour all report visualizations, the list(s) of differentials, metadata and job parameters into an HTML file.
 	A second HTML file used for conversion to PDF is generated slightly different from the one used	for actual HTML
 	representation, for technical reasons to do with image representation.
 	:param jobParams:				dict			job (global) parameters
 	:param allProcessingParams:		dict			per experiment, all parameters for the processing step
-	:param minTopDifferentialsDF:	pd.DataFrame	top X differential protein data (minimal expression, injective)
-																sorted on adjusted p-value and only specified columns
-	:param fullTopDifferentialsDF:	pd.DataFrame	top X differential protein data (full expression, non-injective)
-																sorted on adjusted p-value and only specified columns
-	:param minVolcanoFullPath:		str				path to the volcano plot image (minimal expression)
-	:param fullVolcanoFullPath:		str				path to the volcano plot image (full expression)
+	:param minTopDifferentialsDFs:	{pd.DataFrame}	top X differential protein data (minimal expression, injective)
+													sorted on adjusted p-value and only specified columns, per condition
+	:param fullTopDifferentialsDFs:	{pd.DataFrame}	top X differential protein data (full expression, non-injective)
+													sorted on adjusted p-value and only specified columns, per condition
+	:param minVolcanoFullPaths:		{str}			path to the volcano plot image (minimal expression), per condition
+	:param fullVolcanoFullPaths:	{str}			path to the volcano plot image (full expression), per condition
 	:param PCAPlotFullPath: 		str				path to the PCA plot image
 	:param HCDendrogramFullPath: 	str				path to the HC dendrogram image
 	:param metadata:				dict			[noIsotopicCorrection, RTIsolationInfo, noMasterProteinAccession,
@@ -404,47 +404,50 @@ def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDiffe
 		else:
 			return None
 		
-	if 'significant' in minTopDifferentialsDF.columns:
-		minTopDifferentialsDF = minTopDifferentialsDF.drop('significant', axis=1, inplace=False)
-	else:
-		logging.warning("I cannot remove the 'significant' column from the minDE dataframe (it doesn't exist).")
-	if 'significant' in fullTopDifferentialsDF.columns:
-		fullTopDifferentialsDF = fullTopDifferentialsDF.drop('significant', axis=1, inplace=False)
-	else:
-		logging.warning("I cannot remove the 'significant' column from the fullDE dataframe (it doesn't exist).")
+	# if 'significant' in minTopDifferentialsDF.columns:
+	# 	minTopDifferentialsDF = minTopDifferentialsDF.drop('significant', axis=1, inplace=False)
+	# else:
+	# 	logging.warning("I cannot remove the 'significant' column from the minDE dataframe (it doesn't exist).")
+	# if 'significant' in fullTopDifferentialsDF.columns:
+	# 	fullTopDifferentialsDF = fullTopDifferentialsDF.drop('significant', axis=1, inplace=False)
+	# else:
+	# 	logging.warning("I cannot remove the 'significant' column from the fullDE dataframe (it doesn't exist).")
 	
-	# generate list of differentials HTML code separately because Jinja cant do this
-	minTopDifferentialsHTML = injectColumnWidthHTML(minTopDifferentialsDF.to_html(index=False, justify='left'))
-	fullTopDifferentialsHTML = injectColumnWidthHTML(fullTopDifferentialsDF.to_html(index=False, justify='left'))
+	# per condition: generate list of differentials HTML code separately because Jinja cant do this
+	minTopDifferentialsHTMLDict = {(otherCondition, injectColumnWidthHTML(minTopDifferentialsDFs['otherCondition'].to_html(index=False, justify='left')))
+								   for otherCondition in otherConditions}
+	fullTopDifferentialsHTMLDict = {(otherCondition, injectColumnWidthHTML(fullTopDifferentialsDFs['otherCondition'].to_html(index=False, justify='left')))
+								   for otherCondition in otherConditions}
 	
 	with open(logFilePath, 'r') as logFile:
 		logContents = logFile.readlines()
 	
 	approxDuration = time() - startTime
-	# experiments = jobParams['schema']  # todo remove
-	# for e in experiments:
-	# 	experiments[e]['cond1Aliases'] = experiments[e]['channelAliasesPerCondition'][0]
-	pdfhtmlreport = render_template('report.html', jobName=jobParams['jobName'], minVolcanoFullPath=minVolcanoFullPath,
-									fullVolcanoFullPath=fullVolcanoFullPath,
+
+	pdfhtmlreport = render_template('report.html', jobName=jobParams['jobName'], otherConditions=otherConditions,
+									minVolcanoFullPathDict=minVolcanoFullPaths,
+									fullVolcanoFullPathDict=fullVolcanoFullPaths,
 									minExpression_bool=jobParams['minExpression_bool'],
 									fullExpression_bool=jobParams['fullExpression_bool'],
-									mindifferentials=minTopDifferentialsHTML,
-									fulldifferentials=fullTopDifferentialsHTML, PCAFileName=PCAPlotFullPath,
+									mindifferentialsdict=minTopDifferentialsHTMLDict,
+									fulldifferentialsdict=fullTopDifferentialsHTMLDict, PCAFileName=PCAPlotFullPath,
 									HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 									duration=approxDuration, log=logContents, jobParams=jobParams,
 									allProcessingParams=allProcessingParams, pdfsrc='True')#, experiments=experiments)
 	# get the tails of the input paths, starting from the jobs dir, so the Jinja report template can couple it to the
 	# jobs symlink in the static dir.
-	minVolcanoFullPath = hackImagePathToSymlinkInStaticDir(minVolcanoFullPath)
-	fullVolcanoFullPath = hackImagePathToSymlinkInStaticDir(fullVolcanoFullPath)
+	for condition in otherConditions:
+		minVolcanoFullPaths[condition] = hackImagePathToSymlinkInStaticDir(minVolcanoFullPaths[condition])
+		fullVolcanoFullPaths[condition] = hackImagePathToSymlinkInStaticDir(fullVolcanoFullPaths[condition])
 	HCDendrogramFullPath = hackImagePathToSymlinkInStaticDir(HCDendrogramFullPath)
 	PCAPlotFullPath = hackImagePathToSymlinkInStaticDir(PCAPlotFullPath)
-	htmlReport = render_template('report.html', jobName=jobParams['jobName'], minVolcanoFullPath=minVolcanoFullPath,
-								 fullVolcanoFullPath=fullVolcanoFullPath,
+	htmlReport = render_template('report.html', jobName=jobParams['jobName'], otherConditions=otherConditions,
+								 minVolcanoFullPathDict=minVolcanoFullPaths,
+								 fullVolcanoFullPathDict=fullVolcanoFullPaths,
 								 minExpression_bool=jobParams['minExpression_bool'],
 								 fullExpression_bool=jobParams['fullExpression_bool'],
-								 mindifferentials=minTopDifferentialsHTML,
-								 fulldifferentials=fullTopDifferentialsHTML, PCAFileName=PCAPlotFullPath,
+								 mindifferentialsdict=minTopDifferentialsHTMLDict,
+								 fulldifferentialsdict=fullTopDifferentialsHTMLDict, PCAFileName=PCAPlotFullPath,
 								 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 								 duration=approxDuration, log=logContents, jobParams=jobParams,
 								 allProcessingParams=allProcessingParams)#, experiments=experiments)
