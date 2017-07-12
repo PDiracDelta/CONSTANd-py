@@ -174,7 +174,7 @@ def getTopDifferentials(sortedDifferentialsDF, numDifferentials):
 	return topDifferentials
 
 
-def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4, topIndices=None):
+def getVolcanoPlot(df, condition, alpha, FCThreshold, labelPlot=[False, ] * 4, topIndices=None):
 	"""
 	Generates a volcano plot using the log2 fold changes and adjusted p-values of the differential protein data. It is
 	divided in several regions according to the indicated significance level (as can be determined by alpha and FCThreshold)
@@ -184,6 +184,7 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4, topIndices=N
 	:param alpha:			float			significance level used in the t-test of the DE analysis
 	:param FCThreshold:		float			log2 fold change threshold used in the DE analysis
 	:param labelPlot:		[ bool ]		label all proteins in the different significance regions: [ yes, p, fc, no ]
+	:param condition:		str				name of the condition for which to get the volcano plot
 	:param topIndices:		list			indices of proteins for which to show the label exclusively
 	:return volcanoPlot:	plt.figure		volcano plot as a matplotlib figure object
 	"""
@@ -197,30 +198,30 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4, topIndices=N
 	plt.xlabel(r'log$_2$(fold change)', figure=volcanoPlot)
 	plt.ylabel(r'-log$_{10}$(p-value) ', figure=volcanoPlot)
 	# get indices of different levels of significance
-	significantIndices_yes = df[df['significant'] == 'yes'].index
-	significantIndices_p = df[df['significant'] == 'p'].index
-	significantIndices_fc = df[df['significant'] == 'fc'].index
-	significantIndices_no = df[df['significant'] == 'no'].index
+	significantIndices_yes = df[df['significant ('+condition+')'] == 'yes'].index
+	significantIndices_p = df[df['significant ('+condition+')'] == 'p'].index
+	significantIndices_fc = df[df['significant ('+condition+')'] == 'fc'].index
+	significantIndices_no = df[df['significant ('+condition+')'] == 'no'].index
 	
 	# produce scatterPlot for each category of significance
 	# YES
-	xdataYES = df.loc[significantIndices_yes, 'fold change log2(c1/c2)']
-	ydataYES = -np.log10(df.loc[significantIndices_yes, 'adjusted p-value'])
+	xdataYES = df.loc[significantIndices_yes, 'log2 fold change ('+condition+')']
+	ydataYES = -np.log10(df.loc[significantIndices_yes, 'adjusted p-value ('+condition+')'])
 	labelsYES = df.loc[significantIndices_yes, 'protein']
 	plt.scatter(xdataYES, ydataYES, color='r', figure=volcanoPlot)
 	# P
-	xdataP = df.loc[significantIndices_p, 'fold change log2(c1/c2)']
-	ydataP = -np.log10(df.loc[significantIndices_p, 'adjusted p-value'])
+	xdataP = df.loc[significantIndices_p, 'log2 fold change ('+condition+')']
+	ydataP = -np.log10(df.loc[significantIndices_p, 'adjusted p-value ('+condition+')'])
 	labelsP = df.loc[significantIndices_p, 'protein']
 	plt.scatter(xdataP, ydataP, color='b', figure=volcanoPlot)
 	# FC
-	xdataFC = df.loc[significantIndices_fc, 'fold change log2(c1/c2)']
-	ydataFC = -np.log10(df.loc[significantIndices_fc, 'adjusted p-value'])
+	xdataFC = df.loc[significantIndices_fc, 'log2 fold change ('+condition+')']
+	ydataFC = -np.log10(df.loc[significantIndices_fc, 'adjusted p-value ('+condition+')'])
 	labelsFC = df.loc[significantIndices_fc, 'protein']
 	plt.scatter(xdataFC, ydataFC, color='g', figure=volcanoPlot)
 	# NO
-	xdataNO = df.loc[significantIndices_no, 'fold change log2(c1/c2)']
-	ydataNO = -np.log10(df.loc[significantIndices_no, 'adjusted p-value'])
+	xdataNO = df.loc[significantIndices_no, 'log2 fold change ('+condition+')']
+	ydataNO = -np.log10(df.loc[significantIndices_no, 'adjusted p-value ('+condition+')'])
 	labelsNO = df.loc[significantIndices_no, 'protein']
 	plt.scatter(xdataNO, ydataNO, color='k', figure=volcanoPlot)
 	
