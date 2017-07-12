@@ -126,10 +126,10 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	if writeToDisk:
 		htmlReport, pdfhtmlreport = makeHTML(jobParams=params, allProcessingParams=processingParams,
 											 otherConditions=otherConditions,
-											 minTopDifferentialsDF=minTopDifferentialsDFs,
-											 fullTopDifferentialsDF=fullTopDifferentialsDFs,
-											 minVolcanoFullPath=minVolcanoFullPaths,
-											 fullVolcanoFullPath=fullVolcanoFullPaths,
+											 minTopDifferentialsDFs=minTopDifferentialsDFs,
+											 fullTopDifferentialsDFs=fullTopDifferentialsDFs,
+											 minVolcanoFullPaths=minVolcanoFullPaths,
+											 fullVolcanoFullPaths=fullVolcanoFullPaths,
 											 PCAPlotFullPath=PCAPlotFullPath, HCDendrogramFullPath=HCDendrogramFullPath,
 											 metadata=metadata, logFilePath=logFilePath, startTime=startTime)
 		htmlFullPath = exportData(htmlReport, dataType='html', path_out=params['path_results'],
