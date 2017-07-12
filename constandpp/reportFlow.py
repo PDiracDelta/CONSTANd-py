@@ -31,6 +31,8 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	PCAResult = analysisResults[2]
 	HCResult = analysisResults[3]
 	metadata = analysisResults[5]
+	
+	otherConditions = getOtherConditions(params['schema'])
 
 	def getExpressionResults(this_proteinDF, this_schema):
 		"""
@@ -46,7 +48,6 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		# { condition: sortedProteinExpressionsDF }
 		this_sortedProteinExpressionsDFs = getSortedProteinExpressionsDFs(this_proteinDF, this_schema)
 		this_set = set()
-		otherConditions = getOtherConditions(this_schema)
 		this_topDifferentialsDFs = dict()  # { condition: topDifferentialsDF }
 		this_volcanoPlots = dict()  # { condition: volcanoPlot }
 		# get the Expression results for each condition separately
@@ -74,7 +75,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		minVolcanoFullPaths = {(otherCondition, exportData(minVolcanoPlots[otherCondition], dataType='fig',
 														   path_out=params['path_results'],
 														   filename=params['jobName'] + '_minVolcanoPlot'))
-							   for otherCondition in getOtherConditions(params['schema'])}
+							   for otherCondition in otherConditions}
 		allDEResultsFullPaths.extend(list(minDEResultsFullPaths.values()))  # no need to know which path is which
 		
 	else:  # todo in this case (and also for fullExpression_bool) just let the jinja template handle the None variable.
@@ -94,7 +95,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		fullVolcanoFullPaths = {(otherCondition, exportData(fullVolcanoPlots[otherCondition], dataType='fig',
 															path_out=params['path_results'],
 															filename=params['jobName'] + '_fullVolcanoPlot'))
-								for otherCondition in getOtherConditions(params['schema'])}
+								for otherCondition in otherConditions}
 		allDEResultsFullPaths.extend(list(fullDEResultsFullPaths.values()))  # no need to know which path is which
 	else:
 		fullSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'fold change log2(c1/c2)', 'adjusted p-value'])
@@ -124,6 +125,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 
 	if writeToDisk:
 		htmlReport, pdfhtmlreport = makeHTML(jobParams=params, allProcessingParams=processingParams,
+											 otherConditions=otherConditions,
 											 minTopDifferentialsDF=minTopDifferentialsDFs,
 											 fullTopDifferentialsDF=fullTopDifferentialsDFs,
 											 minVolcanoFullPath=minVolcanoFullPaths,
