@@ -92,7 +92,7 @@ def DEA(allExperimentsDF, proteinPeptidesDict, params):  # todo move function to
 	proteinDF = applyFoldChange(proteinDF, params['pept2protCombinationMethod'], referenceCondition, otherConditions)
 	
 	# indicate significance based on given thresholds alpha and FCThreshold
-	proteinDF = applySignificance(proteinDF, params['alpha'], params['FCThreshold'])
+	proteinDF = applySignificance(proteinDF, otherConditions, params['alpha'], params['FCThreshold'])
 	
 	# add number of peptides that represent each protein (per condition)
 	proteinDF = addNumberOfRepresentingPeptides(proteinDF, referenceCondition, otherConditions)
@@ -244,28 +244,30 @@ def applyFoldChange(proteinDF, pept2protCombinationMethod, referenceCondition, o
 	return proteinDF
 
 
-def applySignificance(df, alpha, FCThreshold):
+def applySignificance(df, otherConditions, alpha, FCThreshold):
 	"""
 	Adds a column with the significance level to the dataframe of proteins; specifies whether the DEA or fold change
 	results or both were significant.
-	:param df:          pd.DataFrame    proteins with their DEA and FC results.
-	:param alpha:       float           significance level
-	:param FCThreshold: float           fold change threshold
-	:return:            pd.DataFrame    protein data with significance levels 'yes', 'no', 'p' or 'fc'.
+	:param df:          	pd.DataFrame    proteins with their DEA and FC results.
+	:param otherConditions:	[ str ]			names of all non-reference conditions
+	:param alpha:       	float           significance level
+	:param FCThreshold: 	float           fold change threshold
+	:return:            	pd.DataFrame    protein data with significance levels 'yes', 'no', 'p' or 'fc'.
 	"""
-	def significant(x):
-		pvalueSignificant = x['adjusted p-value'] < alpha
-		FCSignificant = abs(x['fold change log2(c1/c2)']) > FCThreshold
-		if pvalueSignificant & FCSignificant:
-			return 'yes'
-		elif pvalueSignificant:
-			return 'p'
-		elif FCSignificant:
-			return 'fc'
-		else:
-			return 'no'
-
-	df['significant'] = df.apply(significant, axis=1)
+	for condition in otherConditions:
+		def significant(x):
+			pvalueSignificant = x['adjusted p-value ('+condition+')'] < alpha
+			FCSignificant = abs(x['log2 fold change ('+condition+')']) > FCThreshold
+			if pvalueSignificant & FCSignificant:
+				return 'yes'
+			elif pvalueSignificant:
+				return 'p'
+			elif FCSignificant:
+				return 'fc'
+			else:
+				return 'no'
+		
+		df['significant ('+condition+')'] = df.apply(significant, axis=1)
 	return df
 
 
