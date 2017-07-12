@@ -98,19 +98,25 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# 	fullProteinDF = pd.DataFrame()
 	
 	""" Quality Control """
-	# dataframe with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
-	allExperimentsIntensitiesPerCommonPeptide, metadata['uncommonPeptides'] = getAllExperimentsIntensitiesPerCommonPeptide(dfs, params['schema'])
-	metadata['numeric'].loc[0, 'numUnCommonPeptides'] = len(metadata['uncommonPeptides'])
-	metadata['numeric'].loc[0, 'numCommonPeptides'] = len(allExperimentsIntensitiesPerCommonPeptide)
-	# save the amount of NaN values per channel for common peptides.
-	metadata['commonNanValues'] = pd.DataFrame(np.sum(np.isnan(allExperimentsIntensitiesPerCommonPeptide), axis=0))
-	# perform PCA
-	PCAResult = getPCA(allExperimentsIntensitiesPerCommonPeptide, params['PCA_components'])
-	# perform hierarchical clustering
-	HCResult = getHC(allExperimentsIntensitiesPerCommonPeptide)
+	skipQC = True  # TEST
+	if skipQC:  #TEST
+		PCAResult = None
+		HCResult = None
+		allExperimentsIntensitiesPerCommonPeptide = pd.DataFrame()
+	else:
+		# dataframe with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
+		allExperimentsIntensitiesPerCommonPeptide, metadata['uncommonPeptides'] = getAllExperimentsIntensitiesPerCommonPeptide(dfs, params['schema'])
+		metadata['numeric'].loc[0, 'numUnCommonPeptides'] = len(metadata['uncommonPeptides'])
+		metadata['numeric'].loc[0, 'numCommonPeptides'] = len(allExperimentsIntensitiesPerCommonPeptide)
+		# save the amount of NaN values per channel for common peptides.
+		metadata['commonNanValues'] = pd.DataFrame(np.sum(np.isnan(allExperimentsIntensitiesPerCommonPeptide), axis=0))
+		# perform PCA
+		PCAResult = getPCA(allExperimentsIntensitiesPerCommonPeptide, params['PCA_components'])
+		# perform hierarchical clustering
+		HCResult = getHC(allExperimentsIntensitiesPerCommonPeptide)
 
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
-	handyColumnOrder = ['protein', 'significant', 'adjusted p-value', 'fold change log2(c1/c2)', 'description', 'p-value', '#peptides (c1, c2)', 'peptides', 'condition 1', 'condition 2']
+	handyColumnOrder = buildHandyColumnOrder(minProteinDF.columns, params['referenceCondition'], params['schema'])
 	minProteinDF.reset_index(level=0, inplace=True)
 	fullProteinDF.reset_index(level=0, inplace=True)
 	minProteinDF = minProteinDF.reindex_axis(handyColumnOrder, axis=1)

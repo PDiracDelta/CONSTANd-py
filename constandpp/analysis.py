@@ -357,3 +357,28 @@ def getHC(intensities):
 	intensities[np.isnan(intensities)] = 0
 	condensedDistanceMatrix = pdist(intensities.T) # remove nans and transpose
 	return linkage(condensedDistanceMatrix, method='average') # 'average'=UPGMA
+
+
+def buildHandyColumnOrder(inColumns, referenceCondition, schema):
+	"""
+	Reshuffles the entries of a given list of proteinDF columns into a handy order.
+	:param inColumns:			[ str ]	proteinDF columns, unordered
+	:param referenceCondition:	str		reference condition
+	:param schema:				dict    schema of the experiments' hierarchy
+	:return outColumns:			[ str ]	proteinDF columns, ordered according to: ['protein', 'description',
+										{{ 'adjusted p-value', 'log2 fold change', '#peptides (c1, c2)', 'significant',
+										'p-value', 'condition'}} , 'peptides']
+	"""
+	otherConditions = getOtherConditions(schema, referenceCondition)
+	# ['protein', 'description', 'adjusted p-value', 'log2 fold change', '#peptides (c1, c2)', 'significant', 'p-value',
+	# 'condition 1', 'condition 2', 'peptides']
+	outColumns = ['protein', 'description']
+	allConditions = [referenceCondition] + otherConditions  # correct order
+	for condition in allConditions:
+		outColumns.extend(['adjusted p-value ('+condition+')', 'log2 fold change ('+condition+')',
+						   '#peptides ('+condition+')', 'significant ('+condition+')',
+						   'p-value ('+condition+')', condition])
+	outColumns.append('peptides')
+	assert len(inColumns) == len(outColumns)
+	return outColumns
+
