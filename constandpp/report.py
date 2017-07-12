@@ -115,13 +115,14 @@ def getSortedProteinExpressionsDFs(proteinDF, schema):
 	Returns a list of sortedProteinDFs (see getSortedProteinExpressionsDF); one for each non-reference condition.
 	:param proteinDF: 					pd.DataFrame    	unsorted DE analysis results on the protein level
 	:param schema: 						dict				schema of the experiments' hierarchy.
-	:return sortedProteinExpressionsDFs:[ pd.DataFrame ]	sortedProteinDFs; one for each non-reference condition
+	:return sortedProteinExpressionsDFs:dict				{ condition : sortedProteinDF }
 	"""
 	referenceCondition = schema['referenceCondition']
 	otherConditions = getOtherConditions(schema)
-	# sortedProteinExpressionsDFs = dict(zip(otherConditions, [None, ]*len(otherConditions)))
+	sortedProteinExpressionsDFs = dict()#zip(otherConditions, [None, ]*len(otherConditions)))
 	for condition in otherConditions:
 		sortedProteinExpressionsDFs[condition] = getSortedProteinExpressionsDF(proteinDF, referenceCondition, condition)
+	return sortedProteinExpressionsDFs
 
 
 def getSortedProteinExpressionsDF(proteinDF, referenceCondition, condition):
