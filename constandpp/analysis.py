@@ -366,18 +366,25 @@ def buildHandyColumnOrder(inColumns, referenceCondition, schema):
 	:param referenceCondition:	str		reference condition
 	:param schema:				dict    schema of the experiments' hierarchy
 	:return outColumns:			[ str ]	proteinDF columns, ordered according to: ['protein', 'description',
-										{{ 'adjusted p-value', 'log2 fold change', '#peptides (c1, c2)', 'significant',
-										'p-value', 'condition'}} , 'peptides']
+										{{ 'adjusted p-value', 'log2 fold change'}}, {{'#peptides'}}, {{'significant'}},
+										{{'p-value'}}, {{'condition'}} , 'peptides']
 	"""
 	otherConditions = getOtherConditions(schema, referenceCondition)
 	# ['protein', 'description', 'adjusted p-value', 'log2 fold change', '#peptides (c1, c2)', 'significant', 'p-value',
 	# 'condition 1', 'condition 2', 'peptides']
-	outColumns = ['protein', 'description']
-	allConditions = [referenceCondition] + otherConditions  # correct order
-	for condition in allConditions:
-		outColumns.extend(['adjusted p-value ('+condition+')', 'log2 fold change ('+condition+')',
-						   '#peptides ('+condition+')', 'significant ('+condition+')',
-						   'p-value ('+condition+')', condition])
+	outColumns = ['description']
+	for condition in otherConditions:
+		outColumns.extend(['adjusted p-value ('+condition+')', 'log2 fold change ('+condition+')'])
+	outColumns.append('#peptides ('+referenceCondition+')')
+	for condition in otherConditions:
+		outColumns.append('#peptides ('+condition+')')
+	for condition in otherConditions:
+		outColumns.append('significant ('+condition+')')
+	for condition in otherConditions:
+		outColumns.append('p-value ('+condition+')')
+	outColumns.append(referenceCondition)
+	for condition in otherConditions:
+		outColumns.append(condition)
 	outColumns.append('peptides')
 	assert len(inColumns) == len(outColumns)
 	return outColumns
