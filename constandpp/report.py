@@ -110,14 +110,13 @@ def getMarkers(schema):
 	return channelMarkersDict
 
 
-def getSortedProteinExpressionsDFs(proteinDF, schema):
+def getSortedProteinExpressionsDFs(proteinDF, schema, referenceCondition):
 	"""
 	Returns a list of sortedProteinDFs (see getSortedProteinExpressionsDF); one for each non-reference condition.
 	:param proteinDF: 					pd.DataFrame    	unsorted DE analysis results on the protein level
 	:param schema: 						dict				schema of the experiments' hierarchy.
 	:return sortedProteinExpressionsDFs:dict				{ condition : sortedProteinDF }
 	"""
-	referenceCondition = schema['referenceCondition']
 	otherConditions = getOtherConditions(schema, referenceCondition)
 	sortedProteinExpressionsDFs = dict()#zip(otherConditions, [None, ]*len(otherConditions)))
 	for condition in otherConditions:

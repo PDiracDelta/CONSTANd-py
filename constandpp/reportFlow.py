@@ -46,7 +46,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		:return this_set:							set				all proteins represented in the results
 		"""
 		# { condition: sortedProteinExpressionsDF }
-		this_sortedProteinExpressionsDFs = getSortedProteinExpressionsDFs(this_proteinDF, this_schema)
+		this_sortedProteinExpressionsDFs = getSortedProteinExpressionsDFs(this_proteinDF, this_schema, params['referenceCondition'])
 		this_set = set()
 		this_topDifferentialsDFs = dict()  # { condition: topDifferentialsDF }
 		this_volcanoPlots = dict()  # { condition: volcanoPlot }
