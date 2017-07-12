@@ -307,7 +307,7 @@ def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 	peptidesDf = pd.DataFrame()
 	# join all dataframes together on the Annotated Sequence: you get ALL channels from ALL experiments as columns per peptide.
 	# [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
-	allPeptides = []
+	allPeptides = set()
 	for eName in dfs.keys():
 		eChannelAliases = schema[eName]['allExperimentChannelAliases']
 		if peptidesDf.empty:
@@ -315,8 +315,8 @@ def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 		else:
 			peptidesDf = pd.merge(peptidesDf, dfs[eName].loc[:, ['Annotated Sequence'] + eChannelAliases],
 							 on='Annotated Sequence')
-		allPeptides.extend(dfs[eName].loc[:, 'Annotated Sequence'])
-	uncommonPeptides = pd.DataFrame(list(set(allPeptides).difference(set(peptidesDf.loc[:, 'Annotated Sequence']))))
+		allPeptides.update(set(dfs[eName].loc[:, 'Annotated Sequence']))
+	uncommonPeptides = pd.DataFrame(list(allPeptides.difference(set(peptidesDf.loc[:, 'Annotated Sequence']))))
 	if len(peptidesDf) < 2:
 		raise Exception("Only "+str(len(peptidesDf))+" peptides found that were common across all experiments. Cannot perform PCA nor HC.")
 	return peptidesDf.loc[:, allChannelAliases], uncommonPeptides
