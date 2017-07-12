@@ -66,8 +66,8 @@ def getOtherConditions(schema):
 	:param schema:			dict	schema of the experiments' hierarchy
 	:return otherConditions:list	non-reference conditions
 	"""
-	allConditions = schema['allConditions']
-	referenceCondition = schema['referenceCondition']
+	allConditions = list(schema['allConditions'])
+	referenceCondition = list(schema['referenceCondition'])
 	otherConditions = allConditions
 	otherConditions.remove(referenceCondition)
 	return otherConditions
