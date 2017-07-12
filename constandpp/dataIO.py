@@ -263,6 +263,8 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 	:param path_out:	string  path where data should be exported to
 	:param filename:	string  filename for the data
 	:param delim_out:	char    delimiter of the data
+	:return fullPath:	str		full path of where the data was saved
+	:return fullPaths:	dict	full paths of where the data were saved, per data object
 	"""
 	# todo this function should call sub-functions per data type and optional arguments
 	assert os.path.exists(path_out)
@@ -282,10 +284,14 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 				# data['missing'].columns contains all possible columns
 				removedData.to_csv(fullPath, sep=delim_out, index=False,
 								   columns=data['missing'].columns)
+				return fullPath
 			else:  # save all removedData in separate files per category.
+				fullPaths = dict()
 				for frameName, frame in data.items():
 					assert isinstance(frame, pd.DataFrame)
-					frame.to_csv(path_out + '/' + filename + '_' + frameName + extension, sep=delim_out, index=False)
+					fullPaths[frameName] = path_out + '/' + filename + '_' + frameName + extension
+					frame.to_csv(fullPaths[frameName], sep=delim_out, index=False)
+				return fullPaths
 		else:
 			assert isinstance(data, pd.DataFrame)
 			data.to_csv(fullPath, sep=delim_out, index=False)
