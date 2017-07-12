@@ -117,34 +117,33 @@ def getSortedProteinExpressionsDFs(proteinDF, schema):
 	:param schema: 						dict				schema of the experiments' hierarchy.
 	:return sortedProteinExpressionsDFs:[ pd.DataFrame ]	sortedProteinDFs; one for each non-reference condition
 	"""
+	referenceCondition = schema['referenceCondition']
 	otherConditions = getOtherConditions(schema)
 	# sortedProteinExpressionsDFs = dict(zip(otherConditions, [None, ]*len(otherConditions)))
 	for condition in otherConditions:
-		sortedProteinExpressionsDFs[condition] = getSortedProteinExpressionsDF(proteinDF, condition)
+		sortedProteinExpressionsDFs[condition] = getSortedProteinExpressionsDF(proteinDF, referenceCondition, condition)
 
 
-def getSortedProteinExpressionsDF(proteinDF, condition):
+def getSortedProteinExpressionsDF(proteinDF, referenceCondition, condition):
 	"""
 	Sorts the differential protein data according to adjusted p-value (high p-value should also mean high DE) and resets
 	the index. Returns only the columns	specified.
 	Later in the workflow, the head() function will called to get the top X differentials from this df.
-	:param proteinDF:	pd.DataFrame    unsorted DE analysis results on the protein level
-	:return:    		pd.DataFrame    sorted according to adjusted p-value and only specified columns
+	:param proteinDF:			pd.DataFrame    unsorted DE analysis results on the protein level
+	:param referenceCondition:	str				name of the condition to be used as the reference
+	:param condition:			str				name of the non-reference condition for which to get the sorted DE
+	:return:    				pd.DataFrame    sorted according to adjusted p-value and only specified columns
 	"""
 	reportColumns = ['protein', 'description']
 	
 	# add fold change and p-value columns for each condition
 	adjustedPValueColumn = 'adjusted p-value (' + condition + ')'
 	FCColumn = 'log2 fold change ('+condition+')'
-	reportColumns.extend([FCColumn, adjustedPValueColumn])
-	
-	# add column with #peptides per condition
-	for col in proteinDF.columns:
-		if '#peptides (' in col:
-			reportColumns.append(col)
-			break
-	
-	return proteinDF.loc[:, reportColumns].sort_values(by='adjusted p-value', ascending=True)
+	numPeptColumn = '#peptides ('+condition+')'
+	refNumPeptColumn = '#peptides ('+referenceCondition+')'
+	reportColumns.extend([FCColumn, adjustedPValueColumn, numPeptColumn, refNumPeptColumn])
+
+	return proteinDF.loc[:, reportColumns].sort_values(by=adjustedPValueColumn, ascending=True)
 
 
 def addMissingObservedProteins(sortedProteinExpressionsDF, allProteinsSet):
