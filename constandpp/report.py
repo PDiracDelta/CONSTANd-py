@@ -118,7 +118,7 @@ def getSortedProteinExpressionsDFs(proteinDF, schema):
 	:return sortedProteinExpressionsDFs:dict				{ condition : sortedProteinDF }
 	"""
 	referenceCondition = schema['referenceCondition']
-	otherConditions = getOtherConditions(schema)
+	otherConditions = getOtherConditions(schema, referenceCondition)
 	sortedProteinExpressionsDFs = dict()#zip(otherConditions, [None, ]*len(otherConditions)))
 	for condition in otherConditions:
 		sortedProteinExpressionsDFs[condition] = getSortedProteinExpressionsDF(proteinDF, referenceCondition, condition)

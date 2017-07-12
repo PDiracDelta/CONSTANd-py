@@ -77,7 +77,7 @@ def DEA(allExperimentsDF, proteinPeptidesDict, params):  # todo move function to
 	"""
 	referenceCondition = params['referenceCondition']
 	# use list() so that the new variable is not an alias
-	otherConditions = getOtherConditions(params['schema'])
+	otherConditions = getOtherConditions(params['schema'], referenceCondition)
 	# todo redo docu dataframe structure
 	# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
 	proteinDF = getProteinDF(allExperimentsDF, proteinPeptidesDict, params['schema'],

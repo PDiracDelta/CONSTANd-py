@@ -32,7 +32,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	HCResult = analysisResults[3]
 	metadata = analysisResults[5]
 	
-	otherConditions = getOtherConditions(params['schema'])
+	otherConditions = getOtherConditions(params['schema'], params['referenceCondition'])
 
 	def getExpressionResults(this_proteinDF, this_schema):
 		"""
