@@ -315,6 +315,8 @@ def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 							 on='Annotated Sequence')
 		allPeptides.extend(dfs[eName].loc[:, 'Annotated Sequence'])
 	uncommonPeptides = pd.DataFrame(list(set(allPeptides).difference(set(peptidesDf.loc[:, 'Annotated Sequence']))))
+	if len(peptidesDf) < 2:
+		raise Exception("Only "+str(len(peptidesDf))+" peptides found that were common across all experiments. Cannot perform PCA nor HC.")
 	return peptidesDf.loc[:, allChannelAliases], uncommonPeptides
 
 
