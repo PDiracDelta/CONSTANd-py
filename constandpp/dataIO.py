@@ -9,6 +9,7 @@ import os
 import pandas as pd
 import numpy as np
 import pickle
+import zipfile
 import configparser
 from json import dumps
 from warnings import warn
@@ -335,3 +336,14 @@ def ext2delim(ext):
 		return '\t'
 	else:
 		return None
+
+
+def genZip(outFilePath, inFilePaths):
+	"""
+	Creates a zipfile at specified ouFilePath location from a list of inFilePaths
+	:param outFilePath:	str		output zip file path
+	:param inFilePaths:	[ str ]	input file paths
+	"""
+	with zipfile.ZipFile(outFilePath, 'w') as zf:
+		for f in inFilePaths:
+			zf.write(f)

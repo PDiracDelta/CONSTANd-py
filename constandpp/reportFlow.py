@@ -6,7 +6,7 @@ Workflow of the processing part of CONSTANd++.
 """
 
 from constandpp.report import *
-from constandpp.dataIO import exportData
+from constandpp.dataIO import exportData, genZip
 
 
 def generateReport(analysisResults, params, logFilePath, writeToDisk, processingParams, startTime):
@@ -139,11 +139,16 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 
 		pdfFullPath = HTMLtoPDF(pdfhtmlFullPath)
 		# todo possibly remove need for special pdfhtml if weasyprint fetches the HTML from the web server via URL instead
-
+		
+		# zip the result files together (except the report file)
+		from os.path import join
+		resultsZipFullPath = join(params['path_results'], 'results.zip')
+		genZip(resultsZipFullPath, allDEResultsFullPaths)
+		
 		from constandpp_web.web import send_mail
 		### SEND JOB COMPLETED MAIL ###
 		mailSuccess = send_mail(recipient=params['mailRecipient'], mailBodyFile='reportMail',
-				  jobName=params['jobName'], jobID=params['jobID'], attachments=[pdfFullPath]+allDEResultsFullPaths)
+				  jobName=params['jobName'], jobID=params['jobID'], attachments=[pdfFullPath]+resultsZipFullPath)
 		if mailSuccess is not None:  # something went wrong
 			import logging
 			logging.error(mailSuccess)
