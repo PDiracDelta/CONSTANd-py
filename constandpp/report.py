@@ -136,7 +136,6 @@ def getSortedProteinExpressionsDF(proteinDF, referenceCondition, condition):
 	"""
 	reportColumns = ['protein', 'description']
 	
-	# add fold change and p-value columns for each condition
 	adjustedPValueColumn = 'adjusted p-value (' + condition + ')'
 	FCColumn = 'log2 fold change ('+condition+')'
 	numPeptColumn = '#peptides ('+condition+')'
