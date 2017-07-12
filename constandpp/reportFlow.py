@@ -66,36 +66,40 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	allDEResultsFullPaths = []  # paths to later pass on for mail attachments
 	# do MINIMAL expression
 	if params['minExpression_bool']:
-		minSortedProteinExpressionsDF, minTopDifferentialsDF, minVolcanoPlot, minSet = getExpressionResults(minProteinDF, schema)
+		minSortedProteinExpressionsDFs, minTopDifferentialsDFs, minVolcanoPlots, minSet = getExpressionResults(minProteinDF, params['schema'])
 		# save results
-		minDEResultsFullPath = exportData(minSortedProteinExpressionsDF, dataType='df', path_out=params['path_results'],
+		minDEResultsFullPaths = exportData(minSortedProteinExpressionsDFs, dataType='df', path_out=params['path_results'],
 										  filename=params['jobName'] + '_minSortedDifferentials',
 										  delim_out=params['delim_out'])
-		minVolcanoFullPath = exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
-										filename=params['jobName'] + '_minVolcanoPlot')
-		allDEResultsFullPaths.append(minDEResultsFullPath)
+		minVolcanoFullPaths = {(otherCondition, exportData(minVolcanoPlots[otherCondition], dataType='fig',
+														   path_out=params['path_results'],
+														   filename=params['jobName'] + '_minVolcanoPlot'))
+							   for otherCondition in getOtherConditions(params['schema'])}
+		allDEResultsFullPaths.extend(list(minDEResultsFullPaths.values()))  # no need to know which path is which
 		
 	else:  # todo in this case (and also for fullExpression_bool) just let the jinja template handle the None variable.
 		# but don't make a fake on here and then pass it onto makeHTML() like is done now.
 		minSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'fold change log2(c1/c2)', 'adjusted p-value'])
-		minTopDifferentialsDF = pd.DataFrame(columns=minSortedProteinExpressionsDF.columns)
-		minVolcanoFullPath = None
+		minTopDifferentialsDFs = pd.DataFrame(columns=minSortedProteinExpressionsDF.columns)
+		minVolcanoFullPaths = None
 	
 	# do FULL expression
 	if params['fullExpression_bool']:
-		fullSortedProteinExpressionsDF, fullTopDifferentialsDF, fullVolcanoPlot, fullSet = getExpressionResults(fullProteinDF, schema)
+		fullSortedProteinExpressionsDFs, fullTopDifferentialsDFs, fullVolcanoPlots, fullSet = getExpressionResults(fullProteinDF, params['schema'])
 		# save results
-		fullDEResultsFullPath = exportData(fullSortedProteinExpressionsDF, dataType='df',
+		fullDEResultsFullPaths = exportData(fullSortedProteinExpressionsDFs, dataType='df',
 										   path_out=params['path_results'],
 										   filename=params['jobName'] + '_fullSortedDifferentials',
 										   delim_out=params['delim_out'])
-		fullVolcanoFullPath = exportData(fullVolcanoPlot, dataType='fig', path_out=params['path_results'],
-										 filename=params['jobName'] + '_fullVolcanoPlot')
-		allDEResultsFullPaths.append(fullDEResultsFullPath)
+		fullVolcanoFullPaths = {(otherCondition, exportData(fullVolcanoPlots[otherCondition], dataType='fig',
+															path_out=params['path_results'],
+															filename=params['jobName'] + '_fullVolcanoPlot'))
+								for otherCondition in getOtherConditions(params['schema'])}
+		allDEResultsFullPaths.extend(list(fullDEResultsFullPaths.values()))  # no need to know which path is which
 	else:
 		fullSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'fold change log2(c1/c2)', 'adjusted p-value'])
-		fullTopDifferentialsDF = pd.DataFrame(columns=fullSortedProteinExpressionsDF.columns)
-		fullVolcanoFullPath = None
+		fullTopDifferentialsDFs = pd.DataFrame(columns=fullSortedProteinExpressionsDF.columns)
+		fullVolcanoFullPaths = None
 
 	# metadata
 	if params['minExpression_bool'] and params['fullExpression_bool']:
@@ -120,10 +124,10 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 
 	if writeToDisk:
 		htmlReport, pdfhtmlreport = makeHTML(jobParams=params, allProcessingParams=processingParams,
-											 minTopDifferentialsDF=minTopDifferentialsDF,
-											 fullTopDifferentialsDF=fullTopDifferentialsDF,
-											 minVolcanoFullPath=minVolcanoFullPath,
-											 fullVolcanoFullPath=fullVolcanoFullPath,
+											 minTopDifferentialsDF=minTopDifferentialsDFs,
+											 fullTopDifferentialsDF=fullTopDifferentialsDFs,
+											 minVolcanoFullPath=minVolcanoFullPaths,
+											 fullVolcanoFullPath=fullVolcanoFullPaths,
 											 PCAPlotFullPath=PCAPlotFullPath, HCDendrogramFullPath=HCDendrogramFullPath,
 											 metadata=metadata, logFilePath=logFilePath, startTime=startTime)
 		htmlFullPath = exportData(htmlReport, dataType='html', path_out=params['path_results'],
