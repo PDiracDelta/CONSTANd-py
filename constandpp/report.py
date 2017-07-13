@@ -457,8 +457,14 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 	# get the tails of the input paths, starting from the jobs dir, so the Jinja report template can couple it to the
 	# jobs symlink in the static dir.
 	for condition in otherConditions:
-		minVolcanoFullPaths[condition] = hackImagePathToSymlinkInStaticDir(minVolcanoFullPaths[condition])
-		fullVolcanoFullPaths[condition] = hackImagePathToSymlinkInStaticDir(fullVolcanoFullPaths[condition])
+		if jobParams['minExpression_bool']:
+			minVolcanoFullPaths[condition] = hackImagePathToSymlinkInStaticDir(minVolcanoFullPaths[condition])
+		else:
+			pass
+		if jobParams['fullExpression_bool']:
+			fullVolcanoFullPaths[condition] = hackImagePathToSymlinkInStaticDir(fullVolcanoFullPaths[condition])
+		else:
+			pass
 	HCDendrogramFullPath = hackImagePathToSymlinkInStaticDir(HCDendrogramFullPath)
 	PCAPlotFullPath = hackImagePathToSymlinkInStaticDir(PCAPlotFullPath)
 	htmlReport = render_template('report.html', jobName=jobParams['jobName'], otherConditions=otherConditions,
