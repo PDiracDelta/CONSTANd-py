@@ -437,7 +437,7 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 	with open(logFilePath, 'r') as logFile:
 		logContents = logFile.readlines()
 	
-	approxDuration = time() - startTime
+	approxDuration = round(time() - startTime)
 	
 	from constandpp import __version__
 	pdfhtmlreport = render_template('report.html', version=str(__version__), jobName=jobParams['jobName'],
