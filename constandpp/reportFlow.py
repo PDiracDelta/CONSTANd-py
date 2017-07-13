@@ -58,7 +58,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 			# data visualization
 			this_volcanoPlots[otherCondition] = getVolcanoPlot(this_proteinDF, otherCondition, params['alpha'], params['FCThreshold'],
 															 params['labelVolcanoPlotAreas'],
-															 topIndices=this_topDifferentialsDFs[otherCondition].index)
+															 topIndices=list(this_topDifferentialsDFs[otherCondition]['protein']))
 			# add protein IDs that were observed at least once but got removed, for completeness in the output csv.
 			this_sortedProteinExpressionsDFs[otherCondition] = addMissingObservedProteins(this_sortedProteinExpressionsDFs[otherCondition],
 																						  metadata['allObservedProteins'].loc[:, 'protein'][0])

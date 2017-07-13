@@ -140,8 +140,8 @@ def getSortedProteinExpressionsDF(proteinDF, referenceCondition, condition):
 	numPeptColumn = '#peptides ('+condition+')'
 	refNumPeptColumn = '#peptides ('+referenceCondition+')'
 	reportColumns.extend([FCColumn, adjustedPValueColumn, numPeptColumn, refNumPeptColumn])
-
-	return proteinDF.loc[:, reportColumns].sort_values(by=adjustedPValueColumn, ascending=True)
+	# sort and then also reset index to get protein as a column
+	return proteinDF.loc[:, reportColumns].sort_values(by=adjustedPValueColumn, ascending=True).reset_index(level=0, inplace=False)
 
 
 def addMissingObservedProteins(sortedProteinExpressionsDF, allProteinsSet):
