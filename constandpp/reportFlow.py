@@ -74,7 +74,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 										  delim_out=params['delim_out'])
 		minVolcanoFullPaths = dict((otherCondition, exportData(minVolcanoPlots[otherCondition], dataType='fig',
 														   path_out=params['path_results'],
-														   filename=params['jobName'] + '_minVolcanoPlot'))
+														   filename=params['jobName'] + '_minVolcanoPlot_' + otherCondition))
 							   for otherCondition in otherConditions)
 		allDEResultsFullPaths.extend(list(minDEResultsFullPaths.values()))  # no need to know which path is which
 		
@@ -94,7 +94,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 										   delim_out=params['delim_out'])
 		fullVolcanoFullPaths = dict((otherCondition, exportData(fullVolcanoPlots[otherCondition], dataType='fig',
 															path_out=params['path_results'],
-															filename=params['jobName'] + '_fullVolcanoPlot'))
+															filename=params['jobName'] + '_fullVolcanoPlot_' + otherCondition))
 								for otherCondition in otherConditions)
 		allDEResultsFullPaths.extend(list(fullDEResultsFullPaths.values()))  # no need to know which path is which
 	else:
