@@ -230,11 +230,19 @@ def getVolcanoPlot(df, condition, alpha, FCThreshold, labelPlot=[False, ] * 4, t
 	plt.scatter(xdataNO, ydataNO, color='k', figure=volcanoPlot)
 	
 	if topIndices is not None:  # remove labels of non-top X differentially expressed proteins
-		labelsYES.loc[~labelsYES.index.isin(topIndices)] = ''
-		labelsP.loc[~labelsP.index.isin(topIndices)] = ''
-		labelsFC.loc[~labelsFC.index.isin(topIndices)] = ''
-		labelsNO.loc[~labelsNO.index.isin(topIndices)] = ''
-	
+		for i in range(len(labelsYES)):
+			if labelsYES[i] not in topIndices:
+				labelsYES[i] = ''
+		for i in range(len(labelsP)):
+			if labelsP[i] not in topIndices:
+				labelsP[i] = ''
+		for i in range(len(labelsFC)):
+			if labelsFC[i] not in topIndices:
+				labelsFC[i] = ''
+		for i in range(len(labelsNO)):
+			if labelsNO[i] not in topIndices:
+				labelsNO[i] = ''
+
 	# annotate where requested
 	for labelPlotBool, xdata, ydata, labels in zip(labelPlot, [xdataYES, xdataP, xdataFC, xdataNO],
 												   [ydataYES, ydataP, ydataFC, ydataNO],
