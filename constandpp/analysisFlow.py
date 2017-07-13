@@ -93,9 +93,11 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 			DEA(allExperimentsDF, fullProteinPeptidesDict, params)
 	else:
 		fullProteinDF = pd.DataFrame()
-	# else:
-	# 	minProteinDF = pd.DataFrame()
-	# 	fullProteinDF = pd.DataFrame()
+		
+	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
+	handyColumnOrder = buildHandyColumnOrder(minProteinDF.columns, params['referenceCondition'], params['schema'])
+	minProteinDF = minProteinDF.reindex_axis(handyColumnOrder, axis=1)
+	fullProteinDF = fullProteinDF.reindex_axis(handyColumnOrder, axis=1)
 	
 	""" Quality Control """
 	# dataframe with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
@@ -108,13 +110,6 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	PCAResult = getPCA(allExperimentsIntensitiesPerCommonPeptide, params['PCA_components'])
 	# perform hierarchical clustering
 	HCResult = getHC(allExperimentsIntensitiesPerCommonPeptide)
-
-	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
-	handyColumnOrder = buildHandyColumnOrder(minProteinDF.columns, params['referenceCondition'], params['schema'])
-	# minProteinDF.reset_index(level=0, inplace=True)
-	# fullProteinDF.reset_index(level=0, inplace=True)
-	minProteinDF = minProteinDF.reindex_axis(handyColumnOrder, axis=1)
-	fullProteinDF = fullProteinDF.reindex_axis(handyColumnOrder, axis=1)
 
 	""" save results """
 	if writeToDisk:
