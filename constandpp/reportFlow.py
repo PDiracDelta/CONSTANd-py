@@ -72,10 +72,10 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		minDEResultsFullPaths = exportData(minSortedProteinExpressionsDFs, dataType='df', path_out=params['path_results'],
 										  filename=params['jobName'] + '_minSortedDifferentials',
 										  delim_out=params['delim_out'])
-		minVolcanoFullPaths = {(otherCondition, exportData(minVolcanoPlots[otherCondition], dataType='fig',
+		minVolcanoFullPaths = dict((otherCondition, exportData(minVolcanoPlots[otherCondition], dataType='fig',
 														   path_out=params['path_results'],
 														   filename=params['jobName'] + '_minVolcanoPlot'))
-							   for otherCondition in otherConditions}
+							   for otherCondition in otherConditions)
 		allDEResultsFullPaths.extend(list(minDEResultsFullPaths.values()))  # no need to know which path is which
 		
 	else:  # todo in this case (and also for fullExpression_bool) just let the jinja template handle the None variable.
@@ -92,10 +92,10 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 										   path_out=params['path_results'],
 										   filename=params['jobName'] + '_fullSortedDifferentials',
 										   delim_out=params['delim_out'])
-		fullVolcanoFullPaths = {(otherCondition, exportData(fullVolcanoPlots[otherCondition], dataType='fig',
+		fullVolcanoFullPaths = dict((otherCondition, exportData(fullVolcanoPlots[otherCondition], dataType='fig',
 															path_out=params['path_results'],
 															filename=params['jobName'] + '_fullVolcanoPlot'))
-								for otherCondition in otherConditions}
+								for otherCondition in otherConditions)
 		allDEResultsFullPaths.extend(list(fullDEResultsFullPaths.values()))  # no need to know which path is which
 	else:
 		fullSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'fold change log2(c1/c2)', 'adjusted p-value'])
