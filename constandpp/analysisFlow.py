@@ -113,10 +113,10 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 
 	""" save results """
 	if writeToDisk:
-		# save the protein-level dataframes
-		exportData(minProteinDF, dataType='df', path_out=params['path_out'],
+		# save the protein-level dataframes. Use .reset_index(level=0, inplace=True) to get the proteins as a column
+		exportData(minProteinDF.reset_index(level=0, inplace=False), dataType='df', path_out=params['path_out'],
 				   filename=params['jobName'] + '_results_minimal', delim_out=params['delim_out'])
-		exportData(fullProteinDF, dataType='df', path_out=params['path_out'],
+		exportData(fullProteinDF.reset_index(level=0, inplace=False), dataType='df', path_out=params['path_out'],
 				   filename=params['jobName'] + '_results_full', delim_out=params['delim_out'])
 		# save the intensity matrix of all COMMON peptides
 		exportData(allExperimentsIntensitiesPerCommonPeptide, dataType='df', path_out=params['path_out'],
