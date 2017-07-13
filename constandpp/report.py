@@ -207,22 +207,26 @@ def getVolcanoPlot(df, condition, alpha, FCThreshold, labelPlot=[False, ] * 4, t
 	# YES
 	xdataYES = df.loc[significantIndices_yes, 'log2 fold change ('+condition+')']
 	ydataYES = -np.log10(df.loc[significantIndices_yes, 'adjusted p-value ('+condition+')'])
-	labelsYES = df.loc[significantIndices_yes, 'protein']
+	# labelsYES = df.loc[significantIndices_yes, 'protein']  # as of now, Index==Protein
+	labelsYES = list(significantIndices_yes)
 	plt.scatter(xdataYES, ydataYES, color='r', figure=volcanoPlot)
 	# P
 	xdataP = df.loc[significantIndices_p, 'log2 fold change ('+condition+')']
 	ydataP = -np.log10(df.loc[significantIndices_p, 'adjusted p-value ('+condition+')'])
-	labelsP = df.loc[significantIndices_p, 'protein']
+	# labelsP = df.loc[significantIndices_p, 'protein']  # as of now, Index==Protein
+	labelsP = list(significantIndices_p)
 	plt.scatter(xdataP, ydataP, color='b', figure=volcanoPlot)
 	# FC
 	xdataFC = df.loc[significantIndices_fc, 'log2 fold change ('+condition+')']
 	ydataFC = -np.log10(df.loc[significantIndices_fc, 'adjusted p-value ('+condition+')'])
-	labelsFC = df.loc[significantIndices_fc, 'protein']
+	# labelsFC = df.loc[significantIndices_fc, 'protein']  # as of now, Index==Protein
+	labelsFC = list(significantIndices_fc)
 	plt.scatter(xdataFC, ydataFC, color='g', figure=volcanoPlot)
 	# NO
 	xdataNO = df.loc[significantIndices_no, 'log2 fold change ('+condition+')']
 	ydataNO = -np.log10(df.loc[significantIndices_no, 'adjusted p-value ('+condition+')'])
-	labelsNO = df.loc[significantIndices_no, 'protein']
+	# labelsNO = df.loc[significantIndices_no, 'protein']  # as of now, Index==Protein
+	labelsNO = list(significantIndices_no)
 	plt.scatter(xdataNO, ydataNO, color='k', figure=volcanoPlot)
 	
 	if topIndices is not None:  # remove labels of non-top X differentially expressed proteins
