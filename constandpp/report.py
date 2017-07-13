@@ -134,8 +134,7 @@ def getSortedProteinExpressionsDF(proteinDF, referenceCondition, condition):
 	:param condition:			str				name of the non-reference condition for which to get the sorted DE
 	:return:    				pd.DataFrame    sorted according to adjusted p-value and only specified columns
 	"""
-	reportColumns = ['protein', 'description']
-	
+	reportColumns = ['description']
 	adjustedPValueColumn = 'adjusted p-value (' + condition + ')'
 	FCColumn = 'log2 fold change ('+condition+')'
 	numPeptColumn = '#peptides ('+condition+')'
@@ -445,7 +444,7 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 	approxDuration = time() - startTime
 	
 	from constandpp import __version__
-	pdfhtmlreport = render_template('report.html', version=__version__, jobName=jobParams['jobName'],
+	pdfhtmlreport = render_template('report.html', version=str(__version__), jobName=jobParams['jobName'],
 									otherConditions=otherConditions,
 									minVolcanoFullPathDict=minVolcanoFullPaths,
 									fullVolcanoFullPathDict=fullVolcanoFullPaths,
