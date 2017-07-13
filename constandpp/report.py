@@ -443,8 +443,10 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 		logContents = logFile.readlines()
 	
 	approxDuration = time() - startTime
-
-	pdfhtmlreport = render_template('report.html', jobName=jobParams['jobName'], otherConditions=otherConditions,
+	
+	from constandpp import __version__
+	pdfhtmlreport = render_template('report.html', version=__version__, jobName=jobParams['jobName'],
+									otherConditions=otherConditions,
 									minVolcanoFullPathDict=minVolcanoFullPaths,
 									fullVolcanoFullPathDict=fullVolcanoFullPaths,
 									minExpression_bool=jobParams['minExpression_bool'],
