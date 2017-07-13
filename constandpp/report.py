@@ -419,12 +419,8 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 	for condition in otherConditions:
 		if 'significant' in minTopDifferentialsDFs[condition].columns:
 			minTopDifferentialsDFs[condition] = minTopDifferentialsDFs[condition].drop('significant', axis=1, inplace=False)
-		else:
-			logging.warning("I cannot remove the 'significant' column from the minDE dataframe (it doesn't exist).")
 		if 'significant' in minTopDifferentialsDFs[condition].columns:
 			minTopDifferentialsDFs[condition] = minTopDifferentialsDFs[condition].drop('significant', axis=1, inplace=False)
-		else:
-			logging.warning("I cannot remove the 'significant' column from the fullDE dataframe (it doesn't exist).")
 	
 	# per condition: generate list of differentials HTML code separately because Jinja cant do this
 	if jobParams['minExpression_bool']:
