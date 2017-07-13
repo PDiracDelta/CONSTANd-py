@@ -417,7 +417,7 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 			return None
 	
 	# remove 'significant' columns
-	for condition in jobParams['schema']['allConditions']:
+	for condition in otherConditions:
 		if 'significant' in minTopDifferentialsDFs[condition].columns:
 			minTopDifferentialsDFs[condition] = minTopDifferentialsDFs[condition].drop('significant', axis=1, inplace=False)
 		else:
