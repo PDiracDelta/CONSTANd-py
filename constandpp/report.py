@@ -428,10 +428,10 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 			logging.warning("I cannot remove the 'significant' column from the fullDE dataframe (it doesn't exist).")
 	
 	# per condition: generate list of differentials HTML code separately because Jinja cant do this
-	minTopDifferentialsHTMLDict = {(otherCondition, injectColumnWidthHTML(minTopDifferentialsDFs['otherCondition'].to_html(index=False, justify='left')))
-								   for otherCondition in otherConditions}
-	fullTopDifferentialsHTMLDict = {(otherCondition, injectColumnWidthHTML(fullTopDifferentialsDFs['otherCondition'].to_html(index=False, justify='left')))
-								   for otherCondition in otherConditions}
+	minTopDifferentialsHTMLDict = dict((otherCondition, injectColumnWidthHTML(minTopDifferentialsDFs['otherCondition'].to_html(index=False, justify='left')))
+								   for otherCondition in otherConditions)
+	fullTopDifferentialsHTMLDict = dict((otherCondition, injectColumnWidthHTML(fullTopDifferentialsDFs['otherCondition'].to_html(index=False, justify='left')))
+								   for otherCondition in otherConditions)
 	
 	with open(logFilePath, 'r') as logFile:
 		logContents = logFile.readlines()
