@@ -273,7 +273,10 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 	representativesDf = getRepresentativesDf(bestIndicesDict)
 	df = df.append(representativesDf)
 	toDelete = [item for sublist in duplicateLists for item in sublist]  # unpack list of lists
-	removedData = df.loc[toDelete, columnsToSave]
+	try:
+		removedData = df.loc[toDelete, columnsToSave]
+	except KeyError as e:
+		logging.warning("Could not save removedData in collapse step because a data column is missing: "+str(e.args[0]))
 	# add the representative index of each collection of collapsed duplicates
 	removedData.insert(loc=0, column='Representative First Scan', value=-1)
 	for duplicatesList, rfs in zip(bestIndicesDict.values(),
