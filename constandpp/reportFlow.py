@@ -78,10 +78,8 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 							   for otherCondition in otherConditions)
 		allDEResultsFullPaths.extend(list(minDEResultsFullPaths.values()))  # no need to know which path is which
 		
-	else:  # todo in this case (and also for fullExpression_bool) just let the jinja template handle the None variable.
-		# but don't make a fake on here and then pass it onto makeHTML() like is done now.
-		minSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'fold change log2(c1/c2)', 'adjusted p-value'])
-		minTopDifferentialsDFs = pd.DataFrame(columns=minSortedProteinExpressionsDF.columns)
+	else:
+		minTopDifferentialsDFs = None
 		minVolcanoFullPaths = None
 	
 	# do FULL expression
@@ -98,8 +96,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 								for otherCondition in otherConditions)
 		allDEResultsFullPaths.extend(list(fullDEResultsFullPaths.values()))  # no need to know which path is which
 	else:
-		fullSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'fold change log2(c1/c2)', 'adjusted p-value'])
-		fullTopDifferentialsDFs = pd.DataFrame(columns=fullSortedProteinExpressionsDF.columns)
+		fullTopDifferentialsDFs = None
 		fullVolcanoFullPaths = None
 
 	# metadata
