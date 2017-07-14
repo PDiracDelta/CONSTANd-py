@@ -97,7 +97,7 @@ def removeBadConfidence(df, minimum, removalColumnsToSave):
 		minimum = conf2int[minimum]
 		badConfidences = [conf2int[x] < minimum for x in df.loc[:, 'Confidence']]
 	except KeyError:
-		raise KeyError("Illegal Confidence values (allowed: Low, Medium, High). Watch out for capitalization.")
+		raise KeyError("Either the Confidence column is missing or it contains illegal values (allowed: Low, Medium, High). Watch out for capitalization.")
 	toDelete = df.loc[badConfidences, :].index  # indices of rows to delete
 	removedData = df.loc[toDelete, columnsToSave]
 	df.drop(toDelete, inplace=True)
