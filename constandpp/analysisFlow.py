@@ -32,6 +32,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	:return metadata:			pd.DataFrame	metadata: [noIsotopicCorrection, RTIsolationInfo, noMasterProteinAccession,
 												minSingleConditionProteins, fullSingleConditionProteins, uncommonPeptides, commonNanValues]
 	"""
+	
 	""" Preparation and metadata gathering """
 	processingResultsItems = processingResults.items()
 	dfs = dict((eName, result[0]) for eName, result in processingResultsItems)
@@ -63,7 +64,45 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	if params['getRTIsolationInfo_bool']:
 		metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for
 												 eName in experimentNames], keys=experimentNames)
-
+	
+	def DEA(this_allExperimentsDF, proteinPeptidesDict):
+		"""
+		Bring the data to the protein level in the case of [minimal]{full} expression (shared peptides are [not allowed]{allowed}).
+		Execute the differential expression analysis (t-test + B-H correction, compute log2 fold change and some useful
+		extra columns) and gather some metadata.
+		:param this_allExperimentsDF:		pd.DataFrame	dataframe containing an outer join of all the experiment dataframes
+		:param proteinPeptidesDict:			dict			{ protein : all associated peptide indices (non-injective) }
+		:return proteinDF:					pd.DataFrame	Transformed and selected data on the protein level.
+															Structure:
+															['peptides', 'description', {{condition}}, {{'p-value', 'adjusted p-value'}},
+															{{'log2 fold change'}}, {{'significant'}}, {{'#peptides'}}]
+		:return singleConditionProteins:	pd.DataFrame	protein entries removed due to invalid t-test results
+		:return numProteins:				int				number of proteins taken into account in the DEA
+		"""
+		referenceCondition = params['referenceCondition']
+		# use list() so that the new variable is not an alias
+		otherConditions = getOtherConditions(params['schema'], referenceCondition)
+		# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
+		proteinDF = getProteinDF(this_allExperimentsDF, proteinPeptidesDict, params['schema'],
+								 referenceCondition=referenceCondition, otherConditions=otherConditions)
+		
+		# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
+		# nan values for a certain condition and keep the removed ones in metadata
+		proteinDF, singleConditionProteins = testDifferentialExpression(proteinDF, params['alpha'], referenceCondition,
+																		otherConditions)
+		numProteins = len(proteinDF)
+		
+		# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
+		proteinDF = applyFoldChange(proteinDF, params['pept2protCombinationMethod'], referenceCondition,
+									otherConditions)
+		
+		# indicate significance based on given thresholds alpha and FCThreshold
+		proteinDF = applySignificance(proteinDF, otherConditions, params['alpha'], params['FCThreshold'])
+		
+		# add number of peptides that represent each protein (per condition)
+		proteinDF = addNumberOfRepresentingPeptides(proteinDF, referenceCondition, otherConditions)
+		return proteinDF, singleConditionProteins, numProteins
+	
 	""" Differential Expression Analysis """
 	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe as an outer join
 	allExperimentsDF = combineExperimentDFs(dfs)
@@ -82,7 +121,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		# Bring the data to the protein level in the case of minimal expression (no shared peptides allowed).
 		# Execute the differential expression analysis and gather some metadata
 		minProteinDF, metadata['minSingleConditionProteins'], metadata['numeric'].loc[0, 'minNumProteins'] = \
-			DEA(allExperimentsDF, minProteinPeptidesDict, params)
+			DEA(allExperimentsDF, minProteinPeptidesDict)
 	else:
 		minProteinDF = pd.DataFrame()
 
@@ -90,7 +129,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		# Bring the data to the protein level in the case of full expression (shared peptides allowed).
 		# Execute the differential expression analysis and gather some metadata
 		fullProteinDF, metadata['fullSingleConditionProteins'], metadata['numeric'].loc[0, 'fullNumProteins'] = \
-			DEA(allExperimentsDF, fullProteinPeptidesDict, params)
+			DEA(allExperimentsDF, fullProteinPeptidesDict)
 	else:
 		fullProteinDF = pd.DataFrame()
 	
