@@ -237,11 +237,14 @@ def applyWrapper(columns, wrapper):
 	"""
 	Takes a Nx2 tuple/list wrapper and transforms the columns in the dataframe df specified by the first column entries
 	in wrapper into the new column name specified by the second colmumn entries in wrapper.
-	:param columns:     pd.Index        old column names
-	:param wrapper:     list(tuples)    [(oldName, newName) for some columns]
-	:return newColumns: pd.Index        transformed column names
+	:param columns:     pd.Index or list	old column names
+	:param wrapper:     list(tuples)    	[(oldName, newName) for some columns]
+	:return newColumns: list	        	transformed column names
 	"""
-	newColumns = list(columns.values)
+	if isinstance(columns, pd.Index):
+		newColumns = list(columns.values)
+	elif isinstance(columns, list):
+		newColumns = columns
 	for (old, new) in wrapper:
 		newColumns[newColumns.index(old)] = new
 	return newColumns
