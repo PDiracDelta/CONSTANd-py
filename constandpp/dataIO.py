@@ -215,14 +215,20 @@ def fixFixableFormatMistakes(df):
 	:param df:  pd.DataFrame    possibly containing a multitude of mistakes.
 	:return df: pd.DataFrame    data without recognized format mistakes.
 	"""
+	columns = list(df.columns.values)
 	# you've enabled "show flanking amino acids": DIRk --> [L].DIRk.[m]
 	if df.sample(n=1)['Annotated Sequence'].item().count('.') == 2:  # sequence contains 2 dots
 		df['Annotated Sequence'] = df['Annotated Sequence'].apply(lambda x: x.split('.')[1])  # select part between dots
 	
 	# you're using "Identifying Node" instead of "Identifying Node Type"
-	if 'Identifying Node' in df.columns.values and 'Identifying Node Type' not in df.columns.values:
+	if 'Identifying Node' in columns and 'Identifying Node Type' not in columns:
 		# strip the everything after the last space (=node number between parentheses) + the last space.
 		df['Identifying Node Type'] = df['Identifying Node'].apply(lambda s: s.rsplit(' ', 1)[0])
+	
+	# you're using "Isolation Interference in Percent" instead of 'Isolation Interference [%]'
+	if 'Isolation Interference in Percent' in columns:
+		# replace it
+		df.columns = applyWrapper(columns, [('Isolation Interference in Percent', 'Isolation Interference [%]')])
 	
 	return df
 
