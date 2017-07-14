@@ -13,6 +13,7 @@ import zipfile
 import configparser
 from json import dumps
 from warnings import warn
+import logging
 
 
 def importDataFrame(path_in, delim=None, header=0, dtype=None):
@@ -220,15 +221,18 @@ def fixFixableFormatMistakes(df):
 	if df.sample(n=1)['Annotated Sequence'].item().count('.') == 2:  # sequence contains 2 dots
 		df['Annotated Sequence'] = df['Annotated Sequence'].apply(lambda x: x.split('.')[1])  # select part between dots
 	
+	columns = list(df.columns.values)
 	# you're using "Identifying Node" instead of "Identifying Node Type"
 	if 'Identifying Node' in columns and 'Identifying Node Type' not in columns:
 		# strip the everything after the last space (=node number between parentheses) + the last space.
 		df['Identifying Node Type'] = df['Identifying Node'].apply(lambda s: s.rsplit(' ', 1)[0])
 	
+	columns = list(df.columns.values)
 	# you're using "Isolation Interference in Percent" instead of 'Isolation Interference [%]'
 	if 'Isolation Interference in Percent' in columns:
 		# replace it
-		df.columns = applyWrapper(columns, [('Isolation Interference in Percent', 'Isolation Interference [%]')])
+		newColumns = applyWrapper(columns, [('Isolation Interference in Percent', 'Isolation Interference [%]')])
+		df.columns = newColumns
 	
 	return df
 
