@@ -141,7 +141,7 @@ def setMasterProteinDescriptions(df):
 											 zip(descriptionsLists, correctIndicesLists)]
 		df.drop('Protein Accessions', axis=1, inplace=True)
 	except KeyError as e:
-		logging.warning("Not all necessary columns found (see below); Adding 'Protein Descriptions' column with all empty strings.\n"+e.message)
+		logging.warning("Not all necessary columns found (see below); Adding 'Protein Descriptions' column with all empty strings.\n"+str(e))
 		# add a descriptions column that has all empty strings
 		df.loc[:, 'Protein Descriptions'] = ['', ]*len(df)
 	return df
