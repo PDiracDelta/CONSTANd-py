@@ -59,11 +59,14 @@ def removeMissing(df, noMissingValuesColumns, quanColumns):
 	:return df:						pd.dataFrame    data without missing values
 	"""
 	toDelete = []
-	for column in noMissingValuesColumns:
-		# delete all detections that have a missing value in this column
-		toDelete.extend(df.loc[df.loc[:, column].isnull(), :].index)
-	# delete all detections that have a missing value in both columns: XCorr and Ions Score
-	toDelete.extend(df.loc[[x and y for x, y in zip(df['XCorr'].isnull(), df['Ions Score'].isnull())]].index)
+	try:
+		for column in noMissingValuesColumns:
+			# delete all detections that have a missing value in this column
+			toDelete.extend(df.loc[df.loc[:, column].isnull(), :].index)
+		# delete all detections that have a missing value in both columns: XCorr and Ions Score
+		toDelete.extend(df.loc[[x and y for x, y in zip(df['XCorr'].isnull(), df['Ions Score'].isnull())]].index)
+	except KeyError as e:
+		raise KeyError("Required column '" + e.args[0] + "' was not found.")
 	# get the indices of all detections which have no quan values at all (those have their nansum equal to zero)
 	noIntensitiesBool = np.nansum(getIntensities(df=df, quanColumns=quanColumns), axis=1) == 0.
 	toDelete.extend(df.index[noIntensitiesBool])
