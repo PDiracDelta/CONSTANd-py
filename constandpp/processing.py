@@ -21,7 +21,7 @@ Removed data is always saved into a removedData dataFrame.
 from constandpp.tools import getIntensities
 import numpy as np
 import logging
-from pandas import DataFrame
+from pandas import DataFrame, Series
 
 
 def getAllPresentProteins(df):
@@ -143,7 +143,7 @@ def setMasterProteinDescriptions(df):
 	except KeyError as e:
 		logging.warning("Not all necessary columns found (see below); Adding 'Protein Descriptions' column with all empty strings.\n"+str(e))
 		# add a descriptions column that has all empty strings
-		df.loc[:, 'Protein Descriptions'] = ['', ]*len(df)
+		df.loc[:, 'Protein Descriptions'] = Series(['', ]*len(df)).astype(str)
 	return df
 
 

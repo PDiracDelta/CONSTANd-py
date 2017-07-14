@@ -112,7 +112,7 @@ def getProteinPeptidesDicts(df, fullExpression_bool):
 	"""
 	# create this column if it doesn't exist. It gets removed afterwards anyway.
 	if "# Protein Groups" not in df.columns.values:
-		df["# Protein Groups"] = df.apply(lambda x: len(x['Master Protein Accessions'].split(';')), axis=1)
+		df["# Protein Groups"] = df.apply(lambda x: len(str(x['Master Protein Accessions']).split(';')), axis=1)
 	numProteinGroupsDict = df.groupby("# Protein Groups").groups  # { # Protein Groups : indices }
 	# DEFAULTDICT doesn't return a KeyError when key not found, but rather None. !!! so you can safely .extend()
 	minProteinPeptidesDict = None  # proteins get contribution only from peptides which correspond uniquely to them
