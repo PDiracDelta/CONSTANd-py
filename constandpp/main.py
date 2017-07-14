@@ -142,7 +142,7 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 	# so if you start main.py from within web.py or something, this won't be executed
 	else:  # you didn't call main.py from the command line but from pycharm
 		doProcessing = False
-		doAnalysis = False
+		doAnalysis = True
 		doReport = True
 		writeToDisk = True
 		testing = False
@@ -178,7 +178,8 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '2017-07-11 11:11:53.474680_eterswr/jobConfig_eterswr.ini'
 		# jobConfigFilePath = '2017-07-11 14:43:18.382612_test_multipleConditions_mock/jobConfig_test_multipleConditions_mock.ini'
 		# jobConfigFilePath = '2017-07-12 14:01:31.083929_test multiplecond mock/jobConfig_test multiplecond mock.ini'
-		jobConfigFilePath = '2017-07-13 11:05:31.731077_test multicond/jobConfig_test multicond.ini'
+		# jobConfigFilePath = '2017-07-13 11:05:31.731077_test multicond/jobConfig_test multicond.ini'
+		jobConfigFilePath = '2017-07-14 14:30:46.751727_noExpressionDummies/jobConfig_noExpressionDummies.ini'
 		
 		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	

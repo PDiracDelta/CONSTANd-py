@@ -68,17 +68,15 @@ def DEA(allExperimentsDF, proteinPeptidesDict, params):  # todo move function to
 	:param proteinPeptidesDict:			dict			{ protein : all associated peptide indices (non-injective) }
 	:param params:						dict			job (global) parameters
 	:return proteinDF:					pd.DataFrame	Transformed and selected data on the protein level.
-														Structure (not necessarily in that order):
-														['protein', 'significant', 'adjusted p-value',
-														'fold change log2(c1/c2)', 'description', 'p-value',
-														'#peptides (c1, c2)', 'peptides', 'condition 1', 'condition 2']
+														Structure:
+														['peptides', 'description', {{condition}}, {{'p-value', 'adjusted p-value'}},
+														{{'log2 fold change'}}, {{'significant'}}, {{'#peptides'}}]
 	:return singleConditionProteins:	pd.DataFrame	protein entries removed due to invalid t-test results
 	:return numProteins:				int				number of proteins taken into account in the DEA
 	"""
 	referenceCondition = params['referenceCondition']
 	# use list() so that the new variable is not an alias
 	otherConditions = getOtherConditions(params['schema'], referenceCondition)
-	# todo redo docu dataframe structure
 	# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
 	proteinDF = getProteinDF(allExperimentsDF, proteinPeptidesDict, params['schema'],
 							 referenceCondition=referenceCondition, otherConditions=otherConditions)

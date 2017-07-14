@@ -93,7 +93,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 			DEA(allExperimentsDF, fullProteinPeptidesDict, params)
 	else:
 		fullProteinDF = pd.DataFrame()
-		
+	
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
 	handyColumnOrder = buildHandyColumnOrder(minProteinDF.columns, params['referenceCondition'], params['schema'])
 	minProteinDF = minProteinDF.reindex_axis(handyColumnOrder, axis=1)
