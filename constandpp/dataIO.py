@@ -359,4 +359,4 @@ def genZip(outFilePath, inFilePaths):
 	"""
 	with zipfile.ZipFile(outFilePath, 'w') as zf:
 		for f in inFilePaths:
-			zf.write(f)
+			zf.write(f, arcname=os.path.basename(f))
