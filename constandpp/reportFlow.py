@@ -6,7 +6,7 @@ Workflow of the processing part of CONSTANd++.
 """
 
 from constandpp.report import *
-from constandpp.dataIO import exportData
+from constandpp.dataIO import exportData, genZip
 
 
 def generateReport(analysisResults, params, logFilePath, writeToDisk, processingParams, startTime):
@@ -30,91 +30,89 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	fullProteinDF = analysisResults[1]
 	PCAResult = analysisResults[2]
 	HCResult = analysisResults[3]
-	allExperimentsIntensitiesPerCommonPeptide = np.asarray(analysisResults[4])
 	metadata = analysisResults[5]
+	
+	otherConditions = getOtherConditions(params['schema'], params['referenceCondition'])
 
-	### TEST
-	# make MA plots for comparing conditions
-	testInterexperimentalOnPeptideLevel = False
-	proteinLevelMAPlots = False
-	if testInterexperimentalOnPeptideLevel:
-		from constandpp.tools import MAPlot
-		org3data = allExperimentsIntensitiesPerCommonPeptide[:, 17]
-		#MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 11],
-		#       'org2 exp [1] vs org2 exp [1]')
-		MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 18],
-			   'org2 exp [2] vs org3 exp [2]')
-		MAPlot(org3data, allExperimentsIntensitiesPerCommonPeptide[:, 26],
-			   'org2 exp [2] vs org3 exp [3]')
-	if proteinLevelMAPlots:
-		from constandpp.tools import MAPlot
-		MAPlot(minProteinDF.loc[:, '3_muscle'], minProteinDF.loc[:, '4_muscle'],
-			   'org2 exp [2] vs org3 exp [2]')
-		MAPlot(minProteinDF.loc[:, '3_muscle'], minProteinDF.loc[:, '4_cerebrum'],
-			   'org2 exp [2] vs org3 exp [3]')
-
-	nConditions = len(params['schema']['allConditions'])
+	def getExpressionResults(this_proteinDF, this_schema):
+		"""
+		Sorts the protein dataframe, calculates the set of proteins in the results, generates a volcano plot and selects the
+		top differentials by calling functions from report.py
+		:param this_proteinDF:						pd.DataFrame    unsorted DE analysis results on the protein level
+		:return this_sortedProteinExpressionsDF:	dict			DEA output table sorted according to adjusted p-value,
+																	including proteins without DE results, per condition
+		:return this_topDifferentialsDFs:			dict			top X sorted (on adjusted p-value) proteins, per condition
+		:return this_volcanoPlot:					dict			plt.figure volcano plot, per condition
+		:return this_set:							set				all proteins represented in the results
+		"""
+		# { condition: sortedProteinExpressionsDF }
+		this_sortedProteinExpressionsDFs = getSortedProteinExpressionsDFs(this_proteinDF, this_schema, params['referenceCondition'])
+		this_set = set()
+		this_topDifferentialsDFs = dict()  # { condition: topDifferentialsDF }
+		this_volcanoPlots = dict()  # { condition: volcanoPlot }
+		# get the Expression results for each condition separately
+		for otherCondition in otherConditions:
+			this_set.update(set(this_sortedProteinExpressionsDFs[otherCondition]['protein']))
+			# get top X differentials
+			this_topDifferentialsDFs[otherCondition] = getTopDifferentials(this_sortedProteinExpressionsDFs[otherCondition], params['numDifferentials'])
+			# data visualization
+			this_volcanoPlots[otherCondition] = getVolcanoPlot(this_proteinDF, otherCondition, params['alpha'], params['FCThreshold'],
+															 params['labelVolcanoPlotAreas'],
+															 topIndices=list(this_topDifferentialsDFs[otherCondition]['protein']))
+			# add protein IDs that were observed at least once but got removed, for completeness in the output csv.
+			this_sortedProteinExpressionsDFs[otherCondition] = addMissingObservedProteins(this_sortedProteinExpressionsDFs[otherCondition],
+																						  metadata['allObservedProteins'].loc[:, 'protein'][0])
+		return this_sortedProteinExpressionsDFs, this_topDifferentialsDFs, this_volcanoPlots, this_set
+	
 	allDEResultsFullPaths = []  # paths to later pass on for mail attachments
-	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
-	if nConditions == 2:
-		# todo split off these steps in a separate function which you call for min and full analysis
-		# generate sorted (on p-value) list of differentials
-		if params['minExpression_bool']:
-			minSortedProteinExpressionsDF = getSortedProteinExpressionsDF(minProteinDF)
-			minSet = set(minSortedProteinExpressionsDF['protein'])
-			# get top X differentials
-			minTopDifferentialsDF = getTopDifferentials(minSortedProteinExpressionsDF, params['numDifferentials'])
-			# data visualization
-			minVolcanoPlot = getVolcanoPlot(minProteinDF, params['alpha'], params['FCThreshold'],
-											params['labelVolcanoPlotAreas'], topIndices=minTopDifferentialsDF.index)
-			# add protein IDs that were observed at least once but got removed, for completeness in the output csv.
-			minSortedProteinExpressionsDF = addMissingObservedProteins(minSortedProteinExpressionsDF, metadata['allObservedProteins'].loc[:, 'protein'][0])
-		else:  # todo in this case (and also for fullExpression_bool) just let the jinja template handle the None variable.
-			# but don't make a fake on here and then pass it onto makeHTML() like is done now.
-			minSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'fold change log2(c1/c2)', 'adjusted p-value'])
-			minTopDifferentialsDF = pd.DataFrame(columns=minSortedProteinExpressionsDF.columns)
+	# do MINIMAL expression
+	if params['minExpression_bool']:
+		minSortedProteinExpressionsDFs, minTopDifferentialsDFs, minVolcanoPlots, minSet = getExpressionResults(minProteinDF, params['schema'])
+		# save results
+		minDEResultsFullPaths = exportData(minSortedProteinExpressionsDFs, dataType='df', path_out=params['path_results'],
+										  filename=params['jobName'] + '_minSortedDifferentials',
+										  delim_out=params['delim_out'])
+		minVolcanoFullPaths = dict((otherCondition, exportData(minVolcanoPlots[otherCondition], dataType='fig',
+														   path_out=params['path_results'],
+														   filename=params['jobName'] + '_minVolcanoPlot_' + otherCondition))
+							   for otherCondition in otherConditions)
+		allDEResultsFullPaths.extend(list(minDEResultsFullPaths.values()))  # no need to know which path is which
 		
-		if params['fullExpression_bool']:
-			fullSortedProteinExpressionsDF = getSortedProteinExpressionsDF(fullProteinDF)
-			fullSet = set(fullSortedProteinExpressionsDF['protein'])
-			# get top X differentials
-			fullTopDifferentialsDF = getTopDifferentials(fullSortedProteinExpressionsDF, params['numDifferentials'])
-			# data visualization
-			fullVolcanoPlot = getVolcanoPlot(fullProteinDF, params['alpha'], params['FCThreshold'],
-											 params['labelVolcanoPlotAreas'], topIndices=fullTopDifferentialsDF.index)
-			# add protein IDs that were observed at least once but got removed, for completeness in the output csv.
-			fullSortedProteinExpressionsDF = addMissingObservedProteins(fullSortedProteinExpressionsDF, metadata['allObservedProteins'].loc[:, 'protein'][0])
-		else:
-			fullSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'fold change log2(c1/c2)', 'adjusted p-value'])
-			fullTopDifferentialsDF = pd.DataFrame(columns=fullSortedProteinExpressionsDF.columns)
-		
-		if params['minExpression_bool'] and params['fullExpression_bool']:
-			# list( [in min but not in full], [in full but not in min] )
-			metadata['diffMinFullProteins'] = [list(minSet.difference(fullSet)), list(fullSet.difference(minSet))]
-			# todo combine into one
-
-		if writeToDisk:
-			if params['minExpression_bool']:
-				minDEResultsFullPath = exportData(minSortedProteinExpressionsDF, dataType='df', path_out=params['path_results'],
-						   filename=params['jobName'] + '_minSortedDifferentials', delim_out=params['delim_out'])
-				minVolcanoFullPath = exportData(minVolcanoPlot, dataType='fig', path_out=params['path_results'],
-						   filename=params['jobName'] + '_minVolcanoPlot')
-				allDEResultsFullPaths.append(minDEResultsFullPath)
-			else:
-				minVolcanoFullPath = None
-			if params['fullExpression_bool']:
-				fullDEResultsFullPath = exportData(fullSortedProteinExpressionsDF, dataType='df', path_out=params['path_results'],
-						   filename=params['jobName'] + '_fullSortedDifferentials', delim_out=params['delim_out'])
-				fullVolcanoFullPath = exportData(fullVolcanoPlot, dataType='fig', path_out=params['path_results'],
-						   filename=params['jobName'] + '_fullVolcanoPlot')
-				allDEResultsFullPaths.append(fullDEResultsFullPath)
-			else:
-				fullVolcanoFullPath = None
+	else:  # todo in this case (and also for fullExpression_bool) just let the jinja template handle the None variable.
+		# but don't make a fake on here and then pass it onto makeHTML() like is done now.
+		minSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'fold change log2(c1/c2)', 'adjusted p-value'])
+		minTopDifferentialsDFs = pd.DataFrame(columns=minSortedProteinExpressionsDF.columns)
+		minVolcanoFullPaths = None
+	
+	# do FULL expression
+	if params['fullExpression_bool']:
+		fullSortedProteinExpressionsDFs, fullTopDifferentialsDFs, fullVolcanoPlots, fullSet = getExpressionResults(fullProteinDF, params['schema'])
+		# save results
+		fullDEResultsFullPaths = exportData(fullSortedProteinExpressionsDFs, dataType='df',
+										   path_out=params['path_results'],
+										   filename=params['jobName'] + '_fullSortedDifferentials',
+										   delim_out=params['delim_out'])
+		fullVolcanoFullPaths = dict((otherCondition, exportData(fullVolcanoPlots[otherCondition], dataType='fig',
+															path_out=params['path_results'],
+															filename=params['jobName'] + '_fullVolcanoPlot_' + otherCondition))
+								for otherCondition in otherConditions)
+		allDEResultsFullPaths.extend(list(fullDEResultsFullPaths.values()))  # no need to know which path is which
 	else:
-		minTopDifferentialsDF = pd.DataFrame()
-		fullTopDifferentialsDF = pd.DataFrame()
-		minVolcanoFullPath = None
-		fullVolcanoFullPath = None
+		fullSortedProteinExpressionsDF = pd.DataFrame(columns=['protein', 'significant', 'description', 'fold change log2(c1/c2)', 'adjusted p-value'])
+		fullTopDifferentialsDFs = pd.DataFrame(columns=fullSortedProteinExpressionsDF.columns)
+		fullVolcanoFullPaths = None
+
+	# metadata
+	if params['minExpression_bool'] and params['fullExpression_bool']:
+		# list( [in min but not in full], [in full but not in min] )
+		metadata['diffMinFullProteins'] = [list(minSet.difference(fullSet)), list(fullSet.difference(minSet))]
+		# todo combine into one
+
+	# else:
+	# 	minTopDifferentialsDF = pd.DataFrame()
+	# 	fullTopDifferentialsDF = pd.DataFrame()
+	# 	minVolcanoFullPath = None
+	# 	fullVolcanoFullPath = None
 
 	PCAPlot = getPCAPlot(PCAResult, params['schema'])
 	if writeToDisk:
@@ -127,10 +125,11 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 
 	if writeToDisk:
 		htmlReport, pdfhtmlreport = makeHTML(jobParams=params, allProcessingParams=processingParams,
-											 minTopDifferentialsDF=minTopDifferentialsDF,
-											 fullTopDifferentialsDF=fullTopDifferentialsDF,
-											 minVolcanoFullPath=minVolcanoFullPath,
-											 fullVolcanoFullPath=fullVolcanoFullPath,
+											 otherConditions=otherConditions,
+											 minTopDifferentialsDFs=minTopDifferentialsDFs,
+											 fullTopDifferentialsDFs=fullTopDifferentialsDFs,
+											 minVolcanoFullPaths=minVolcanoFullPaths,
+											 fullVolcanoFullPaths=fullVolcanoFullPaths,
 											 PCAPlotFullPath=PCAPlotFullPath, HCDendrogramFullPath=HCDendrogramFullPath,
 											 metadata=metadata, logFilePath=logFilePath, startTime=startTime)
 		htmlFullPath = exportData(htmlReport, dataType='html', path_out=params['path_results'],
@@ -140,11 +139,16 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 
 		pdfFullPath = HTMLtoPDF(pdfhtmlFullPath)
 		# todo possibly remove need for special pdfhtml if weasyprint fetches the HTML from the web server via URL instead
-
+		
+		# zip the result files together (except the report file)
+		from os.path import join
+		resultsZipFullPath = join(params['path_results'], 'results.zip')
+		genZip(resultsZipFullPath, allDEResultsFullPaths)
+		
 		from constandpp_web.web import send_mail
 		### SEND JOB COMPLETED MAIL ###
 		mailSuccess = send_mail(recipient=params['mailRecipient'], mailBodyFile='reportMail',
-				  jobName=params['jobName'], jobID=params['jobID'], attachments=[pdfFullPath]+allDEResultsFullPaths)
+				  jobName=params['jobName'], jobID=params['jobID'], attachments=[pdfFullPath]+[resultsZipFullPath])
 		if mailSuccess is not None:  # something went wrong
 			import logging
 			logging.error(mailSuccess)

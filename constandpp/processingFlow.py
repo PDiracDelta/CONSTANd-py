@@ -41,8 +41,12 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	
 	if params['removeIsolationInterference_bool']:
 		# remove all data with too high isolation interference
-		df, removedData['isolationInterference'] = removeIsolationInterference(df, params[
-			'removeIsolationInterference_threshold'], params['removalColumnsToSave'])
+		try:
+			df, removedData['isolationInterference'] = \
+				removeIsolationInterference(df, params['removeIsolationInterference_threshold'],
+											params['removalColumnsToSave'])
+		except KeyError:
+			logging.warning("No 'Isolation Interference' column found: did NOT filter on Isolation Interference!")
 	# remove all non-master protein accessions (entire column) and descriptions (selective).
 	df = setMasterProteinDescriptions(df)
 	

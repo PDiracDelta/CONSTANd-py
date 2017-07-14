@@ -9,9 +9,11 @@ import os
 import pandas as pd
 import numpy as np
 import pickle
+import zipfile
 import configparser
 from json import dumps
 from warnings import warn
+import logging
 
 
 def importDataFrame(path_in, delim=None, header=0, dtype=None):
@@ -200,7 +202,8 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	incompleteSchemaDict['allConditions'] = list(allConditions)
 	
 	# check if some of the conditions provided do not actually have forbidden names (union not empty)
-	forbiddenConditionNames = {'data', 'config', 'isotopicCorrection_matrix', 'wrapper', 'allExperimentConditions'}
+	forbiddenConditionNames = {'data', 'config', 'isotopicCorrection_matrix', 'wrapper', 'allExperimentConditions',
+							   'protein', 'peptides', 'description', 'fold change log2(c1/c2)', 'p-value'}
 	if allConditions & {'data', 'config', 'isotopicCorrection_matrix', 'wrapper'}:
 		raise Exception("Please do not use as condition names any of the following: " + str(list(forbiddenConditionNames)))
 	
@@ -213,14 +216,23 @@ def fixFixableFormatMistakes(df):
 	:param df:  pd.DataFrame    possibly containing a multitude of mistakes.
 	:return df: pd.DataFrame    data without recognized format mistakes.
 	"""
+	columns = list(df.columns.values)
 	# you've enabled "show flanking amino acids": DIRk --> [L].DIRk.[m]
 	if df.sample(n=1)['Annotated Sequence'].item().count('.') == 2:  # sequence contains 2 dots
 		df['Annotated Sequence'] = df['Annotated Sequence'].apply(lambda x: x.split('.')[1])  # select part between dots
 	
+	columns = list(df.columns.values)
 	# you're using "Identifying Node" instead of "Identifying Node Type"
-	if 'Identifying Node' in df.columns.values and 'Identifying Node Type' not in df.columns.values:
+	if 'Identifying Node' in columns and 'Identifying Node Type' not in columns:
 		# strip the everything after the last space (=node number between parentheses) + the last space.
 		df['Identifying Node Type'] = df['Identifying Node'].apply(lambda s: s.rsplit(' ', 1)[0])
+	
+	columns = list(df.columns.values)
+	# you're using "Isolation Interference in Percent" instead of 'Isolation Interference [%]'
+	if 'Isolation Interference in Percent' in columns:
+		# replace it
+		newColumns = applyWrapper(columns, [('Isolation Interference in Percent', 'Isolation Interference [%]')])
+		df.columns = newColumns
 	
 	return df
 
@@ -229,11 +241,14 @@ def applyWrapper(columns, wrapper):
 	"""
 	Takes a Nx2 tuple/list wrapper and transforms the columns in the dataframe df specified by the first column entries
 	in wrapper into the new column name specified by the second colmumn entries in wrapper.
-	:param columns:     pd.Index        old column names
-	:param wrapper:     list(tuples)    [(oldName, newName) for some columns]
-	:return newColumns: pd.Index        transformed column names
+	:param columns:     pd.Index or list	old column names
+	:param wrapper:     list(tuples)    	[(oldName, newName) for some columns]
+	:return newColumns: list	        	transformed column names
 	"""
-	newColumns = list(columns.values)
+	if isinstance(columns, pd.Index):
+		newColumns = list(columns.values)
+	elif isinstance(columns, list):
+		newColumns = columns
 	for (old, new) in wrapper:
 		newColumns[newColumns.index(old)] = new
 	return newColumns
@@ -262,6 +277,8 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 	:param path_out:	string  path where data should be exported to
 	:param filename:	string  filename for the data
 	:param delim_out:	char    delimiter of the data
+	:return fullPath:	str		full path of where the data was saved
+	:return fullPaths:	dict	full paths of where the data were saved, per data object
 	"""
 	# todo this function should call sub-functions per data type and optional arguments
 	assert os.path.exists(path_out)
@@ -281,10 +298,14 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 				# data['missing'].columns contains all possible columns
 				removedData.to_csv(fullPath, sep=delim_out, index=False,
 								   columns=data['missing'].columns)
+				return fullPath
 			else:  # save all removedData in separate files per category.
+				fullPaths = dict()
 				for frameName, frame in data.items():
 					assert isinstance(frame, pd.DataFrame)
-					frame.to_csv(path_out + '/' + filename + '_' + frameName + extension, sep=delim_out, index=False)
+					fullPaths[frameName] = path_out + '/' + filename + '_' + frameName + extension
+					frame.to_csv(fullPaths[frameName], sep=delim_out, index=False)
+				return fullPaths
 		else:
 			assert isinstance(data, pd.DataFrame)
 			data.to_csv(fullPath, sep=delim_out, index=False)
@@ -294,9 +315,9 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 		with open(outFileFullPathNoExt + '.pkl', "wb") as fout:
 			# save as pickle. Load again later as: ax = pickle.load(file('myplot.pickle')); then plt.show()
 			pickle.dump(data, fout, protocol=4)
-		from matplotlib import pyplot as plt
+		# from matplotlib import pyplot as plt
 		# ax = data
-		plt.savefig(outFileFullPathNoExt + '.png', format='png', bbox_inches='tight')
+		data.savefig(outFileFullPathNoExt + '.png', format='png', bbox_inches='tight')
 		return outFileFullPathNoExt + '.png'
 	elif dataType == 'html':
 		fullPath += '.html'
@@ -328,3 +349,14 @@ def ext2delim(ext):
 		return '\t'
 	else:
 		return None
+
+
+def genZip(outFilePath, inFilePaths):
+	"""
+	Creates a zipfile at specified ouFilePath location from a list of inFilePaths
+	:param outFilePath:	str		output zip file path
+	:param inFilePaths:	[ str ]	input file paths
+	"""
+	with zipfile.ZipFile(outFilePath, 'w') as zf:
+		for f in inFilePaths:
+			zf.write(f, arcname=os.path.basename(f))

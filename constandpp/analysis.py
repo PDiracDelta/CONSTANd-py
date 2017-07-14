@@ -9,7 +9,7 @@ Performs a differential expression analysis on the normalized intensities as pro
 import numpy as np
 import pandas as pd
 import logging
-from constandpp.tools import unnest
+from constandpp.tools import unnest, getOtherConditions
 # from constandpp.tools import getIntensities
 from collections import defaultdict
 from statsmodels.sandbox.stats.multicomp import multipletests
@@ -59,7 +59,7 @@ def combineExperimentDFs(dfs):  # todo how are PSMs combined with multiple charg
 	return pd.concat(dfs.values(), keys=dfs.keys(), join='outer')
 
 
-def DEA(allExperimentsDF, proteinPeptidesDict, params):
+def DEA(allExperimentsDF, proteinPeptidesDict, params):  # todo move function to analysisFlow
 	"""
 	Bring the data to the protein level in the case of [minimal]{full} expression (shared peptides are [not allowed]{allowed}).
 	Execute the differential expression analysis (t-test + B-H correction, compute log2 fold change and some useful
@@ -75,22 +75,27 @@ def DEA(allExperimentsDF, proteinPeptidesDict, params):
 	:return singleConditionProteins:	pd.DataFrame	protein entries removed due to invalid t-test results
 	:return numProteins:				int				number of proteins taken into account in the DEA
 	"""
+	referenceCondition = params['referenceCondition']
+	# use list() so that the new variable is not an alias
+	otherConditions = getOtherConditions(params['schema'], referenceCondition)
+	# todo redo docu dataframe structure
 	# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
-	proteinDF = getProteinDF(allExperimentsDF, proteinPeptidesDict, params['schema'])
+	proteinDF = getProteinDF(allExperimentsDF, proteinPeptidesDict, params['schema'],
+							 referenceCondition=referenceCondition, otherConditions=otherConditions)
 	
 	# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
 	# nan values for a certain condition and keep the removed ones in metadata
-	proteinDF, singleConditionProteins = testDifferentialExpression(proteinDF, params['alpha'])
+	proteinDF, singleConditionProteins = testDifferentialExpression(proteinDF, params['alpha'], referenceCondition, otherConditions)
 	numProteins = len(proteinDF)
 	
 	# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
-	proteinDF = applyFoldChange(proteinDF, params['pept2protCombinationMethod'])
+	proteinDF = applyFoldChange(proteinDF, params['pept2protCombinationMethod'], referenceCondition, otherConditions)
 	
 	# indicate significance based on given thresholds alpha and FCThreshold
-	proteinDF = applySignificance(proteinDF, params['alpha'], params['FCThreshold'])
+	proteinDF = applySignificance(proteinDF, otherConditions, params['alpha'], params['FCThreshold'])
 	
 	# add number of peptides that represent each protein (per condition)
-	proteinDF = addNumberOfRepresentingPeptides(proteinDF)
+	proteinDF = addNumberOfRepresentingPeptides(proteinDF, referenceCondition, otherConditions)
 	return proteinDF, singleConditionProteins, numProteins
 
 
@@ -107,7 +112,7 @@ def getProteinPeptidesDicts(df, fullExpression_bool):
 	"""
 	# create this column if it doesn't exist. It gets removed afterwards anyway.
 	if "# Protein Groups" not in df.columns.values:
-		df["# Protein Groups"] = df.apply(lambda x: len(x['Master Protein Accessions'].split(';')), axis=1)
+		df["# Protein Groups"] = df.apply(lambda x: len(str(x['Master Protein Accessions']).split(';')), axis=1)
 	numProteinGroupsDict = df.groupby("# Protein Groups").groups  # { # Protein Groups : indices }
 	# DEFAULTDICT doesn't return a KeyError when key not found, but rather None. !!! so you can safely .extend()
 	minProteinPeptidesDict = None  # proteins get contribution only from peptides which correspond uniquely to them
@@ -137,126 +142,155 @@ def getProteinPeptidesDicts(df, fullExpression_bool):
 		return minProteinPeptidesDict, None, df.loc[noMasterProteinAccession, ['First Scan', 'Annotated Sequence']]
 
 
-def getProteinDF(df, proteinPeptidesDict, schema):
+def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherConditions):
 	"""
 	Transform the data index from the peptide to the protein level by using the associations in proteinPeptidesDict, and
 	select only relevant information. The resulting dataframe is indexed on the Master Protein Accessions.
-	Quantification values from all associated unique modified peptides are kept in a list per condition (max: 2) for
-	each protein.
+	Quantification values from all associated unique modified peptides are kept in a list per condition for each protein.
 	:param df:					pd.DataFrame				outer join of all experiments.
 	:param proteinPeptidesDict:	{protein: [peptide ids]}	proteins and their associated peptide ids.
 	:param schema:				dict                		schema of the experiments' hierarchy.
+	:param referenceCondition:	str							reference condition for the fold change calculation.
+	:param otherConditions:		list 						all non-reference conditions in the experiment
 	:return proteinDF:			pd.DataFrame				transformed and selected data on the protein level.
 															Structure:
-															['protein', 'peptides', 'description', 'condition 1', 'condition 2']
+															['protein', 'peptides', 'description',
+															referenceCondition, condition 1, condition 2, ...]
 	"""
-	proteinDFColumns = ['protein', 'peptides', 'description', 'condition 1', 'condition 2']
+	if 'Protein Descriptions' not in df.columns.values:  # in case there was no Descriptions column in the input
+		df['Protein Descriptions'] = pd.Series()
+	proteinDFColumns = ['protein', 'peptides', 'description']
+	allConditions = [referenceCondition]+otherConditions
+	# append reference condition first, and then the other conditions
+	proteinDFColumns.append(referenceCondition)
+	proteinDFColumns.extend(otherConditions)
 	proteinDF = pd.DataFrame([list(proteinPeptidesDict.keys())].extend([[None], ]*len(proteinDFColumns)),
 							 columns=proteinDFColumns).set_index('protein')
-	condition1 = schema['allConditions'][0]  # TEST todo
-	condition2 = schema['allConditions'][1]  # TEST todo
+	
 	for protein, peptideIndices in proteinPeptidesDict.items():
+		# construct the new protein entry, with empty quan lists for now, and add it to the proteinDF
+		proteinEntry = [df.loc[peptideIndices, 'Annotated Sequence'].tolist(),
+						df.loc[peptideIndices, 'Protein Descriptions'][0]]
+		numFilledProteinEntries = len(proteinEntry)  # for easy adding later on
+		proteinEntry.extend([None, ]*len(allConditions))
+		
+		proteinQuanPerCondition = dict(zip(allConditions, [pd.Series(), ] * len(allConditions)))
 		# interpret as multi index so that you can call .levels and .get_level_values()
 		peptideIndices = pd.MultiIndex.from_tuples(peptideIndices)
-		# combine all channels into one channel per condition.
-		condition1Intensities = pd.Series()
-		condition2Intensities = pd.Series()
-		# per experiment, get the a list of indices per channel for both conditions, and concatenate the corresponding df values.
+		# per experiment, get the list of indices and append the corresponding df values to the right quanPerCondition.
 		for eName in peptideIndices.levels[0]:  # peptideIndices.levels[0] is the experimentName part of the index.
 			# get the indices of the current experiment
 			peptideIndicesPerExperiment = peptideIndices.values[peptideIndices.get_level_values(0) == eName]
-			# get a list of dfs, to sort the intensities per channel.
-			condition1intensitiesPerChannel = [df.loc[peptideIndicesPerExperiment, channel] for channel in
-											   schema[eName][condition1]['channelAliases']]
-			condition2intensitiesPerChannel = [df.loc[peptideIndicesPerExperiment, channel] for channel in
-											   schema[eName][condition2]['channelAliases']]
-			condition1Intensities = pd.concat([condition1Intensities] + condition1intensitiesPerChannel, axis=0, ignore_index=True)
-			condition2Intensities = pd.concat([condition2Intensities] + condition2intensitiesPerChannel, axis=0, ignore_index=True)
-		# fill new dataframe on protein level, per condition
-		if 'Protein Descriptions' not in df.columns.values:
-			df['Protein Descriptions'] = pd.Series()
-		proteinDF.loc[protein, :] = [df.loc[peptideIndices, 'Annotated Sequence'].tolist(),
-									 df.loc[peptideIndices, 'Protein Descriptions'][0],
-									 condition1Intensities.tolist(), condition2Intensities.tolist()]
+			# for each condition in the experiment, append all its channels to the quanPerCondition Series.
+			for condition in schema[eName]['allExperimentConditions']:
+				for channel in schema[eName][condition]['channelAliases']:
+					proteinQuanPerCondition[condition] = proteinQuanPerCondition[condition].append(df.loc[peptideIndicesPerExperiment, channel])
+		
+		# add quan lists to protein entry and then add proteinEntry to dataframe (faster than accessing dataframe twice)
+		proteinEntry[numFilledProteinEntries] = list(proteinQuanPerCondition[referenceCondition])  # list so it shows nicely in exported csv
+		for i in range(len(otherConditions)):  # preserve order of otherConditions
+			proteinEntry[numFilledProteinEntries+1+i] = list(proteinQuanPerCondition[otherConditions[i]])  # list so it shows nicely in exported csv
+		# fill new dataframe
+		proteinDF.loc[protein, :] = proteinEntry
+	
 	return proteinDF
 
 
-def testDifferentialExpression(this_proteinDF, alpha):
+def testDifferentialExpression(this_proteinDF, alpha, referenceCondition, otherConditions):
 	"""
 	Perform a t-test for independent samples for each protein on its (2) associated lists of peptide quantifications,
 	do a Benjamini-Hochberg correction and store the results in new "p-values" and "adjusted p-values" columns in the
 	dataframe. If a test returns NaN or masked values (e.g. due to sample size==1) the corresponding protein is removed.
-	:param this_proteinDF:	pd.DataFrame	data from all experiments on the protein level
-	:param alpha:			float			confidence level for the t-test
-	:return this_proteinDF:	pd.DataFrame	data on protein level, with statistical test information
-	:return removedData:	pd.DataFrame	protein entries removed due to invalid t-test results
+	:param this_proteinDF:		pd.DataFrame	data from all experiments on the protein level
+	:param alpha:				float			confidence level for the t-test
+	:param referenceCondition:	str				name of the condition to be used as the reference
+	:param otherConditions:		list 			all non-reference conditions in the experiment
+	:return this_proteinDF:		pd.DataFrame	data on protein level, with statistical test information
+	:return removedData:		pd.DataFrame	protein entries removed due to invalid t-test results
 	"""
 	# { protein : indices of (uniquely/all) associated peptides }
 	# perform t-test on the intensities lists of both conditions of each protein, assuming data is independent.
-	this_proteinDF['p-value'] = this_proteinDF.apply(lambda x: ttest(x['condition 1'], x['condition 2'], nan_policy='omit')[1], axis=1)
-	# remove masked values
-	this_proteinDF.loc[:, 'p-value'] = this_proteinDF.loc[:, 'p-value'].apply(lambda x: np.nan if x is np.ma.masked or x == 0.0 else x)
-	toDeleteProteins = this_proteinDF[np.isnan(this_proteinDF['p-value'])].index
-	removedData = this_proteinDF.loc[toDeleteProteins, :].copy()
-	this_proteinDF.drop(toDeleteProteins, inplace=True)
-	# Benjamini-Hochberg correction
-	# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
-	__, this_proteinDF['adjusted p-value'], __, __ = multipletests(pvals=np.asarray(this_proteinDF.loc[:, 'p-value']),
-																   alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
+	for condition in otherConditions:
+		pValueColumn = 'p-value (' + condition + ')'
+		this_proteinDF[pValueColumn] = this_proteinDF.apply(lambda x: ttest(x[referenceCondition], x[condition], nan_policy='omit')[1], axis=1)
+		# remove masked values
+		this_proteinDF.loc[:, pValueColumn] = this_proteinDF.loc[:, pValueColumn].apply(lambda x: np.nan if x is np.ma.masked or x == 0.0 else x)
+		toDeleteProteins = this_proteinDF[np.isnan(this_proteinDF[pValueColumn])].index
+		removedData = this_proteinDF.loc[toDeleteProteins, :].copy()
+		this_proteinDF.drop(toDeleteProteins, inplace=True)
+		# Benjamini-Hochberg correction
+		# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
+		__, this_proteinDF['adjusted '+pValueColumn], __, __ = multipletests(pvals=np.asarray(this_proteinDF.loc[:, pValueColumn]),
+																	   alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
 	return this_proteinDF, removedData
 
 
-def applyFoldChange(proteinDF, pept2protCombinationMethod):
+def applyFoldChange(proteinDF, pept2protCombinationMethod, referenceCondition, otherConditions):
 	"""
 	Calculate the log2 fold change of the quantification values per channel for each protein according to
-	pept2protCombinationMethod and add it to the new "fold change log2(c1/c2)" column.
+	pept2protCombinationMethod and add it to the new "log2 fold change (conditionName)" columns.
 	:param proteinDF:					pd.DataFrame	data on the protein level with t-test results.
 	:param pept2protCombinationMethod:  str				method for reducing peptide information into one figure per protein
+	:param referenceCondition:	str				name of the condition to be used as the reference
+	:param otherConditions:		list 			all non-reference conditions in the experiment
 	:return proteinDF:					pd.DataFrame	data on the protein level, including fold changes
 	"""
-	if pept2protCombinationMethod == 'mean':
-		proteinDF['fold change log2(c1/c2)'] = proteinDF.apply(lambda x: np.log2(np.nanmean(x['condition 1'])/np.nanmean(x['condition 2'])), axis=1)
-	elif pept2protCombinationMethod == 'median':
-		proteinDF['fold change log2(c1/c2)'] = proteinDF.apply(lambda x: np.log2(np.nanmedian(x['condition 1']) / np.nanmedian(x['condition 2'])), axis=1)
+	for condition in otherConditions:
+		if pept2protCombinationMethod == 'mean':
+			proteinDF['log2 fold change ('+condition+')'] = proteinDF.apply(lambda x: np.log2(np.nanmean(x[condition])/np.nanmean(x[referenceCondition])), axis=1)
+		elif pept2protCombinationMethod == 'median':
+			proteinDF['log2 fold change ('+condition+')'] = proteinDF.apply(lambda x: np.log2(np.nanmedian(x[condition]) / np.nanmedian(x[referenceCondition])), axis=1)
+		else:
+			raise Exception("Illegal pept2protCombinationMethod '"+str(pept2protCombinationMethod)+"'.")
 	return proteinDF
 
 
-def applySignificance(df, alpha, FCThreshold):
+def applySignificance(df, otherConditions, alpha, FCThreshold):
 	"""
 	Adds a column with the significance level to the dataframe of proteins; specifies whether the DEA or fold change
 	results or both were significant.
-	:param df:          pd.DataFrame    proteins with their DEA and FC results.
-	:param alpha:       float           significance level
-	:param FCThreshold: float           fold change threshold
-	:return:            pd.DataFrame    protein data with significance levels 'yes', 'no', 'p' or 'fc'.
+	:param df:          	pd.DataFrame    proteins with their DEA and FC results.
+	:param otherConditions:	[ str ]			names of all non-reference conditions
+	:param alpha:       	float           significance level
+	:param FCThreshold: 	float           fold change threshold
+	:return:            	pd.DataFrame    protein data with significance levels 'yes', 'no', 'p' or 'fc'.
 	"""
-	def significant(x):
-		pvalueSignificant = x['adjusted p-value'] < alpha
-		FCSignificant = abs(x['fold change log2(c1/c2)']) > FCThreshold
-		if pvalueSignificant & FCSignificant:
-			return 'yes'
-		elif pvalueSignificant:
-			return 'p'
-		elif FCSignificant:
-			return 'fc'
-		else:
-			return 'no'
-
-	df['significant'] = df.apply(significant, axis=1)
+	for condition in otherConditions:
+		def significant(x):
+			pvalueSignificant = x['adjusted p-value ('+condition+')'] < alpha
+			FCSignificant = abs(x['log2 fold change ('+condition+')']) > FCThreshold
+			if pvalueSignificant & FCSignificant:
+				return 'yes'
+			elif pvalueSignificant:
+				return 'p'
+			elif FCSignificant:
+				return 'fc'
+			else:
+				return 'no'
+		
+		df['significant ('+condition+')'] = df.apply(significant, axis=1)
 	return df
 
 
-def addNumberOfRepresentingPeptides(proteinDF):
+def addNumberOfRepresentingPeptides(proteinDF, referenceCondition, otherConditions):
 	"""
 	Adds a column '#peptides (c1, c2)' to the proteinDF by zipping the lengths of the list of observed quantification
 	values for each condition.
-	:param proteinDF:	pd.DataFrame	proteinDF with quantification values per condition
-	:return proteinDF:	pd.DataFrame	proteinDF including column with amount of peptides per condition
+	:param proteinDF:			pd.DataFrame	proteinDF with quantification values per condition
+	:param referenceCondition:	str				name of the condition to be used as the reference
+	:param otherConditions:		list 			all non-reference conditions in the experiment
+	:return proteinDF:			pd.DataFrame	proteinDF including column with amount of peptides per condition
 	"""
-	c1Lengths = proteinDF.loc[:, 'condition 1'].apply(lambda x: len(pd.Series(x).dropna()))
-	c2Lengths = proteinDF.loc[:, 'condition 2'].apply(lambda x: len(pd.Series(x).dropna()))
-	# if you don't do series(list(x)).values it gives an Error or makes it into nans... god knows why
-	proteinDF['#peptides (c1, c2)'] = pd.Series(list(zip(c1Lengths, c2Lengths))).values
+	# order is important: referenceCondition first
+	allConditions = [referenceCondition] + otherConditions
+	# lengths = []
+	for condition in allConditions:
+		# lengths.append(proteinDF.loc[:, condition].apply(lambda x: len(pd.Series(x).dropna())))
+		# EDIT: just do one column per condition, because we want to be able to split them in the report afterwards.
+		proteinDF['#peptides (' + str(condition) + ')'] = proteinDF.loc[:, condition].apply(lambda x: len(pd.Series(x).dropna()))
+	# # if you don't do series(list(x)).values it gives an Error or makes it into nans... god knows why
+	# # use * for the pointer of `lengths` because zip doesn't take a list of lists as an argument.
+	# proteinDF['#peptides '+str(allConditions)] = pd.Series(list(zip(*lengths))).values
 	return proteinDF
 
 
@@ -274,7 +308,7 @@ def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 	peptidesDf = pd.DataFrame()
 	# join all dataframes together on the Annotated Sequence: you get ALL channels from ALL experiments as columns per peptide.
 	# [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
-	allPeptides = []
+	allPeptides = set()
 	for eName in dfs.keys():
 		eChannelAliases = schema[eName]['allExperimentChannelAliases']
 		if peptidesDf.empty:
@@ -282,8 +316,10 @@ def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 		else:
 			peptidesDf = pd.merge(peptidesDf, dfs[eName].loc[:, ['Annotated Sequence'] + eChannelAliases],
 							 on='Annotated Sequence')
-		allPeptides.extend(dfs[eName].loc[:, 'Annotated Sequence'])
-	uncommonPeptides = pd.DataFrame(list(set(allPeptides).difference(set(peptidesDf.loc[:, 'Annotated Sequence']))))
+		allPeptides.update(set(dfs[eName].loc[:, 'Annotated Sequence']))
+	uncommonPeptides = pd.DataFrame(list(allPeptides.difference(set(peptidesDf.loc[:, 'Annotated Sequence']))))
+	if len(peptidesDf) < 2:
+		raise Exception("Only "+str(len(peptidesDf))+" peptides found that were common across all experiments. Cannot perform PCA nor HC.")
 	return peptidesDf.loc[:, allChannelAliases], uncommonPeptides
 
 
@@ -322,3 +358,35 @@ def getHC(intensities):
 	intensities[np.isnan(intensities)] = 0
 	condensedDistanceMatrix = pdist(intensities.T) # remove nans and transpose
 	return linkage(condensedDistanceMatrix, method='average') # 'average'=UPGMA
+
+
+def buildHandyColumnOrder(inColumns, referenceCondition, schema):
+	"""
+	Reshuffles the entries of a given list of proteinDF columns into a handy order.
+	:param inColumns:			[ str ]	proteinDF columns, unordered
+	:param referenceCondition:	str		reference condition
+	:param schema:				dict    schema of the experiments' hierarchy
+	:return outColumns:			[ str ]	proteinDF columns, ordered according to: ['protein', 'description',
+										{{ 'adjusted p-value', 'log2 fold change'}}, {{'#peptides'}}, {{'significant'}},
+										{{'p-value'}}, {{'condition'}} , 'peptides']
+	"""
+	otherConditions = getOtherConditions(schema, referenceCondition)
+	# ['protein', 'description', 'adjusted p-value', 'log2 fold change', '#peptides (c1, c2)', 'significant', 'p-value',
+	# 'condition 1', 'condition 2', 'peptides']
+	outColumns = ['description']
+	for condition in otherConditions:
+		outColumns.extend(['adjusted p-value ('+condition+')', 'log2 fold change ('+condition+')'])
+	outColumns.append('#peptides ('+referenceCondition+')')
+	for condition in otherConditions:
+		outColumns.append('#peptides ('+condition+')')
+	for condition in otherConditions:
+		outColumns.append('significant ('+condition+')')
+	for condition in otherConditions:
+		outColumns.append('p-value ('+condition+')')
+	outColumns.append(referenceCondition)
+	for condition in otherConditions:
+		outColumns.append(condition)
+	outColumns.append('peptides')
+	assert len(inColumns) == len(outColumns)
+	return outColumns
+

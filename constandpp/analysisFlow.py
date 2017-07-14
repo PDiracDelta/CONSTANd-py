@@ -68,34 +68,36 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe as an outer join
 	allExperimentsDF = combineExperimentDFs(dfs)
 
-	nConditions = len(params['schema']['allConditions'])
-	# ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
-	if nConditions == 2:
-		# get min and max protein-peptide mappings
-		if params['fullExpression_bool']:
-			minProteinPeptidesDict, fullProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
-		else:
-			minProteinPeptidesDict, __, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
-		metadata['numeric'].loc[0, 'numNoMasterProteinAccession'] = len(metadata['noMasterProteinAccession'])
+	# nConditions = len(params['schema']['allConditions'])
+	# # ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
+	# if nConditions == 2:
+	# get min and max protein-peptide mappings
+	if params['fullExpression_bool']:
+		minProteinPeptidesDict, fullProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
+	else:
+		minProteinPeptidesDict, __, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
+	metadata['numeric'].loc[0, 'numNoMasterProteinAccession'] = len(metadata['noMasterProteinAccession'])
 
-		if params['minExpression_bool']:
-			# Bring the data to the protein level in the case of minimal expression (no shared peptides allowed).
-			# Execute the differential expression analysis and gather some metadata
-			minProteinDF, metadata['minSingleConditionProteins'], metadata['numeric'].loc[0, 'minNumProteins'] = \
-				DEA(allExperimentsDF, minProteinPeptidesDict, params)
-		else:
-			minProteinDF = pd.DataFrame()
-
-		if params['fullExpression_bool']:
-			# Bring the data to the protein level in the case of full expression (shared peptides allowed).
-			# Execute the differential expression analysis and gather some metadata
-			fullProteinDF, metadata['fullSingleConditionProteins'], metadata['numeric'].loc[0, 'fullNumProteins'] = \
-				DEA(allExperimentsDF, fullProteinPeptidesDict, params)
-		else:
-			fullProteinDF = pd.DataFrame()
+	if params['minExpression_bool']:
+		# Bring the data to the protein level in the case of minimal expression (no shared peptides allowed).
+		# Execute the differential expression analysis and gather some metadata
+		minProteinDF, metadata['minSingleConditionProteins'], metadata['numeric'].loc[0, 'minNumProteins'] = \
+			DEA(allExperimentsDF, minProteinPeptidesDict, params)
 	else:
 		minProteinDF = pd.DataFrame()
+
+	if params['fullExpression_bool']:
+		# Bring the data to the protein level in the case of full expression (shared peptides allowed).
+		# Execute the differential expression analysis and gather some metadata
+		fullProteinDF, metadata['fullSingleConditionProteins'], metadata['numeric'].loc[0, 'fullNumProteins'] = \
+			DEA(allExperimentsDF, fullProteinPeptidesDict, params)
+	else:
 		fullProteinDF = pd.DataFrame()
+		
+	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
+	handyColumnOrder = buildHandyColumnOrder(minProteinDF.columns, params['referenceCondition'], params['schema'])
+	minProteinDF = minProteinDF.reindex_axis(handyColumnOrder, axis=1)
+	fullProteinDF = fullProteinDF.reindex_axis(handyColumnOrder, axis=1)
 	
 	""" Quality Control """
 	# dataframe with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
@@ -109,19 +111,12 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# perform hierarchical clustering
 	HCResult = getHC(allExperimentsIntensitiesPerCommonPeptide)
 
-	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
-	handyColumnOrder = ['protein', 'significant', 'adjusted p-value', 'fold change log2(c1/c2)', 'description', 'p-value', '#peptides (c1, c2)', 'peptides', 'condition 1', 'condition 2']
-	minProteinDF.reset_index(level=0, inplace=True)
-	fullProteinDF.reset_index(level=0, inplace=True)
-	minProteinDF = minProteinDF.reindex_axis(handyColumnOrder, axis=1)
-	fullProteinDF = fullProteinDF.reindex_axis(handyColumnOrder, axis=1)
-
 	""" save results """
 	if writeToDisk:
-		# save the protein-level dataframes
-		exportData(minProteinDF, dataType='df', path_out=params['path_out'],
+		# save the protein-level dataframes. Use .reset_index(level=0, inplace=True) to get the proteins as a column
+		exportData(minProteinDF.reset_index(level=0, inplace=False), dataType='df', path_out=params['path_out'],
 				   filename=params['jobName'] + '_results_minimal', delim_out=params['delim_out'])
-		exportData(fullProteinDF, dataType='df', path_out=params['path_out'],
+		exportData(fullProteinDF.reset_index(level=0, inplace=False), dataType='df', path_out=params['path_out'],
 				   filename=params['jobName'] + '_results_full', delim_out=params['delim_out'])
 		# save the intensity matrix of all COMMON peptides
 		exportData(allExperimentsIntensitiesPerCommonPeptide, dataType='df', path_out=params['path_out'],

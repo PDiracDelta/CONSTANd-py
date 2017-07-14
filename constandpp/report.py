@@ -12,7 +12,7 @@ Functions involved in generating the report that includes:
 """
 import pandas as pd
 import numpy as np
-from constandpp.tools import unnest
+from constandpp.tools import unnest, getOtherConditions
 from warnings import warn
 from scipy.cluster.hierarchy import dendrogram
 import matplotlib
@@ -110,16 +110,38 @@ def getMarkers(schema):
 	return channelMarkersDict
 
 
-def getSortedProteinExpressionsDF(proteinDF):
+def getSortedProteinExpressionsDFs(proteinDF, schema, referenceCondition):
+	"""
+	Returns a list of sortedProteinDFs (see getSortedProteinExpressionsDF); one for each non-reference condition.
+	:param proteinDF: 					pd.DataFrame    	unsorted DE analysis results on the protein level
+	:param schema: 						dict				schema of the experiments' hierarchy.
+	:return sortedProteinExpressionsDFs:dict				{ condition : sortedProteinDF }
+	"""
+	otherConditions = getOtherConditions(schema, referenceCondition)
+	sortedProteinExpressionsDFs = dict()#zip(otherConditions, [None, ]*len(otherConditions)))
+	for condition in otherConditions:
+		sortedProteinExpressionsDFs[condition] = getSortedProteinExpressionsDF(proteinDF, referenceCondition, condition)
+	return sortedProteinExpressionsDFs
+
+
+def getSortedProteinExpressionsDF(proteinDF, referenceCondition, condition):
 	"""
 	Sorts the differential protein data according to adjusted p-value (high p-value should also mean high DE) and resets
 	the index. Returns only the columns	specified.
 	Later in the workflow, the head() function will called to get the top X differentials from this df.
-	:param proteinDF:	pd.DataFrame    unsorted DE analysis results on the protein level
-	:return:    		pd.DataFrame    sorted according to adjusted p-value and only specified columns
+	:param proteinDF:			pd.DataFrame    unsorted DE analysis results on the protein level
+	:param referenceCondition:	str				name of the condition to be used as the reference
+	:param condition:			str				name of the non-reference condition for which to get the sorted DE
+	:return:    				pd.DataFrame    sorted according to adjusted p-value and only specified columns
 	"""
-	reportColumns = ['protein', 'significant', 'description', 'fold change log2(c1/c2)', 'adjusted p-value', '#peptides (c1, c2)']
-	return proteinDF.loc[:, reportColumns].sort_values(by='adjusted p-value', ascending=True)
+	reportColumns = ['description']
+	adjustedPValueColumn = 'adjusted p-value (' + condition + ')'
+	FCColumn = 'log2 fold change ('+condition+')'
+	numPeptColumn = '#peptides ('+condition+')'
+	refNumPeptColumn = '#peptides ('+referenceCondition+')'
+	reportColumns.extend([FCColumn, adjustedPValueColumn, numPeptColumn, refNumPeptColumn])
+	# sort and then also reset index to get protein as a column
+	return proteinDF.loc[:, reportColumns].sort_values(by=adjustedPValueColumn, ascending=True).reset_index(level=0, inplace=False)
 
 
 def addMissingObservedProteins(sortedProteinExpressionsDF, allProteinsSet):
@@ -151,7 +173,7 @@ def getTopDifferentials(sortedDifferentialsDF, numDifferentials):
 	return topDifferentials
 
 
-def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4, topIndices=None):
+def getVolcanoPlot(df, condition, alpha, FCThreshold, labelPlot=[False, ] * 4, topIndices=None):
 	"""
 	Generates a volcano plot using the log2 fold changes and adjusted p-values of the differential protein data. It is
 	divided in several regions according to the indicated significance level (as can be determined by alpha and FCThreshold)
@@ -161,6 +183,7 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4, topIndices=N
 	:param alpha:			float			significance level used in the t-test of the DE analysis
 	:param FCThreshold:		float			log2 fold change threshold used in the DE analysis
 	:param labelPlot:		[ bool ]		label all proteins in the different significance regions: [ yes, p, fc, no ]
+	:param condition:		str				name of the condition for which to get the volcano plot
 	:param topIndices:		list			indices of proteins for which to show the label exclusively
 	:return volcanoPlot:	plt.figure		volcano plot as a matplotlib figure object
 	"""
@@ -174,39 +197,51 @@ def getVolcanoPlot(df, alpha, FCThreshold, labelPlot=[False, ] * 4, topIndices=N
 	plt.xlabel(r'log$_2$(fold change)', figure=volcanoPlot)
 	plt.ylabel(r'-log$_{10}$(p-value) ', figure=volcanoPlot)
 	# get indices of different levels of significance
-	significantIndices_yes = df[df['significant'] == 'yes'].index
-	significantIndices_p = df[df['significant'] == 'p'].index
-	significantIndices_fc = df[df['significant'] == 'fc'].index
-	significantIndices_no = df[df['significant'] == 'no'].index
+	significantIndices_yes = df[df['significant ('+condition+')'] == 'yes'].index
+	significantIndices_p = df[df['significant ('+condition+')'] == 'p'].index
+	significantIndices_fc = df[df['significant ('+condition+')'] == 'fc'].index
+	significantIndices_no = df[df['significant ('+condition+')'] == 'no'].index
 	
 	# produce scatterPlot for each category of significance
 	# YES
-	xdataYES = df.loc[significantIndices_yes, 'fold change log2(c1/c2)']
-	ydataYES = -np.log10(df.loc[significantIndices_yes, 'adjusted p-value'])
-	labelsYES = df.loc[significantIndices_yes, 'protein']
+	xdataYES = df.loc[significantIndices_yes, 'log2 fold change ('+condition+')']
+	ydataYES = -np.log10(df.loc[significantIndices_yes, 'adjusted p-value ('+condition+')'])
+	# labelsYES = df.loc[significantIndices_yes, 'protein']  # as of now, Index==Protein
+	labelsYES = list(significantIndices_yes)
 	plt.scatter(xdataYES, ydataYES, color='r', figure=volcanoPlot)
 	# P
-	xdataP = df.loc[significantIndices_p, 'fold change log2(c1/c2)']
-	ydataP = -np.log10(df.loc[significantIndices_p, 'adjusted p-value'])
-	labelsP = df.loc[significantIndices_p, 'protein']
+	xdataP = df.loc[significantIndices_p, 'log2 fold change ('+condition+')']
+	ydataP = -np.log10(df.loc[significantIndices_p, 'adjusted p-value ('+condition+')'])
+	# labelsP = df.loc[significantIndices_p, 'protein']  # as of now, Index==Protein
+	labelsP = list(significantIndices_p)
 	plt.scatter(xdataP, ydataP, color='b', figure=volcanoPlot)
 	# FC
-	xdataFC = df.loc[significantIndices_fc, 'fold change log2(c1/c2)']
-	ydataFC = -np.log10(df.loc[significantIndices_fc, 'adjusted p-value'])
-	labelsFC = df.loc[significantIndices_fc, 'protein']
+	xdataFC = df.loc[significantIndices_fc, 'log2 fold change ('+condition+')']
+	ydataFC = -np.log10(df.loc[significantIndices_fc, 'adjusted p-value ('+condition+')'])
+	# labelsFC = df.loc[significantIndices_fc, 'protein']  # as of now, Index==Protein
+	labelsFC = list(significantIndices_fc)
 	plt.scatter(xdataFC, ydataFC, color='g', figure=volcanoPlot)
 	# NO
-	xdataNO = df.loc[significantIndices_no, 'fold change log2(c1/c2)']
-	ydataNO = -np.log10(df.loc[significantIndices_no, 'adjusted p-value'])
-	labelsNO = df.loc[significantIndices_no, 'protein']
+	xdataNO = df.loc[significantIndices_no, 'log2 fold change ('+condition+')']
+	ydataNO = -np.log10(df.loc[significantIndices_no, 'adjusted p-value ('+condition+')'])
+	# labelsNO = df.loc[significantIndices_no, 'protein']  # as of now, Index==Protein
+	labelsNO = list(significantIndices_no)
 	plt.scatter(xdataNO, ydataNO, color='k', figure=volcanoPlot)
 	
 	if topIndices is not None:  # remove labels of non-top X differentially expressed proteins
-		labelsYES.loc[~labelsYES.index.isin(topIndices)] = ''
-		labelsP.loc[~labelsP.index.isin(topIndices)] = ''
-		labelsFC.loc[~labelsFC.index.isin(topIndices)] = ''
-		labelsNO.loc[~labelsNO.index.isin(topIndices)] = ''
-	
+		for i in range(len(labelsYES)):
+			if labelsYES[i] not in topIndices:
+				labelsYES[i] = ''
+		for i in range(len(labelsP)):
+			if labelsP[i] not in topIndices:
+				labelsP[i] = ''
+		for i in range(len(labelsFC)):
+			if labelsFC[i] not in topIndices:
+				labelsFC[i] = ''
+		for i in range(len(labelsNO)):
+			if labelsNO[i] not in topIndices:
+				labelsNO[i] = ''
+
 	# annotate where requested
 	for labelPlotBool, xdata, ydata, labels in zip(labelPlot, [xdataYES, xdataP, xdataFC, xdataNO],
 												   [ydataYES, ydataP, ydataFC, ydataNO],
@@ -318,20 +353,20 @@ def getHCDendrogram(HCResult, schema, title=None):
 	return HCDendrogram
 
 
-def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDifferentialsDF, minVolcanoFullPath,
-			 fullVolcanoFullPath, PCAPlotFullPath, HCDendrogramFullPath, metadata, logFilePath, startTime):
+def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferentialsDFs, fullTopDifferentialsDFs, minVolcanoFullPaths,
+			 fullVolcanoFullPaths, PCAPlotFullPath, HCDendrogramFullPath, metadata, logFilePath, startTime):
 	"""
 	Pour all report visualizations, the list(s) of differentials, metadata and job parameters into an HTML file.
 	A second HTML file used for conversion to PDF is generated slightly different from the one used	for actual HTML
 	representation, for technical reasons to do with image representation.
 	:param jobParams:				dict			job (global) parameters
 	:param allProcessingParams:		dict			per experiment, all parameters for the processing step
-	:param minTopDifferentialsDF:	pd.DataFrame	top X differential protein data (minimal expression, injective)
-																sorted on adjusted p-value and only specified columns
-	:param fullTopDifferentialsDF:	pd.DataFrame	top X differential protein data (full expression, non-injective)
-																sorted on adjusted p-value and only specified columns
-	:param minVolcanoFullPath:		str				path to the volcano plot image (minimal expression)
-	:param fullVolcanoFullPath:		str				path to the volcano plot image (full expression)
+	:param minTopDifferentialsDFs:	{pd.DataFrame}	top X differential protein data (minimal expression, injective)
+													sorted on adjusted p-value and only specified columns, per condition
+	:param fullTopDifferentialsDFs:	{pd.DataFrame}	top X differential protein data (full expression, non-injective)
+													sorted on adjusted p-value and only specified columns, per condition
+	:param minVolcanoFullPaths:		{str}			path to the volcano plot image (minimal expression), per condition
+	:param fullVolcanoFullPaths:	{str}			path to the volcano plot image (full expression), per condition
 	:param PCAPlotFullPath: 		str				path to the PCA plot image
 	:param HCDendrogramFullPath: 	str				path to the HC dendrogram image
 	:param metadata:				dict			[noIsotopicCorrection, RTIsolationInfo, noMasterProteinAccession,
@@ -379,48 +414,63 @@ def makeHTML(jobParams, allProcessingParams, minTopDifferentialsDF, fullTopDiffe
 			return old_path.split(allJobsParDir)[1].lstrip('/')
 		else:
 			return None
-		
-	if 'significant' in minTopDifferentialsDF.columns:
-		minTopDifferentialsDF = minTopDifferentialsDF.drop('significant', axis=1, inplace=False)
-	else:
-		logging.warning("I cannot remove the 'significant' column from the minDE dataframe (it doesn't exist).")
-	if 'significant' in fullTopDifferentialsDF.columns:
-		fullTopDifferentialsDF = fullTopDifferentialsDF.drop('significant', axis=1, inplace=False)
-	else:
-		logging.warning("I cannot remove the 'significant' column from the fullDE dataframe (it doesn't exist).")
 	
-	# generate list of differentials HTML code separately because Jinja cant do this
-	minTopDifferentialsHTML = injectColumnWidthHTML(minTopDifferentialsDF.to_html(index=False, justify='left'))
-	fullTopDifferentialsHTML = injectColumnWidthHTML(fullTopDifferentialsDF.to_html(index=False, justify='left'))
+	# remove 'significant' columns
+	for condition in otherConditions:
+		if 'significant' in minTopDifferentialsDFs[condition].columns:
+			minTopDifferentialsDFs[condition] = minTopDifferentialsDFs[condition].drop('significant', axis=1, inplace=False)
+		if 'significant' in minTopDifferentialsDFs[condition].columns:
+			minTopDifferentialsDFs[condition] = minTopDifferentialsDFs[condition].drop('significant', axis=1, inplace=False)
+	
+	# per condition: generate list of differentials HTML code separately because Jinja cant do this
+	if jobParams['minExpression_bool']:
+		minTopDifferentialsHTMLDict = dict((otherCondition, injectColumnWidthHTML(minTopDifferentialsDFs[otherCondition].to_html(index=False, justify='left')))
+								   for otherCondition in otherConditions)
+	else:
+		minTopDifferentialsHTMLDict = None
+	if jobParams['fullExpression_bool']:
+		fullTopDifferentialsHTMLDict = dict((otherCondition, injectColumnWidthHTML(fullTopDifferentialsDFs[otherCondition].to_html(index=False, justify='left')))
+								   for otherCondition in otherConditions)
+	else:
+		fullTopDifferentialsHTMLDict = None
 	
 	with open(logFilePath, 'r') as logFile:
 		logContents = logFile.readlines()
 	
-	approxDuration = time() - startTime
-	# experiments = jobParams['schema']  # todo remove
-	# for e in experiments:
-	# 	experiments[e]['cond1Aliases'] = experiments[e]['channelAliasesPerCondition'][0]
-	pdfhtmlreport = render_template('report.html', jobName=jobParams['jobName'], minVolcanoFullPath=minVolcanoFullPath,
-									fullVolcanoFullPath=fullVolcanoFullPath,
+	approxDuration = round(time() - startTime)
+	
+	from constandpp import __version__
+	pdfhtmlreport = render_template('report.html', version=str(__version__), jobName=jobParams['jobName'],
+									otherConditions=otherConditions,
+									minVolcanoFullPathDict=minVolcanoFullPaths,
+									fullVolcanoFullPathDict=fullVolcanoFullPaths,
 									minExpression_bool=jobParams['minExpression_bool'],
 									fullExpression_bool=jobParams['fullExpression_bool'],
-									mindifferentials=minTopDifferentialsHTML,
-									fulldifferentials=fullTopDifferentialsHTML, PCAFileName=PCAPlotFullPath,
+									mindifferentialsdict=minTopDifferentialsHTMLDict,
+									fulldifferentialsdict=fullTopDifferentialsHTMLDict, PCAFileName=PCAPlotFullPath,
 									HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 									duration=approxDuration, log=logContents, jobParams=jobParams,
 									allProcessingParams=allProcessingParams, pdfsrc='True')#, experiments=experiments)
 	# get the tails of the input paths, starting from the jobs dir, so the Jinja report template can couple it to the
 	# jobs symlink in the static dir.
-	minVolcanoFullPath = hackImagePathToSymlinkInStaticDir(minVolcanoFullPath)
-	fullVolcanoFullPath = hackImagePathToSymlinkInStaticDir(fullVolcanoFullPath)
+	for condition in otherConditions:
+		if jobParams['minExpression_bool']:
+			minVolcanoFullPaths[condition] = hackImagePathToSymlinkInStaticDir(minVolcanoFullPaths[condition])
+		else:
+			pass
+		if jobParams['fullExpression_bool']:
+			fullVolcanoFullPaths[condition] = hackImagePathToSymlinkInStaticDir(fullVolcanoFullPaths[condition])
+		else:
+			pass
 	HCDendrogramFullPath = hackImagePathToSymlinkInStaticDir(HCDendrogramFullPath)
 	PCAPlotFullPath = hackImagePathToSymlinkInStaticDir(PCAPlotFullPath)
-	htmlReport = render_template('report.html', jobName=jobParams['jobName'], minVolcanoFullPath=minVolcanoFullPath,
-								 fullVolcanoFullPath=fullVolcanoFullPath,
+	htmlReport = render_template('report.html', jobName=jobParams['jobName'], otherConditions=otherConditions,
+								 minVolcanoFullPathDict=minVolcanoFullPaths,
+								 fullVolcanoFullPathDict=fullVolcanoFullPaths,
 								 minExpression_bool=jobParams['minExpression_bool'],
 								 fullExpression_bool=jobParams['fullExpression_bool'],
-								 mindifferentials=minTopDifferentialsHTML,
-								 fulldifferentials=fullTopDifferentialsHTML, PCAFileName=PCAPlotFullPath,
+								 mindifferentialsdict=minTopDifferentialsHTMLDict,
+								 fulldifferentialsdict=fullTopDifferentialsHTMLDict, PCAFileName=PCAPlotFullPath,
 								 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
 								 duration=approxDuration, log=logContents, jobParams=jobParams,
 								 allProcessingParams=allProcessingParams)#, experiments=experiments)
