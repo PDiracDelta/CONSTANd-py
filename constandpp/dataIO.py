@@ -128,8 +128,8 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	incompleteSchemaDict = OrderedDict()  # use ordered dict so the items() order is always the same
 	numCols = len(schemaDF.columns)
 	numRows = len(schemaDF)
-	if not (numCols > 2):  # at least 3 columns
-		raise Exception("Schema must have at least 3 columns EXPERIMENT\\tCONDITION 1\\tCONDITION 2 (separated by tabs)")
+	if not (numCols > 1):  # at least 2 columns
+		raise Exception("Schema must have at least 3 columns EXPERIMENT\\tCONDITION (separated by tabs)")
 	incompleteSchemaDict['allExperiments'] = list(schemaDF.loc[:, 0])
 	# check if experiment names are unique
 	if not len(set(incompleteSchemaDict['allExperiments'])) == numRows:
