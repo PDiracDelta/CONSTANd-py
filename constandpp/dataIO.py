@@ -234,6 +234,14 @@ def fixFixableFormatMistakes(df):
 		newColumns = applyWrapper(columns, [('Isolation Interference in Percent', 'Isolation Interference [%]')])
 		df.columns = newColumns
 	
+	columns = list(df.columns.values)
+	# you're using "Number of Protein Groups" instead of '# Protein Groups'
+	if 'Number of Protein Groups' in columns:
+		# replace it
+		newColumns = applyWrapper(columns, [('Number of Protein Groups', '# Protein Groups')])
+		df.columns = newColumns
+	assert '# Protein Groups' in df.columns.values
+	
 	return df
 
 
