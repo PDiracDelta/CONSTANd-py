@@ -216,6 +216,7 @@ def fixFixableFormatMistakes(df):
 	:param df:  pd.DataFrame    possibly containing a multitude of mistakes.
 	:return df: pd.DataFrame    data without recognized format mistakes.
 	"""
+	""" misc """
 	columns = list(df.columns.values)
 	# you've enabled "show flanking amino acids": DIRk --> [L].DIRk.[m]
 	if df.sample(n=1)['Annotated Sequence'].item().count('.') == 2:  # sequence contains 2 dots
@@ -227,20 +228,19 @@ def fixFixableFormatMistakes(df):
 		# strip the everything after the last space (=node number between parentheses) + the last space.
 		df['Identifying Node Type'] = df['Identifying Node'].apply(lambda s: s.rsplit(' ', 1)[0])
 	
+	""" rename columns """
 	columns = list(df.columns.values)
-	# you're using "Isolation Interference in Percent" instead of 'Isolation Interference [%]'
-	if 'Isolation Interference in Percent' in columns:
-		# replace it
-		newColumns = applyWrapper(columns, [('Isolation Interference in Percent', 'Isolation Interference [%]')])
-		df.columns = newColumns
-	
-	columns = list(df.columns.values)
-	# you're using "Number of Protein Groups" instead of '# Protein Groups'
-	if 'Number of Protein Groups' in columns:
-		# replace it
-		newColumns = applyWrapper(columns, [('Number of Protein Groups', '# Protein Groups')])
-		df.columns = newColumns
-	assert '# Protein Groups' in df.columns.values
+	replacementDict = {
+		'Isolation Interference in Percent': 'Isolation Interference [%]',
+		'Number of Protein Groups': '# Protein Groups',
+		'mz in Da': 'm/z [Da]',
+		'Delta mz in Da': 'Deltam/z [Da]',
+		'RT in min': 'RT [min]'
+	}
+	for original, replacement in replacementDict.items():
+		if original in columns:
+			columns = applyWrapper(columns, [(original, replacement)])
+			df.columns = columns
 	
 	return df
 
