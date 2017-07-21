@@ -129,8 +129,8 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 	
 	for protein, peptideIndices in proteinPeptidesDict.items():
 		# construct the new protein entry, with empty quan lists for now, and add it to the proteinDF
-		proteinEntry = [df.loc[peptideIndices, 'Annotated Sequence'].tolist(),
-						df.loc[peptideIndices, 'Protein Descriptions'][0]]
+		proteinEntry = [df.loc[peptideIndices, 'Protein Descriptions'][0],
+						df.loc[peptideIndices, 'Annotated Sequence'].tolist()]
 		numFilledProteinEntries = len(proteinEntry)  # for easy adding later on
 		proteinEntry.extend([None, ]*len(allConditions))
 		

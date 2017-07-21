@@ -179,7 +179,8 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '2017-07-11 14:43:18.382612_test_multipleConditions_mock/jobConfig_test_multipleConditions_mock.ini'
 		# jobConfigFilePath = '2017-07-12 14:01:31.083929_test multiplecond mock/jobConfig_test multiplecond mock.ini'
 		# jobConfigFilePath = '2017-07-13 11:05:31.731077_test multicond/jobConfig_test multicond.ini'
-		jobConfigFilePath = '2017-07-14 14:30:46.751727_noExpressionDummies/jobConfig_noExpressionDummies.ini'
+		# jobConfigFilePath = '2017-07-14 14:30:46.751727_noExpressionDummies/jobConfig_noExpressionDummies.ini'
+		jobConfigFilePath = '2017-07-20 17:52:51.984483_ESmit_digestives/jobConfig_ESmit_digestives.ini'
 		
 		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	
