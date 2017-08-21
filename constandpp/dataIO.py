@@ -146,6 +146,7 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	numAllChannelNames = 0
 	numAllChannelAliases = 0
 	for __, row in schemaDF.iterrows():
+		row = [x for x in row if x != '']
 		experimentChannelNames = []
 		experimentChannelAliases = []
 		experimentName = str(row[0])
