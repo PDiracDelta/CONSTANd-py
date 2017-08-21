@@ -150,7 +150,7 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 		experimentChannelAliases = []
 		experimentName = str(row[0])
 		incompleteSchemaDict[experimentName] = OrderedDict()
-		conditionsList = [str(element).split(':')[0] for element in row[1:]]
+		conditionsList = [str(element).split(':')[0] for element in row[1:] if element != '']
 		allConditions.update(conditionsList)
 		try:
 			channelNamesList = [str(element).split(':')[1] for element in row[1:]]
