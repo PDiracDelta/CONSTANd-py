@@ -39,7 +39,10 @@ def importDataFrame(path_in, delim=None, header=0, dtype=None):
 	else:  # delim is something else OR None.
 		try:
 			df = pd.read_csv(path_in, delimiter=delim, header=header, dtype=dtype)
-		except:
+		except pd.errors.EmptyDataError as e:
+			# catch these specifically to re-raise (necessary when doing checkRequiredColumns() in web.py)
+			raise e
+		except Exception:
 			if delim is None:
 				raise Exception("Data cannot be read: no delimiter specified and Pandas failed automatic recognition.")
 			else:
