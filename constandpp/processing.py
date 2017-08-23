@@ -196,6 +196,7 @@ def undoublePSMAlgo(df, identifyingNodes, exclusive, quanColumns, removalColumns
 	try:
 		removedData = df.loc[toDelete, columnsToSave]
 	except KeyError as e:
+		removedData = DataFrame()
 		logging.warning("Could not save removedData in undoublePSMAlgo step because a data column is missing: " + str(e.args[0]))
 	df.drop(toDelete, inplace=True)  # drop all or some non-master data.
 	return df, removedData
