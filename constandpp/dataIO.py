@@ -248,9 +248,10 @@ def fixFixableFormatMistakes(df):
 	
 	""" misc """
 	columns = list(df.columns.values)
-	# you've enabled "show flanking amino acids": DIRk --> [L].DIRk.[m]
-	if df.sample(n=1)['Annotated Sequence'].item().count('.') == 2:  # sequence contains 2 dots
-		df['Annotated Sequence'] = df['Annotated Sequence'].apply(lambda x: x.split('.')[1])  # select part between dots
+	if 'Annotated Sequence' in columns:
+		# you've enabled "show flanking amino acids": DIRk --> [L].DIRk.[m]
+		if df.sample(n=1)['Annotated Sequence'].item().count('.') == 2:  # sequence contains 2 dots
+			df['Annotated Sequence'] = df['Annotated Sequence'].apply(lambda x: x.split('.')[1])  # select part between dots
 	
 	columns = list(df.columns.values)
 	# you're using "Identifying Node" instead of "Identifying Node Type"
