@@ -118,13 +118,13 @@ def removeIsolationInterference(df, threshold, removalColumnsToSave):
 	:return df:             		pd.dataFrame    filtered data
 	:return removedData:    		pd.dataFrame    basic info about the removed values
 	"""
-	try:
-		columnsToSave = ['Isolation Interference [%]'] + removalColumnsToSave
-		toDelete = df.loc[df['Isolation Interference [%]'] > threshold].index  # indices of rows to delete
-		removedData = df.loc[toDelete, columnsToSave]
-		df.drop(toDelete, inplace=True)
-	except KeyError:
+	if 'Isolation Interference [%]' not in df.columns:
 		logging.warning("No 'Isolation Interference' column found: did NOT filter on Isolation Interference!")
+		return df, DataFrame()
+	columnsToSave = ['Isolation Interference [%]'] + removalColumnsToSave
+	toDelete = df.loc[df['Isolation Interference [%]'] > threshold].index  # indices of rows to delete
+	removedData = df.loc[toDelete, columnsToSave]
+	df.drop(toDelete, inplace=True)
 	return df, removedData
 
 
