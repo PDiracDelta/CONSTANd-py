@@ -253,6 +253,7 @@ def applyWrapper(columns, wrapper):
 	:param wrapper:     list(tuples)    	[(oldName, newName) for some columns]
 	:return newColumns: list	        	transformed column names
 	"""
+	
 	if isinstance(columns, pd.Index):
 		newColumns = list(columns.values)
 	elif isinstance(columns, list):
@@ -269,6 +270,7 @@ def importExperimentData(path_in, delim=None, header=0, wrapper=None):
 	:param path_in:     string          existing path to input file
 	:param delim:       char            delimiter of the data
 	:param header:      int             row that contains the header of the data (None if no header)
+	:param wrapper: 	list(tuples)	wrapper (nested list of pairs) specifying column name transformations
 	:return df:			pd.DataFrame    ready-to-use experimental data
 	"""
 	df = importDataFrame(path_in, delim=delim, header=header)
