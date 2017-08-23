@@ -37,15 +37,27 @@ def importDataFrame(path_in, delim=None, header=0, dtype=None):
 	if delim == 'xlsx':
 		df = pd.read_excel(path_in)
 	else:  # delim is something else OR None.
-		try:
-			df = pd.read_csv(path_in, delimiter=delim, header=header, dtype=dtype)
-		except pd.errors.EmptyDataError as e:
-			# catch these specifically to re-raise (necessary when doing checkRequiredColumns() in web.py)
-			raise e
-		except Exception as e:
-			if delim is None:
-				raise Exception("Data cannot be read: no delimiter specified and Pandas failed automatic recognition: "+e.args[0])
-			else:
+		if delim is None:
+			possibleDelims = ['\t', ',']
+			for d in possibleDelims:
+				try:
+					df = pd.read_csv(path_in, delimiter=d, header=header, dtype=dtype)
+					break
+				except Exception:
+					pass
+			if 'df' not in locals():  # possibleDelims did not work
+				# try without delim
+				try:
+					df = pd.read_csv(path_in, header=header, dtype=dtype)
+				except Exception as e:
+					raise Exception("Data cannot be read: no delimiter specified and Pandas failed automatic recognition: " + e.args[0])
+		else:
+			try:
+				df = pd.read_csv(path_in, delimiter=delim, header=header, dtype=dtype)
+			except pd.errors.EmptyDataError as e:
+				# catch these specifically to re-raise (necessary when doing checkRequiredColumns() in web.py)
+				raise e
+			except Exception as e:
 				raise Exception("Data cannot be read: the delimiter " + str(delim) + " is not right for this file. Pandas returned: "+e.args[0])
 	
 	return df.dropna(how="all")  # drop empty lines
