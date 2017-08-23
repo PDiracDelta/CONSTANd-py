@@ -126,7 +126,7 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 		properties = []
 		if not undoublePSMAlgo_bool:  # only if you didn't undoublePSMAlgo
 			## SELECT IDENTICAL PSMALGO (i.e. different First Scan) ##
-			byFirstPropDict = df.groupby('Identifying Node').groups
+			byFirstPropDict = df.groupby('Identifying Node Type').groups
 			properties.append('Annotated Sequence')
 		else:
 			## SELECT IDENTICAL SEQUENCE ##
