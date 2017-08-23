@@ -102,7 +102,11 @@ def removeBadConfidence(df, minimum, removalColumnsToSave):
 	toDelete = df.loc[badConfidences, :].index  # indices of rows to delete
 	if len(set(df.loc[toDelete, 'Confidence']).difference(set(allConfidenceLevels))) > 0:  # illegal values detected
 		logging.warning("Either the Confidence column is missing or it contains illegal values (allowed: Low, Medium, High). I am removing all PSMs with illegal values.")
-	removedData = df.loc[toDelete, columnsToSave]
+	try:
+		removedData = df.loc[toDelete, columnsToSave]
+	except KeyError as e:
+		removedData = DataFrame()
+		logging.warning("Could not save removedData in removeBadConfidence step because a data column is missing: " + str(e.args[0]))
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 
@@ -123,7 +127,11 @@ def removeIsolationInterference(df, threshold, removalColumnsToSave):
 		return df, DataFrame()
 	columnsToSave = ['Isolation Interference [%]'] + removalColumnsToSave
 	toDelete = df.loc[df['Isolation Interference [%]'] > threshold].index  # indices of rows to delete
-	removedData = df.loc[toDelete, columnsToSave]
+	try:
+		removedData = df.loc[toDelete, columnsToSave]
+	except KeyError as e:
+		removedData = DataFrame()
+		logging.warning("Could not save removedData in removeIsolationInterference step because a data column is missing: " + str(e.args[0]))
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 
