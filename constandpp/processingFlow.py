@@ -28,6 +28,9 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	"""
 	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
 	
+	# remove all useless columns from the dataFrame
+	df = removeObsoleteColumns(df, wantedColumns=params['wantedColumns'])
+	
 	# get a set of all master proteins detected in at least one PSM.
 	allMasterProteins = getAllPresentProteins(df)
 	
@@ -36,8 +39,6 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	
 	if params['removeBadConfidence_bool']:
 		df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'], params['removalColumnsToSave'])
-	# remove all useless columns from the dataFrame
-	df = removeObsoleteColumns(df, wantedColumns=params['wantedColumns'])
 	
 	if params['removeIsolationInterference_bool']:
 		# remove all data with too high isolation interference
