@@ -217,18 +217,6 @@ def fixFixableFormatMistakes(df):
 	:param df:  pd.DataFrame    possibly containing a multitude of mistakes.
 	:return df: pd.DataFrame    data without recognized format mistakes.
 	"""
-	""" misc """
-	columns = list(df.columns.values)
-	# you've enabled "show flanking amino acids": DIRk --> [L].DIRk.[m]
-	if df.sample(n=1)['Annotated Sequence'].item().count('.') == 2:  # sequence contains 2 dots
-		df['Annotated Sequence'] = df['Annotated Sequence'].apply(lambda x: x.split('.')[1])  # select part between dots
-	
-	columns = list(df.columns.values)
-	# you're using "Identifying Node" instead of "Identifying Node Type"
-	if 'Identifying Node' in columns and 'Identifying Node Type' not in columns:
-		# strip the everything after the last space (=node number between parentheses) + the last space.
-		df['Identifying Node Type'] = df['Identifying Node'].apply(lambda s: s.rsplit(' ', 1)[0])
-	
 	""" rename columns """
 	columns = list(df.columns.values)
 	replacementDict = {
@@ -242,6 +230,25 @@ def fixFixableFormatMistakes(df):
 		if original in columns:
 			columns = applyWrapper(columns, [(original, replacement)])
 			df.columns = columns
+	
+	""" misc """
+	columns = list(df.columns.values)
+	# you've enabled "show flanking amino acids": DIRk --> [L].DIRk.[m]
+	if df.sample(n=1)['Annotated Sequence'].item().count('.') == 2:  # sequence contains 2 dots
+		df['Annotated Sequence'] = df['Annotated Sequence'].apply(lambda x: x.split('.')[1])  # select part between dots
+	
+	columns = list(df.columns.values)
+	# you're using "Identifying Node" instead of "Identifying Node Type"
+	if 'Identifying Node' in columns and 'Identifying Node Type' not in columns:
+		# strip the everything after the last space (=node number between parentheses) + the last space.
+		df['Identifying Node Type'] = df['Identifying Node'].apply(lambda s: s.rsplit(' ', 1)[0])
+	
+	columns = list(df.columns.values)
+	# First Scan is missing but RT is present
+	if 'First Scan' not in columns and 'RT [min]' in columns:
+		# make a fake First Scan column by copying the RT column (necessary for undoublePSMAlgo)
+		logging.warning("Couldn't find a 'First Scan' column; creating it by copy-pasting the contents of the 'RT [min]' column.")
+		df['First Scan'] = df['RT [min]'].copy()
 	
 	return df
 
