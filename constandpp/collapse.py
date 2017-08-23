@@ -11,6 +11,7 @@ and replaces the duplicates with one representative detection and a combination/
 
 import numpy as np
 import logging
+from pandas import DataFrame
 from warnings import filterwarnings
 from constandpp.tools import setIntensities, getIntensities
 from scipy.spatial.distance import cdist, euclidean
@@ -281,6 +282,7 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 		for duplicatesList, rfs in zip(bestIndicesDict.values(), representativesDf['First Scan']):
 			removedData.loc[duplicatesList, 'Representative First Scan'] = rfs
 	except KeyError as e:
+		removedData = DataFrame()
 		logging.warning("Could not save removedData in collapse step because a data column is missing: "+str(e.args[0]))
 	# actually remove the toDelete detections
 	df.drop(toDelete, inplace=True)
