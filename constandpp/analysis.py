@@ -46,7 +46,11 @@ def getNoIsotopicCorrection(df, noCorrectionIndices):
 	:param noCorrectionIndices: list            indices of detections that received no isotopic correction
 	:return:                    pd.DataFrame    ['First Scan', 'Identifying Node Type', 'Annotated Sequence', 'Master Protein Accessions']
 	"""
-	return df.loc[noCorrectionIndices, ['First Scan', 'Identifying Node Type', 'Annotated Sequence', 'Master Protein Accessions']]
+	try:
+		return df.loc[noCorrectionIndices, ['First Scan', 'Identifying Node Type', 'Annotated Sequence', 'Master Protein Accessions']]
+	except KeyError:
+		logging.warning("No NoIsotopicCorrection info could be saved because a necessary column was missing.")
+		return pd.DataFrame()
 
 
 def combineExperimentDFs(dfs):  # todo how are PSMs combined with multiple charge states for instance?
