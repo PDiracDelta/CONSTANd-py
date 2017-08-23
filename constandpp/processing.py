@@ -91,6 +91,9 @@ def removeBadConfidence(df, minimum, removalColumnsToSave):
 	:return df:             		pd.dataFrame    data with confidence levels > minimum
 	:return removedData:			pd.dataFrame    data with confidence levels < minimum
 	"""
+	if 'Confidence' not in df.columns:
+		logging.warning("No 'Confidence' column found: did NOT filter on Confidence level!")
+		return df, DataFrame()
 	columnsToSave = ['Confidence'] + removalColumnsToSave
 	allConfidenceLevels = ('low', 'Low', 'medium', 'Medium', 'high', 'High')
 	minIndex = allConfidenceLevels.index(minimum)

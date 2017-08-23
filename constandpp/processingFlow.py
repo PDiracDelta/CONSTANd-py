@@ -31,8 +31,6 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	# remove all useless columns from the dataFrame
 	df = removeObsoleteColumns(df, wantedColumns=params['wantedColumns'])
 	
-	
-	
 	# get a set of all master proteins detected in at least one PSM.
 	allMasterProteins = getAllPresentProteins(df)
 	
