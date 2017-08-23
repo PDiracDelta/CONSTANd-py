@@ -92,14 +92,13 @@ def removeBadConfidence(df, minimum, removalColumnsToSave):
 	:return removedData:			pd.dataFrame    data with confidence levels < minimum
 	"""
 	columnsToSave = ['Confidence'] + removalColumnsToSave
-	conf2int = {'Low': 1, 'Medium': 2, 'High': 3}
-	try:
-		minimum = conf2int[minimum]
-		badConfidences = [conf2int[x] < minimum for x in df.loc[:, 'Confidence']]
-	except KeyError:
-		logging.warning("Either the Confidence column is missing or it contains illegal values (allowed: Low, Medium, High). I am removing all unknown entries.")
-		# todo add another try except and make sure all unknown confidence types are removed
+	allConfidenceLevels = ('low', 'Low', 'medium', 'Medium', 'high', 'High')
+	minIndex = allConfidenceLevels.index(minimum)
+	allowedConfidenceLevels = allConfidenceLevels[int(minIndex-np.ceil(minIndex % 2)):]
+	badConfidences = [x not in allowedConfidenceLevels for x in df.loc[:, 'Confidence']]  # True if confidence level is bad
 	toDelete = df.loc[badConfidences, :].index  # indices of rows to delete
+	if len(set(df.loc[toDelete, 'Confidence']).difference(set(allConfidenceLevels))) > 0:  # illegal values detected
+		logging.warning("Either the Confidence column is missing or it contains illegal values (allowed: Low, Medium, High). I am removing all PSMs with illegal values.")
 	removedData = df.loc[toDelete, columnsToSave]
 	df.drop(toDelete, inplace=True)
 	return df, removedData
