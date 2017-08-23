@@ -42,11 +42,11 @@ def importDataFrame(path_in, delim=None, header=0, dtype=None):
 		except pd.errors.EmptyDataError as e:
 			# catch these specifically to re-raise (necessary when doing checkRequiredColumns() in web.py)
 			raise e
-		except Exception:
+		except Exception as e:
 			if delim is None:
-				raise Exception("Data cannot be read: no delimiter specified and Pandas failed automatic recognition.")
+				raise Exception("Data cannot be read: no delimiter specified and Pandas failed automatic recognition: "+e.args[0])
 			else:
-				raise Exception("Data cannot be read: the delimiter " + str(delim) + " is not right for this file.")
+				raise Exception("Data cannot be read: the delimiter " + str(delim) + " is not right for this file. Pandas returned: "+e.args[0])
 	
 	return df.dropna(how="all")  # drop empty lines
 
