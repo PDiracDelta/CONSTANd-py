@@ -181,7 +181,8 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '2017-07-13 11:05:31.731077_test multicond/jobConfig_test multicond.ini'
 		# jobConfigFilePath = '2017-07-14 14:30:46.751727_noExpressionDummies/jobConfig_noExpressionDummies.ini'
 		# jobConfigFilePath = '2017-07-20 17:52:51.984483_ESmit_digestives/jobConfig_ESmit_digestives.ini'
-		jobConfigFilePath = '2017-08-23 10:20:21.345488_test_updatedRemoveBadConfidence/jobConfig_test_updatedRemoveBadConfidence.ini'
+		#jobConfigFilePath = '2017-08-23 10:20:21.345488_test_updatedRemoveBadConfidence/jobConfig_test_updatedRemoveBadConfidence.ini'
+		jobConfigFilePath = '2017-08-23 17:01:13.474192_df/jobConfig_df.ini'
 		
 		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	
