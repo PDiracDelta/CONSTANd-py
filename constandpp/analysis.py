@@ -96,10 +96,10 @@ def getProteinPeptidesDicts(df, fullExpression_bool):
 				for protein in multipleProteins: # extend the possibly (probably) already existing entry in the dict.
 					fullProteinPeptidesDict[protein].extend(nonUniqueIndices)
 	# 3rd return argument must be a dataframe!
-	if fullExpression_bool:
-		return minProteinPeptidesDict, fullProteinPeptidesDict, df.loc[noMasterProteinAccession, ['First Scan', 'Annotated Sequence']]
-	else:  # todo also allow only max expression
-		return minProteinPeptidesDict, None, df.loc[noMasterProteinAccession, ['First Scan', 'Annotated Sequence']]
+	if not fullExpression_bool:  # should return None
+		# todo also allow only max expression
+		fullProteinPeptidesDict = None
+	return minProteinPeptidesDict, fullProteinPeptidesDict, df.loc[noMasterProteinAccession, ['First Scan', 'Annotated Sequence']]
 
 
 def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherConditions):
