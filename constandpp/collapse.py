@@ -126,8 +126,13 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 		properties = []
 		if not undoublePSMAlgo_bool:  # only if you didn't undoublePSMAlgo
 			## SELECT IDENTICAL PSMALGO (i.e. different First Scan) ##
-			byFirstPropDict = df.groupby('Identifying Node Type').groups
-			properties.append('Annotated Sequence')
+			try:
+				byFirstPropDict = df.groupby('Identifying Node Type').groups
+				properties.append('Annotated Sequence')
+			except KeyError:
+				logging.warning("Could not group by PSMAlgo in groupby(PSMAlgo) step during collapse/aggregation because the Identifying Node Type column is missing. Skipping this step.")
+				# Skip the PSMAlgo step and select first by annotated sequence anyway
+				byFirstPropDict = df.groupby('Annotated Sequence').groups
 		else:
 			## SELECT IDENTICAL SEQUENCE ##
 			byFirstPropDict = df.groupby('Annotated Sequence').groups
