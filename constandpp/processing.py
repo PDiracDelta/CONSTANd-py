@@ -50,7 +50,7 @@ def removeObsoleteColumns(df, wantedColumns):
 	return df.drop(list(obsolete), axis=1)
 
 
-def removeMissing(df, noMissingValuesColumns, quanColumns):
+def removeMissing(df, noMissingValuesColumns, quanColumns, identifyingNodes):
 	"""
 	Removes detections for which entries in essential columns is missing, or which have no quan values or labels.
 	:param df:  					pd.dataFrame    data with missing values
@@ -59,12 +59,13 @@ def removeMissing(df, noMissingValuesColumns, quanColumns):
 	:return df:						pd.dataFrame    data without missing values
 	"""
 	toDelete = []
+	scoreColumns = [identifyingNodes['master'][1]] + [x[y][1] for x in identifyingNodes['slaves'] for y in x]
 	try:
 		for column in noMissingValuesColumns:
 			# delete all detections that have a missing value in this column
 			toDelete.extend(df.loc[df.loc[:, column].isnull(), :].index)
 		# delete all detections that have a missing value in both columns: XCorr and Ions Score
-		toDelete.extend(df.loc[[x and y for x, y in zip(df['XCorr'].isnull(), df['Ions Score'].isnull())]].index)
+		toDelete.extend([x[0] for x in df[scoreColumns].isnull().iterrows() if x[1].all()])  # x[0] is the index
 	except KeyError as e:
 		raise KeyError("Required column '" + str(e.args[0]) + "' was not found.")
 	# get the indices of all detections which have no quan values at all (those have their nansum equal to zero)

@@ -35,7 +35,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	allMasterProteins = getAllPresentProteins(df)
 	
 	# remove detections where (essential) data is missing.
-	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['quanColumns'])
+	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['quanColumns'], params['identifyingNodes'])
 	
 	if params['removeBadConfidence_bool']:
 		df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'], params['removalColumnsToSave'])
