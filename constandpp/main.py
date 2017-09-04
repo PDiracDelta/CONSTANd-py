@@ -9,7 +9,7 @@ import sys, logging, datetime, traceback
 from constandpp.dataIO import *
 
 
-def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, testing):
+def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 	"""
 	For now this is just stuff for debugging and testing. Later:
 	Contains and explicits the workflow of the program. Using the booleans doProcessing, doAnalysis and writeToDisk one
@@ -138,14 +138,12 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		doAnalysis = (args[3] == 'True')
 		doReport = (args[4] == 'True')
 		writeToDisk = (args[5] == 'True')
-		testing = (args[6] == 'True')
 	# so if you start main.py from within web.py or something, this won't be executed
 	else:  # you didn't call main.py from the command line but from pycharm
 		doProcessing = True
 		doAnalysis = True
 		doReport = True
 		writeToDisk = True
-		testing = False
 		
 		from constandpp_web.config import ALLJOBSDIR
 		# jobConfigFilePath = 'job/jobConfig.ini' # TEST
@@ -191,8 +189,7 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		jobDirName = os.path.basename(os.path.abspath(os.path.join(jobConfigFilePath, os.pardir)))
 		try:
 			main(jobConfigFilePath=jobConfigFilePath, doProcessing=doProcessing, doAnalysis=doAnalysis,
-				 doReport=doReport,
-				 testing=testing, writeToDisk=writeToDisk)
+				 doReport=doReport, writeToDisk=writeToDisk)
 			DB_setJobCompleted(jobDirName)
 		except:
 			DB_setJobFailed(jobDirName)
