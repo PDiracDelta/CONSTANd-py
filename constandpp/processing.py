@@ -59,7 +59,8 @@ def removeMissing(df, noMissingValuesColumns, quanColumns, identifyingNodes):
 	:return df:						pd.dataFrame    data without missing values
 	"""
 	toDelete = []
-	scoreColumns = [identifyingNodes['master'][1]] + [x[y][1] for x in identifyingNodes['slaves'] for y in x]
+	#scoreColumns = [identifyingNodes['master'][1]] + [x[y][1] for x in identifyingNodes['slaves'] for y in range(len(x))]
+	scoreColumns = [identifyingNodes['master'][1]] + [x[1] for x in identifyingNodes['slaves']]
 	try:
 		for column in noMissingValuesColumns:
 			# delete all detections that have a missing value in this column
