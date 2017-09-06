@@ -11,9 +11,8 @@ from constandpp.dataIO import *
 
 def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 	"""
-	For now this is just stuff for debugging and testing. Later:
-	Contains and explicits the workflow of the program. Using the booleans doProcessing, doAnalysis and writeToDisk one
-	can control	which parts of the workflow to perform.
+	Contains and explicits the workflow of the program. Using the booleans doProcessing, doAnalysis, deReport and
+	writeToDisk one can control	which parts of the workflow to perform.
 	"""
 	# todo proper docu
 	from constandpp.getInput import getProcessingInput, getJobInput
@@ -22,7 +21,6 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 	from constandpp.reportFlow import generateReport
 	from time import time
 	from constandpp_web.web import DB_setJobReportRelPaths
-	
 	logFilePath = os.path.abspath(os.path.join(jobConfigFilePath, os.path.join(os.pardir, 'log.txt')))
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
 	start = time()
