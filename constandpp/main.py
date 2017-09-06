@@ -130,7 +130,7 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 	args = sys.argv
 	print(str(args))  # TEST
 	if len(args) != 1:
-		assert len(args) == 7  # todo use argparser
+		assert len(args) == 6  # todo use argparser
 		jobConfigFilePath = args[1]
 		doProcessing = (args[2] == 'True')
 		doAnalysis = (args[3] == 'True')
