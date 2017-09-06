@@ -3,6 +3,7 @@
 import numpy as np
 from constandpp import fontsize, fontweight, figheight, figwidth
 import matplotlib as mpl
+mpl.use('Agg')  # you need a backend that doesn't use X-server and you need to do it before you import pyplot.
 import matplotlib.pyplot as plt
 
 
@@ -102,7 +103,7 @@ def scatterPlot(x, y, title=None, xlab=None, ylab=None):
 	:param ylab:	str			label for the y-axis
 	:return f:		plt.figure	scatterPlot as a matplotlib figure object
 	"""
-	mpl.use('GTK3Agg')
+	mpl.use('Agg')
 	mpl.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
 	
 	f = plt.figure(figsize=(figwidth, figheight))

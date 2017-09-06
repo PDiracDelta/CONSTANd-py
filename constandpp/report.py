@@ -16,6 +16,7 @@ from constandpp.tools import unnest, getOtherConditions
 from warnings import warn
 from scipy.cluster.hierarchy import dendrogram
 import matplotlib
+matplotlib.use('Agg')  # you need a backend that doesn't use X-server and you need to do it before you import pyplot.
 from matplotlib import pyplot as plt
 from matplotlib import markers
 from matplotlib.colors import to_hex
@@ -25,7 +26,7 @@ from constandpp import fontweight, fontsize, figwidth, figheight
 
 # adjust font size globally
 matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
-matplotlib.use('GTK3Agg')
+matplotlib.use('Agg')
 
 
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
