@@ -49,7 +49,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	metadata = {}
 	metadata['numeric'] = pd.DataFrame()
 	# Compile a list of all master proteins found at least in 1 PSM and at least in 1 experiment:
-	allObservedProteins = set(unnest(allMasterProteinss.values()))
+	allObservedProteins = list(set(unnest(allMasterProteinss.values())))
 	metadata['numeric'].loc[0, 'numObservedProteins'] = len(allObservedProteins)
 	metadata['allObservedProteins'] = pd.DataFrame({'protein': [allObservedProteins]})
 	
