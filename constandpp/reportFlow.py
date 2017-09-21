@@ -61,7 +61,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 															 topIndices=list(this_topDifferentialsDFs[otherCondition]['protein']))
 			# add protein IDs that were observed at least once but got removed, for completeness in the output csv.
 			this_sortedProteinExpressionsDFs[otherCondition] = addMissingObservedProteins(this_sortedProteinExpressionsDFs[otherCondition],
-																						  metadata['allObservedProteins'].loc[:, 'protein'][0])
+																						  set(metadata['allObservedProteins'].loc[:, 'protein']))
 		return this_sortedProteinExpressionsDFs, this_topDifferentialsDFs, this_volcanoPlots, this_set
 	
 	allDEResultsFullPaths = []  # paths to later pass on for mail attachments
