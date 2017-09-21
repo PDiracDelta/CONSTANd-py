@@ -55,11 +55,11 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 			# process every input dataframe
 			logging.info(
 				"Starting processing of experiment '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
-				str(datetime.datetime.now()).split('.')[0])
+				str(datetime.datetime.utcnow()).split('.')[0])
 			processingResults[eName] = processDf(dfs[eName], processingParams[eName], writeToDisk)
 			logging.info(
 				"Finished processing of experiment '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
-				str(datetime.datetime.now()).split('.')[0])
+				str(datetime.datetime.utcnow()).split('.')[0])
 			pickle.dump(processingResults[eName], open(processingResultsDumpFilename, 'wb'))  # TEST
 		elif doAnalysis:
 			try:
@@ -84,10 +84,10 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 		
 		# perform analysis
 		logging.info("Starting analysis of job: " + jobParams['jobName'] + " at " +
-					 str(datetime.datetime.now()).split('.')[0])
+					 str(datetime.datetime.utcnow()).split('.')[0])
 		analysisResults = analyzeProcessingResult(processingResults, jobParams, writeToDisk)
 		logging.info("Finished analysis of job: " + jobParams['jobName'] + " at " +
-					 str(datetime.datetime.now()).split('.')[0])
+					 str(datetime.datetime.utcnow()).split('.')[0])
 		pickle.dump(analysisResults, open(analysisResultsDumpFilename, 'wb'))  # TEST
 	elif doReport:
 		try:
@@ -110,12 +110,12 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 		
 		# visualize and make a report
 		logging.info("Starting visualization end report generation of job: " + jobParams['jobName'] + "at " +
-					 str(datetime.datetime.now()).split('.')[0])
+					 str(datetime.datetime.utcnow()).split('.')[0])
 		generateReport(analysisResults, jobParams, logFilePath, writeToDisk, processingParams, start)
 		DB_setJobReportRelPaths(jobID=jobDirName, resultpath=jobParams['path_results'],
 								jobName=jobParams['jobName'])
 		logging.info("Finished visualization end report generation of job: " + jobParams['jobName'] + "at " +
-					 str(datetime.datetime.now()).split('.')[0])
+					 str(datetime.datetime.utcnow()).split('.')[0])
 	else:
 		logging.warning("No report generated!")
 	stop = time()
