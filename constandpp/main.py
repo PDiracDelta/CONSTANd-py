@@ -144,39 +144,6 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		writeToDisk = True
 		
 		from constandpp_web.config import ALLJOBSDIR
-		# jobConfigFilePath = 'job/jobConfig.ini' # TEST
-		# jobConfigFilePath = '../jobs/2017-01-23 02:40:26.553814_two/jobConfig_two.ini'
-		# jobConfigFilePath = webFlow(exptype='COON')
-		# jobConfigFilePath = webFlow(exptype='COON', previousjobdirName='2016-12-26 10:56:10.646919_COON')
-		# jobConfigFilePath = webFlow(exptype='COON_SN')
-		# jobConfigFilePath = webFlow(exptype='COON_SN', previousjobdirName='2016-12-20 14:21:47.786288_COON_SN')
-		# jobConfigFilePath = webFlow(exptype='COON_norm')
-		# jobConfigFilePath = webFlow(exptype='COON_norm', previousjobdirName='2016-12-12 22:43:38.030716_COON_norm')
-		# jobConfigFilePath = webFlow(exptype='COON_SN_norm')
-		# jobConfigFilePath = webFlow(exptype='COON_SN_norm', previousjobdirName='2016-12-12 22:48:30.701250_COON_SN_norm')
-		# jobConfigFilePath = webFlow(exptype='COON_nonormnoconstand')
-		# jobConfigFilePath = webFlow(exptype='COON_nonormnoconstand', previousjobdirName='2016-12-20 14:31:47.045927_COON_nonormnoconstand')
-		# jobConfigFilePath = webFlow(exptype='COON_noISO')
-		# jobConfigFilePath = webFlow(exptype='COON_noISO', previousjobdirName='2016-12-16 16:38:30.536344_COON_noISO')
-		# jobConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand')
-		# jobConfigFilePath = webFlow(exptype='COON_SN_nonormnoconstand', previousjobdirName='2016-12-20 14:39:09.476567_COON_SN_nonormnoconstand')
-		# jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-04-14 17:46:37.527494_alleswerkt?/jobConfig_alleswerkt?.ini'
-		# jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-04-14 18:11:41.620222_geenvraagteken/jobConfig_geenvraagteken.ini'
-		# jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-04-14 10:14:53.002433_coon2test/jobConfig_coon2test.ini'
-		# jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-05-05 16:55:09.046951_testIDT_COON/jobConfig_testIDT_COON.ini'
-		# jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/CONSTANd++/jobs/2017-05-16 profiler_test_COON/jobConfig_testRemoveNegsIC_COON.ini'
-		# jobConfigFilePath = '2017-06-09 16:27:58.613049_testCSVallProteinsAndAttachment_COON_2cond/jobConfig_testCSVallProteinsAndAttachment_COON_2cond.ini'
-		# jobConfigFilePath = '2017-07-03 14:36:26.266664_testNumPeptsCol/jobConfig_testNumPeptsCol.ini'
-		# jobConfigFilePath = '2017-07-04 13:20:00.950020_prims_2_3/jobConfig_prims_2_3.ini'
-		# jobConfigFilePath = '2017-07-04 13:44:15.358353_prims_2_3/jobConfig_prims_2_3.ini'
-		# jobConfigFilePath = '2017-07-06 09:44:57.809888_test_newSchema_MAX/jobConfig_test_newSchema_MAX.ini'
-		# jobConfigFilePath = '2017-07-06 11:05:47.378532_test_newschema_MAX_2cond/jobConfig_test_newschema_MAX_2cond.ini'
-		# jobConfigFilePath = '2017-07-11 11:11:53.474680_eterswr/jobConfig_eterswr.ini'
-		# jobConfigFilePath = '2017-07-11 14:43:18.382612_test_multipleConditions_mock/jobConfig_test_multipleConditions_mock.ini'
-		# jobConfigFilePath = '2017-07-12 14:01:31.083929_test multiplecond mock/jobConfig_test multiplecond mock.ini'
-		# jobConfigFilePath = '2017-07-13 11:05:31.731077_test multicond/jobConfig_test multicond.ini'
-		# jobConfigFilePath = '2017-07-14 14:30:46.751727_noExpressionDummies/jobConfig_noExpressionDummies.ini'
-		# jobConfigFilePath = '2017-07-20 17:52:51.984483_ESmit_digestives/jobConfig_ESmit_digestives.ini'
 		#jobConfigFilePath = '2017-08-23 10:20:21.345488_test_updatedRemoveBadConfidence/jobConfig_test_updatedRemoveBadConfidence.ini'
 		#jobConfigFilePath = '2017-08-23 17:01:13.474192_df/jobConfig_df.ini'
 		# jobConfigFilePath = '2017-08-30 16:56:24.378757_ESmit_digests_v2/jobConfig_ESmit_digests_v2.ini'
