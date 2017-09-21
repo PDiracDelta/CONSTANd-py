@@ -36,7 +36,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	""" Preparation and metadata gathering """
 	processingResultsItems = processingResults.items()
 	dfs = dict((eName, result[0]) for eName, result in processingResultsItems)
-	normalizedIntensitiess = dict((eName, result[1]) for eName, result in processingResultsItems)
+	constandOutputs = dict((eName, result[1]) for eName, result in processingResultsItems)
 	removedDatas = dict((eName, result[2]) for eName, result in processingResultsItems)
 	allMasterProteinss = dict((eName, result[3]) for eName, result in processingResultsItems)
 	noCorrectionIndicess = {}

@@ -92,7 +92,8 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	if doConstand:
 		# perform the CONSTANd algorithm;
 		intensities = getIntensities(df, quanColumns=params['quanColumns'])
-		normalizedIntensities, convergenceTrail, R, S = constand(intensities, params['precision'], params['maxIterations'])
+		constandOutput = constand(intensities, params['precision'], params['maxIterations'])
+		normalizedIntensities = constandOutput[0]
 		normalizedDf = setIntensities(df, intensities=normalizedIntensities, quanColumns=params['quanColumns'])
 	else:
 		# TEST do NOT perform CONSTANd
@@ -117,6 +118,6 @@ def processDf(df, params, writeToDisk, doConstand=True):
 		# save the DE analysis results
 
 	if params['isotopicCorrection_bool']:
-		return normalizedDf, normalizedIntensities, removedData, allMasterProteins, noCorrectionIndices  # todo find better solution than 2 returns
+		return normalizedDf, constandOutput, removedData, allMasterProteins, noCorrectionIndices  # todo find better solution than 2 returns
 	else:
-		return normalizedDf, normalizedIntensities, removedData, allMasterProteins  #todo add noCorrectionIndices variable that is empty
+		return normalizedDf, constandOutput, removedData, allMasterProteins  #todo add noCorrectionIndices variable that is empty
