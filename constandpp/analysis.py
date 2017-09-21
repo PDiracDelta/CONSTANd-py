@@ -41,9 +41,9 @@ def getRTIsolationInfo(removedData_RT):
 
 def getNoIsotopicCorrection(df, noCorrectionIndices):
 	"""
-	Given a dataframe and indices of detections that received no corrections, returns some basic info about them.
+	Given a dataframe and indices of PSMs that received no corrections, returns some basic info about them.
 	:param df:                  pd.DataFrame	processed and possibly (if not: exception caught) isotope-corrected data frame
-	:param noCorrectionIndices: list            indices of detections that received no isotopic correction
+	:param noCorrectionIndices: list            indices of PSMs that received no isotopic correction
 	:return:                    pd.DataFrame    ['First Scan', 'Identifying Node Type', 'Annotated Sequence', 'Master Protein Accessions']
 	"""
 	try:

@@ -91,13 +91,13 @@ def getProcessingInput(configFilePath):
 		raise Exception("Please indicate which columns (in addition to the intensities) to save for removed data.")
 	if removeBadConfidence_bool is None:
 		raise Exception(
-			"Please indicate whether you would like to remove detections with confidence lower than certain "
+			"Please indicate whether you would like to remove PSMs with confidence lower than certain "
 			"threshold.")
 	if removeBadConfidence_bool and removeBadConfidence_minimum not in ['High', 'Medium']:
 		raise Exception(
 			"Invalid minimum confidence level: " + removeBadConfidence_minimum + ". Must select 'Medium' or 'High'.")
 	if removeIsolationInterference_bool is None:
-		raise Exception("Please indicate whether you would like to remove high Isolation Interference detections.")
+		raise Exception("Please indicate whether you would like to remove high Isolation Interference PSMs.")
 	if not (0 < removeIsolationInterference_threshold < 100 or removeIsolationInterference_bool is None):
 		raise Exception("Isolation Interference Threshold should be either 'None' or between 0 and 100 (percentage).")
 	if collapse_method not in ('bestMatch', 'mostIntense', 'mean', 'geometricMedian', 'weighted'):

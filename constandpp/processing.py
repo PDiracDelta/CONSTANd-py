@@ -5,7 +5,7 @@
 Collection of functions that process the data before it can be normalized by CONSTANd.
 Includes:
 * removing unnecessary variables/columns
-* removing detections with missing values that are essential
+* removing PSMs with missing values that are essential
 * removing high isolation interference cases
 * removing redundancy due to different peptide spectrum match (PSM) algorithms
 * correct for isotopic impurities in the reporters
@@ -52,7 +52,7 @@ def removeObsoleteColumns(df, wantedColumns):
 
 def removeMissing(df, noMissingValuesColumns, quanColumns, identifyingNodes):
 	"""
-	Removes detections for which entries in essential columns is missing, or which have no quan values or labels.
+	Removes PSMs for which entries in essential columns is missing, or which have no quan values or labels.
 	:param df:  					pd.dataFrame    data with missing values
 	:param noMissingValuesColumns:	list			columns which may not contain missing values
 	:param quanColumns:		list			columns that contain the quantification values
@@ -62,13 +62,13 @@ def removeMissing(df, noMissingValuesColumns, quanColumns, identifyingNodes):
 	scoreColumns = [identifyingNodes['master'][1]] + [x[1] for x in identifyingNodes['slaves']]
 	try:
 		for column in noMissingValuesColumns:
-			# delete all detections that have a missing value in this column
+			# delete all PSMs that have a missing value in this column
 			toDelete.extend(df.loc[df.loc[:, column].isnull(), :].index)
-		# delete all detections that have a missing value in both columns: XCorr and Ions Score
+		# delete all PSMs that have a missing value in both columns: XCorr and Ions Score
 		toDelete.extend([x[0] for x in df[scoreColumns].isnull().iterrows() if x[1].all()])  # x[0] is the index
 	except KeyError as e:
 		raise KeyError("Required column '" + str(e.args[0]) + "' was not found.")
-	# get the indices of all detections which have no quan values at all (those have their nansum equal to zero)
+	# get the indices of all PSMs which have no quan values at all (those have their nansum equal to zero)
 	noIntensitiesBool = np.nansum(getIntensities(df=df, quanColumns=quanColumns), axis=1) == 0.
 	toDelete.extend(df.index[noIntensitiesBool])
 	
@@ -76,14 +76,14 @@ def removeMissing(df, noMissingValuesColumns, quanColumns, identifyingNodes):
 	removedData = df.loc[toDelete]
 	if toDelete.size > 0:
 		logging.warning(
-			"Some detections have been removed from the workflow due to missing values: see removedData['missing'].")
+			"Some PSMs have been removed from the workflow due to missing values: see removedData['missing'].")
 	df.drop(toDelete, inplace=True)
 	return df, removedData
 
 
 def removeBadConfidence(df, minimum, removalColumnsToSave):
 	"""
-	Removes detections from the input dataFrame if they have a confidence level worse than the given minimum. Saves some
+	Removes PSMs from the input dataFrame if they have a confidence level worse than the given minimum. Saves some
 	info about data with lower than minimum confidence levels in removedData.
 	Information of removed entries is saved according to removalColumnsToSave.
 	:param df:              		pd.dataFrame    data with all confidence levels
@@ -182,14 +182,14 @@ def undoublePSMAlgo(df, identifyingNodes, exclusive, quanColumns, removalColumns
 	masterName = identifyingNodes['master'][0]
 	byIdentifyingNodeDict = df.groupby('Identifying Node Type').groups  # {Identifying Node Type : [list of indices]}
 	masterIndices = set(byIdentifyingNodeDict[masterName])
-	toDelete = set(df.index.values).difference(masterIndices)  # all indices of detections not done by MASTER
+	toDelete = set(df.index.values).difference(masterIndices)  # all indices of PSMs not done by MASTER
 	columnsToSave = removalColumnsToSave + quanColumns
 	# check whether some slave data should be kept.
 	if len(identifyingNodes['slaves']) != 0 and not exclusive:  # a SLAVE was specified: save its information in
 		# removedData. ALso, KEEP UNIQUE SLAVE scans by removing them from the toDelete list
 		byFirstScanDict = df.groupby('First Scan').groups
 		singles = set(map(lambda e: e[0], filter(lambda e: len(e) == 1,
-												 byFirstScanDict.values())))  # indices of detections done by only 1 PSMAlgo
+												 byFirstScanDict.values())))  # indices of PSMs done by only 1 PSMAlgo
 		singlesNotByMasterIndices = singles.difference(masterIndices)
 		toDelete = toDelete.difference(singlesNotByMasterIndices)  # keep only indices not discovered by SLAVE
 		slaveScoreName = identifyingNodes['slaves'][0][1]
@@ -223,6 +223,6 @@ def isotopicCorrection(intensities, correctionsMatrix):
 				np.where(intensities == row)[0][0])  # np.where()[0][0] is numpy equivalent van .index()
 			if not warnedYet:
 				logging.warning(
-					"Cannot correct isotope impurities for detections with NaN reporter intensities; skipping those.")
+					"Cannot correct isotope impurities for PSMs with NaN reporter intensities; skipping those.")
 				warnedYet = True
 	return np.asarray(correctedIntensities), noCorrectionIndices

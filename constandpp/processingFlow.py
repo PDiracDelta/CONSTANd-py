@@ -34,7 +34,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	# get a set of all master proteins detected in at least one PSM.
 	allMasterProteins = getAllPresentProteins(df)
 	
-	# remove detections where (essential) data is missing.
+	# remove PSMs where (essential) data is missing.
 	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['quanColumns'], params['identifyingNodes'])
 	
 	if params['removeBadConfidence_bool']:
@@ -54,7 +54,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 													 exclusive=params['undoublePSMAlgo_exclusive_bool'],
 													 quanColumns=params['quanColumns'],
 													 removalColumnsToSave=params['removalColumnsToSave'])
-		# SANITY CHECK: no detections with the same scan number may exist after undoublePSMAlgo()
+		# SANITY CHECK: no PSMs with the same scan number may exist after undoublePSMAlgo()
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
 	
 	if params['isotopicCorrection_bool']:
@@ -67,7 +67,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 		# from scripts.tools import removeRowsWithNeg
 		# df = removeRowsWithNeg(df, params['quanColumns'])
 	
-	# collapse peptide list redundancy due to multiple detections at different RT
+	# collapse peptide list redundancy due to multiple PSMs at different RT
 	df, removedData['RT'] = collapse('RT', df, quanColumns=params['quanColumns'], method=params['collapse_method'],
 									 identifyingNodes=params['identifyingNodes'],
 									 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])

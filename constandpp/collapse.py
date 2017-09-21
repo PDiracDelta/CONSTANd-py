@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 """
-Collection of functions that help removing redundancy in the data due to detections which have:
+Collection of functions that help removing redundancy in the data due to PSMs which have:
 * different retention time (RT) values
 * different charges
 * different (post-translational) modifications (PTMs)
-and replaces the duplicates with one representative detection and a combination/summary/selection of their intensities.
+and replaces the duplicates with one representative PSM and a combination/summary/selection of their intensities.
 """
 
 import numpy as np
@@ -27,7 +27,7 @@ def geometricMedian(X, eps=1e-5):
 	:param eps: float64         precision
 	:return:    np.ndarray      geometric median multidimensional vector
 	"""
-	# throw away detections with nan-values
+	# throw away PSMs with nan-values
 	X = X[~np.isnan(X).any(axis=1)]
 
 	y = np.mean(X, 0)
@@ -64,9 +64,9 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 	Removes each group of duplicate from the experimental data df and replaces them by a representative entry that has
 	all properties of the entry amongst them with the best PSM score, but with quantification values determined by a
 	method specified through `method`.
-	intensities (via getNewIntensities function): remove all duplicates and enter one replacement detection.
+	intensities (via getNewIntensities function): remove all duplicates and enter one replacement PSM.
 	Adds a 'Degeneracy' column to the dataFrame if it didn't exist already: this contains the number of peptides that
-	have been collapsed onto that (synthetic) detection.
+	have been collapsed onto that (synthetic) PSM.
 	Returns removedData according to the columnsToSave list.
 	:param toCollapse:              	str             variable of which true duplicates are to be collapsed.
 	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
@@ -101,10 +101,10 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 			combination-of-properties values, but non-identical toCollapse values.
 			For instance when toCollapse=='RT':
 			[
-				[2, 4, 8], # indices of detections with (Charge2, PTM2) and unique(RT2, RT4, RT8)==True
-				[1, 5, 6], # indices of detections with (Charge1, PTM1) and unique(RT1, RT5, RT6)==True
-				[3],       # indices of detections with (Charge3, PTM3) and unique(RT3)==True
-				[7, 9],    # indices of detections with (Charge7, PTM7) and unique(RT7, RT9)==True
+				[2, 4, 8], # indices of PSMs with (Charge2, PTM2) and unique(RT2, RT4, RT8)==True
+				[1, 5, 6], # indices of PSMs with (Charge1, PTM1) and unique(RT1, RT5, RT6)==True
+				[3],       # indices of PSMs with (Charge3, PTM3) and unique(RT3)==True
+				[7, 9],    # indices of PSMs with (Charge7, PTM7) and unique(RT7, RT9)==True
 			]
 			This function correctly groups by PSMAlgo when required and does not when it is prohibited.
 			:param byPropDict:          	dict    { propertyValue : [duplicateIndices] }
@@ -155,7 +155,7 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 		quantification values is specified by centerMeasure.
 		:param this2_bestIndicesDict:   dict    { bestIndex : [group of duplicate indices]}
 		:param centerMeasure:           str     specifies the method of combination
-		:return newIntensitiesDict:     dict    { bestIndex : new intensities of the representative detection }
+		:return newIntensitiesDict:     dict    { bestIndex : new intensities of the representative PSM }
 		"""
 		newIntensitiesDict = {}
 		for bestIndex, this_duplicatesList in this2_bestIndicesDict.items():
@@ -184,7 +184,7 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 		best PSM match according to dataFrame df. Does this intelligently by taking masterPSMAlgo into account. If no
 		best index can be found (due to missing score for instance) it just takes the first in this_duplicateLists.
 		:param this_duplicateLists: list    [[group of duplicates] per toCollapse value in the df]
-		:return this_bestIndices:   dict    { indices of detections with the best PSM score per group of duplicates : [group of duplicates] }
+		:return this_bestIndices:   dict    { indices of PSMs with the best PSM score per group of duplicates : [group of duplicates] }
 		"""
 		isNanWarnedYet = False
 		noSlavePSMAlgoWarnedYet = False
@@ -234,12 +234,12 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 	def getRepresentativesDf(this_bestIndicesDict):
 		"""
 		Uses a list of indices of the best PSM matches bestIndices amongst each group of duplicates. Based on this best
-		PSM entry, generates a representative detection for each group of duplicates. This is done by copying all
+		PSM entry, generates a representative PSM for each group of duplicates. This is done by copying all
 		bestMatch properties, while calculating new quantification values when necessary and also updating the Degeneracy
 		parameter. Indices are taken w.r.t. df from the parent scope.
 		The behaviour should not be overwritten so as to use the mostIntense indices instead, since the quantification
 		values or not of importance here, but rather the PSM properties and their reliability.
-		:param this_bestIndicesDict:     dict           { index of detection with best PSM score per group of duplicates : [group of duplicates] }
+		:param this_bestIndicesDict:     dict           { index of PSM with best PSM score per group of duplicates : [group of duplicates] }
 		:return this_representativesDf:  pd.dataFrame   all representatives data that will replace the duplicate entries in the dataFrame df
 		"""
 		this_bestIndices = this_bestIndicesDict.keys()
@@ -268,14 +268,14 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 		return this_representativesDf
 
 	if 'Degeneracy' not in df.columns:
-		# contains the number of peptides that have been collapsed onto each (synthetic) detection.
+		# contains the number of peptides that have been collapsed onto each (synthetic) PSM.
 		df.loc[:, 'Degeneracy'] = [1, ] * len(df.index)
 
 	# get a nested list of duplicates according to toCollapse. [[duplicates1], [duplicates2], ...]
 	duplicateLists = getDuplicates()
 	# get the new intensities per first occurrence index (df index)
 	bestIndicesDict = getBestIndicesDict(duplicateLists)  # {bestIndex : [duplicates]}
-	# add the new representative detections to the dataFrame
+	# add the new representative PSMs to the dataFrame
 	representativesDf = getRepresentativesDf(bestIndicesDict)
 	df = df.append(representativesDf)
 	toDelete = [item for sublist in duplicateLists for item in sublist]  # unpack list of lists
@@ -289,7 +289,7 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 	except KeyError as e:
 		removedData = DataFrame()
 		logging.warning("Could not save removedData in collapse step because a data column is missing: "+str(e.args[0]))
-	# actually remove the toDelete detections
+	# actually remove the toDelete PSMs
 	df.drop(toDelete, inplace=True)
 
 	return df, removedData

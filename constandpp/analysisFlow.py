@@ -53,7 +53,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	metadata['numeric'].loc[0, 'numObservedProteins'] = len(allObservedProteins)
 	metadata['allObservedProteins'] = pd.DataFrame({'protein': [allObservedProteins]})
 	
-	# record detections without isotopic correction applied. Multi-indexed on experiment names and old indices!
+	# record PSMs without isotopic correction applied. Multi-indexed on experiment names and old indices!
 	# This is done here instead of the processing flow because back then there was no metadata variable yet.
 	try:
 		metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for
