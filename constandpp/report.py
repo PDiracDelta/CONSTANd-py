@@ -465,7 +465,7 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 			pass
 	HCDendrogramFullPath = hackImagePathToSymlinkInStaticDir(HCDendrogramFullPath)
 	PCAPlotFullPath = hackImagePathToSymlinkInStaticDir(PCAPlotFullPath)
-	htmlReport = render_template('report.html', jobName=jobParams['jobName'], otherConditions=otherConditions,
+	htmlReport = render_template('report.html', version=str(__version__), jobName=jobParams['jobName'], otherConditions=otherConditions,
 								 minVolcanoFullPathDict=minVolcanoFullPaths,
 								 fullVolcanoFullPathDict=fullVolcanoFullPaths,
 								 minExpression_bool=jobParams['minExpression_bool'],
