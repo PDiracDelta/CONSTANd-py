@@ -10,7 +10,7 @@ Includes:
 * removing redundancy due to different peptide spectrum match (PSM) algorithms
 * correct for isotopic impurities in the reporters
 * get/set the intensity matrix of a dataFrame
-Excludes (see collapse.py):
+Excludes (see aggregate.py):
 * removing redundancy due to:
 	* different retention time (RT) values
 	* different charges

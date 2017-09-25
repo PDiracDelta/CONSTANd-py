@@ -56,19 +56,19 @@ def geometricMedian(X, eps=1e-5):
 		y = y1
 
 
-def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMAlgo_bool, columnsToSave):  #
+def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePSMAlgo_bool, columnsToSave):  #
 	"""
-	Generic collapse function, which removes redundancy in the data due to property toCollapse.
+	Generic aggregate function, which removes redundancy in the data due to property toAggregate.
 	Looks for duplicate 'Annotated Sequence' values in the dataFrame and further groups by other possible properties
-	(PSMAlgo, Charge, Modifications) if necessary, while respecting the collapse order imposed in the main() function.
+	(PSMAlgo, Charge, Modifications) if necessary, while respecting the aggregate order imposed in the main() function.
 	Removes each group of duplicate from the experimental data df and replaces them by a representative entry that has
 	all properties of the entry amongst them with the best PSM score, but with quantification values determined by a
 	method specified through `method`.
 	intensities (via getNewIntensities function): remove all duplicates and enter one replacement PSM.
 	Adds a 'Degeneracy' column to the dataFrame if it didn't exist already: this contains the number of peptides that
-	have been collapsed onto that (synthetic) PSM.
+	have been aggregated onto that (synthetic) PSM.
 	Returns removedData according to the columnsToSave list.
-	:param toCollapse:              	str             variable of which true duplicates are to be collapsed.
+	:param toAggregate:              	str             variable of which true duplicates are to be aggregated.
 	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
 	:param quanColumns:			list			columns that contain the quantification values
 	:param method:                      str             defines how the new quantification values of the representative
@@ -88,9 +88,9 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 	def getDuplicates():
 		"""
 		Takes the dataFrame df from the parent scope and returns a nested list of groups of duplicates according to
-		the toCollapse variable. Based on iterative use of the pd.DataFrame.groupby('property').groups function which
+		the toAggregate variable. Based on iterative use of the pd.DataFrame.groupby('property').groups function which
 		returns a dict { propertyValue : [duplicateIndices] }.
-		:return this_duplicateLists:     list            [[group of duplicates] per `toCollapse` value in the df]
+		:return this_duplicateLists:     list            [[group of duplicates] per `toAggregate` value in the df]
 		"""
 		def groupByIdenticalProperties(byPropDict, remainingProperties):
 			"""
@@ -98,8 +98,8 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 			properties, and uses the first one to do another groupby() on each dataframe slice consisting of one set of
 			duplicates in the input dictionary values. Then, iteratively calls itself again using that dictionary and
 			the other remaining properties. The result is a nested list of duplicates which all have identical
-			combination-of-properties values, but non-identical toCollapse values.
-			For instance when toCollapse=='RT':
+			combination-of-properties values, but non-identical toAggregate values.
+			For instance when toAggregate=='RT':
 			[
 				[2, 4, 8], # indices of PSMs with (Charge2, PTM2) and unique(RT2, RT4, RT8)==True
 				[1, 5, 6], # indices of PSMs with (Charge1, PTM1) and unique(RT1, RT5, RT6)==True
@@ -130,17 +130,17 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 				byFirstPropDict = df.groupby('Identifying Node Type').groups
 				properties.append('Annotated Sequence')
 			except KeyError:
-				logging.warning("Could not group by PSMAlgo in groupby(PSMAlgo) step during collapse/aggregation because the Identifying Node Type column is missing. Skipping this step.")
+				logging.warning("Could not group by PSMAlgo in groupby(PSMAlgo) step during aggregate/aggregation because the Identifying Node Type column is missing. Skipping this step.")
 				# Skip the PSMAlgo step and select first by annotated sequence anyway
 				byFirstPropDict = df.groupby('Annotated Sequence').groups
 		else:
 			## SELECT IDENTICAL SEQUENCE ##
 			byFirstPropDict = df.groupby('Annotated Sequence').groups
-		if toCollapse == 'RT':
+		if toAggregate == 'RT':
 			groupByIdenticalProperties(byFirstPropDict, properties + ['Charge', 'Modifications'])
-		elif toCollapse == 'Charge':
+		elif toAggregate == 'Charge':
 			groupByIdenticalProperties(byFirstPropDict, properties + ['Modifications'])
-		elif toCollapse == 'PTM':
+		elif toAggregate == 'PTM':
 			# modifications are apparent from the sequence! Remove this dependence!
 			byFirstPropDict = df.groupby(df['Annotated Sequence'].str.upper()).groups
 			groupByIdenticalProperties(byFirstPropDict, properties + ['Charge'])
@@ -183,7 +183,7 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 		For each sublist in the nested list of duplicates duplicateLists, calculates the index of the duplicate with the
 		best PSM match according to dataFrame df. Does this intelligently by taking masterPSMAlgo into account. If no
 		best index can be found (due to missing score for instance) it just takes the first in this_duplicateLists.
-		:param this_duplicateLists: list    [[group of duplicates] per toCollapse value in the df]
+		:param this_duplicateLists: list    [[group of duplicates] per toAggregate value in the df]
 		:return this_bestIndices:   dict    { indices of PSMs with the best PSM score per group of duplicates : [group of duplicates] }
 		"""
 		isNanWarnedYet = False
@@ -268,10 +268,10 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 		return this_representativesDf
 
 	if 'Degeneracy' not in df.columns:
-		# contains the number of peptides that have been collapsed onto each (synthetic) PSM.
+		# contains the number of peptides that have been aggregated onto each (synthetic) PSM.
 		df.loc[:, 'Degeneracy'] = [1, ] * len(df.index)
 
-	# get a nested list of duplicates according to toCollapse. [[duplicates1], [duplicates2], ...]
+	# get a nested list of duplicates according to toAggregate. [[duplicates1], [duplicates2], ...]
 	duplicateLists = getDuplicates()
 	# get the new intensities per first occurrence index (df index)
 	bestIndicesDict = getBestIndicesDict(duplicateLists)  # {bestIndex : [duplicates]}
@@ -281,14 +281,14 @@ def collapse(toCollapse, df, quanColumns, method, identifyingNodes, undoublePSMA
 	toDelete = [item for sublist in duplicateLists for item in sublist]  # unpack list of lists
 	try:
 		removedData = df.loc[toDelete, columnsToSave]
-		# add the representative index of each collection of collapsed duplicates
+		# add the representative index of each collection of aggregated duplicates
 		removedData.insert(loc=0, column='Representative First Scan', value=-1)
 		# relies on fact that order is conserved! #todo
 		for duplicatesList, rfs in zip(bestIndicesDict.values(), representativesDf['First Scan']):
 			removedData.loc[duplicatesList, 'Representative First Scan'] = rfs
 	except KeyError as e:
 		removedData = DataFrame()
-		logging.warning("Could not save removedData in collapse step because a data column is missing: "+str(e.args[0]))
+		logging.warning("Could not save removedData in aggregate step because a data column is missing: "+str(e.args[0]))
 	# actually remove the toDelete PSMs
 	df.drop(toDelete, inplace=True)
 

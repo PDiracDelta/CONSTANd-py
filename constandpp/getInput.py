@@ -51,17 +51,17 @@ def getProcessingInput(configFilePath):
 	wantedColumns = parseExpression(config.get('DEFAULT', 'wantedColumns'))
 	noMissingValuesColumns = parseExpression(config.get('DEFAULT', 'noMissingValuesColumns'))
 	removalColumnsToSave = parseExpression(config.get('DEFAULT', 'removalColumnsToSave'))
-	collapseColumnsToSave = parseExpression(config.get('DEFAULT', 'collapseColumnsToSave'))
+	aggregateColumnsToSave = parseExpression(config.get('DEFAULT', 'aggregateColumnsToSave'))
 	removeBadConfidence_bool = config.getboolean('DEFAULT', 'removeBadConfidence_bool')
 	removeBadConfidence_minimum = config.get('DEFAULT', 'removeBadConfidence_minimum')
 	removeIsolationInterference_bool = config.getboolean('DEFAULT', 'removeIsolationInterference_bool')
 	removeIsolationInterference_threshold = config.getfloat('DEFAULT', 'removeIsolationInterference_threshold')
-	collapse_method = config.get('DEFAULT', 'collapse_method')
+	aggregate_method = config.get('DEFAULT', 'aggregate_method')
 	identifyingNodes = parseExpression(config.get('DEFAULT', 'identifyingNodes'))
 	undoublePSMAlgo_bool = config.getboolean('DEFAULT', 'undoublePSMAlgo_bool')
 	undoublePSMAlgo_exclusive_bool = config.getboolean('DEFAULT', 'undoublePSMAlgo_exclusive_bool')
-	collapseCharge_bool = config.getboolean('DEFAULT', 'collapseCharge_bool')
-	collapsePTM_bool = config.getboolean('DEFAULT', 'collapsePTM_bool')
+	aggregateCharge_bool = config.getboolean('DEFAULT', 'aggregateCharge_bool')
+	aggregatePTM_bool = config.getboolean('DEFAULT', 'aggregatePTM_bool')
 	isotopicCorrection_bool = config.getboolean('DEFAULT', 'isotopicCorrection_bool')
 	isotopicCorrection_matrix = config.get('DEFAULT', 'isotopicCorrection_matrix')
 	precision = config.getfloat('DEFAULT', 'precision')
@@ -87,7 +87,7 @@ def getProcessingInput(configFilePath):
 	if wantedColumns is None:
 		raise Exception(
 			"Please indicate which columns (in addition to the intensities) you would like to have output for.")
-	if collapseColumnsToSave is None:
+	if aggregateColumnsToSave is None:
 		raise Exception("Please indicate which columns (in addition to the intensities) to save for removed data.")
 	if removeBadConfidence_bool is None:
 		raise Exception(
@@ -100,15 +100,15 @@ def getProcessingInput(configFilePath):
 		raise Exception("Please indicate whether you would like to remove high Isolation Interference PSMs.")
 	if not (0 < removeIsolationInterference_threshold < 100 or removeIsolationInterference_bool is None):
 		raise Exception("Isolation Interference Threshold should be either 'None' or between 0 and 100 (percentage).")
-	if collapse_method not in ('bestMatch', 'mostIntense', 'mean', 'geometricMedian', 'weighted'):
-		raise Exception("Invalid collapse method: '" + collapse_method + "'. Please pick 'max', 'mean' or 'median'.")
+	if aggregate_method not in ('bestMatch', 'mostIntense', 'mean', 'geometricMedian', 'weighted'):
+		raise Exception("Invalid aggregate method: '" + aggregate_method + "'. Please pick 'max', 'mean' or 'median'.")
 	if undoublePSMAlgo_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PSM Algorithms.")
 	if undoublePSMAlgo_exclusive_bool is None:
 		raise Exception("Please indicate whether PSM Algorithm redundancy removal should be exclusive or not.")
-	if collapseCharge_bool is None:
+	if aggregateCharge_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple charge states.")
-	if collapsePTM_bool is None:
+	if aggregatePTM_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PTMs.")
 	if isotopicCorrection_bool is None:
 		raise Exception("Please indicate whether you would like to correct for isotopic impurities.")
@@ -144,7 +144,7 @@ def getProcessingInput(configFilePath):
 		'wantedColumns': wantedColumns + quanColumns,  # needs to include intensitycolumns
 		'noMissingValuesColumns': noMissingValuesColumns,
 		'removalColumnsToSave': removalColumnsToSave + quanColumns,  # needs to include intensitycolumns
-		'collapseColumnsToSave': collapseColumnsToSave + quanColumns,  # needs to include intensitycolumns
+		'aggregateColumnsToSave': aggregateColumnsToSave + quanColumns,  # needs to include intensitycolumns
 		'removeBadConfidence_bool': removeBadConfidence_bool,
 		'removeBadConfidence_minimum': removeBadConfidence_minimum,
 		'removeIsolationInterference_bool': removeIsolationInterference_bool,
@@ -152,9 +152,9 @@ def getProcessingInput(configFilePath):
 		'identifyingNodes': identifyingNodes,
 		'undoublePSMAlgo_bool': undoublePSMAlgo_bool,
 		'undoublePSMAlgo_exclusive_bool': undoublePSMAlgo_exclusive_bool,
-		'collapse_method': collapse_method,
-		'collapseCharge_bool': collapseCharge_bool,
-		'collapsePTM_bool': collapsePTM_bool,
+		'aggregate_method': aggregate_method,
+		'aggregateCharge_bool': aggregateCharge_bool,
+		'aggregatePTM_bool': aggregatePTM_bool,
 		'isotopicCorrection_bool': isotopicCorrection_bool,
 		'isotopicCorrection_matrix': isotopicCorrection_matrix,
 		'precision': precision,

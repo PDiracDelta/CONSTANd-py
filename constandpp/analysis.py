@@ -23,8 +23,8 @@ from scipy.cluster.hierarchy import linkage
 def getRTIsolationInfo(removedData_RT):
 	"""
 	Returns dataFrame with the mean, standard deviation, and max-min value of the RT values for each duplicate_group
-	representative that is found in the removedData_RT dataframe containing the removedData for the RT collapse.
-	:param removedData_RT:  pd.DataFrame    removedData for the RT collapse.
+	representative that is found in the removedData_RT dataframe containing the removedData for the RT aggregate.
+	:param removedData_RT:  pd.DataFrame    removedData for the RT aggregate.
 	:return:                pd.DataFrame    statistics 'Degeneracy', 'mean', 'std', 'max-min' about the RT values
 	"""
 	if 'Representative First Scan' in removedData_RT.columns.values and 'RT [min]' in removedData_RT.columns.values:

@@ -8,7 +8,7 @@ Workflow of the processing part of CONSTANd++.
 from constandpp.processing import *
 from constandpp.tools import setIntensities
 from constandpp.dataIO import exportData
-from constandpp.collapse import collapse
+from constandpp.aggregate import aggregate
 from constandpp.constand import constand
 
 
@@ -49,7 +49,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	df = setMasterProteinDescriptions(df)
 	
 	if params['undoublePSMAlgo_bool']:
-		# collapse peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
+		# aggregate peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
 		df, removedData['PSMAlgo'] = undoublePSMAlgo(df, identifyingNodes=params['identifyingNodes'],
 													 exclusive=params['undoublePSMAlgo_exclusive_bool'],
 													 quanColumns=params['quanColumns'],
@@ -67,25 +67,25 @@ def processDf(df, params, writeToDisk, doConstand=True):
 		# from scripts.tools import removeRowsWithNeg
 		# df = removeRowsWithNeg(df, params['quanColumns'])
 	
-	# collapse peptide list redundancy due to multiple PSMs at different RT
-	df, removedData['RT'] = collapse('RT', df, quanColumns=params['quanColumns'], method=params['collapse_method'],
+	# aggregate peptide list redundancy due to multiple PSMs at different RT
+	df, removedData['RT'] = aggregate('RT', df, quanColumns=params['quanColumns'], method=params['aggregate_method'],
 									 identifyingNodes=params['identifyingNodes'],
-									 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
+									 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['aggregateColumnsToSave'])
 	
-	if params['collapseCharge_bool']:
-		# collapse peptide list redundancy due to different charges (optional)
-		df, removedData['charge'] = collapse('Charge', df, quanColumns=params['quanColumns'], method=params['collapse_method'],
+	if params['aggregateCharge_bool']:
+		# aggregate peptide list redundancy due to different charges (optional)
+		df, removedData['charge'] = aggregate('Charge', df, quanColumns=params['quanColumns'], method=params['aggregate_method'],
 											 identifyingNodes=params['identifyingNodes'],
-											 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
+											 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['aggregateColumnsToSave'])
 	
-	if params['collapsePTM_bool']:
-		# collapse peptide list redundancy due to different charges (optional)
-		df, removedData['modifications'] = collapse('PTM', df, quanColumns=params['quanColumns'], method=params['collapse_method'],
+	if params['aggregatePTM_bool']:
+		# aggregate peptide list redundancy due to different charges (optional)
+		df, removedData['modifications'] = aggregate('PTM', df, quanColumns=params['quanColumns'], method=params['aggregate_method'],
 													identifyingNodes=params['identifyingNodes'],
-													undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['collapseColumnsToSave'])
+													undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['aggregateColumnsToSave'])
 
-	# SANITY CHECK: there should be no more duplicates if all collapses have been applied.
-	if params['undoublePSMAlgo_bool'] and params['collapseCharge_bool']:  # TEST
+	# SANITY CHECK: there should be no more duplicates if all aggregates have been applied.
+	if params['undoublePSMAlgo_bool'] and params['aggregateCharge_bool']:  # TEST
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby(
 			'Annotated Sequence').groups))  # only 1 index vector in dict of SEQUENCE:[INDICES] for all sequences
 
