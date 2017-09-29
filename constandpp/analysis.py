@@ -278,6 +278,7 @@ def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 		if peptidesDf.empty:
 			peptidesDf = dfs[eName].loc[:, ['Annotated Sequence'] + eChannelAliases]
 		else:
+			# merge makes sure that only peptides whose annotated sequence appears in EACH experiment get selected
 			peptidesDf = pd.merge(peptidesDf, dfs[eName].loc[:, ['Annotated Sequence'] + eChannelAliases],
 							 on='Annotated Sequence')
 		allPeptides.update(set(dfs[eName].loc[:, 'Annotated Sequence']))
