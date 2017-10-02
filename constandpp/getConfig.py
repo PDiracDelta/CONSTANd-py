@@ -6,7 +6,6 @@ Get the input parameters from the config file.
 """
 
 import configparser
-# import numpy as np
 import os
 from json import loads as parseExpression
 from codecs import getdecoder as gd

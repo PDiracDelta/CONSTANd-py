@@ -32,7 +32,6 @@ def getIntensities(df, quanColumns, indices=None):
 	:param indices:         list                        indices of the entries for which to obtain the intensities
 	:return intensities:    np.ndarray                  matrix of quantification values
 	"""
-	import numpy as np
 	from pandas import Series
 	if isinstance(df, Series):  # this is a dataframe with only 1 entry: indexing [:, cols] doesnt work.
 		return np.asarray(df.loc[quanColumns])

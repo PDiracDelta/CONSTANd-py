@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 import logging
 from constandpp.tools import unnest, getOtherConditions
-# from constandpp.tools import getIntensities
 from collections import defaultdict
 from statsmodels.sandbox.stats.multicomp import multipletests
 from scipy.stats import ttest_ind as ttest

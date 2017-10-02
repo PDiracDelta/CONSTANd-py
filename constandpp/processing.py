@@ -26,7 +26,7 @@ from pandas import DataFrame, Series
 
 def getAllPresentProteins(df):
 	""" Returns the set of all master proteins appearing in at least one PSM, regardless of the PSM usefulness. """
-	from constandpp.tools import partition, unnest
+	from constandpp.tools import unnest
 	if 'Master Protein Accessions' in df.columns.values:
 		allMPAStrings = df.loc[:, 'Master Protein Accessions'].astype(str)
 		allMPAListsAndItems = [x.split('; ') for x in allMPAStrings]

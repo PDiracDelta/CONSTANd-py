@@ -10,6 +10,7 @@ Functions involved in generating the report that includes:
 * metadata info (warnings etc.)
 * overview of parameters used in the workflow
 """
+
 import pandas as pd
 import numpy as np
 from constandpp.tools import unnest, getOtherConditions
@@ -384,7 +385,6 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 	from constandpp_web import app
 	from os import path, pardir
 	from pandas import set_option
-	import logging
 	
 	allJobsParDir = path.abspath(path.join(app.config.get('ALLJOBSDIR'), pardir))
 	set_option('display.max_colwidth', -1)  # otherwise the Description column text is truncated.

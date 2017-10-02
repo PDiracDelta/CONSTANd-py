@@ -5,7 +5,9 @@
 Python implementation of mass spectrometer protein data analysis using the CONSTANd_RAS algorithm.
 """
 
-import sys, logging, datetime, traceback
+import sys
+import datetime
+import traceback
 from constandpp.dataIO import *
 
 
