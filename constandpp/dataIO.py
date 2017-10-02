@@ -105,14 +105,14 @@ def importWrapper(path_in='wrapper.tsv'):
 	return list(importDataFrame(path_in, header=None, dtype=str).values)
 
 
-def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistribute file manipulation files(functions?) in web.py
+def parseDoEFile(DoEPath):  # todo either move this to web.py or redistribute file manipulation files(functions?) in web.py
 	"""
-	Parses the .tsv schema into a hierarchical overview with intensity columns groups per condition and experiment. The
-	wrapper and config entries are set to None for now. The structure of the schema should be as follows:
+	Parses the .tsv DoE file into a hierarchical overview with intensity columns groups per condition and experiment.
+	The	wrapper and config entries are set to None for now. The structure of the schema should be as follows:
 		experiment_name	cond1:df_col1,df_col2:alias1,alias2		cond2:df_col3,df_col4:alias3,alias4
 	IF aliases are provided for a certain row, they must all be provided. Else they are generated automatically as
 	EXPERIMENTNAME_CONDITION_COLNAME.
-	:param schemaPath:              str     path to the schema file that the user uploaded
+	:param DoEPath:              str     path to the DoE file that the user uploaded
 	:return incompleteSchemaDict:   dict    schema in dict format, without config and wrapper information, in the format
 											{ allExperiments: [experiments] ,
 											  allConditions: [conditions] ,
@@ -139,7 +139,7 @@ def parseSchemaFile(schemaPath):  # todo either move this to web.py or redistrib
 	""" import schema as dataframe """
 	from collections import OrderedDict
 	# import schema file as dataframe and replace nan values by empty strings
-	schemaDF = importDataFrame(schemaPath, delim='\t', header=None, dtype=str).replace(np.nan, '', regex=True)
+	schemaDF = importDataFrame(DoEPath, delim='\t', header=None, dtype=str).replace(np.nan, '', regex=True)
 	incompleteSchemaDict = OrderedDict()  # use ordered dict so the items() order is always the same
 	numCols = len(schemaDF.columns)
 	numRows = len(schemaDF)
