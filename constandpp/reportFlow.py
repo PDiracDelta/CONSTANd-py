@@ -23,7 +23,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	:param params:			dict	job (global) parameters
 	:param logFilePath:		str		path to the log file with information about each processingFlow and analysisFlow call
 	:param writeToDisk:		bool	write visualizations and reports to disk (if not: just pass the return statement)
-	:param processingParams:dict	experiment-specific processing parameters (see getInput.py.)
+	:param processingParams:dict	experiment-specific processing parameters (see getConfig.py.)
 	:param startTime:		float	UNIX epoch timestamp at which the reportFlow was started
 	"""
 	minProteinDF = analysisResults[0]

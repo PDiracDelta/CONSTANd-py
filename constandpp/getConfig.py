@@ -22,7 +22,7 @@ def parseDelimiter(d):
 		return gd("unicode_escape")(d)[0]  # treat delimiters correctly: ignore first escape
 
 
-def getProcessingInput(configFilePath):
+def getProcessingConfig(configFilePath):
 	"""
 	Returns the processing parameters in a dict based on the .ini file at the argument path. Creates a ConfigParser
 	object to scan the config file and gets all hardcoded variables one by one from the DEFAULT section, parsing them
@@ -172,7 +172,7 @@ def getProcessingInput(configFilePath):
 	return params
 
 
-def getJobInput(jobConfigFilePath):
+def getJobConfig(jobConfigFilePath):
 	"""
 	Returns the job parameters in a dict based on the .ini file at the argument path. Creates a ConfigParser
 	object to scan the config file and gets all hardcoded variables one by one from the DEFAULT section, parsing them

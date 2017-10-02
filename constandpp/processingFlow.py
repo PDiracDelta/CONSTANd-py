@@ -19,7 +19,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	isotopic impurities (optional),	normalizes using the CONSTANd method and saves the output to disk if so required.
 	Along the way, removed data is kept in a corresponding dict of dataframes.
 	:param df:						pd.DataFrame		Peptide Spectrum Match dataframe (see documentation).
-	:param params:					dict				experiment-specific processing parameters (see getInput.py.)
+	:param params:					dict				experiment-specific processing parameters (see getConfig.py.)
 	:param writeToDisk:				bool				write results to harddisk (if not: only pass via return statement).
 	:return normalizedDf:			pd.DataFrame		cleaned, normalized data on the "unique modified peptide" level
 	:return normalizedIntensities:	np.ndarray			matrix of quantification values on the "unique modified peptide" level

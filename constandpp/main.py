@@ -15,7 +15,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 	writeToDisk one can control	which parts of the workflow to perform.
 	"""
 	# todo proper docu
-	from constandpp.getInput import getProcessingInput, getJobInput
+	from constandpp.getConfig import getProcessingConfig, getJobConfig
 	from constandpp.processingFlow import processDf
 	from constandpp.analysisFlow import analyzeProcessingResult
 	from constandpp.reportFlow import generateReport
@@ -24,7 +24,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 	logFilePath = os.path.abspath(os.path.join(jobConfigFilePath, os.path.join(os.pardir, 'log.txt')))
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
 	start = time()
-	jobParams = getJobInput(jobConfigFilePath)  # config filenames + params for the combination of experiments
+	jobParams = getJobConfig(jobConfigFilePath)  # config filenames + params for the combination of experiments
 	processingParams = {}  # specific params for each experiment
 	dfs = {}
 	processingResults = {}
@@ -33,7 +33,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 	for eName in experimentNames:
 		""" Data processing """
 		# get all input parameters
-		processingParams[eName] = getProcessingInput(jobParams['schema'][eName]['config'])
+		processingParams[eName] = getProcessingConfig(jobParams['schema'][eName]['config'])
 		# get the dataframes
 		# todo move this step to processingFlow --> NO because everything inside the Flow.py files should reside in memory, not on disk.
 		dfs[eName] = importExperimentData(processingParams[eName]['data'],
