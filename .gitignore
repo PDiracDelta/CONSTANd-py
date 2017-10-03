@@ -1,8 +1,5 @@
 scripts
 .idea/
 __pycache__
-constandpp/web/jobs
-constandpp-webconstandpp_web
-constandpp_web
 constandpp.egg-info
 main.py.lprof
