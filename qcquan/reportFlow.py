@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Workflow of the processing part of CONSTANd++.
+Workflow of the processing part of QCQuan.
 """
 
 from constandpp.report import *

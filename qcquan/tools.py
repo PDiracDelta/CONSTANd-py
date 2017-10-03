@@ -1,4 +1,4 @@
-""" Collection of handy tools used by various modules of the CONSTANd++ workflow. """
+""" Collection of handy tools used by various modules of the QCQuan workflow. """
 
 import numpy as np
 from constandpp import fontsize, fontweight, figheight, figwidth

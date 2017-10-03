@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Workflow of the analysis part of CONSTANd++.
+Workflow of the analysis part of QCQuan.
 """
 
 from constandpp.analysis import *
