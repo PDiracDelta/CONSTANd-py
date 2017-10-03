@@ -247,6 +247,8 @@ def fixFixableFormatMistakes(df):
 	""" misc """
 	columns = list(df.columns.values)
 	if 'Annotated Sequence' in columns:
+		# make sure all amino-acids are noted in upper case
+		df['Annotated Sequence'] = df['Annotated Sequence'].str.upper()
 		# you've enabled "show flanking amino acids": DIRk --> [L].DIRk.[m]
 		if df.sample(n=1)['Annotated Sequence'].item().count('.') == 2:  # sequence contains 2 dots
 			df['Annotated Sequence'] = df['Annotated Sequence'].apply(lambda x: x.split('.')[1])  # select part between dots

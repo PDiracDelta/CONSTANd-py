@@ -142,7 +142,7 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 			groupByIdenticalProperties(byFirstPropDict, properties + ['Modifications'])
 		elif toAggregate == 'PTM':
 			# modifications are apparent from the sequence! Remove this dependence!
-			byFirstPropDict = df.groupby(df['Annotated Sequence'].str.upper()).groups
+			byFirstPropDict = df.groupby(df['Annotated Sequence']).groups
 			groupByIdenticalProperties(byFirstPropDict, properties + ['Charge'])
 
 		return this_duplicateLists
