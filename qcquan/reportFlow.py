@@ -5,8 +5,8 @@
 Workflow of the processing part of QCQuan.
 """
 
-from constandpp.report import *
-from constandpp.dataIO import exportData, genZip
+from qcquan.report import *
+from qcquan.dataIO import exportData, genZip
 
 
 def generateReport(analysisResults, params, logFilePath, writeToDisk, processingParams, startTime):
@@ -142,7 +142,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		resultsZipFullPath = join(params['path_results'], 'results.zip')
 		genZip(resultsZipFullPath, allDEResultsFullPaths)
 		
-		from constandpp_web.web import send_mail
+		from qcquan_web.web import send_mail
 		### SEND JOB COMPLETED MAIL ###
 		mailSuccess = send_mail(recipient=params['mailRecipient'], mailBodyFile='reportMail',
 				  jobName=params['jobName'], jobID=params['jobID'], attachments=[pdfFullPath])

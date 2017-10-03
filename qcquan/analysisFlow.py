@@ -5,8 +5,8 @@
 Workflow of the analysis part of QCQuan.
 """
 
-from constandpp.analysis import *
-from constandpp.dataIO import exportData
+from qcquan.analysis import *
+from qcquan.dataIO import exportData
 
 
 def analyzeProcessingResult(processingResults, params, writeToDisk):

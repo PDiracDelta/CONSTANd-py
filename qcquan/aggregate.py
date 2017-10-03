@@ -13,7 +13,7 @@ import numpy as np
 import logging
 from pandas import DataFrame
 from warnings import filterwarnings
-from constandpp.tools import setIntensities, getIntensities
+from qcquan.tools import setIntensities, getIntensities
 from scipy.spatial.distance import cdist, euclidean
 
 columnsToSave = None

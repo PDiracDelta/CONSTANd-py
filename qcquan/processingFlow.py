@@ -5,11 +5,11 @@
 Workflow of the processing part of QCQuan.
 """
 
-from constandpp.processing import *
-from constandpp.tools import setIntensities
-from constandpp.dataIO import exportData
-from constandpp.aggregate import aggregate
-from constandpp.constand import constand
+from qcquan.processing import *
+from qcquan.tools import setIntensities
+from qcquan.dataIO import exportData
+from qcquan.aggregate import aggregate
+from qcquan.constand import constand
 
 
 def processDf(df, params, writeToDisk, doConstand=True):

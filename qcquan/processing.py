@@ -18,7 +18,7 @@ Excludes (see aggregate.py):
 Removed data is always saved into a removedData dataFrame.
 """
 
-from constandpp.tools import getIntensities
+from qcquan.tools import getIntensities
 import numpy as np
 import logging
 from pandas import DataFrame, Series
@@ -26,7 +26,7 @@ from pandas import DataFrame, Series
 
 def getAllPresentProteins(df):
 	""" Returns the set of all master proteins appearing in at least one PSM, regardless of the PSM usefulness. """
-	from constandpp.tools import unnest
+	from qcquan.tools import unnest
 	if 'Master Protein Accessions' in df.columns.values:
 		allMPAStrings = df.loc[:, 'Master Protein Accessions'].astype(str)
 		allMPAListsAndItems = [x.split('; ') for x in allMPAStrings]

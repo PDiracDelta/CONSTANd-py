@@ -13,7 +13,7 @@ Functions involved in generating the report that includes:
 
 import pandas as pd
 import numpy as np
-from constandpp.tools import unnest, getOtherConditions
+from qcquan.tools import unnest, getOtherConditions
 from warnings import warn
 from scipy.cluster.hierarchy import dendrogram
 import matplotlib
@@ -21,7 +21,7 @@ matplotlib.use('Agg')  # you need a backend that doesn't use X-server and you ne
 from matplotlib import pyplot as plt
 from matplotlib import markers
 from matplotlib.colors import to_hex
-from constandpp import fontweight, fontsize, figwidth, figheight
+from qcquan import fontweight, fontsize, figwidth, figheight
 
 # from adjustText import adjust_text
 
@@ -382,7 +382,7 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 	"""
 	from flask import render_template
 	from time import time
-	from constandpp_web import app
+	from qcquan_web import app
 	from os import path, pardir
 	from pandas import set_option
 	
@@ -440,7 +440,7 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 	
 	approxDuration = round(time() - startTime)
 	
-	from constandpp import __version__
+	from qcquan import __version__
 	pdfhtmlreport = render_template('report.html', version=str(__version__), jobName=jobParams['jobName'],
 									otherConditions=otherConditions,
 									minVolcanoFullPathDict=minVolcanoFullPaths,
@@ -492,7 +492,7 @@ def HTMLtoPDF(htmlReportFullPath):
 	from subprocess import run
 	from weasyprint import HTML, CSS
 	# from os import path
-	# from constandpp_web import config
+	# from qcquan_web import config
 	
 	pdfReportFullPath = htmlReportFullPath[0:-4] + 'pdf'
 	# command = 'wkhtmltopdf -L 1cm -R 1cm -T 1cm -B 1cm "'+htmlReportFullPath+'" "'+pdfReportFullPath+'"'

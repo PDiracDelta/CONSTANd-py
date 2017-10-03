@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-setup(name='constandpp',
+setup(name='qcquan',
       version='0.2',
       description='QCQuan workflow',
       url='https://constand.vito.be',

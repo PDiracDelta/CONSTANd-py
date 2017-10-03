@@ -1,7 +1,7 @@
 """ Collection of handy tools used by various modules of the QCQuan workflow. """
 
 import numpy as np
-from constandpp import fontsize, fontweight, figheight, figwidth
+from qcquan import fontsize, fontweight, figheight, figwidth
 import matplotlib as mpl
 mpl.use('Agg')  # you need a backend that doesn't use X-server and you need to do it before you import pyplot.
 import matplotlib.pyplot as plt
@@ -94,7 +94,7 @@ def MA(x, y):
 
 def scatterPlot(x, y, title=None, xlab=None, ylab=None):
 	"""
-	Return a scatterPlot for the given data, with the constandpp-specific plot settings (fonts, figsizes, ...).
+	Return a scatterPlot for the given data, with the qcquan-specific plot settings (fonts, figsizes, ...).
 	:param x:		list		x data
 	:param y:		list		y data
 	:param title:	str			scatterPlot title
@@ -118,7 +118,7 @@ def scatterPlot(x, y, title=None, xlab=None, ylab=None):
 
 def MAPlot(x, y, title=None):
 	"""
-	Return an MA plot for the given data, with the constandpp-specific plot settings (fonts, figsizes, ...) by calling
+	Return an MA plot for the given data, with the qcquan-specific plot settings (fonts, figsizes, ...) by calling
 	MA() and then scatterPlot().
 	:param x:		list	x data
 	:param y:		list	y data

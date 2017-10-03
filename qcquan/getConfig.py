@@ -9,7 +9,7 @@ import configparser
 import os
 from json import loads as parseExpression
 from codecs import getdecoder as gd
-from constandpp.dataIO import importIsotopicCorrectionsMatrix, importWrapper
+from qcquan.dataIO import importIsotopicCorrectionsMatrix, importWrapper
 
 
 def parseDelimiter(d):

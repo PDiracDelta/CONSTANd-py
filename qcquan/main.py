@@ -8,7 +8,7 @@ Python implementation of mass spectrometer protein data analysis using the CONST
 import sys
 import datetime
 import traceback
-from constandpp.dataIO import *
+from qcquan.dataIO import *
 
 
 def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
@@ -17,12 +17,12 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 	writeToDisk one can control	which parts of the workflow to perform.
 	"""
 	# todo proper docu
-	from constandpp.getConfig import getProcessingConfig, getJobConfig
-	from constandpp.processingFlow import processDf
-	from constandpp.analysisFlow import analyzeProcessingResult
-	from constandpp.reportFlow import generateReport
+	from qcquan.getConfig import getProcessingConfig, getJobConfig
+	from qcquan.processingFlow import processDf
+	from qcquan.analysisFlow import analyzeProcessingResult
+	from qcquan.reportFlow import generateReport
 	from time import time
-	from constandpp_web.web import DB_setJobReportRelPaths
+	from qcquan_web.web import DB_setJobReportRelPaths
 	logFilePath = os.path.abspath(os.path.join(jobConfigFilePath, os.path.join(os.pardir, 'log.txt')))
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
 	start = time()
@@ -125,8 +125,8 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 
 
 if __name__ == '__main__':  # this should not execute if main.py is not the main module called by the python interpreter,
-	from constandpp_web.web import DB_setJobCompleted, DB_setJobFailed
-	from constandpp_web import app
+	from qcquan_web.web import DB_setJobCompleted, DB_setJobFailed
+	from qcquan_web import app
 	from traceback import print_exc
 	
 	args = sys.argv
@@ -145,7 +145,7 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		doReport = True
 		writeToDisk = True
 		
-		from constandpp_web.config import ALLJOBSDIR
+		from qcquan_web.config import ALLJOBSDIR
 		#jobConfigFilePath = '2017-08-23 10:20:21.345488_test_updatedRemoveBadConfidence/jobConfig_test_updatedRemoveBadConfidence.ini'
 		#jobConfigFilePath = '2017-08-23 17:01:13.474192_df/jobConfig_df.ini'
 		# jobConfigFilePath = '2017-08-30 16:56:24.378757_ESmit_digests_v2/jobConfig_ESmit_digests_v2.ini'
