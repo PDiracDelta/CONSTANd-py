@@ -246,12 +246,11 @@ def fixFixableFormatMistakes(df):
 	
 	""" misc """
 	columns = list(df.columns.values)
-	if 'Annotated Sequence' in columns:
-		# make sure all amino-acids are noted in upper case
-		df['Annotated Sequence'] = df['Annotated Sequence'].str.upper()
+	# Set the Sequence column if it doesn't exist
+	if 'Annotated Sequence' in columns and 'Sequence' not in columns:
 		# you've enabled "show flanking amino acids": DIRk --> [L].DIRk.[m]
 		if df.sample(n=1)['Annotated Sequence'].item().count('.') == 2:  # sequence contains 2 dots
-			df['Annotated Sequence'] = df['Annotated Sequence'].apply(lambda x: x.split('.')[1])  # select part between dots
+			df['Sequence'] = df['Annotated Sequence'].apply(lambda x: x.split('.')[1])  # select part between dots
 	
 	columns = list(df.columns.values)
 	# you're using "Identifying Node" instead of "Identifying Node Type"
@@ -265,6 +264,11 @@ def fixFixableFormatMistakes(df):
 		# make a fake First Scan column by copying the RT column (necessary for undoublePSMAlgo)
 		logging.warning("Couldn't find a 'First Scan' column; creating it by copy-pasting the contents of the 'RT [min]' column.")
 		df['First Scan'] = df['RT [min]'].copy()
+	
+	columns = list(df.columns.values)
+	if 'Sequence' in columns:
+		# make sure all amino-acids are noted in upper case
+		df['Sequence'] = df['Sequence'].str.upper()
 	
 	return df
 
