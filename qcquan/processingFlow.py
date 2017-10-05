@@ -87,7 +87,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	# SANITY CHECK: there should be no more duplicates if all aggregates have been applied.
 	if params['undoublePSMAlgo_bool'] and params['aggregateCharge_bool']:  # TEST
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby(
-			'Annotated Sequence').groups))  # only 1 index vector in dict of SEQUENCE:[INDICES] for all sequences
+			'Sequence').groups))  # only 1 index vector in dict of SEQUENCE:[INDICES] for all sequences
 
 	if doConstand:
 		# perform the CONSTANd algorithm;

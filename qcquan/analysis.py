@@ -43,10 +43,10 @@ def getNoIsotopicCorrection(df, noCorrectionIndices):
 	Given a dataframe and indices of PSMs that received no corrections, returns some basic info about them.
 	:param df:                  pd.DataFrame	processed and possibly (if not: exception caught) isotope-corrected data frame
 	:param noCorrectionIndices: list            indices of PSMs that received no isotopic correction
-	:return:                    pd.DataFrame    ['First Scan', 'Identifying Node Type', 'Annotated Sequence', 'Master Protein Accessions']
+	:return:                    pd.DataFrame    ['First Scan', 'Identifying Node Type', 'Sequence', 'Master Protein Accessions']
 	"""
 	try:
-		return df.loc[noCorrectionIndices, ['First Scan', 'Identifying Node Type', 'Annotated Sequence', 'Master Protein Accessions']]
+		return df.loc[noCorrectionIndices, ['First Scan', 'Identifying Node Type', 'Sequence', 'Master Protein Accessions']]
 	except KeyError:
 		logging.warning("No NoIsotopicCorrection info could be saved because a necessary column was missing.")
 		return pd.DataFrame()
@@ -102,7 +102,7 @@ def getProteinPeptidesDicts(df, fullExpression_bool):
 	if not fullExpression_bool:  # should return None
 		# todo also allow only max expression
 		fullProteinPeptidesDict = None
-	return minProteinPeptidesDict, fullProteinPeptidesDict, df.loc[noMasterProteinAccession, ['First Scan', 'Annotated Sequence']]
+	return minProteinPeptidesDict, fullProteinPeptidesDict, df.loc[noMasterProteinAccession, ['First Scan', 'Sequence']]
 
 
 def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherConditions):
@@ -132,7 +132,7 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 	
 	for protein, peptideIndices in proteinPeptidesDict.items():
 		# construct the new protein entry, with empty quan lists for now, and add it to the proteinDF
-		proteinEntry = [df.loc[peptideIndices, 'Annotated Sequence'].tolist(),
+		proteinEntry = [df.loc[peptideIndices, 'Sequence'].tolist(),
 						df.loc[peptideIndices, 'Protein Descriptions'][0]]
 		numFilledProteinEntries = len(proteinEntry)  # for easy adding later on
 		proteinEntry.extend([None, ]*len(allConditions))
@@ -269,19 +269,19 @@ def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 	"""
 	allChannelAliases = unnest([schema[eName]['allExperimentChannelAliases'] for eName in schema['allExperiments']])
 	peptidesDf = pd.DataFrame()
-	# join all dataframes together on the Annotated Sequence: you get ALL channels from ALL experiments as columns per peptide.
+	# join all dataframes together on the Sequence: you get ALL channels from ALL experiments as columns per peptide.
 	# [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
 	allPeptides = set()
 	for eName in dfs.keys():
 		eChannelAliases = schema[eName]['allExperimentChannelAliases']
 		if peptidesDf.empty:
-			peptidesDf = dfs[eName].loc[:, ['Annotated Sequence'] + eChannelAliases]
+			peptidesDf = dfs[eName].loc[:, ['Sequence'] + eChannelAliases]
 		else:
-			# merge makes sure that only peptides whose annotated sequence appears in EACH experiment get selected
-			peptidesDf = pd.merge(peptidesDf, dfs[eName].loc[:, ['Annotated Sequence'] + eChannelAliases],
-							 on='Annotated Sequence')
-		allPeptides.update(set(dfs[eName].loc[:, 'Annotated Sequence']))
-	uncommonPeptides = pd.DataFrame(list(allPeptides.difference(set(peptidesDf.loc[:, 'Annotated Sequence']))))
+			# merge makes sure that only peptides whose Sequence appears in EACH experiment get selected
+			peptidesDf = pd.merge(peptidesDf, dfs[eName].loc[:, ['Sequence'] + eChannelAliases],
+							 on='Sequence')
+		allPeptides.update(set(dfs[eName].loc[:, 'Sequence']))
+	uncommonPeptides = pd.DataFrame(list(allPeptides.difference(set(peptidesDf.loc[:, 'Sequence']))))
 	if len(peptidesDf) < 2:
 		raise Exception("Only "+str(len(peptidesDf))+" peptides found that were common across all experiments. Cannot perform PCA nor HC.")
 	return peptidesDf.loc[:, allChannelAliases], uncommonPeptides

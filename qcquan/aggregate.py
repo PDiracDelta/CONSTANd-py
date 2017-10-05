@@ -59,7 +59,7 @@ def geometricMedian(X, eps=1e-5):
 def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePSMAlgo_bool, columnsToSave):  #
 	"""
 	Generic aggregate function, which removes redundancy in the data due to property toAggregate.
-	Looks for duplicate 'Annotated Sequence' values in the dataFrame and further groups by other possible properties
+	Looks for duplicate 'Sequence' values in the dataFrame and further groups by other possible properties
 	(PSMAlgo, Charge, Modifications) if necessary, while respecting the aggregate order imposed in the main() function.
 	Removes each group of duplicate from the experimental data df and replaces them by a representative entry that has
 	all properties of the entry amongst them with the best PSM score, but with quantification values determined by a
@@ -128,20 +128,20 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 			## SELECT IDENTICAL PSMALGO (i.e. different First Scan) ##
 			try:
 				byFirstPropDict = df.groupby('Identifying Node Type').groups
-				properties.append('Annotated Sequence')
+				properties.append('Sequence')
 			except KeyError:
 				logging.warning("Could not group by PSMAlgo in groupby(PSMAlgo) step during aggregate/aggregation because the Identifying Node Type column is missing. Skipping this step.")
-				# Skip the PSMAlgo step and select first by annotated sequence anyway
-				byFirstPropDict = df.groupby('Annotated Sequence').groups
+				# Skip the PSMAlgo step and select first by Sequence anyway
+				byFirstPropDict = df.groupby('Sequence').groups
 		else:
 			## SELECT IDENTICAL SEQUENCE ##
-			byFirstPropDict = df.groupby('Annotated Sequence').groups
+			byFirstPropDict = df.groupby('Sequence').groups
 		if toAggregate == 'RT':
 			groupByIdenticalProperties(byFirstPropDict, properties + ['Charge', 'Modifications'])
 		elif toAggregate == 'Charge':
 			groupByIdenticalProperties(byFirstPropDict, properties + ['Modifications'])
 		elif toAggregate == 'PTM':
-			byFirstPropDict = df.groupby(df['Annotated Sequence']).groups
+			byFirstPropDict = df.groupby(df['Sequence']).groups
 			groupByIdenticalProperties(byFirstPropDict, properties + ['Charge'])
 
 		return this_duplicateLists
