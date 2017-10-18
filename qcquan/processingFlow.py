@@ -81,9 +81,13 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	if params['aggregatePTM_bool']:
 		# aggregate peptide list redundancy due to different charges (optional)
 		df, removedData['modifications'] = aggregate('PTM', df, quanColumns=params['quanColumns'], method=params['aggregate_method'],
-													identifyingNodes=params['identifyingNodes'],
-													undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['aggregateColumnsToSave'])
-
+													 identifyingNodes=params['identifyingNodes'],
+													 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'],
+													 columnsToSave=params['aggregateColumnsToSave'],
+													 aggregateCharge_bool=params['aggregateCharge_bool'])
+	else:
+		logging.warning("No PTM aggregation done.")
+		
 	# SANITY CHECK: there should be no more duplicates if all aggregates have been applied.
 	if params['undoublePSMAlgo_bool'] and params['aggregateCharge_bool']:  # TEST
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby(

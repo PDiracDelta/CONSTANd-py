@@ -56,7 +56,7 @@ def geometricMedian(X, eps=1e-5):
 		y = y1
 
 
-def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePSMAlgo_bool, columnsToSave):  #
+def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePSMAlgo_bool, columnsToSave, aggregateCharge_bool=None):  #
 	"""
 	Generic aggregate function, which removes redundancy in the data due to property toAggregate.
 	Looks for duplicate 'Sequence' values in the dataFrame and further groups by other possible properties
@@ -141,8 +141,16 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 		elif toAggregate == 'Charge':
 			groupByIdenticalProperties(byFirstPropDict, properties + ['Modifications'])
 		elif toAggregate == 'PTM':
-			byFirstPropDict = df.groupby(df['Sequence']).groups
-			groupByIdenticalProperties(byFirstPropDict, properties + ['Charge'])
+			# byFirstPropDict = df.groupby(df['Sequence']).groups  # todo obsolete?
+			if not aggregateCharge_bool:  # if you did not and do not want to aggregate by Charge, you need to groupBy
+				# Charge first, otherwise you aggregate it anyway.
+				additionalProperties = [x for x in ['Charge'] if x in df.columns]
+			else:  # if you did aggregate by Charge, you should explicitly NOT groupBy it anymore, because then you
+				# will exclude cases from aggregation where there is BOTH a Charge and a PTM difference, as these will
+				# not yet have been aggregated during the aggregateCharge step. However, you do want those to be
+				# aggregated in the end since you want to aggregate on both properties, so now is the time to do it.
+				additionalProperties = []
+			groupByIdenticalProperties(byFirstPropDict, properties + additionalProperties)
 
 		return this_duplicateLists
 
