@@ -55,19 +55,20 @@ def removeMissing(df, noMissingValuesColumns, quanColumns, identifyingNodes):
 	Removes PSMs for which entries in essential columns is missing, or which have no quan values or labels.
 	:param df:  					pd.dataFrame    data with missing values
 	:param noMissingValuesColumns:	list			columns which may not contain missing values
-	:param quanColumns:		list			columns that contain the quantification values
+	:param quanColumns:				list			columns that contain the quantification values
 	:return df:						pd.dataFrame    data without missing values
 	"""
 	toDelete = []
 	scoreColumns = [identifyingNodes['master'][1]] + [x[1] for x in identifyingNodes['slaves']]
-	try:
-		for column in noMissingValuesColumns:
+	for column in noMissingValuesColumns:
+		try:
 			# delete all PSMs that have a missing value in this column
 			toDelete.extend(df.loc[df.loc[:, column].isnull(), :].index)
-		# delete all PSMs that have a missing value in both columns: XCorr and Ions Score
-		toDelete.extend([x[0] for x in df[scoreColumns].isnull().iterrows() if x[1].all()])  # x[0] is the index
-	except KeyError as e:
-		raise KeyError("Required column '" + str(e.args[0]) + "' was not found.")
+			if scoreColumns[0] != 'unspecified':  # if no PSMAlgo specified, there are no score columns.
+				# delete all PSMs that have a missing value in all PSMAlgo score columns
+				toDelete.extend([x[0] for x in df[scoreColumns].isnull().iterrows() if x[1].all()])  # x[0] is the index
+		except KeyError as e:
+			logging.warning("Column '" + str(e.args[0]) + "' was not found. Not removing its missing values.")
 	# get the indices of all PSMs which have no quan values at all (those have their nansum equal to zero)
 	noIntensitiesBool = np.nansum(getIntensities(df=df, quanColumns=quanColumns), axis=1) == 0.
 	toDelete.extend(df.index[noIntensitiesBool])
@@ -159,7 +160,7 @@ def setMasterProteinDescriptions(df):
 											 zip(descriptionsLists, correctIndicesLists)]
 		df.drop('Protein Accessions', axis=1, inplace=True)
 	except KeyError as e:
-		logging.warning("Not all necessary columns found (see below); Adding 'Protein Descriptions' column with all empty strings.\nMissing: "+str(e))
+		logging.warning("Not all necessary columns found (see below); Adding 'Protein Descriptions' column with all empty strings.\nMissing: "+str(e.args[0]))
 		# add a descriptions column that has all empty strings. This assignment works even if the column doesn't exist yet.
 		df.loc[:, 'Protein Descriptions'] = Series(['', ]*len(df)).astype(str)
 	return df

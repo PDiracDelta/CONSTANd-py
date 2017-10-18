@@ -48,7 +48,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	# remove all non-master protein accessions (entire column) and descriptions (selective).
 	df = setMasterProteinDescriptions(df)
 	
-	if params['undoublePSMAlgo_bool']:
+	if params['undoublePSMAlgo_bool'] and 'Identifying Node Type' in df.columns:
 		# aggregate peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
 		df, removedData['PSMAlgo'] = undoublePSMAlgo(df, identifyingNodes=params['identifyingNodes'],
 													 exclusive=params['undoublePSMAlgo_exclusive_bool'],
@@ -56,6 +56,8 @@ def processDf(df, params, writeToDisk, doConstand=True):
 													 removalColumnsToSave=params['removalColumnsToSave'])
 		# SANITY CHECK: no PSMs with the same scan number may exist after undoublePSMAlgo()
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
+	else:
+		logging.warning("No PSM Algorithm redundancy removal done.")
 	
 	if params['isotopicCorrection_bool']:
 		# perform isotopic corrections and then apply them to the dataframe. No i-TRAQ copyright issues as of 2017-05-04
@@ -67,25 +69,32 @@ def processDf(df, params, writeToDisk, doConstand=True):
 		# from scripts.tools import removeRowsWithNeg
 		# df = removeRowsWithNeg(df, params['quanColumns'])
 	
-	# aggregate peptide list redundancy due to multiple PSMs at different RT
+	# aggregate peptide list redundancy due to multiple PSMs at different RT.
+	# This works even if Charge and Modifications not present in columns.
 	df, removedData['RT'] = aggregate('RT', df, quanColumns=params['quanColumns'], method=params['aggregate_method'],
 									 identifyingNodes=params['identifyingNodes'],
 									 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['aggregateColumnsToSave'])
 	
-	if params['aggregateCharge_bool']:
+	if params['aggregateCharge_bool'] and 'Charge' in df.columns:
 		# aggregate peptide list redundancy due to different charges (optional)
 		df, removedData['charge'] = aggregate('Charge', df, quanColumns=params['quanColumns'], method=params['aggregate_method'],
 											 identifyingNodes=params['identifyingNodes'],
 											 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['aggregateColumnsToSave'])
-	
-	if params['aggregatePTM_bool']:
+	else:
+		logging.warning("No Charge aggregation done.")
+		
+	if params['aggregatePTM_bool'] and 'Modifications' in df.columns:
 		# aggregate peptide list redundancy due to different charges (optional)
 		df, removedData['modifications'] = aggregate('PTM', df, quanColumns=params['quanColumns'], method=params['aggregate_method'],
-													identifyingNodes=params['identifyingNodes'],
-													undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['aggregateColumnsToSave'])
-
+													 identifyingNodes=params['identifyingNodes'],
+													 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'],
+													 columnsToSave=params['aggregateColumnsToSave'],
+													 aggregateCharge_bool=params['aggregateCharge_bool'])
+	else:
+		logging.warning("No PTM aggregation done.")
+		
 	# SANITY CHECK: there should be no more duplicates if all aggregates have been applied.
-	if params['undoublePSMAlgo_bool'] and params['aggregateCharge_bool']:  # TEST
+	if params['undoublePSMAlgo_bool'] and params['aggregateCharge_bool'] and params['aggregatePTM_bool']:  # TEST
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby(
 			'Sequence').groups))  # only 1 index vector in dict of SEQUENCE:[INDICES] for all sequences
 
