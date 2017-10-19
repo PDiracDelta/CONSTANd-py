@@ -211,13 +211,17 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 					if not noSlavePSMAlgoWarnedYet:  # I haven't thrown this warning yet
 						logging.warning("No slave PSMAlgo score column ('"+slaveScoreName+"') present in data set. ")
 						noSlavePSMAlgoWarnedYet = True
-				if np.isnan(bestIndex) and not isNanWarnedYet:
-					logging.warning("No best PSM score found for some lists of duplicates; first duplicate arbitrarily chosen. "
-						 "First Scan numbers of first list encountered: "+str(df.loc[this_duplicatesList, 'First Scan']))
+			if np.isnan(bestIndex):  # no score values found --> pick most intense one
+				bestIndex = getIntenseIndicesDict({bestIndex: this_duplicatesList})[bestIndex]  # assign most intense
+				if not isNanWarnedYet:
+					logging.warning(
+						"Aggregation: no best PSM score found for some lists of duplicates; most intense PSM"
+						"chosen instead. First Scan numbers of first list encountered: "
+						+ str(df.loc[this_duplicatesList, 'First Scan']))
 					isNanWarnedYet = True
-					bestIndex = this_duplicatesList[0]
+			
 			this_bestIndicesDict[bestIndex] = this_duplicatesList
-
+		
 		return this_bestIndicesDict
 
 	def getIntenseIndicesDict(this_bestIndicesDict):
