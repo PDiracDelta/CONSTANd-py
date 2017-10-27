@@ -158,8 +158,10 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '2017-10-18 11:40:15.623240_test_lessRequiredColumns_stripallcols_Mascotonly_MAX/jobConfig_test_lessRequiredColumns_stripallcols_Mascotonly_MAX.ini'
 		# jobConfigFilePath = '2017-10-18 12:58:44.290228_MAX/jobConfig_MAX.ini'
 		# jobConfigFilePath = '2017-10-18 12:37:18.416057_test_lessRequiredColumns_nochargenoPTM_MAX/jobConfig_test_lessRequiredColumns_nochargenoPTM_MAX.ini'
-		jobConfigFilePath = '2017-10-19 08:36:23.430610_test_lessRequiredColumns_Mascotonly_MAX/jobConfig_test_lessRequiredColumns_Mascotonly_MAX.ini'
+		# jobConfigFilePath = '2017-10-19 08:36:23.430610_test_lessRequiredColumns_Mascotonly_MAX/jobConfig_test_lessRequiredColumns_Mascotonly_MAX.ini'
 		# jobConfigFilePath = '2017-10-19 08:37:31.909072_test_mascotonly_MAX/jobConfig_test_mascotonly_MAX.ini'
+		# jobConfigFilePath = '2017-10-19 12:33:08.063018_testmissing_withisolInterf_MAX/jobConfig_testmissing_withisolInterf_MAX.ini'
+		jobConfigFilePath = '2017-10-27 14:29:59.916544_SMoyson_K/jobConfig_SMoyson_K.ini'
 		
 		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	
