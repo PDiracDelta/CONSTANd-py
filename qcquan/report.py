@@ -195,7 +195,7 @@ def getVolcanoPlot(df, condition, alpha, FCThreshold, labelPlot=[False, ] * 4, t
 	# maximize figure
 	# mng = plt.get_current_fig_manager()
 	# mng.full_screen_toggle()
-	plt.title(r'Volcano Plot ($FC>$' + str(FCThreshold) + r'; $\alpha=$' + str(alpha) + ')', figure=volcanoPlot)
+	plt.title(r'Volcano Plot ($FC>$' + str(FCThreshold) + r'; p < ' + str(alpha) + ')', figure=volcanoPlot)
 	plt.xlabel(r'log$_2$(fold change)', figure=volcanoPlot)
 	plt.ylabel(r'-log$_{10}$(p-value) ', figure=volcanoPlot)
 	# get indices of different levels of significance
