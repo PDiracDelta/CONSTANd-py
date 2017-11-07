@@ -1,7 +1,8 @@
 from setuptools import setup, find_packages
+from qcquan import __version__ as version
 
 setup(name='qcquan',
-      version='0.2',
+      version=version,
       description='QCQuan workflow',
       url='https://constand.vito.be',
       author='Joris Van Houtven',
