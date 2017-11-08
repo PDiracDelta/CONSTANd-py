@@ -120,9 +120,19 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 															['protein', 'peptides', 'description',
 															referenceCondition, condition 1, condition 2, ...]
 	"""
+	def uniqueMods(dfModSeries):
+		""" Transforms the Modifications column from the DF into a list of unique non-TMT modifications. """
+		# make set of all occurring modifications
+		allMods = set(y.strip() for y in unnest([x.split(';') for x in dfModSeries]))
+		# remove redundancy due to modification location (select info between brackets())
+		uniqueModsBetweenBrackets = set([x.partition('(')[-1].partition(')')[0] for x in allMods])
+		return list(uniqueModsBetweenBrackets)
+	
 	if 'Protein Descriptions' not in df.columns.values:  # in case there was no Descriptions column in the input
 		df['Protein Descriptions'] = pd.Series()
-	proteinDFColumns = ['protein', 'peptides', 'description']
+	if 'Modifications' not in df.columns.values:  # in case there was no Modifications column in the input
+		df['Modifications'] = pd.Series()
+	proteinDFColumns = ['protein', 'peptides', 'description', 'modifications']
 	allConditions = [referenceCondition]+otherConditions
 	# append reference condition first, and then the other conditions
 	proteinDFColumns.append(referenceCondition)
@@ -133,7 +143,8 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 	for protein, peptideIndices in proteinPeptidesDict.items():
 		# construct the new protein entry, with empty quan lists for now, and add it to the proteinDF
 		proteinEntry = [df.loc[peptideIndices, 'Sequence'].tolist(),
-						df.loc[peptideIndices, 'Protein Descriptions'][0]]
+						df.loc[peptideIndices, 'Protein Descriptions'][0],
+						uniqueMods(df.loc[peptideIndices, 'Modifications']),]
 		numFilledProteinEntries = len(proteinEntry)  # for easy adding later on
 		proteinEntry.extend([None, ]*len(allConditions))
 		
@@ -351,6 +362,7 @@ def buildHandyColumnOrder(inColumns, referenceCondition, schema):
 	for condition in otherConditions:
 		outColumns.append(condition)
 	outColumns.append('peptides')
+	outColumns.append('modifications')
 	assert len(inColumns) == len(outColumns)
 	return outColumns
 

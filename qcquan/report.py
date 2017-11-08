@@ -120,7 +120,7 @@ def getSortedProteinExpressionsDFs(proteinDF, schema, referenceCondition):
 	:return sortedProteinExpressionsDFs:dict				{ condition : sortedProteinDF }
 	"""
 	otherConditions = getOtherConditions(schema, referenceCondition)
-	sortedProteinExpressionsDFs = dict()#zip(otherConditions, [None, ]*len(otherConditions)))
+	sortedProteinExpressionsDFs = dict()
 	for condition in otherConditions:
 		sortedProteinExpressionsDFs[condition] = getSortedProteinExpressionsDF(proteinDF, referenceCondition, condition)
 	return sortedProteinExpressionsDFs
@@ -136,7 +136,7 @@ def getSortedProteinExpressionsDF(proteinDF, referenceCondition, condition):
 	:param condition:			str				name of the non-reference condition for which to get the sorted DE
 	:return:    				pd.DataFrame    sorted according to adjusted p-value and only specified columns
 	"""
-	reportColumns = ['description']
+	reportColumns = ['description', 'modifications']
 	adjustedPValueColumn = 'adjusted p-value (' + condition + ')'
 	FCColumn = 'log2 fold change ('+condition+')'
 	numPeptColumn = '#peptides ('+condition+')'
