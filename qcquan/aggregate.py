@@ -70,13 +70,13 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 	Returns removedData according to the columnsToSave list.
 	:param toAggregate:              	str             variable of which true duplicates are to be aggregated.
 	:param df:                          pd.dataFrame    with sequence duplicates due to difference in certain variables/columns.
-	:param quanColumns:			list			columns that contain the quantification values
+	:param quanColumns:					list			columns that contain the quantification values
 	:param method:                      str             defines how the new quantification values of the representative
 														are selected/constructed:
 														bestMatch: those of the PSM with the best score
 														mostIntsene: those of the PSM with the most intense values
 														mean: the mean of all PSMs in that duplicates group
-														geametricMedian: the geometric median of all PSMs in that duplicates group
+														geometricMedian: the geometric median of all PSMs in that duplicates group
 	:param identifyingNodes:			dict			PSM rater algorithm names and score names. Structure:
 														{"master": [NAME, SCORE_NAME], "slaves": [[NAME, SCORE_NAME], ...]}
 	:param undoublePSMAlgo_bool:		bool			Has the PSM algo redundancy already been removed?
@@ -99,6 +99,8 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 			duplicates in the input dictionary values. Then, iteratively calls itself again using that dictionary and
 			the other remaining properties. The result is a nested list of duplicates which all have identical
 			combination-of-properties values, but non-identical toAggregate values.
+			The only possible properties are RT [min], Charge, Modifications. If a property is not present in the
+			dataframe, there is no grouping on that property.
 			For instance when toAggregate=='RT':
 			[
 				[2, 4, 8], # indices of PSMs with (Charge2, PTM2) and unique(RT2, RT4, RT8)==True
@@ -114,7 +116,7 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 			# use only indices that are not single (i.e. that have a duplicate)
 			notSingleList = list(filter(lambda e: len(e) > 1, byPropDict.values()))  # [list of [lists of length > 1]]
 			if remainingProperties:  # check for more identical properties before marking as duplicates
-				for byPropIndices in notSingleList: # only if there actually is at least one group of dnp.asarray(df.locuplicates
+				for byPropIndices in notSingleList: # only if there actually is at least one group of np.asarray(df.loc[duplicates])
 					## SELECT IDENTICAL <NEXTPROPERTY> ##  # for each sublist of notSingleList
 					groupByIdenticalProperties(df.loc[byPropIndices].groupby(remainingProperties[0]).groups,
 											   remainingProperties[1:])  # first pop the [0] property to both return and remove it!
@@ -124,7 +126,8 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 		this_duplicateLists = []  # [list of [list of duplicate indices] for each duplicate]
 		# list of properties
 		properties = []
-		if not undoublePSMAlgo_bool:  # only if you didn't undoublePSMAlgo
+		if not undoublePSMAlgo_bool and 'Identifying Node Type' in df.columns:  # only if you didn't undoublePSMAlgo but
+			# the 'Identifying Node Type' information is available.
 			## SELECT IDENTICAL PSMALGO (i.e. different First Scan) ##
 			try:
 				byFirstPropDict = df.groupby('Identifying Node Type').groups
@@ -136,10 +139,12 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 		else:
 			## SELECT IDENTICAL SEQUENCE ##
 			byFirstPropDict = df.groupby('Sequence').groups
-		if toAggregate == 'RT':
-			groupByIdenticalProperties(byFirstPropDict, properties + ['Charge', 'Modifications'])
-		elif toAggregate == 'Charge':
-			groupByIdenticalProperties(byFirstPropDict, properties + ['Modifications'])
+		if toAggregate == 'RT':  # add extra properties to group by if they exist in the dataframe
+			additionalProperties = [x for x in ['Charge', 'Modifications'] if x in df.columns]
+			groupByIdenticalProperties(byFirstPropDict, properties + additionalProperties)
+		elif toAggregate == 'Charge':  # add extra properties to group by if they exist in the dataframe
+			additionalProperties = [x for x in ['Modifications'] if x in df.columns]
+			groupByIdenticalProperties(byFirstPropDict, properties + additionalProperties)
 		elif toAggregate == 'PTM':
 			# byFirstPropDict = df.groupby(df['Sequence']).groups  # todo obsolete?
 			if not aggregateCharge_bool:  # if you did not and do not want to aggregate by Charge, you need to groupBy
@@ -189,12 +194,11 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 		"""
 		For each sublist in the nested list of duplicates duplicateLists, calculates the index of the duplicate with the
 		best PSM match according to dataFrame df. Does this intelligently by taking masterPSMAlgo into account. If no
-		best index can be found (due to missing score for instance) it just takes the first in this_duplicateLists.
+		best index can be found due to missing scores, the most intense score is chosen instead.
 		:param this_duplicateLists: list    [[group of duplicates] per toAggregate value in the df]
 		:return this_bestIndices:   dict    { indices of PSMs with the best PSM score per group of duplicates : [group of duplicates] }
 		"""
 		isNanWarnedYet = False
-		noSlavePSMAlgoWarnedYet = False
 		this_bestIndicesDict = {}
 		masterScoreName = identifyingNodes['master'][1]
 		if len(identifyingNodes['slaves']) > 0:  # if there is at least one PSMAlgo Slave
@@ -203,25 +207,22 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 			slaveScoreName = None
 
 		for this_duplicatesList in this_duplicateLists:
-			bestIndex = df.loc[this_duplicatesList, masterScoreName].idxmax(axis=0, skipna=True)
+			if masterScoreName != 'unspecified':  # only if there actually IS a score column
+				bestIndex = df.loc[this_duplicatesList, masterScoreName].idxmax(axis=0, skipna=True)
+			else:  # if there is no PSM Algo information provided
+				bestIndex = np.nan
 			if np.isnan(bestIndex) and slaveScoreName is not None:  # no MASTER scores found --> take best SLAVE (if it exists)
-				try:
-					bestIndex = df.loc[this_duplicatesList, slaveScoreName].idxmax(axis=0, skipna=True)
-				except KeyError:  # if no slave score column is present in the data set
-					if not noSlavePSMAlgoWarnedYet:  # I haven't thrown this warning yet
-						logging.warning("No slave PSMAlgo score column ('"+slaveScoreName+"') present in data set. ")
-						noSlavePSMAlgoWarnedYet = True
+				bestIndex = df.loc[this_duplicatesList, slaveScoreName].idxmax(axis=0, skipna=True)
 			if np.isnan(bestIndex):  # no score values found --> pick most intense one
 				bestIndex = getIntenseIndicesDict({bestIndex: this_duplicatesList})[bestIndex]  # assign most intense
 				if not isNanWarnedYet:
-					logging.warning(
-						"Aggregation: no best PSM score found for some lists of duplicates; most intense PSM"
-						"chosen instead. First Scan numbers of first list encountered: "
-						+ str(df.loc[this_duplicatesList, 'First Scan']))
+					logging.warning("Aggregation: no best PSM score found for some lists of duplicates; most intense PSM"
+									"chosen instead. First Scan numbers of first list encountered: "
+									+str(df.loc[this_duplicatesList, 'First Scan']))
 					isNanWarnedYet = True
-			
+				
 			this_bestIndicesDict[bestIndex] = this_duplicatesList
-		
+
 		return this_bestIndicesDict
 
 	def getIntenseIndicesDict(this_bestIndicesDict):
@@ -235,23 +236,29 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 		intenseIndicesDict = {}
 		for bestIndex, this_duplicatesList in this_bestIndicesDict.items():
 			# calculate the total MS2 intensities for each duplicate
-			totalIntensities = np.sum(getIntensities(df, this_duplicatesList), axis=1)
+			totalIntensities = np.sum(getIntensities(df, quanColumns=quanColumns, indices=this_duplicatesList), axis=1)
 			# get the most intense duplicate
 			intenseIndex = this_duplicatesList[np.argmax(totalIntensities)]
 			assert not np.isnan(intenseIndex)
 			intenseIndicesDict[bestIndex] = intenseIndex
 		return intenseIndicesDict
 
-	def getRepresentativesDf(this_bestIndicesDict):
+	def getRepresentativesDf(this_bestIndicesDict, this_method):
 		"""
 		Uses a list of indices of the best PSM matches bestIndices amongst each group of duplicates. Based on this best
 		PSM entry, generates a representative PSM for each group of duplicates. This is done by copying all
 		bestMatch properties, while calculating new quantification values when necessary and also updating the Degeneracy
 		parameter. Indices are taken w.r.t. df from the parent scope.
 		The behaviour should not be overwritten so as to use the mostIntense indices instead, since the quantification
-		values or not of importance here, but rather the PSM properties and their reliability.
-		:param this_bestIndicesDict:     dict           { index of PSM with best PSM score per group of duplicates : [group of duplicates] }
-		:return this_representativesDf:  pd.dataFrame   all representatives data that will replace the duplicate entries in the dataFrame df
+		values are not of importance here, but rather the PSM properties and their reliability.
+		:param this_bestIndicesDict:    dict			{ index of PSM with best PSM score per group of duplicates : [group of duplicates] }
+		:param this_method:				str				defines how the new quantification values of the representative
+														are selected/constructed:
+														bestMatch: those of the PSM with the best score
+														mostIntsene: those of the PSM with the most intense values
+														mean: the mean of all PSMs in that duplicates group
+														geometricMedian: the geometric median of all PSMs in that duplicates group
+		:return this_representativesDf: pd.dataFrame	all representatives data that will replace the duplicate entries in the dataFrame df
 		"""
 		this_bestIndices = this_bestIndicesDict.keys()
 		this_duplicateLists = this_bestIndicesDict.values()
@@ -260,16 +267,17 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 		# sum the degeneracies of all duplicates involved in each representative
 		this_representativesDf.loc[:, 'Degeneracy'] = [np.sum(np.asarray(df.loc[(this_duplicatesList, 'Degeneracy')])) for this_duplicatesList in this_duplicateLists]
 
-		if method == 'bestMatch':
+		if this_method == 'bestMatch':
 			pass
-		elif method == 'mostIntense':
+		elif this_method == 'mostIntense':
 			intenseIndicesDict = getIntenseIndicesDict(this_bestIndicesDict)
 			# generate { bestIndex : [mostIntense intensities] }
-			intensitiesDict = dict((ind_best, getIntensities(df.loc[ind_intense, :])) for (ind_best, ind_intense) in intenseIndicesDict.items())
+			intensitiesDict = dict((ind_best, getIntensities(df.loc[ind_intense, :], quanColumns=quanColumns))
+								   for (ind_best, ind_intense) in intenseIndicesDict.items())
 			# set the representative intensities to be the most intense intensities
 			this_representativesDf = setIntensities(this_representativesDf, quanColumns=quanColumns, intensities=intensitiesDict)
 		else:  # method == 'centerMeasure'
-			newIntensitiesDict = combineDetections(this_bestIndicesDict, centerMeasure=method)
+			newIntensitiesDict = combineDetections(this_bestIndicesDict, centerMeasure=this_method)
 			# set the representative intensities to be the most intense intensities
 			this_representativesDf = setIntensities(this_representativesDf, quanColumns=quanColumns, intensities=newIntensitiesDict)
 
@@ -284,10 +292,14 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 
 	# get a nested list of duplicates according to toAggregate. [[duplicates1], [duplicates2], ...]
 	duplicateLists = getDuplicates()
+	
+	if method == 'bestMatch' and identifyingNodes['master'][1] == 'unspecified':  # no PSM scores available: change to mostIntense
+		method = 'mostIntense'
+		logging.warning("No PSM Algorithm information is available. Overriding aggregate_method to use mostIntense method.")
 	# get the new intensities per first occurrence index (df index)
 	bestIndicesDict = getBestIndicesDict(duplicateLists)  # {bestIndex : [duplicates]}
 	# add the new representative PSMs to the dataFrame
-	representativesDf = getRepresentativesDf(bestIndicesDict)
+	representativesDf = getRepresentativesDf(bestIndicesDict, this_method=method)
 	df = df.append(representativesDf)
 	toDelete = [item for sublist in duplicateLists for item in sublist]  # unpack list of lists
 	try:

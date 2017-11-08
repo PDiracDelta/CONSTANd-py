@@ -48,6 +48,7 @@ def getProcessingConfig(configFilePath):
 	removedDataInOneFile_bool = config.getboolean('DEFAULT', 'removedDataInOneFile_bool')
 	quanColumns = parseExpression(config.get('DEFAULT', 'quanColumns'))
 	wantedColumns = parseExpression(config.get('DEFAULT', 'wantedColumns'))
+	requiredColumns = parseExpression(config.get('DEFAULT', 'requiredColumns'))
 	noMissingValuesColumns = parseExpression(config.get('DEFAULT', 'noMissingValuesColumns'))
 	removalColumnsToSave = parseExpression(config.get('DEFAULT', 'removalColumnsToSave'))
 	aggregateColumnsToSave = parseExpression(config.get('DEFAULT', 'aggregateColumnsToSave'))
@@ -141,6 +142,7 @@ def getProcessingConfig(configFilePath):
 		'removedDataInOneFile_bool': removedDataInOneFile_bool,
 		'quanColumns': quanColumns,
 		'wantedColumns': wantedColumns + quanColumns,  # needs to include intensitycolumns
+		'requiredColumns': requiredColumns + quanColumns,  # needs to include intensitycolumns
 		'noMissingValuesColumns': noMissingValuesColumns,
 		'removalColumnsToSave': removalColumnsToSave + quanColumns,  # needs to include intensitycolumns
 		'aggregateColumnsToSave': aggregateColumnsToSave + quanColumns,  # needs to include intensitycolumns
