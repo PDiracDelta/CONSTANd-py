@@ -322,7 +322,7 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 	assert os.path.exists(path_out)
 	
 	extension = delim2ext(delim_out)
-	fullPath = path_out + '/' + filename + extension
+	fullPath = os.path.join(path_out, filename + extension)
 	
 	if dataType == 'txt':
 		np.savetxt(fullPath, data, delimiter=delim_out)
