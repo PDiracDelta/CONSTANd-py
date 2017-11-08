@@ -124,6 +124,8 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 		""" Transforms the Modifications column from the DF into a list of unique non-TMT modifications. """
 		# make set of all occurring modifications
 		allMods = set(y.strip() for y in unnest([x.split(';') for x in dfModSeries.astype(str)]))
+		# this N-terminal one is ALWAYS present -> redundant information
+		allMods.remove('N-Term(TMT6plex)')
 		# remove redundancy due to modification location (select info between brackets())
 		uniqueModsBetweenBrackets = set([x.partition('(')[-1].partition(')')[0] for x in allMods])
 		return list(uniqueModsBetweenBrackets)
