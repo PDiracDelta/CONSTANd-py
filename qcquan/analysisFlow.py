@@ -40,10 +40,11 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	constandOutputs = dict((eName, result[1]) for eName, result in processingResultsItems)
 	removedDatas = dict((eName, result[2]) for eName, result in processingResultsItems)
 	allMasterProteinss = dict((eName, result[3]) for eName, result in processingResultsItems)
+	processedDfFullPaths = dict((eName, result[4]) for eName, result in processingResultsItems)
 	noCorrectionIndicess = {}
 	for eName, result in processingResultsItems:
-		if len(result) > 4:  # if noCorrectionIndices exists in results
-			noCorrectionIndicess[eName] = result[3]
+		if len(result) > 5:  # if noCorrectionIndices exists in results
+			noCorrectionIndicess[eName] = result[-1]
 
 	experimentNames = processingResults.keys()
 	# contains statistics and metadata (like the parameters) about the analysis.
@@ -129,4 +130,4 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 				   filename=params['jobName'] + '_metadata',
 				   delim_out=params['delim_out'], inOneFile=False)
 
-	return minProteinDF, fullProteinDF, PCAResult, HCResult, allExperimentsIntensitiesPerCommonPeptide, metadata
+	return minProteinDF, fullProteinDF, PCAResult, HCResult, allExperimentsIntensitiesPerCommonPeptide, metadata, processedDfFullPaths

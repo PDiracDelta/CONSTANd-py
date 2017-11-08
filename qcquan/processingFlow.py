@@ -115,13 +115,13 @@ def processDf(df, params, writeToDisk, doConstand=True):
 		exportData(removedData, dataType='df', path_out=removedDataDir, filename=params['filename_out'] + '_removedData',
 				   delim_out=params['delim_out'], inOneFile=params['removedDataInOneFile_bool'])
 		# save the final form of the dataFrame WITHOUT normalized intensities.
-		exportData(df, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_dataFrame', delim_out=params['delim_out'])
+		processedDfFullPath = exportData(df, dataType='df', path_out=params['path_out'], filename=params['filename_out'] + '_dataFrame', delim_out=params['delim_out'])
 		# save the normalized intensities obtained through CONSTANd
 		exportData(normalizedIntensities, dataType='txt', path_out=params['path_out'],
 				   filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
 		# save the DE analysis results
 
 	if params['isotopicCorrection_bool']:
-		return normalizedDf, constandOutput, removedData, allMasterProteins, noCorrectionIndices  # todo find better solution than 2 returns
+		return normalizedDf, constandOutput, removedData, allMasterProteins, processedDfFullPath, noCorrectionIndices  # todo find better solution than 2 returns
 	else:
-		return normalizedDf, constandOutput, removedData, allMasterProteins  #todo add noCorrectionIndices variable that is empty
+		return normalizedDf, constandOutput, removedData, allMasterProteins, processedDfFullPath  #todo add noCorrectionIndices variable that is empty

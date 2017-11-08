@@ -31,6 +31,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	PCAResult = analysisResults[2]
 	HCResult = analysisResults[3]
 	metadata = analysisResults[5]
+	processedDfFullPaths = analysisResults[6]
 	
 	otherConditions = getOtherConditions(params['schema'], params['referenceCondition'])
 
@@ -65,6 +66,8 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		return this_sortedProteinExpressionsDFs, this_topDifferentialsDFs, this_volcanoPlots, this_set
 	
 	allDEResultsFullPaths = []  # paths to later pass on for mail attachments
+	# include non-redundant peptide information ( = processed PSM file)
+	allDEResultsFullPaths.extend(processedDfFullPaths)
 	# do MINIMAL expression
 	if params['minExpression_bool']:
 		minSortedProteinExpressionsDFs, minTopDifferentialsDFs, minVolcanoPlots, minSet = getExpressionResults(minProteinDF, params['schema'])

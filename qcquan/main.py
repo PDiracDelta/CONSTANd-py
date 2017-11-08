@@ -140,8 +140,8 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		writeToDisk = (args[5] == 'True')
 	# so if you start main.py from within web.py or something, this won't be executed
 	else:  # you didn't call main.py from the command line but from pycharm
-		doProcessing = True
-		doAnalysis = True
+		doProcessing = False
+		doAnalysis = False
 		doReport = True
 		writeToDisk = True
 		
@@ -156,8 +156,9 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '2017-10-17 10:04:40.957958_Schmidt_EColi/jobConfig_Schmidt_EColi.ini'
 		# jobConfigFilePath = '2017-10-18 11:21:16.709475_test_lessRequiredColumns_MAX/jobConfig_test_lessRequiredColumns_MAX.ini'
 		# jobConfigFilePath = '2017-10-18 11:40:15.623240_test_lessRequiredColumns_stripallcols_Mascotonly_MAX/jobConfig_test_lessRequiredColumns_stripallcols_Mascotonly_MAX.ini'
-		jobConfigFilePath = '2017-10-18 12:58:44.290228_MAX/jobConfig_MAX.ini'
+		# jobConfigFilePath = '2017-10-18 12:58:44.290228_MAX/jobConfig_MAX.ini'
 		# jobConfigFilePath = '2017-10-18 12:37:18.416057_test_lessRequiredColumns_nochargenoPTM_MAX/jobConfig_test_lessRequiredColumns_nochargenoPTM_MAX.ini'
+		jobConfigFilePath = '2017-11-08 09:01:32.700185_MAX_peptideInfoInZip/jobConfig_MAX_peptideInfoInZip.ini'
 		
 		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	

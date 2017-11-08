@@ -344,7 +344,7 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 					fullPaths[frameName] = path_out + '/' + filename + '_' + frameName + extension
 					frame.to_csv(fullPaths[frameName], sep=delim_out, index=False)
 				return fullPaths
-		else:
+		else:  # it's just a single dataframe
 			assert isinstance(data, pd.DataFrame)
 			data.to_csv(fullPath, sep=delim_out, index=False)
 			return fullPath
