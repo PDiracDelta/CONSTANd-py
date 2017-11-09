@@ -19,7 +19,8 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	Because of technical reasons to do with image representation, the PDF is generated from a slightly different HTML
 	file than the "public" HTML file.
 	Graphs and report files are written to disk if so specified by writeToDisk.
-	:param analysisResults:	list	[minProteinDF, fullProteinDF, PCAResult, HCResult, allExperimentsIntensitiesPerCommonPeptide]
+	:param analysisResults:	list	[minProteinDF, fullProteinDF, PCAResult, HCResult,
+									allExperimentsIntensitiesPerCommonPeptide, metadata, extraOutputFilesFullPaths]
 	:param params:			dict	job (global) parameters
 	:param logFilePath:		str		path to the log file with information about each processingFlow and analysisFlow call
 	:param writeToDisk:		bool	write visualizations and reports to disk (if not: just pass the return statement)
@@ -31,7 +32,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	PCAResult = analysisResults[2]
 	HCResult = analysisResults[3]
 	metadata = analysisResults[5]
-	processedDfFullPaths = analysisResults[6]
+	extraOutputFilesFullPaths = analysisResults[6]  # processedDfFullPaths, minProteinDF_fullPath, fullProteinDF_fullPath
 	
 	otherConditions = getOtherConditions(params['schema'], params['referenceCondition'])
 
@@ -67,7 +68,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	
 	allDEResultsFullPaths = []  # paths to later pass on for mail attachments
 	# include non-redundant peptide information ( = processed PSM file)
-	allDEResultsFullPaths.extend(list(processedDfFullPaths.values()))
+	allDEResultsFullPaths.extend(extraOutputFilesFullPaths)
 	# do MINIMAL expression
 	if params['minExpression_bool']:
 		minSortedProteinExpressionsDFs, minTopDifferentialsDFs, minVolcanoPlots, minSet = getExpressionResults(minProteinDF, params['schema'])

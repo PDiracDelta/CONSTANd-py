@@ -32,6 +32,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 																		[e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
 	:return metadata:			pd.DataFrame	metadata: [noIsotopicCorrection, RTIsolationInfo, noMasterProteinAccession,
 												minSingleConditionProteins, fullSingleConditionProteins, uncommonPeptides, commonNanValues]
+	:return extraOutputFiles:	list			list of full paths of extra output files to be included in the .zip file
 	"""
 	
 	""" Preparation and metadata gathering """
@@ -117,9 +118,9 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	""" save results """
 	if writeToDisk:
 		# save the protein-level dataframes. Use .reset_index(level=0, inplace=True) to get the proteins as a column
-		exportData(minProteinDF.reset_index(level=0, inplace=False), dataType='df', path_out=params['path_out'],
+		minProteinDF_fullPath = exportData(minProteinDF.reset_index(level=0, inplace=False), dataType='df', path_out=params['path_out'],
 				   filename=params['jobName'] + '_results_minimal', delim_out=params['delim_out'])
-		exportData(fullProteinDF.reset_index(level=0, inplace=False), dataType='df', path_out=params['path_out'],
+		fullProteinDF_fullPath = exportData(fullProteinDF.reset_index(level=0, inplace=False), dataType='df', path_out=params['path_out'],
 				   filename=params['jobName'] + '_results_full', delim_out=params['delim_out'])
 		# save the intensity matrix of all COMMON peptides
 		exportData(allExperimentsIntensitiesPerCommonPeptide, dataType='df', path_out=params['path_out'],
@@ -129,5 +130,11 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		exportData(metadata, dataType='df', path_out=params['path_out'],
 				   filename=params['jobName'] + '_metadata',
 				   delim_out=params['delim_out'], inOneFile=False)
+	else:
+		minProteinDF_fullPath = None
+		fullProteinDF_fullPath = None
+	extraOutputFiles = list(processedDfFullPaths.values()) + [minProteinDF_fullPath]
+	if params['fullExpression_bool']:
+		extraOutputFiles.append(fullProteinDF_fullPath)
 
-	return minProteinDF, fullProteinDF, PCAResult, HCResult, allExperimentsIntensitiesPerCommonPeptide, metadata, processedDfFullPaths
+	return minProteinDF, fullProteinDF, PCAResult, HCResult, allExperimentsIntensitiesPerCommonPeptide, metadata, extraOutputFiles
