@@ -106,6 +106,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 		normalizedDf = setIntensities(df, intensities=normalizedIntensities, quanColumns=params['quanColumns'])
 	else:
 		# TEST do NOT perform CONSTANd
+		constandOutput = None
 		logging.warning("+++++++++++++++++++++++++++++++CONSTAND NOT PERFORMED+++++++++++++++++++++++++++++++++")
 		normalizedIntensities = [0]
 		normalizedDf = df
