@@ -450,17 +450,18 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 	approxDuration = round(time() - startTime)
 	
 	from qcquan import __version__
-	pdfhtmlreport = render_template('report.html', version=str(__version__), jobName=jobParams['jobName'],
-									otherConditions=otherConditions,
-									minVolcanoFullPathDict=minVolcanoFullPaths,
-									fullVolcanoFullPathDict=fullVolcanoFullPaths,
-									minExpression_bool=jobParams['minExpression_bool'],
-									fullExpression_bool=jobParams['fullExpression_bool'],
-									mindifferentialsdict=minTopDifferentialsHTMLDict,
-									fulldifferentialsdict=fullTopDifferentialsHTMLDict, PCAFileName=PCAPlotFullPath,
-									HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
-									duration=approxDuration, log=logContents, jobParams=jobParams,
-									allProcessingParams=allProcessingParams, pdfsrc='True')#, experiments=experiments)
+	with app.app_context():
+		pdfhtmlreport = render_template('report.html', version=str(__version__), jobName=jobParams['jobName'],
+										otherConditions=otherConditions,
+										minVolcanoFullPathDict=minVolcanoFullPaths,
+										fullVolcanoFullPathDict=fullVolcanoFullPaths,
+										minExpression_bool=jobParams['minExpression_bool'],
+										fullExpression_bool=jobParams['fullExpression_bool'],
+										mindifferentialsdict=minTopDifferentialsHTMLDict,
+										fulldifferentialsdict=fullTopDifferentialsHTMLDict, PCAFileName=PCAPlotFullPath,
+										HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
+										duration=approxDuration, log=logContents, jobParams=jobParams,
+										allProcessingParams=allProcessingParams, pdfsrc='True')#, experiments=experiments)
 	# get the tails of the input paths, starting from the jobs dir, so the Jinja report template can couple it to the
 	# jobs symlink in the static dir.
 	for condition in otherConditions:
@@ -474,16 +475,18 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 			pass
 	HCDendrogramFullPath = hackImagePathToSymlinkInStaticDir(HCDendrogramFullPath)
 	PCAPlotFullPath = hackImagePathToSymlinkInStaticDir(PCAPlotFullPath)
-	htmlReport = render_template('report.html', version=str(__version__), jobName=jobParams['jobName'], otherConditions=otherConditions,
-								 minVolcanoFullPathDict=minVolcanoFullPaths,
-								 fullVolcanoFullPathDict=fullVolcanoFullPaths,
-								 minExpression_bool=jobParams['minExpression_bool'],
-								 fullExpression_bool=jobParams['fullExpression_bool'],
-								 mindifferentialsdict=minTopDifferentialsHTMLDict,
-								 fulldifferentialsdict=fullTopDifferentialsHTMLDict, PCAFileName=PCAPlotFullPath,
-								 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
-								 duration=approxDuration, log=logContents, jobParams=jobParams,
-								 allProcessingParams=allProcessingParams)#, experiments=experiments)
+	with app.app_context():
+		htmlReport = render_template('report.html', version=str(__version__), jobName=jobParams['jobName'],
+									 otherConditions=otherConditions,
+									 minVolcanoFullPathDict=minVolcanoFullPaths,
+									 fullVolcanoFullPathDict=fullVolcanoFullPaths,
+									 minExpression_bool=jobParams['minExpression_bool'],
+									 fullExpression_bool=jobParams['fullExpression_bool'],
+									 mindifferentialsdict=minTopDifferentialsHTMLDict,
+									 fulldifferentialsdict=fullTopDifferentialsHTMLDict, PCAFileName=PCAPlotFullPath,
+									 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
+									 duration=approxDuration, log=logContents, jobParams=jobParams,
+									 allProcessingParams=allProcessingParams)#, experiments=experiments)
 	return htmlReport, pdfhtmlreport
 
 
