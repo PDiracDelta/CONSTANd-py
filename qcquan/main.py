@@ -125,6 +125,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 
 
 if __name__ == '__main__':  # this should not execute if main.py is not the main module called by the python interpreter,
+	# so if you start main.py from within web.py or something, this won't be executed
 	from qcquan_web.web import DB_setJobCompleted, DB_setJobFailed
 	from qcquan_web import app
 	from traceback import print_exc
@@ -138,7 +139,6 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		doAnalysis = (args[3] == 'True')
 		doReport = (args[4] == 'True')
 		writeToDisk = (args[5] == 'True')
-	# so if you start main.py from within web.py or something, this won't be executed
 	else:  # you didn't call main.py from the command line but from pycharm
 		doProcessing = False
 		doAnalysis = True
@@ -154,7 +154,8 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '2017-09-21 09:53:22.528726_test_zipfileinjobifopage/jobConfig_test_zipfileinjobifopage.ini'
 		# jobConfigFilePath = '2017-10-03 13:48:11.434715_test_after_qcquan_rename/jobConfig_test_after_qcquan_rename.ini'
 		# jobConfigFilePath = '2017-10-17 10:04:40.957958_Schmidt_EColi/jobConfig_Schmidt_EColi.ini'
-		jobConfigFilePath = '2017-11-09 14:25:37.510140_fullzip_MAX/jobConfig_fullzip_MAX.ini'
+		# jobConfigFilePath = '2017-11-09 14:25:37.510140_fullzip_MAX/jobConfig_fullzip_MAX.ini'
+		jobConfigFilePath = '2017-09-21 14:01:04.901275_Gatto_PSMs/jobConfig_Gatto_PSMs.ini'
 		
 		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	
