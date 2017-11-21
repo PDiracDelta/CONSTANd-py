@@ -27,7 +27,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
 	start = time()
 	jobParams = getJobConfig(jobConfigFilePath)  # config filenames + params for the combination of experiments
-	processingParams = {}  # specific params for each experiment
+	allProcessingParams = {}  # specific params for each experiment
 	dfs = {}
 	processingResults = {}
 	experimentNames = jobParams['schema']['allExperiments']
@@ -35,14 +35,14 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 	for eName in experimentNames:
 		""" Data processing """
 		# get all input parameters
-		processingParams[eName] = getProcessingConfig(jobParams['schema'][eName]['config'])
+		allProcessingParams[eName] = getProcessingConfig(jobParams['schema'][eName]['config'])
 		# get the dataframes
 		# todo move this step to processingFlow --> NO because everything inside the Flow.py files should reside in memory, not on disk.
-		dfs[eName] = importExperimentData(processingParams[eName]['data'],
-										  delim=processingParams[eName]['delim_in'],
-										  header=processingParams[eName]['header_in'],
-										  wrapper=processingParams[eName]['wrapper'])
-		processing_path_out = processingParams[eName]['path_out']
+		dfs[eName] = importExperimentData(allProcessingParams[eName]['data'],
+										  delim=allProcessingParams[eName]['delim_in'],
+										  header=allProcessingParams[eName]['header_in'],
+										  wrapper=allProcessingParams[eName]['wrapper'])
+		processing_path_out = allProcessingParams[eName]['path_out']
 		processingResultsDumpFilename = os.path.join(processing_path_out, 'processingResultsDump_' + str(eName))
 		if doProcessing:
 			print('Starting processing of ' + eName + '...')
@@ -58,7 +58,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 			logging.info(
 				"Starting processing of experiment '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.utcnow()).split('.')[0])
-			processingResults[eName] = processDf(dfs[eName], processingParams[eName], writeToDisk)
+			processingResults[eName] = processDf(dfs[eName], allProcessingParams[eName], writeToDisk)
 			logging.info(
 				"Finished processing of experiment '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.utcnow()).split('.')[0])
@@ -113,7 +113,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 		# visualize and make a report
 		logging.info("Starting visualization end report generation of job: " + jobParams['jobName'] + "at " +
 					 str(datetime.datetime.utcnow()).split('.')[0])
-		generateReport(analysisResults, jobParams, logFilePath, writeToDisk, processingParams, start)
+		generateReport(analysisResults, jobParams, logFilePath, writeToDisk, allProcessingParams, start)
 		DB_setJobReportRelPaths(jobID=jobDirName, resultpath=jobParams['path_results'],
 								jobName=jobParams['jobName'])
 		logging.info("Finished visualization end report generation of job: " + jobParams['jobName'] + "at " +
