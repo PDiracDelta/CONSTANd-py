@@ -140,7 +140,7 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		doReport = (args[4] == 'True')
 		writeToDisk = (args[5] == 'True')
 	else:  # you didn't call main.py from the command line but from pycharm
-		doProcessing = True
+		doProcessing = False
 		doAnalysis = True
 		doReport = True
 		writeToDisk = True
@@ -156,7 +156,8 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '2017-10-17 10:04:40.957958_Schmidt_EColi/jobConfig_Schmidt_EColi.ini'
 		# jobConfigFilePath = '2017-11-09 14:25:37.510140_fullzip_MAX/jobConfig_fullzip_MAX.ini'
 		# jobConfigFilePath = '2017-09-21 14:01:04.901275_Gatto_PSMs/jobConfig_Gatto_PSMs.ini'
-		jobConfigFilePath = '2017-10-10 13:52:21.393429_Gatto_R_incl_NA_PSM/jobConfig_Gatto_R_incl_NA_PSM.ini'
+		# jobConfigFilePath = '2017-10-10 13:52:21.393429_Gatto_R_incl_NA_PSM/jobConfig_Gatto_R_incl_NA_PSM.ini'
+		jobConfigFilePath = '2017-11-22 10:13:00.911475_Schmidt_HeLa-RPE/jobConfig_Schmidt_HeLa-RPE.ini'
 		
 		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	
