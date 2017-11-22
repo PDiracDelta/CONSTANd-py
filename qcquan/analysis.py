@@ -129,9 +129,10 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 			allMods.remove('N-Term(TMT6plex)') if 'N-Term(TMT6plex)' in allMods else None
 			# remove redundancy due to modification location (select info between brackets())
 			uniqueModsBetweenBrackets = set([x.partition('(')[-1].partition(')')[0] for x in allMods])
+			return list(uniqueModsBetweenBrackets)
 		except:
 			logging.warning("Could not remove redundancy due to modification location (only works properly for Proteome Discoverer modification format).")
-		return list(uniqueModsBetweenBrackets)
+			return list(allMods)
 	
 	if 'Protein Descriptions' not in df.columns.values:  # in case there was no Descriptions column in the input
 		df['Protein Descriptions'] = pd.Series()
@@ -147,6 +148,7 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 	
 	for protein, peptideIndices in proteinPeptidesDict.items():
 		# construct the new protein entry, with empty quan lists for now, and add it to the proteinDF
+		# this line consumes virtually all of the computing time
 		proteinEntry = [df.loc[peptideIndices, 'Sequence'].tolist(),
 						df.loc[peptideIndices, 'Protein Descriptions'][0],
 						uniqueMods(df.loc[peptideIndices, 'Modifications']),]
