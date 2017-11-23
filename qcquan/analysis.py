@@ -148,10 +148,12 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 	
 	for protein, peptideIndices in proteinPeptidesDict.items():
 		# construct the new protein entry, with empty quan lists for now, and add it to the proteinDF
-		# this line consumes virtually all of the computing time
-		proteinEntry = [df.loc[peptideIndices, 'Sequence'].tolist(),
-						df.loc[peptideIndices, 'Protein Descriptions'][0],
-						uniqueMods(df.loc[peptideIndices, 'Modifications']),]
+		# the .loc lines consume virtually all of the computing time. But I increased performance by a factor ~20 by
+		# splitting the selection and manipulation operations
+		proteinData = df.loc[peptideIndices, ['Sequence', 'Protein Descriptions', 'Modifications']]
+		proteinEntry = [proteinData['Sequence'].tolist(),
+						proteinData['Protein Descriptions'][0],
+						uniqueMods(proteinData['Modifications']), ]
 		numFilledProteinEntries = len(proteinEntry)  # for easy adding later on
 		proteinEntry.extend([None, ]*len(allConditions))
 		
