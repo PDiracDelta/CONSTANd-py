@@ -168,11 +168,17 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 		for eName in peptideIndices.levels[0]:  # peptideIndices.levels[0] is the experimentName part of the index.
 			# get the indices of the current experiment
 			peptideIndicesPerExperiment = peptideIndices.values[peptideIndices.get_level_values(0) == eName]
+			# retrieve all quan values for these peptides
+			allPeptidesQuanValues = df.loc[peptideIndicesPerExperiment, schema[eName]['allExperimentChannelAliases']]
 			# for each condition in the experiment, append all its channels to the quanPerCondition Series.
 			for condition in schema[eName]['allExperimentConditions']:
+				conditionQuanValues = pd.Series()
 				for channel in schema[eName][condition]['channelAliases']:
 					# todo this step makes the whole thing slow (about 85% of all analysis time)
-					proteinQuanPerCondition[condition] = proteinQuanPerCondition[condition].append(df.loc[peptideIndicesPerExperiment, channel])
+					# variable assignment because a pd.Series is returned after the append operation
+					conditionQuanValues = conditionQuanValues.append(allPeptidesQuanValues[channel])
+				proteinQuanPerCondition[condition] = conditionQuanValues.copy()
+				# proteinQuanPerCondition[condition] = proteinQuanPerCondition[condition].append(conditionQuanValues)
 		
 		# add quan lists to protein entry and then add proteinEntry to dataframe (faster than accessing dataframe twice)
 		proteinEntry[numFilledProteinEntries] = list(proteinQuanPerCondition[referenceCondition])  # list so it shows nicely in exported csv
