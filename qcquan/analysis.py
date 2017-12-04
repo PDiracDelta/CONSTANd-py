@@ -104,7 +104,7 @@ def getProteinPeptidesDicts(df, fullExpression_bool):
 		fullProteinPeptidesDict = None
 	return minProteinPeptidesDict, fullProteinPeptidesDict, df.loc[noMasterProteinAccession, ['First Scan', 'Sequence']]
 
-
+# @profile
 def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherConditions):
 	"""
 	Transform the data index from the peptide to the protein level by using the associations in proteinPeptidesDict, and
@@ -167,6 +167,7 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 			# for each condition in the experiment, append all its channels to the quanPerCondition Series.
 			for condition in schema[eName]['allExperimentConditions']:
 				for channel in schema[eName][condition]['channelAliases']:
+					# todo this step makes the whole thing slow (about 85% of all analysis time)
 					proteinQuanPerCondition[condition] = proteinQuanPerCondition[condition].append(df.loc[peptideIndicesPerExperiment, channel])
 		
 		# add quan lists to protein entry and then add proteinEntry to dataframe (faster than accessing dataframe twice)
