@@ -48,13 +48,13 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	# remove all non-master protein accessions (entire column) and descriptions (selective).
 	df = setMasterProteinDescriptions(df)
 	
-	if params['undoublePSMAlgo_bool'] and params['identifyingNodes']['master'][0] != 'unspecified' and 'Identifying Node Type' in df.columns:
+	if params['undoublePSMAlgo_bool'] and params['identifyingNodes']['scoreNames'][0] != 'unspecified' and 'Identifying Node Type' in df.columns:
 		# aggregate peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
-		df, removedData['PSMAlgo'] = undoublePSMAlgo(df, identifyingNodes=params['identifyingNodes'],
-													 exclusive=params['undoublePSMAlgo_exclusive_bool'],
-													 quanColumns=params['quanColumns'],
-													 removalColumnsToSave=params['removalColumnsToSave'])
-		# SANITY CHECK: no PSMs with the same scan number may exist after undoublePSMAlgo()
+		df, removedData['PSMAlgo'] = removeIdentifyingNodeRedundancy(df, identifyingNodes=params['identifyingNodes'],
+																	 exclusive=params['undoublePSMAlgo_exclusive_bool'],
+																	 quanColumns=params['quanColumns'],
+																	 removalColumnsToSave=params['removalColumnsToSave'])
+		# SANITY CHECK: no PSMs with the same scan number may exist after removeIdentifyingNodeRedundancy()
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
 	else:
 		logging.warning("No PSM Algorithm redundancy removal done.")

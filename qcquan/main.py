@@ -158,7 +158,10 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '2017-09-21 14:01:04.901275_Gatto_PSMs/jobConfig_Gatto_PSMs.ini'
 		# jobConfigFilePath = '2017-10-10 13:52:21.393429_Gatto_R_incl_NA_PSM/jobConfig_Gatto_R_incl_NA_PSM.ini'
 		# jobConfigFilePath = '2017-11-22 10:13:00.911475_Schmidt_HeLa-RPE/jobConfig_Schmidt_HeLa-RPE.ini'
-		jobConfigFilePath = '2017-10-18 12:58:44.290228_MAX/jobConfig_MAX.ini'
+		# jobConfigFilePath = '2017-10-18 12:58:44.290228_MAX/jobConfig_MAX.ini'
+		# jobConfigFilePath = '2017-11-23 15:32:09.090927_Schmidt_HeLa-RPE_full/jobConfig_Schmidt_HeLa-RPE_full.ini'
+		# jobConfigFilePath = '2017-12-05 12:06:06.865343_MAX_testLoopOrderChange/jobConfig_MAX_testLoopOrderChange.ini'
+		jobConfigFilePath = '2017-12-05 16:06:02.211023_MAX_testPSMAlgoPriority/jobConfig_MAX_testPSMAlgoPriority.ini'
 		
 		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	

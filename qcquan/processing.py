@@ -18,7 +18,7 @@ Excludes (see aggregate.py):
 Removed data is always saved into a removedData dataFrame.
 """
 
-from qcquan.tools import getIntensities
+from qcquan.tools import getIntensities, unnest
 import numpy as np
 import logging
 from pandas import DataFrame, Series
@@ -59,14 +59,13 @@ def removeMissing(df, noMissingValuesColumns, quanColumns, identifyingNodes):
 	:return df:						pd.dataFrame    data without missing values
 	"""
 	toDelete = []
-	scoreColumns = [identifyingNodes['master'][1]] + [x[1] for x in identifyingNodes['slaves']]
 	for column in noMissingValuesColumns:
 		try:
 			# delete all PSMs that have a missing value in this column
 			toDelete.extend(df.loc[df.loc[:, column].isnull(), :].index)
-			if scoreColumns[0] != 'unspecified':  # if no PSMAlgo specified, there are no score columns.
+			if identifyingNodes['scoreNames'][0] != 'unspecified':  # if no PSMAlgo specified, there are no score columns.
 				# delete all PSMs that have a missing value in all PSMAlgo score columns
-				toDelete.extend([x[0] for x in df[scoreColumns].isnull().iterrows() if x[1].all()])  # x[0] is the index
+				toDelete.extend([x[0] for x in df[identifyingNodes['scoreNames']].isnull().iterrows() if x[1].all()])  # x[0] is the index
 		except KeyError as e:
 			logging.warning("Column '" + str(e.args[0]) + "' was not found. Not removing its missing values.")
 	# get the indices of all PSMs which have no quan values at all (those have their nansum equal to zero)
@@ -166,12 +165,12 @@ def setMasterProteinDescriptions(df):
 	return df
 
 
-def undoublePSMAlgo(df, identifyingNodes, exclusive, quanColumns, removalColumnsToSave):
+def removeIdentifyingNodeRedundancy(df, identifyingNodes, exclusive, quanColumns, removalColumnsToSave):
 	"""
-	Removes redundant data due to different PSM algorithms producing the same peptide match. The 'master' algorithm
-	values are preferred over the 'slave' algorithm values, the latter whom are removed and have their basic information
-	saved in removedData. If exclusive=True, this function only keeps master data and never slave data.
-	If no slave algorithm was specified, the algorithm proceeds as if exclusive==True.
+	Removes redundant data due to different PSM algorithms producing the same peptide match. The high priority entries
+	(high index = low priority) are preferred over the lower ones (slaves). Redundant entries are removed and have some
+	information saved in removedData. If exclusive=True, this function only keeps master (=highest priority algorithm)
+	data and never slave data. If no slave algorithms were specified, the algorithm proceeds as if exclusive==True.
 	:param df:              	pd.dataFrame    data with double First Scan numbers due to PSMAlgo redundancy
 	:param identifyingNodes:		dict            master-slave PSM algorithm specifier
 	:param exclusive:       		bool            save master data exclusively or include slave data where necessary?
@@ -180,26 +179,37 @@ def undoublePSMAlgo(df, identifyingNodes, exclusive, quanColumns, removalColumns
 	:return df:             		pd.dataFrame    data without double First Scan numbers due to PSMAlgo redundancy
 	:return removedData:    		pd.dataFrame    basic info about the removed entries
 	"""
-	masterName = identifyingNodes['master'][0]
+	columnsToSave = removalColumnsToSave + quanColumns
+	columnsToSave.extend(identifyingNodes['scoreNames'])
+	
+	# naively assume that ONLY master data should be kept
+	masterName = identifyingNodes['engineNames'][0]
 	byIdentifyingNodeDict = df.groupby('Identifying Node Type').groups  # {Identifying Node Type : [list of indices]}
+	byFirstScanDict = df.groupby('First Scan').groups
 	masterIndices = set(byIdentifyingNodeDict[masterName])
 	toDelete = set(df.index.values).difference(masterIndices)  # all indices of PSMs not done by MASTER
-	columnsToSave = removalColumnsToSave + quanColumns
-	# check whether some slave data should be kept.
-	if len(identifyingNodes['slaves']) != 0 and not exclusive:  # a SLAVE was specified: save its information in
-		# removedData. ALso, KEEP UNIQUE SLAVE scans by removing them from the toDelete list
-		byFirstScanDict = df.groupby('First Scan').groups
-		singles = set(map(lambda e: e[0], filter(lambda e: len(e) == 1,
-												 byFirstScanDict.values())))  # indices of PSMs done by only 1 PSMAlgo
-		singlesNotByMasterIndices = singles.difference(masterIndices)
-		toDelete = toDelete.difference(singlesNotByMasterIndices)  # keep only indices not discovered by SLAVE
-		slaveScoreName = identifyingNodes['slaves'][0][1]
-		columnsToSave.append(slaveScoreName)
+	
+	# non-naively check whether some slave data should also be kept.
+	if len(identifyingNodes['scoreNames']) > 1 and not exclusive:  # multiple engines specified: save their information
+		# in removedData or KEEP the highest priority engine data from PSMs.
+		eligibleEngineIndices = masterIndices
+		for engineName in identifyingNodes['engineNames'][1:]:
+			# get First Scan numbers of newly obsolete PSMs
+			firstScansAlreadyKept = set(df.loc[eligibleEngineIndices, 'First Scan'])
+			# remove the PSMs that were made obsolete
+			for fs in firstScansAlreadyKept:
+				del byFirstScanDict[fs]
+			# generate set of indices that CAN still be kept (so not the ones who have just been made obsolete)
+			toBeCheckedIndices = set(unnest(list(x) for x in byFirstScanDict.values()))
+			engineIndices = set(byIdentifyingNodeDict[engineName])
+			# select only those that are still able to be kept
+			eligibleEngineIndices = toBeCheckedIndices.intersection(engineIndices)
+			toDelete = toDelete.difference(eligibleEngineIndices)
 	try:
 		removedData = df.loc[toDelete, columnsToSave]
 	except KeyError as e:
 		removedData = DataFrame()
-		logging.warning("Could not save removedData in undoublePSMAlgo step because a data column is missing: " + str(e.args[0]))
+		logging.warning("Could not save removedData in removeIdentifyingNodeRedundancy step because a data column is missing: " + str(e.args[0]))
 	df.drop(toDelete, inplace=True)  # drop all or some non-master data.
 	return df, removedData
 

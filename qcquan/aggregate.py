@@ -126,7 +126,7 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 		this_duplicateLists = []  # [list of [list of duplicate indices] for each duplicate]
 		# list of properties
 		properties = []
-		if not undoublePSMAlgo_bool and 'Identifying Node Type' in df.columns:  # only if you didn't undoublePSMAlgo but
+		if not undoublePSMAlgo_bool and 'Identifying Node Type' in df.columns:  # only if you didn't removeIdentifyingNodeRedundancy but
 			# the 'Identifying Node Type' information is available.
 			## SELECT IDENTICAL PSMALGO (i.e. different First Scan) ##
 			try:
@@ -200,28 +200,37 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 		"""
 		isNanWarnedYet = False
 		this_bestIndicesDict = {}
-		masterScoreName = identifyingNodes['master'][1]
-		if len(identifyingNodes['slaves']) > 0:  # if there is at least one PSMAlgo Slave
-			slaveScoreName = identifyingNodes['slaves'][0][1]
-		else:  # if there are no PSMAlgo Slaves
-			slaveScoreName = None
-
-		for this_duplicatesList in this_duplicateLists:
-			if masterScoreName != 'unspecified':  # only if there actually IS a score column
+		masterScoreName = identifyingNodes['scoreNames'][0]
+		
+		if masterScoreName != 'unspecified':  # only if there actually IS a score column
+			for this_duplicatesList in this_duplicateLists:
 				bestIndex = df.loc[this_duplicatesList, masterScoreName].idxmax(axis=0, skipna=True)
-			else:  # if there is no PSM Algo information provided
-				bestIndex = np.nan
-			if np.isnan(bestIndex) and slaveScoreName is not None:  # no MASTER scores found --> take best SLAVE (if it exists)
-				bestIndex = df.loc[this_duplicatesList, slaveScoreName].idxmax(axis=0, skipna=True)
-			if np.isnan(bestIndex):  # no score values found --> pick most intense one
-				bestIndex = getIntenseIndicesDict({bestIndex: this_duplicatesList})[bestIndex]  # assign most intense
+				slaveScoreNames = identifyingNodes['scoreNames'][1:]
+				i = 0
+				while np.isnan(bestIndex) and i < len(slaveScoreNames) is not None:
+					# no valid score found yet --> take next SLAVE if it exists
+					bestIndex = df.loc[this_duplicatesList, slaveScoreNames[i]].idxmax(axis=0, skipna=True)
+					i += 1
+				if np.isnan(bestIndex):  # no score values found --> pick most intense one JUST FOR THIS LIST
+					bestIndex = getIntenseIndicesDict({bestIndex: this_duplicatesList})[bestIndex]  # assign most intense
+					if not isNanWarnedYet:
+						logging.warning("Aggregation: no best PSM score found for some lists of duplicates; most intense PSM"
+										"chosen instead. First Scan numbers of first list encountered: "
+										+str(df.loc[this_duplicatesList, 'First Scan']))
+						isNanWarnedYet = True
+					
+				this_bestIndicesDict[bestIndex] = this_duplicatesList
+			
+		else:  # no score columns exist --> ALWAYS pick most intense ones
+			for this_duplicatesList in this_duplicateLists:
+				bestIndex = getIntenseIndicesDict({'-1': this_duplicatesList})['-1']  # assign most intense
 				if not isNanWarnedYet:
 					logging.warning("Aggregation: no best PSM score found for some lists of duplicates; most intense PSM"
 									"chosen instead. First Scan numbers of first list encountered: "
 									+str(df.loc[this_duplicatesList, 'First Scan']))
 					isNanWarnedYet = True
 				
-			this_bestIndicesDict[bestIndex] = this_duplicatesList
+				this_bestIndicesDict[bestIndex] = this_duplicatesList
 
 		return this_bestIndicesDict
 
@@ -293,7 +302,7 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 	# get a nested list of duplicates according to toAggregate. [[duplicates1], [duplicates2], ...]
 	duplicateLists = getDuplicates()
 	
-	if method == 'bestMatch' and identifyingNodes['master'][1] == 'unspecified':  # no PSM scores available: change to mostIntense
+	if method == 'bestMatch' and identifyingNodes['scoreNames'][0] == 'unspecified':  # no PSM scores available: change to mostIntense
 		method = 'mostIntense'
 		logging.warning("No PSM Algorithm information is available. Overriding aggregate_method to use mostIntense method.")
 	# get the new intensities per first occurrence index (df index)
