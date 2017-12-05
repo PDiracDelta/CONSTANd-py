@@ -52,13 +52,16 @@ def getNoIsotopicCorrection(df, noCorrectionIndices):
 		return pd.DataFrame()
 
 
-def combineExperimentDFs(dfs):  # todo how are PSMs combined with multiple charge states for instance?
+def combineExperimentDFs(dfs):
 	"""
 	Merge dataframes of all experiments into one multi-indexed (eName, oldIndex) dataframe, by performing an outer join.
 	The intensity columns are non-identical across different dataframes and resulting empty fields are valued NaN.
 	:param dfs:     [pd.DataFrame]	dataframes from multiple experiments
 	:return: 		pd.DataFrame	dataframe containing an outer join of the input list of dataframes
 	"""
+	# how are PSMs combined with multiple charge states for instance?
+	# since we are using keys= there will be NO merging of entries, because each peptide will have its own unique index
+	# index = (eName, oldIndex)
 	return pd.concat(dfs.values(), keys=dfs.keys(), join='outer')
 
 
@@ -76,6 +79,7 @@ def getProteinPeptidesDicts(df, fullExpression_bool):
 	# create this column if it doesn't exist. It gets removed afterwards anyway.
 	if "# Protein Groups" not in df.columns.values:
 		df["# Protein Groups"] = df.apply(lambda x: len(str(x['Master Protein Accessions']).split(';')), axis=1)
+	# its OK that # Protein Groups is inferred only from info within the same experiment. This is how it should be.
 	numProteinGroupsDict = df.groupby("# Protein Groups").groups  # { # Protein Groups : indices }
 	# DEFAULTDICT doesn't return a KeyError when key not found, but rather None. !!! so you can safely .extend()
 	minProteinPeptidesDict = None  # proteins get contribution only from peptides which correspond uniquely to them
