@@ -174,10 +174,9 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 			for condition in schema[eName]['allExperimentConditions']:
 				conditionQuanValues = pd.Series()
 				for channel in schema[eName][condition]['channelAliases']:
-					# todo this step makes the whole thing slow (about 85% of all analysis time)
 					# variable assignment because a pd.Series is returned after the append operation
 					conditionQuanValues = conditionQuanValues.append(allPeptidesQuanValues[channel])
-				proteinQuanPerCondition[condition] = conditionQuanValues.copy()
+				proteinQuanPerCondition[condition] = proteinQuanPerCondition[condition].append(conditionQuanValues)
 				# proteinQuanPerCondition[condition] = proteinQuanPerCondition[condition].append(conditionQuanValues)
 		
 		# add quan lists to protein entry and then add proteinEntry to dataframe (faster than accessing dataframe twice)
