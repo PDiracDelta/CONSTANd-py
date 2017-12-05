@@ -175,9 +175,7 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 				conditionQuanValues = pd.Series()
 				for channel in schema[eName][condition]['channelAliases']:
 					# variable assignment because a pd.Series is returned after the append operation
-					conditionQuanValues = conditionQuanValues.append(allPeptidesQuanValues[channel])
-				proteinQuanPerCondition[condition] = proteinQuanPerCondition[condition].append(conditionQuanValues)
-				# proteinQuanPerCondition[condition] = proteinQuanPerCondition[condition].append(conditionQuanValues)
+					proteinQuanPerCondition[condition] = proteinQuanPerCondition[condition].append(allPeptidesQuanValues[channel])
 		
 		# add quan lists to protein entry and then add proteinEntry to dataframe (faster than accessing dataframe twice)
 		proteinEntry[numFilledProteinEntries] = list(proteinQuanPerCondition[referenceCondition])  # list so it shows nicely in exported csv
