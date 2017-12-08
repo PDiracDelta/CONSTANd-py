@@ -56,11 +56,11 @@ def geometricMedian(X, eps=1e-5):
 		y = y1
 
 
-def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePSMAlgo_bool, columnsToSave, aggregateCharge_bool=None):  #
+def aggregate(toAggregate, df, quanColumns, method, PSMEnginePriority, removePSMEngineRedundancy_bool, columnsToSave, aggregateCharge_bool=None):  #
 	"""
 	Generic aggregate function, which removes redundancy in the data due to property toAggregate.
 	Looks for duplicate 'Sequence' values in the dataFrame and further groups by other possible properties
-	(PSMAlgo, Charge, Modifications) if necessary, while respecting the aggregate order imposed in the main() function.
+	(PSMEngine, Charge, Modifications) if necessary, while respecting the aggregate order imposed in the main() function.
 	Removes each group of duplicate from the experimental data df and replaces them by a representative entry that has
 	all properties of the entry amongst them with the best PSM score, but with quantification values determined by a
 	method specified through `method`.
@@ -77,9 +77,9 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 														mostIntsene: those of the PSM with the most intense values
 														mean: the mean of all PSMs in that duplicates group
 														geometricMedian: the geometric median of all PSMs in that duplicates group
-	:param identifyingNodes:			dict			PSM rater algorithm names and score names. Structure:
+	:param PSMEnginePriority:			dict			PSM rater algorithm names and score names. Structure:
 														{"master": [NAME, SCORE_NAME], "slaves": [[NAME, SCORE_NAME], ...]}
-	:param undoublePSMAlgo_bool:		bool			Has the PSM algo redundancy already been removed?
+	:param removePSMEngineRedundancy_bool:		bool			Has the PSM algo redundancy already been removed?
 	:param columnsToSave:				list(str)		fields of to-be-removed entries that are saved into removedData
 	:return df:                         pd.dataFrame    without sequence duplicates according to to checkTrueDuplicates.
 	:return removedData:                pd.dataFrame    [PARENT INDEX, and, fields, to, be, saved]
@@ -108,7 +108,7 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 				[3],       # indices of PSMs with (Charge3, PTM3) and unique(RT3)==True
 				[7, 9],    # indices of PSMs with (Charge7, PTM7) and unique(RT7, RT9)==True
 			]
-			This function correctly groups by PSMAlgo when required and does not when it is prohibited.
+			This function correctly groups by PSMEngine when required and does not when it is prohibited.
 			:param byPropDict:          	dict    { propertyValue : [duplicateIndices] }
 			:param remainingProperties: 	list	properties still to be grouped by
 			:return this_duplicateLists:	list    [[group of duplicates] per combination-of-properties values in the dataFrame]
@@ -126,15 +126,15 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 		this_duplicateLists = []  # [list of [list of duplicate indices] for each duplicate]
 		# list of properties
 		properties = []
-		if not undoublePSMAlgo_bool and 'Identifying Node Type' in df.columns:  # only if you didn't removeIdentifyingNodeRedundancy but
+		if not removePSMEngineRedundancy_bool and 'Identifying Node Type' in df.columns:  # only if you didn't removePSMEngineRedundancy but
 			# the 'Identifying Node Type' information is available.
-			## SELECT IDENTICAL PSMALGO (i.e. different First Scan) ##
+			## SELECT IDENTICAL PSMEngine (i.e. different First Scan) ##
 			try:
 				byFirstPropDict = df.groupby('Identifying Node Type').groups
 				properties.append('Sequence')
 			except KeyError:
-				logging.warning("Could not group by PSMAlgo in groupby(PSMAlgo) step during aggregate/aggregation because the Identifying Node Type column is missing. Skipping this step.")
-				# Skip the PSMAlgo step and select first by Sequence anyway
+				logging.warning("Could not group by PSMEngine in groupby(PSMEngine) step during aggregate/aggregation because the Identifying Node Type column is missing. Skipping this step.")
+				# Skip the PSMEngine step and select first by Sequence anyway
 				byFirstPropDict = df.groupby('Sequence').groups
 		else:
 			## SELECT IDENTICAL SEQUENCE ##
@@ -193,19 +193,19 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 	def getBestIndicesDict(this_duplicateLists):
 		"""
 		For each sublist in the nested list of duplicates duplicateLists, calculates the index of the duplicate with the
-		best PSM match according to dataFrame df. Does this intelligently by taking masterPSMAlgo into account. If no
+		best PSM match according to dataFrame df. Does this intelligently by taking masterPSMEngine into account. If no
 		best index can be found due to missing scores, the most intense score is chosen instead.
 		:param this_duplicateLists: list    [[group of duplicates] per toAggregate value in the df]
 		:return this_bestIndices:   dict    { indices of PSMs with the best PSM score per group of duplicates : [group of duplicates] }
 		"""
 		isNanWarnedYet = False
 		this_bestIndicesDict = {}
-		masterScoreName = identifyingNodes['scoreNames'][0]
+		masterScoreName = PSMEnginePriority['scoreNames'][0]
 		
 		if masterScoreName != 'unspecified':  # only if there actually IS a score column
 			for this_duplicatesList in this_duplicateLists:
 				bestIndex = df.loc[this_duplicatesList, masterScoreName].idxmax(axis=0, skipna=True)
-				slaveScoreNames = identifyingNodes['scoreNames'][1:]
+				slaveScoreNames = PSMEnginePriority['scoreNames'][1:]
 				i = 0
 				while np.isnan(bestIndex) and i < len(slaveScoreNames) is not None:
 					# no valid score found yet --> take next SLAVE if it exists
@@ -302,7 +302,7 @@ def aggregate(toAggregate, df, quanColumns, method, identifyingNodes, undoublePS
 	# get a nested list of duplicates according to toAggregate. [[duplicates1], [duplicates2], ...]
 	duplicateLists = getDuplicates()
 	
-	if method == 'bestMatch' and identifyingNodes['scoreNames'][0] == 'unspecified':  # no PSM scores available: change to mostIntense
+	if method == 'bestMatch' and PSMEnginePriority['scoreNames'][0] == 'unspecified':  # no PSM scores available: change to mostIntense
 		method = 'mostIntense'
 		logging.warning("No PSM Algorithm information is available. Overriding aggregate_method to use mostIntense method.")
 	# get the new intensities per first occurrence index (df index)

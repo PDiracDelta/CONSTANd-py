@@ -261,7 +261,7 @@ def fixFixableFormatMistakes(df):
 	columns = list(df.columns.values)
 	# First Scan is missing but RT is present
 	if 'First Scan' not in columns and 'RT [min]' in columns:
-		# make a fake First Scan column by copying the RT column (necessary for removeIdentifyingNodeRedundancy)
+		# make a fake First Scan column by copying the RT column (necessary for removePSMEngineRedundancy)
 		logging.warning("Couldn't find a 'First Scan' column; creating it by copy-pasting the contents of the 'RT [min]' column.")
 		df['First Scan'] = df['RT [min]'].copy()
 	

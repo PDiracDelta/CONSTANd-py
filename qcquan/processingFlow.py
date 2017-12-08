@@ -24,7 +24,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	:return normalizedDf:			pd.DataFrame		cleaned, normalized data on the "unique modified peptide" level
 	:return normalizedIntensities:	np.ndarray			matrix of quantification values on the "unique modified peptide" level
 	:return removedData:			{ pd.DataFrame }	removed data: [missing, confidence, isolationInterference,
-														PSMAlgo, RT, charge, modifications]
+														PSMEngine, RT, charge, modifications]
 	"""
 	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
 	
@@ -35,7 +35,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	allMasterProteins = getAllPresentProteins(df)
 	
 	# remove PSMs where (essential) data is missing.
-	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['quanColumns'], params['identifyingNodes'])
+	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['quanColumns'], params['PSMEnginePriority'])
 	
 	if params['removeBadConfidence_bool']:
 		df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'], params['removalColumnsToSave'])
@@ -48,13 +48,13 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	# remove all non-master protein accessions (entire column) and descriptions (selective).
 	df = setMasterProteinDescriptions(df)
 	
-	if params['undoublePSMAlgo_bool'] and params['identifyingNodes']['scoreNames'][0] != 'unspecified' and 'Identifying Node Type' in df.columns:
+	if params['removePSMEngineRedundancy_bool'] and params['PSMEnginePriority']['scoreNames'][0] != 'unspecified' and 'Identifying Node Type' in df.columns:
 		# aggregate peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
-		df, removedData['PSMAlgo'] = removeIdentifyingNodeRedundancy(df, identifyingNodes=params['identifyingNodes'],
-																	 exclusive=params['undoublePSMAlgo_exclusive_bool'],
-																	 quanColumns=params['quanColumns'],
-																	 removalColumnsToSave=params['removalColumnsToSave'])
-		# SANITY CHECK: no PSMs with the same scan number may exist after removeIdentifyingNodeRedundancy()
+		df, removedData['PSMEngine'] = removePSMEngineRedundancy(df, PSMEnginePriority=params['PSMEnginePriority'],
+																 exclusive=params['removePSMEngineRedundancy_exclusive_bool'],
+																 quanColumns=params['quanColumns'],
+																 removalColumnsToSave=params['removalColumnsToSave'])
+		# SANITY CHECK: no PSMs with the same scan number may exist after removePSMEngineRedundancy()
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
 	else:
 		logging.warning("No PSM Algorithm redundancy removal done.")
@@ -72,29 +72,29 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	# aggregate peptide list redundancy due to multiple PSMs at different RT.
 	# This works even if Charge and Modifications not present in columns.
 	df, removedData['RT'] = aggregate('RT', df, quanColumns=params['quanColumns'], method=params['aggregate_method'],
-									 identifyingNodes=params['identifyingNodes'],
-									 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['aggregateColumnsToSave'])
+									 PSMEnginePriority=params['PSMEnginePriority'],
+									 removePSMEngineRedundancy_bool=params['removePSMEngineRedundancy_bool'], columnsToSave=params['aggregateColumnsToSave'])
 	
 	if params['aggregateCharge_bool'] and 'Charge' in df.columns:
 		# aggregate peptide list redundancy due to different charges (optional)
 		df, removedData['charge'] = aggregate('Charge', df, quanColumns=params['quanColumns'], method=params['aggregate_method'],
-											 identifyingNodes=params['identifyingNodes'],
-											 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'], columnsToSave=params['aggregateColumnsToSave'])
+											 PSMEnginePriority=params['PSMEnginePriority'],
+											 removePSMEngineRedundancy_bool=params['removePSMEngineRedundancy_bool'], columnsToSave=params['aggregateColumnsToSave'])
 	else:
 		logging.warning("No Charge aggregation done.")
 		
 	if params['aggregatePTM_bool'] and 'Modifications' in df.columns:
 		# aggregate peptide list redundancy due to different charges (optional)
 		df, removedData['modifications'] = aggregate('PTM', df, quanColumns=params['quanColumns'], method=params['aggregate_method'],
-													 identifyingNodes=params['identifyingNodes'],
-													 undoublePSMAlgo_bool=params['undoublePSMAlgo_bool'],
+													 PSMEnginePriority=params['PSMEnginePriority'],
+													 removePSMEngineRedundancy_bool=params['removePSMEngineRedundancy_bool'],
 													 columnsToSave=params['aggregateColumnsToSave'],
 													 aggregateCharge_bool=params['aggregateCharge_bool'])
 	else:
 		logging.warning("No PTM aggregation done.")
 		
 	# SANITY CHECK: there should be no more duplicates if all aggregates have been applied.
-	if params['undoublePSMAlgo_bool'] and params['aggregateCharge_bool'] and params['aggregatePTM_bool']:  # TEST
+	if params['removePSMEngineRedundancy_bool'] and params['aggregateCharge_bool'] and params['aggregatePTM_bool']:  # TEST
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby(
 			'Sequence').groups))  # only 1 index vector in dict of SEQUENCE:[INDICES] for all sequences
 

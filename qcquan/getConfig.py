@@ -57,9 +57,9 @@ def getProcessingConfig(configFilePath):
 	removeIsolationInterference_bool = config.getboolean('DEFAULT', 'removeIsolationInterference_bool')
 	removeIsolationInterference_threshold = config.getfloat('DEFAULT', 'removeIsolationInterference_threshold')
 	aggregate_method = config.get('DEFAULT', 'aggregate_method')
-	identifyingNodes = parseExpression(config.get('DEFAULT', 'identifyingNodes'))
-	undoublePSMAlgo_bool = config.getboolean('DEFAULT', 'undoublePSMAlgo_bool')
-	undoublePSMAlgo_exclusive_bool = config.getboolean('DEFAULT', 'undoublePSMAlgo_exclusive_bool')
+	PSMEnginePriority = parseExpression(config.get('DEFAULT', 'PSMEnginePriority'))
+	removePSMEngineRedundancy_bool = config.getboolean('DEFAULT', 'removePSMEngineRedundancy_bool')
+	removePSMEngineRedundancy_exclusive_bool = config.getboolean('DEFAULT', 'removePSMEngineRedundancy_exclusive_bool')
 	aggregateCharge_bool = config.getboolean('DEFAULT', 'aggregateCharge_bool')
 	aggregatePTM_bool = config.getboolean('DEFAULT', 'aggregatePTM_bool')
 	isotopicCorrection_bool = config.getboolean('DEFAULT', 'isotopicCorrection_bool')
@@ -102,9 +102,9 @@ def getProcessingConfig(configFilePath):
 		raise Exception("Isolation Interference Threshold should be either 'None' or between 0 and 100 (percentage).")
 	if aggregate_method not in ('bestMatch', 'mostIntense', 'mean', 'geometricMedian', 'weighted'):
 		raise Exception("Invalid aggregate method: '" + aggregate_method + "'. Please pick 'max', 'mean' or 'median'.")
-	if undoublePSMAlgo_bool is None:
+	if removePSMEngineRedundancy_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PSM Algorithms.")
-	if undoublePSMAlgo_exclusive_bool is None:
+	if removePSMEngineRedundancy_exclusive_bool is None:
 		raise Exception("Please indicate whether PSM Algorithm redundancy removal should be exclusive or not.")
 	if aggregateCharge_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple charge states.")
@@ -150,9 +150,9 @@ def getProcessingConfig(configFilePath):
 		'removeBadConfidence_minimum': removeBadConfidence_minimum,
 		'removeIsolationInterference_bool': removeIsolationInterference_bool,
 		'removeIsolationInterference_threshold': removeIsolationInterference_threshold,
-		'identifyingNodes': identifyingNodes,
-		'undoublePSMAlgo_bool': undoublePSMAlgo_bool,
-		'undoublePSMAlgo_exclusive_bool': undoublePSMAlgo_exclusive_bool,
+		'PSMEnginePriority': PSMEnginePriority,
+		'removePSMEngineRedundancy_bool': removePSMEngineRedundancy_bool,
+		'removePSMEngineRedundancy_exclusive_bool': removePSMEngineRedundancy_exclusive_bool,
 		'aggregate_method': aggregate_method,
 		'aggregateCharge_bool': aggregateCharge_bool,
 		'aggregatePTM_bool': aggregatePTM_bool,
