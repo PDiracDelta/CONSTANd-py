@@ -111,12 +111,12 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 				os.makedirs(results_path_out)
 		
 		# visualize and make a report
-		logging.info("Starting visualization end report generation of job: " + jobParams['jobName'] + "at " +
+		logging.info("Starting visualization end report generation of job: " + jobParams['jobName'] + " at " +
 					 str(datetime.datetime.utcnow()).split('.')[0])
 		generateReport(analysisResults, jobParams, logFilePath, writeToDisk, allProcessingParams, start)
 		DB_setJobReportRelPaths(jobID=jobDirName, resultpath=jobParams['path_results'],
 								jobName=jobParams['jobName'])
-		logging.info("Finished visualization end report generation of job: " + jobParams['jobName'] + "at " +
+		logging.info("Finished visualization end report generation of job: " + jobParams['jobName'] + " at " +
 					 str(datetime.datetime.utcnow()).split('.')[0])
 	else:
 		logging.warning("No report generated!")
@@ -140,8 +140,8 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		doReport = (args[4] == 'True')
 		writeToDisk = (args[5] == 'True')
 	else:  # you didn't call main.py from the command line but from pycharm
-		doProcessing = True
-		doAnalysis = True
+		doProcessing = False
+		doAnalysis = False
 		doReport = True
 		writeToDisk = True
 		
@@ -161,7 +161,8 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '2017-10-18 12:58:44.290228_MAX/jobConfig_MAX.ini'
 		# jobConfigFilePath = '2017-11-23 15:32:09.090927_Schmidt_HeLa-RPE_full/jobConfig_Schmidt_HeLa-RPE_full.ini'
 		# jobConfigFilePath = '2017-12-05 12:06:06.865343_MAX_testLoopOrderChange/jobConfig_MAX_testLoopOrderChange.ini'
-		jobConfigFilePath = '2017-12-05 16:06:02.211023_MAX_testPSMEnginePriority/jobConfig_MAX_testPSMEnginePriority.ini'
+		# jobConfigFilePath = '2017-12-05 16:06:02.211023_MAX_testPSMEnginePriority/jobConfig_MAX_testPSMEnginePriority.ini'
+		jobConfigFilePath = '2017-12-20 10:38:40.961151_MAX_before_peptideMods/jobConfig_MAX_before_peptideMods.ini'
 		
 		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	
