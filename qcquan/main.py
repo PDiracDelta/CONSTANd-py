@@ -111,12 +111,12 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 				os.makedirs(results_path_out)
 		
 		# visualize and make a report
-		logging.info("Starting visualization end report generation of job: " + jobParams['jobName'] + "at " +
+		logging.info("Starting visualization end report generation of job: " + jobParams['jobName'] + " at " +
 					 str(datetime.datetime.utcnow()).split('.')[0])
 		generateReport(analysisResults, jobParams, logFilePath, writeToDisk, allProcessingParams, start)
 		DB_setJobReportRelPaths(jobID=jobDirName, resultpath=jobParams['path_results'],
 								jobName=jobParams['jobName'])
-		logging.info("Finished visualization end report generation of job: " + jobParams['jobName'] + "at " +
+		logging.info("Finished visualization end report generation of job: " + jobParams['jobName'] + " at " +
 					 str(datetime.datetime.utcnow()).split('.')[0])
 	else:
 		logging.warning("No report generated!")
