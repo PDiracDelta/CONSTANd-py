@@ -285,12 +285,12 @@ def addNumberOfRepresentingPeptides(proteinDF, referenceCondition, otherConditio
 	return proteinDF
 
 
-def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
+def getCommonPeptidesQuanValuesDF(dfs, schema):
 	"""
-	Takes a list of dataframes and selects only the sequence and intensities, then inner joins them on sequence.
-	The result is the intensity matrix as a dataframe with header with ALL experiment channels per peptide, for only the
-	COMMON peptides i.e. those peptides detected in ALL experiments. Also returns list/DataFrame of peptides that are
-	not common for all experiments.
+	Takes a list of dataframes and selects only the sequence, modifications and intensities, then inner joins them on
+	sequence and modifications.	The result is the intensity matrix as a dataframe with header with ALL experiment
+	channels per peptide, for only the COMMON modified, non-redundant peptides i.e. those peptides detected in ALL
+	experiments. Also returns list/DataFrame of peptides that are not common for all experiments.
 	:param dfs:     [ pd.DataFrame ]	data of the experiments
 	:param schema:  dict                schema of the experiments' hierarchy
 	:return:        pd.DataFrame		[e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN] for all COMMON peptides.
@@ -299,20 +299,24 @@ def getAllExperimentsIntensitiesPerCommonPeptide(dfs, schema):
 	peptidesDf = pd.DataFrame()
 	# join all dataframes together on the Sequence: you get ALL channels from ALL experiments as columns per peptide.
 	# [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
-	allPeptides = set()
+	allModifiedPeptides = set()
 	for eName in dfs.keys():
 		eChannelAliases = schema[eName]['allExperimentChannelAliases']
 		if peptidesDf.empty:
-			peptidesDf = dfs[eName].loc[:, ['Sequence'] + eChannelAliases]
+			peptidesDf = dfs[eName].loc[:, ['Sequence', 'Modifications'] + eChannelAliases]
 		else:
-			# merge makes sure that only peptides whose Sequence appears in EACH experiment get selected
-			peptidesDf = pd.merge(peptidesDf, dfs[eName].loc[:, ['Sequence'] + eChannelAliases],
-							 on='Sequence')
-		allPeptides.update(set(dfs[eName].loc[:, 'Sequence']))
-	uncommonPeptides = pd.DataFrame(list(allPeptides.difference(set(peptidesDf.loc[:, 'Sequence']))))
+			# Merge makes sure that only peptides whose Sequence appears in EACH experiment get selected
+			# If a channel in eChannelAliases does not exist in this eName, then it will return a column of NaNs (good).
+			# The same applies to the Modifications column: if there are none, there is no problem.
+			peptidesDf = pd.merge(peptidesDf, dfs[eName].loc[:, ['Sequence', 'Modifications'] + eChannelAliases],
+							 on=['Sequence', 'Modifications'])
+		peptidesAndModifications = zip(dfs[eName]['Sequence'], dfs[eName]['Modifications'])
+		allModifiedPeptides.update(set(peptidesAndModifications))
+	allCommonModifiedPeptides = set(zip(peptidesDf['Sequence'], peptidesDf['Modifications']))
+	uncommonModifiedPeptides = pd.DataFrame(list(allModifiedPeptides.difference(allCommonModifiedPeptides)))
 	if len(peptidesDf) < 2:
 		raise Exception("Only "+str(len(peptidesDf))+" peptides found that were common across all experiments. Cannot perform PCA nor HC.")
-	return peptidesDf.loc[:, allChannelAliases], uncommonPeptides
+	return peptidesDf.loc[:, allChannelAliases], uncommonModifiedPeptides
 
 
 def getPCA(intensities, nComponents=2):

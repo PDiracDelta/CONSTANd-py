@@ -28,10 +28,10 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	:return fullProteinDF:		pd.DataFrame	combined analysis data of all experiments, on the protein level
 	:return PCAResult:			np.ndarray		PC scores for the quantification channels in the common-peptide-level global dataframe
 	:return HCResult:			np.ndarray  	Nx4 linkage matrix of the quantification channels in the common-peptide-level global dataframe
-	:return allExperimentsIntensitiesPerCommonPeptide:	pd.DataFrame	for all COMMON (found in all experiments) peptides:
+	:return commonPeptidesQuanValuesDF:	pd.DataFrame	for all COMMON (found in all experiments) peptides:
 																		[e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
 	:return metadata:			pd.DataFrame	metadata: [noIsotopicCorrection, RTIsolationInfo, noMasterProteinAccession,
-												minSingleConditionProteins, fullSingleConditionProteins, uncommonPeptides, commonNanValues]
+												minSingleConditionProteins, fullSingleConditionProteins, uncommonModifiedPeptides, commonNanValues]
 	:return extraOutputFiles:	list			list of full paths of extra output files to be included in the .zip file
 	"""
 	
@@ -72,9 +72,6 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe as an outer join
 	allExperimentsDF = combineExperimentDFs(dfs)
 
-	# nConditions = len(params['schema']['allConditions'])
-	# # ONLY PRODUCE VOLCANO AND DEA IF CONDITIONS == 2
-	# if nConditions == 2:
 	# get min and max protein-peptide mappings
 	if params['fullExpression_bool']:
 		minProteinPeptidesDict, fullProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
@@ -105,15 +102,15 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	
 	""" Quality Control """
 	# dataframe with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
-	allExperimentsIntensitiesPerCommonPeptide, metadata['uncommonPeptides'] = getAllExperimentsIntensitiesPerCommonPeptide(dfs, params['schema'])
-	metadata['numeric'].loc[0, 'numUnCommonPeptides'] = len(metadata['uncommonPeptides'])
-	metadata['numeric'].loc[0, 'numCommonPeptides'] = len(allExperimentsIntensitiesPerCommonPeptide)
+	commonPeptidesQuanValuesDF, metadata['uncommonModifiedPeptides'] = getCommonPeptidesQuanValuesDF(dfs, params['schema'])
+	metadata['numeric'].loc[0, 'numUnCommonModifiedPeptides'] = len(metadata['uncommonModifiedPeptides'])
+	metadata['numeric'].loc[0, 'numCommonModifiedPeptides'] = len(commonPeptidesQuanValuesDF)
 	# save the amount of NaN values per channel for common peptides.
-	metadata['commonNanValues'] = pd.DataFrame(np.sum(np.isnan(allExperimentsIntensitiesPerCommonPeptide), axis=0))
+	metadata['commonNanValues'] = pd.DataFrame(np.sum(np.isnan(commonPeptidesQuanValuesDF), axis=0))
 	# perform PCA
-	PCAResult = getPCA(allExperimentsIntensitiesPerCommonPeptide, params['PCA_components'])
+	PCAResult = getPCA(commonPeptidesQuanValuesDF, params['PCA_components'])
 	# perform hierarchical clustering
-	HCResult = getHC(allExperimentsIntensitiesPerCommonPeptide)
+	HCResult = getHC(commonPeptidesQuanValuesDF)
 
 	""" save results """
 	if writeToDisk:
@@ -123,7 +120,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 		fullProteinDF_fullPath = exportData(fullProteinDF.reset_index(level=0, inplace=False), dataType='df', path_out=params['path_out'],
 				   filename=params['jobName'] + '_results_full', delim_out=params['delim_out'])
 		# save the intensity matrix of all COMMON peptides
-		exportData(allExperimentsIntensitiesPerCommonPeptide, dataType='df', path_out=params['path_out'],
+		exportData(commonPeptidesQuanValuesDF, dataType='df', path_out=params['path_out'],
 				   filename=params['jobName'] + '_CommonPeptideIntensities',
 				   delim_out=params['delim_out'], inOneFile=False)
 		# save the metadata
@@ -137,4 +134,4 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	if params['fullExpression_bool']:
 		extraOutputFiles.append(fullProteinDF_fullPath)
 
-	return minProteinDF, fullProteinDF, PCAResult, HCResult, allExperimentsIntensitiesPerCommonPeptide, metadata, extraOutputFiles
+	return minProteinDF, fullProteinDF, PCAResult, HCResult, commonPeptidesQuanValuesDF, metadata, extraOutputFiles
