@@ -128,8 +128,9 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 		""" Selects only the unique, non-TMT modifications. """
 		# make set of all occurring modifications
 		allMods = set(unnest(dfModSeries.values))
-		# this N-terminal one is ALWAYS present -> redundant information
-		allMods.remove('TMT6plex') if 'TMT6plex' in allMods else None
+		# The TMT6plex ones are now removed in processing
+		# # this N-terminal one is ALWAYS present -> redundant information
+		# allMods.remove('TMT6plex') if 'TMT6plex' in allMods else None
 		return list(allMods)
 	
 	if 'Protein Descriptions' not in df.columns.values:  # in case there was no Descriptions column in the input

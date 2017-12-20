@@ -226,6 +226,8 @@ def cleanModificationsInfo(df):
 		try:
 			# select only modification IDENTITY (remove redundancy due to location info) (select info between brackets())
 			df['Modifications'] = df['Modifications'].apply(lambda modsList: [x.partition('(')[-1].partition(')')[0] for x in modsList])
+			# remove all 'TMT6plex' modifications
+			df['Modifications'] = df['Modifications'].apply(lambda x: list(filter(lambda y: y != 'TMT6plex', x)))
 		except:
 			logging.warning("Could not remove modification redundancy due to location (only works properly for Proteome Discoverer modification format).")
 		# sort alphabetically (so modification order is always the same!)
