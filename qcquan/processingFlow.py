@@ -82,6 +82,10 @@ def processDf(df, params, writeToDisk, doConstand=True):
 											 removePSMEngineRedundancy_bool=params['removePSMEngineRedundancy_bool'], columnsToSave=params['aggregateColumnsToSave'])
 	else:
 		logging.warning("No Charge aggregation done.")
+	
+	# Turn Modifications info into a list (NOT set, redundancy still possible!) and only keep modification identity info,
+	# not location or other things.
+	df = cleanModificationsInfo(df)
 		
 	if params['aggregatePTM_bool'] and 'Modifications' in df.columns:
 		# aggregate peptide list redundancy due to different charges (optional)
