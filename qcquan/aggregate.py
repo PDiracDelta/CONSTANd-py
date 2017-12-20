@@ -299,8 +299,12 @@ def aggregate(toAggregate, df, quanColumns, method, PSMEnginePriority, removePSM
 		# contains the number of peptides that have been aggregated onto each (synthetic) PSM.
 		df.loc[:, 'Degeneracy'] = [1, ] * len(df.index)
 
+	# convert back to string to do groupby # todo this is fucking stupid
+	df['Modifications'] = df['Modifications'].apply(';'.join)
 	# get a nested list of duplicates according to toAggregate. [[duplicates1], [duplicates2], ...]
 	duplicateLists = getDuplicates()
+	# convert back to list
+	df['Modifications'] = df['Modifications'].apply(lambda x: x.split(';') if x != '' else [])
 	
 	if method == 'bestMatch' and PSMEnginePriority['scoreNames'][0] == 'unspecified':  # no PSM scores available: change to mostIntense
 		method = 'mostIntense'

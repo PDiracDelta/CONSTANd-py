@@ -48,6 +48,10 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	# remove all non-master protein accessions (entire column) and descriptions (selective).
 	df = setMasterProteinDescriptions(df)
 	
+	# Turn Modifications info into a list (NOT set, redundancy still possible!) and only keep modification identity info,
+	# not location or other things.
+	df = cleanModificationsInfo(df)
+	
 	if params['removePSMEngineRedundancy_bool'] and params['PSMEnginePriority']['scoreNames'][0] != 'unspecified' and 'Identifying Node Type' in df.columns:
 		# aggregate peptide list redundancy due to overlap in MASCOT/SEQUEST peptide matches
 		df, removedData['PSMEngine'] = removePSMEngineRedundancy(df, PSMEnginePriority=params['PSMEnginePriority'],
@@ -82,10 +86,6 @@ def processDf(df, params, writeToDisk, doConstand=True):
 											 removePSMEngineRedundancy_bool=params['removePSMEngineRedundancy_bool'], columnsToSave=params['aggregateColumnsToSave'])
 	else:
 		logging.warning("No Charge aggregation done.")
-	
-	# Turn Modifications info into a list (NOT set, redundancy still possible!) and only keep modification identity info,
-	# not location or other things.
-	df = cleanModificationsInfo(df)
 		
 	if params['aggregatePTM_bool'] and 'Modifications' in df.columns:
 		# aggregate peptide list redundancy due to different charges (optional)
