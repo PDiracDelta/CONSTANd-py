@@ -125,18 +125,12 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 															referenceCondition, condition 1, condition 2, ...]
 	"""
 	def uniqueMods(dfModSeries):
-		""" Transforms the Modifications column from the DF into a list of unique non-TMT modifications. """
+		""" Selects only the unique, non-TMT modifications. """
 		# make set of all occurring modifications
-		allMods = set(y.strip() for y in unnest([x.split(';') for x in dfModSeries.astype(str)]))
-		try:
-			# this N-terminal one is ALWAYS present -> redundant information
-			allMods.remove('N-Term(TMT6plex)') if 'N-Term(TMT6plex)' in allMods else None
-			# remove redundancy due to modification location (select info between brackets())
-			uniqueModsBetweenBrackets = set([x.partition('(')[-1].partition(')')[0] for x in allMods])
-			return list(uniqueModsBetweenBrackets)
-		except:
-			logging.warning("Could not remove redundancy due to modification location (only works properly for Proteome Discoverer modification format).")
-			return list(allMods)
+		allMods = set(unnest(dfModSeries.values))
+		# this N-terminal one is ALWAYS present -> redundant information
+		allMods.remove('TMT6plex') if 'TMT6plex' in allMods else None
+		return list(allMods)
 	
 	if 'Protein Descriptions' not in df.columns.values:  # in case there was no Descriptions column in the input
 		df['Protein Descriptions'] = pd.Series()
@@ -302,6 +296,8 @@ def getCommonPeptidesQuanValuesDF(dfs, schema):
 	allModifiedPeptides = set()
 	for eName in dfs.keys():
 		eChannelAliases = schema[eName]['allExperimentChannelAliases']
+		# convert modifications list to strings because they need to be hashable
+		dfs[eName]['Modifications'] = dfs[eName]['Modifications'].apply(';'.join)
 		if peptidesDf.empty:
 			peptidesDf = dfs[eName].loc[:, ['Sequence', 'Modifications'] + eChannelAliases]
 		else:

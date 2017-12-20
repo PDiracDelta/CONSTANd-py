@@ -162,7 +162,8 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '2017-11-23 15:32:09.090927_Schmidt_HeLa-RPE_full/jobConfig_Schmidt_HeLa-RPE_full.ini'
 		# jobConfigFilePath = '2017-12-05 12:06:06.865343_MAX_testLoopOrderChange/jobConfig_MAX_testLoopOrderChange.ini'
 		# jobConfigFilePath = '2017-12-05 16:06:02.211023_MAX_testPSMEnginePriority/jobConfig_MAX_testPSMEnginePriority.ini'
-		jobConfigFilePath = '2017-12-20 09:52:00.452239_MAX_peptideMods/jobConfig_MAX_peptideMods.ini'
+		# jobConfigFilePath = '2017-12-20 09:52:00.452239_MAX_peptideMods/jobConfig_MAX_peptideMods.ini'
+		jobConfigFilePath = '2017-12-20 11:48:43.675332_MAX_modsinfocleaned/jobConfig_MAX_modsinfocleaned.ini'
 		
 		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	

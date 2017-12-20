@@ -214,6 +214,25 @@ def removePSMEngineRedundancy(df, PSMEnginePriority, exclusive, quanColumns, rem
 	return df, removedData
 
 
+def cleanModificationsInfo(df):
+	""" Transforms the modification strings in the Modifications Series into a list of modifications without location
+	information, only identity information. """
+	if 'Modifications' not in df.columns:
+		logging.warning("No 'Modifications' column found: did NOT clean Modifications information.")
+	else:
+		# make set of all occurring modifications
+		# allMods = set(y.strip() for y in unnest([x.split(';') for x in dfModSeries.astype(str)]))
+		df['Modifications'] = df['Modifications'].apply(lambda x: str(x).split(';'))
+		try:
+			# select only modification IDENTITY (remove redundancy due to location info) (select info between brackets())
+			df['Modifications'] = df['Modifications'].apply(lambda modsList: [x.partition('(')[-1].partition(')')[0] for x in modsList])
+		except:
+			logging.warning("Could not remove modification redundancy due to location (only works properly for Proteome Discoverer modification format).")
+		# sort alphabetically (so modification order is always the same!)
+		df['Modifications'] = df['Modifications'].apply(sorted)
+	return df
+
+
 def isotopicCorrection(intensities, correctionsMatrix):
 	"""
 	Corrects isotopic impurities in the intensities using a given corrections matrix by solving the linear system:
