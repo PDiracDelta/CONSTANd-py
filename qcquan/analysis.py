@@ -113,7 +113,9 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 	"""
 	Transform the data index from the peptide to the protein level by using the associations in proteinPeptidesDict, and
 	select only relevant information. The resulting dataframe is indexed on the Master Protein Accessions.
-	Quantification values from all associated unique modified peptides are kept in a list per condition for each protein.
+	Quantification values from all associated unique modified peptides are averaged per channel/sample and kept in a
+	list per condition for each protein. The total (before averaging) number of peptide observations per protein is also
+	kept (this is thus NOT the number of observations used in the t-test, but contains also repeated measurements).
 	:param df:					pd.DataFrame				outer join of all experiments.
 	:param proteinPeptidesDict:	{protein: [peptide ids]}	proteins and their associated peptide ids.
 	:param schema:				dict                		schema of the experiments' hierarchy.
@@ -140,23 +142,32 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 	proteinDFColumns = ['protein', 'peptides', 'description', 'modifications']
 	allConditions = [referenceCondition]+otherConditions
 	# append reference condition first, and then the other conditions
-	proteinDFColumns.append(referenceCondition)
-	proteinDFColumns.extend(otherConditions)
+	proteinDFColumns.extend([referenceCondition, '#peptides (' + str(referenceCondition) + ')'])
+	# weave #peptide columns in between condition columns
+	proteinDFColumns.extend(unnest(list(zip(otherConditions, ['#peptides (' + str(c) + ')' for c in otherConditions]))))
 	proteinDF = pd.DataFrame([list(proteinPeptidesDict.keys())].extend([[None], ]*len(proteinDFColumns)),
 							 columns=proteinDFColumns).set_index('protein')
+	# remove protein from column list because it is now the index (use this list later on)
+	proteinDFColumns.remove('protein')
+	
+	# construct empty protein entry
+	emptyProteinEntry = pd.Series(data=[None, ] * len(proteinDFColumns), index=proteinDFColumns)
+	for i in emptyProteinEntry.index:  # set initial values
+		if '#peptides' in i:
+			emptyProteinEntry[i] = 0
+		elif i in allConditions:
+			emptyProteinEntry[i] = []
 	
 	for protein, peptideIndices in proteinPeptidesDict.items():
 		# construct the new protein entry, with empty quan lists for now, and add it to the proteinDF
 		# the .loc lines consume virtually all of the computing time. But I increased performance by a factor ~20 by
 		# splitting the selection and manipulation operations
 		proteinData = df.loc[peptideIndices, ['Sequence', 'Protein Descriptions', 'Modifications']]
-		proteinEntry = [proteinData['Sequence'].tolist(),
-						proteinData['Protein Descriptions'][0],
-						uniqueMods(proteinData['Modifications']), ]
-		numFilledProteinEntries = len(proteinEntry)  # for easy adding later on
-		proteinEntry.extend([None, ]*len(allConditions))
-		
-		proteinQuanPerCondition = dict(zip(allConditions, [pd.Series(), ] * len(allConditions)))
+		# start out with empty protein entry
+		proteinEntry = emptyProteinEntry.copy()
+		proteinEntry[['peptides', 'description', 'modifications']] = [proteinData['Sequence'].tolist(),
+																	  proteinData['Protein Descriptions'][0],
+																	  uniqueMods(proteinData['Modifications']), ]
 		# interpret as multi index so that you can call .levels and .get_level_values()
 		peptideIndices = pd.MultiIndex.from_tuples(peptideIndices)
 		# per experiment, get the list of indices and append the corresponding df values to the right quanPerCondition.
@@ -167,18 +178,15 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 			allPeptidesQuanValues = df.loc[peptideIndicesPerExperiment, schema[eName]['allExperimentChannelAliases']]
 			# for each condition in the experiment, append all its channels to the quanPerCondition Series.
 			for condition in schema[eName]['allExperimentConditions']:
-				conditionQuanValues = pd.Series()
 				for channel in schema[eName][condition]['channelAliases']:
 					# variable assignment because a pd.Series is returned after the append operation
 					# NP.NANMEAN TO AVOID UNDERSTIMATION OF VARIANCE BECAUSE OF REPEATED MEASUREMENTS (stay conservative)
-					proteinQuanPerCondition[condition] = proteinQuanPerCondition[condition].append(pd.Series(np.nanmean(allPeptidesQuanValues[channel])))
+					proteinEntry[condition].append(np.nanmean(pd.Series(allPeptidesQuanValues[channel]).dropna()))
+					# keep track of the total number of OBSERVED (!=used in DEA) peptides
+					proteinEntry['#peptides (' + str(condition) + ')'] += len(pd.Series(allPeptidesQuanValues[channel]).dropna())
 		
-		# add quan lists to protein entry and then add proteinEntry to dataframe (faster than accessing dataframe twice)
-		proteinEntry[numFilledProteinEntries] = list(proteinQuanPerCondition[referenceCondition])  # list so it shows nicely in exported csv
-		for i in range(len(otherConditions)):  # preserve order of otherConditions
-			proteinEntry[numFilledProteinEntries+1+i] = list(proteinQuanPerCondition[otherConditions[i]])  # list so it shows nicely in exported csv
 		# fill new dataframe
-		proteinDF.loc[protein, :] = proteinEntry
+		proteinDF.loc[protein, :] = proteinEntry.copy()
 	
 	return proteinDF
 
@@ -257,28 +265,6 @@ def applySignificance(df, otherConditions, alpha, FCThreshold):
 		
 		df['significant ('+condition+')'] = df.apply(significant, axis=1)
 	return df
-
-
-def addNumberOfRepresentingPeptides(proteinDF, referenceCondition, otherConditions):
-	"""
-	Adds a column '#peptides (c1, c2)' to the proteinDF by zipping the lengths of the list of observed quantification
-	values for each condition.
-	:param proteinDF:			pd.DataFrame	proteinDF with quantification values per condition
-	:param referenceCondition:	str				name of the condition to be used as the reference
-	:param otherConditions:		list 			all non-reference conditions in the experiment
-	:return proteinDF:			pd.DataFrame	proteinDF including column with amount of peptides per condition
-	"""
-	# order is important: referenceCondition first
-	allConditions = [referenceCondition] + otherConditions
-	# lengths = []
-	for condition in allConditions:
-		# lengths.append(proteinDF.loc[:, condition].apply(lambda x: len(pd.Series(x).dropna())))
-		# EDIT: just do one column per condition, because we want to be able to split them in the report afterwards.
-		proteinDF['#peptides (' + str(condition) + ')'] = proteinDF.loc[:, condition].apply(lambda x: len(pd.Series(x).dropna()))
-	# # if you don't do series(list(x)).values it gives an Error or makes it into nans... god knows why
-	# # use * for the pointer of `lengths` because zip doesn't take a list of lists as an argument.
-	# proteinDF['#peptides '+str(allConditions)] = pd.Series(list(zip(*lengths))).values
-	return proteinDF
 
 
 def getCommonPeptidesQuanValuesDF(dfs, schema):

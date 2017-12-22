@@ -47,6 +47,4 @@ def DEA(this_allExperimentsDF, proteinPeptidesDict, params):
 	# indicate significance based on given thresholds alpha and FCThreshold
 	proteinDF = applySignificance(proteinDF, otherConditions, params['alpha'], params['FCThreshold'])
 	
-	# add number of peptides that represent each protein (per condition)
-	proteinDF = addNumberOfRepresentingPeptides(proteinDF, referenceCondition, otherConditions)
 	return proteinDF, singleConditionProteins, numProteins
