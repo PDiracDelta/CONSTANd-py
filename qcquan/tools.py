@@ -123,6 +123,7 @@ def MAPlot(x, y, title=None):
 	:param x:		list	x data
 	:param y:		list	y data
 	:param title:	str		MA plot title
+	:return plt:	pyplot	matplotlib pyplot object of the MA plot
 	:return M:		list	logx - logy
 	:return A:		list	(logx + logy) * 0.5
 	:return m:		float64	mean(M)
@@ -135,8 +136,8 @@ def MAPlot(x, y, title=None):
 		title = 'mean(M): ' + str(m) + '; var(M):' + str(v)
 	else:
 		title = title + '\nmean(M): ' + str(m) + '; var(M):' + str(v)
-	fig = scatterPlot(A, M, title=title, xlab='A', ylab='M')
+	plt = scatterPlot(A, M, title=title, xlab='A', ylab='M')
 	# plt.xlim((-10.1,0))
 	# plt.ylim((-10.1, 10.1))
-	fig.show()
-	return M, A, m, v
+	# fig.show()
+	return plt, M, A, m, v
