@@ -135,6 +135,16 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 		# allMods.remove('TMT6plex') if 'TMT6plex' in allMods else None
 		return list(allMods)
 	
+	def emptyProteinEntry(this_allConditions):
+		""" Create an empty Protein Entry to fill. This has to be a separate function to start out completely blank. """
+		this_emptyProteinEntry = pd.Series(data=[None, ] * len(proteinDFColumns), index=proteinDFColumns)
+		for i in this_emptyProteinEntry.index:  # set initial values
+			if '#peptides' in i:
+				this_emptyProteinEntry[i] = 0
+			elif i in this_allConditions:
+				this_emptyProteinEntry[i] = []
+		return this_emptyProteinEntry
+	
 	if 'Protein Descriptions' not in df.columns.values:  # in case there was no Descriptions column in the input
 		df['Protein Descriptions'] = pd.Series()
 	if 'Modifications' not in df.columns.values:  # in case there was no Modifications column in the input
@@ -150,21 +160,13 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 	# remove protein from column list because it is now the index (use this list later on)
 	proteinDFColumns.remove('protein')
 	
-	# construct empty protein entry
-	emptyProteinEntry = pd.Series(data=[None, ] * len(proteinDFColumns), index=proteinDFColumns)
-	for i in emptyProteinEntry.index:  # set initial values
-		if '#peptides' in i:
-			emptyProteinEntry[i] = 0
-		elif i in allConditions:
-			emptyProteinEntry[i] = []
-	
 	for protein, peptideIndices in proteinPeptidesDict.items():
 		# construct the new protein entry, with empty quan lists for now, and add it to the proteinDF
 		# the .loc lines consume virtually all of the computing time. But I increased performance by a factor ~20 by
 		# splitting the selection and manipulation operations
 		proteinData = df.loc[peptideIndices, ['Sequence', 'Protein Descriptions', 'Modifications']]
 		# start out with empty protein entry
-		proteinEntry = emptyProteinEntry.copy()
+		proteinEntry = emptyProteinEntry(allConditions)
 		proteinEntry[['peptides', 'description', 'modifications']] = [proteinData['Sequence'].tolist(),
 																	  proteinData['Protein Descriptions'][0],
 																	  uniqueMods(proteinData['Modifications']), ]
@@ -184,9 +186,8 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 					proteinEntry[condition].append(np.nanmean(pd.Series(allPeptidesQuanValues[channel]).dropna()))
 					# keep track of the total number of OBSERVED (!=used in DEA) peptides
 					proteinEntry['#peptides (' + str(condition) + ')'] += len(pd.Series(allPeptidesQuanValues[channel]).dropna())
-		
 		# fill new dataframe
-		proteinDF.loc[protein, :] = proteinEntry.copy()
+		proteinDF.loc[protein, :] = proteinEntry
 	
 	return proteinDF
 
