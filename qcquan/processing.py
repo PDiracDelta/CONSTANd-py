@@ -251,6 +251,15 @@ def getDeltappmMetadata(df, deltappmCol):
 					  Series(np.nanstd(quanDF, 0), index=deltappmCol)], index=['max', 'mean', 'std']).transpose()
 
 
+def getInjectionTimeInfo(df, ITCol):
+	""" calculates max injection time, and #PSMs at and below this value, then returns this info as a dataframe """
+	ITvals = df.loc[:, ITCol]
+	ITmax = np.nanmax(ITvals)
+	numBelowMax = len(list(filter(lambda x: x < ITmax, ITvals)))
+	numMax = len(list(filter(lambda x: x == ITmax, ITvals)))
+	return DataFrame([[ITmax, numMax, numBelowMax]], columns=['max', 'num max', 'num below'])
+
+
 def isotopicCorrection(intensities, correctionsMatrix):
 	"""
 	Corrects isotopic impurities in the intensities using a given corrections matrix by solving the linear system:
