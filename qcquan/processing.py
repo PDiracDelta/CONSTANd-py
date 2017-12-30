@@ -243,6 +243,14 @@ def getIntensityMetadata(df, quanColumns):
 					  Series(np.nanstd(quanDF, 0), index=quanColumns)], index=['max', 'mean', 'std']).transpose()
 
 
+def getDeltappmMetadata(df, deltappmCol):
+	""" calculates max, mean and std of the deltappm column in the given df and returns it as a dataframe """
+	quanDF = df.loc[:, deltappmCol]
+	return DataFrame([Series(np.amax(quanDF, 0), index=deltappmCol),
+					  Series(np.nanmean(quanDF, 0), index=deltappmCol),
+					  Series(np.nanstd(quanDF, 0), index=deltappmCol)], index=['max', 'mean', 'std']).transpose()
+
+
 def isotopicCorrection(intensities, correctionsMatrix):
 	"""
 	Corrects isotopic impurities in the intensities using a given corrections matrix by solving the linear system:
