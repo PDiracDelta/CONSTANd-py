@@ -332,6 +332,8 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 	elif dataType == 'df':
 		if isinstance(data, dict):  # there are actually multiple dataFrames
 			if inOneFile:  # save all removedData in one file.
+				# todo clean up this procedure, it only works for removedData.
+				raise UserWarning("Do you REALLY want to save all this data in one dataframe...? Sounds like a bad idea.")
 				removedData = pd.DataFrame().append(list(data.values()))
 				# data['missing'].columns contains all possible columns
 				removedData.to_csv(fullPath, sep=delim_out, index=False,
@@ -339,10 +341,14 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 				return fullPath
 			else:  # save all removedData in separate files per category.
 				fullPaths = dict()
-				for frameName, frame in data.items():
-					assert isinstance(frame, pd.DataFrame)
-					fullPaths[frameName] = path_out + '/' + filename + '_' + frameName + extension
-					frame.to_csv(fullPaths[frameName], sep=delim_out, index=False)
+				for key, value in data.items():  # recursively export all frames in the dict in a separate file.
+					if type(value) in [dict, pd.DataFrame]:
+						valueDataType = 'df'
+					elif type(value) in [list, float, int, set]:
+						valueDataType = 'txt'
+					else:
+						valueDataType = 'obj'
+					fullPaths[key] = exportData(value, valueDataType, path_out, filename + '_' + key, delim_out, False)
 				return fullPaths
 		else:  # it's just a single dataframe
 			assert isinstance(data, pd.DataFrame)
