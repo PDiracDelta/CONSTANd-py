@@ -31,6 +31,8 @@ def processDf(df, params, writeToDisk, metadata, doConstand=True):
 	"""
 	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
 	
+	metadata['numPSMs_initial'] = len(df)
+	
 	# remove all useless columns from the dataFrame
 	df = removeObsoleteColumns(df, wantedColumns=params['wantedColumns'])
 	
@@ -65,6 +67,12 @@ def processDf(df, params, writeToDisk, metadata, doConstand=True):
 		assert np.prod((len(i) < 2 for (s, i) in df.groupby('First Scan').groups))
 	else:
 		logging.warning("No PSM Algorithm redundancy removal done.")
+	
+	metadata['numPSMs_afterCleaning'] = len(df)
+	metadata['intensityStatistics'] = getIntensityMetadata(df, params['quanColumns'])
+	metadata['deltappmStatistics'] = getDeltappmMetadata(df, 'DeltaM [ppm]')
+	metadata['injectionTimeInfo'] = getInjectionTimeInfo(df, 'Ion Inject Time [ms]')
+	# metadata['numPeptidesPerPSM'] = np.nanmean()  # NOT IMPLEMENTED: this info is not given by PD2.1
 	
 	if params['isotopicCorrection_bool']:
 		# perform isotopic corrections and then apply them to the dataframe. No i-TRAQ copyright issues as of 2017-05-04
