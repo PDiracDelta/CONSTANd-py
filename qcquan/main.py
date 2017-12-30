@@ -25,7 +25,8 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 	from qcquan_web.web import DB_setJobReportRelPaths
 	logFilePath = os.path.abspath(os.path.join(jobConfigFilePath, os.path.join(os.pardir, 'log.txt')))
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
-	start = time()
+	metadata = dict()
+	metadata['start'] = time()
 	jobParams = getJobConfig(jobConfigFilePath)  # config filenames + params for the combination of experiments
 	allProcessingParams = {}  # specific params for each experiment
 	dfs = {}
@@ -58,7 +59,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 			logging.info(
 				"Starting processing of experiment '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.utcnow()).split('.')[0])
-			processingResults[eName] = processDf(dfs[eName], allProcessingParams[eName], writeToDisk)
+			processingResults[eName] = processDf(dfs[eName], allProcessingParams[eName], writeToDisk, metadata)
 			logging.info(
 				"Finished processing of experiment '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.utcnow()).split('.')[0])
@@ -113,7 +114,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 		# visualize and make a report
 		logging.info("Starting visualization end report generation of job: " + jobParams['jobName'] + " at " +
 					 str(datetime.datetime.utcnow()).split('.')[0])
-		generateReport(analysisResults, jobParams, logFilePath, writeToDisk, allProcessingParams, start)
+		generateReport(analysisResults, jobParams, logFilePath, writeToDisk, allProcessingParams, metadata['start'])
 		DB_setJobReportRelPaths(jobID=jobDirName, resultpath=jobParams['path_results'],
 								jobName=jobParams['jobName'])
 		logging.info("Finished visualization end report generation of job: " + jobParams['jobName'] + " at " +
@@ -121,7 +122,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 	else:
 		logging.warning("No report generated!")
 	stop = time()
-	print(stop - start)
+	print(stop - metadata['start'])
 
 
 if __name__ == '__main__':  # this should not execute if main.py is not the main module called by the python interpreter,
@@ -162,7 +163,8 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '2017-11-23 15:32:09.090927_Schmidt_HeLa-RPE_full/jobConfig_Schmidt_HeLa-RPE_full.ini'
 		# jobConfigFilePath = '2017-12-05 12:06:06.865343_MAX_testLoopOrderChange/jobConfig_MAX_testLoopOrderChange.ini'
 		# jobConfigFilePath = '2017-12-05 16:06:02.211023_MAX_testPSMEnginePriority/jobConfig_MAX_testPSMEnginePriority.ini'
-		jobConfigFilePath = '2017-12-22 13:19:56.823574_MAX_numpeptfix/jobConfig_MAX_numpeptfix.ini'
+		# jobConfigFilePath = '2017-12-22 13:19:56.823574_MAX_numpeptfix/jobConfig_MAX_numpeptfix.ini'
+		jobConfigFilePath = '2017-12-30 00:46:56.082681_MAX_testglobalmetadata/jobConfig_MAX_testglobalmetadata.ini'
 		
 		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	

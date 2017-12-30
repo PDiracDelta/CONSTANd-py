@@ -40,29 +40,19 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	dfs = dict((eName, result[0]) for eName, result in processingResultsItems)
 	constandOutputs = dict((eName, result[1]) for eName, result in processingResultsItems)
 	removedDatas = dict((eName, result[2]) for eName, result in processingResultsItems)
-	allMasterProteinss = dict((eName, result[3]) for eName, result in processingResultsItems)
+	metadatas = dict((eName, result[3]) for eName, result in processingResultsItems)
 	processedDfFullPaths = dict((eName, result[4]) for eName, result in processingResultsItems)
-	noCorrectionIndicess = {}
-	for eName, result in processingResultsItems:
-		if len(result) > 5:  # if noCorrectionIndices exists in results
-			noCorrectionIndicess[eName] = result[-1]
 
 	experimentNames = processingResults.keys()
 	# contains statistics and metadata (like the parameters) about the analysis.
-	metadata = {}
+	metadata = dict()
+	metadata.update(metadatas)  # include metadata from each processing job
 	metadata['numeric'] = pd.DataFrame()
 	# Compile a list of all master proteins found at least in 1 PSM and at least in 1 experiment:
-	allObservedProteins = pd.Series(list(set(unnest(allMasterProteinss.values()))))
+	allObservedProteins = pd.Series(list(set().union(*[metadatas[eName]['allMasterProteins'] for eName in experimentNames])))
 	metadata['numeric'].loc[0, 'numObservedProteins'] = len(allObservedProteins)
 	metadata['allObservedProteins'] = pd.DataFrame({'protein': allObservedProteins})
 	
-	# record PSMs without isotopic correction applied. Multi-indexed on experiment names and old indices!
-	# This is done here instead of the processing flow because back then there was no metadata variable yet.
-	try:
-		metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for
-												  eName in noCorrectionIndicess.keys()], keys=experimentNames)  # todo ugly
-	except ValueError:
-		pass  # not a single noCorrectionIndices was found. OK.
 	# record RT isolation statistics. Future: flag. Multi-indexed on experiment names and old indices!
 	if params['getRTIsolationInfo_bool']:
 		metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for

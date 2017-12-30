@@ -12,14 +12,17 @@ from qcquan.aggregate import aggregate
 from qcquan.constand import constand
 
 
-def processDf(df, params, writeToDisk, doConstand=True):
+def processDf(df, params, writeToDisk, metadata, doConstand=True):
 	"""
 	Calls all the necessary functions to process the dataframe of one experiment and prepare the analysis input objects.
 	Cleans the input data, removes redundancy due to PSM algorithm, charge (optional) and PTMs (optional), then corrects
 	isotopic impurities (optional),	normalizes using the CONSTANd method and saves the output to disk if so required.
-	Along the way, removed data is kept in a corresponding dict of dataframes.
+	Along the way, removed data is kept in a corresponding dict of dataframes, and metadata is gathered for meta-analysis
+	and QC purposes.
 	:param df:						pd.DataFrame		Peptide Spectrum Match dataframe (see documentation).
 	:param params:					dict				experiment-specific processing parameters (see getConfig.py.)
+	:param metadata:				dict				metadata about the job, including QC information.
+														[allMasterProteins; (noIsotopicCorrectionIndices)]
 	:param writeToDisk:				bool				write results to harddisk (if not: only pass via return statement).
 	:return normalizedDf:			pd.DataFrame		cleaned, normalized data on the "unique modified peptide" level
 	:return normalizedIntensities:	np.ndarray			matrix of quantification values on the "unique modified peptide" level
@@ -32,7 +35,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	df = removeObsoleteColumns(df, wantedColumns=params['wantedColumns'])
 	
 	# get a set of all master proteins detected in at least one PSM.
-	allMasterProteins = getAllPresentProteins(df)
+	metadata['allMasterProteins'] = getAllPresentProteins(df)
 	
 	# remove PSMs where (essential) data is missing.
 	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['quanColumns'], params['PSMEnginePriority'])
@@ -66,7 +69,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	if params['isotopicCorrection_bool']:
 		# perform isotopic corrections and then apply them to the dataframe. No i-TRAQ copyright issues as of 2017-05-04
 		# (see logboek.txt or git history)
-		correctedIntensities, noCorrectionIndices = isotopicCorrection(getIntensities(df, quanColumns=params['quanColumns']),
+		correctedIntensities, metadata['noIsotopicCorrectionIndices'] = isotopicCorrection(getIntensities(df, quanColumns=params['quanColumns']),
 															  correctionsMatrix=params['isotopicCorrection_matrix'])
 		df = setIntensities(df, intensities=correctedIntensities, quanColumns=params['quanColumns'])
 		# TEST remove the negative quan value rows
@@ -131,7 +134,4 @@ def processDf(df, params, writeToDisk, doConstand=True):
 				   filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
 		# save the DE analysis results
 
-	if params['isotopicCorrection_bool']:
-		return normalizedDf, constandOutput, removedData, allMasterProteins, processedDfFullPath, noCorrectionIndices  # todo find better solution than 2 returns
-	else:
-		return normalizedDf, constandOutput, removedData, allMasterProteins, processedDfFullPath  #todo add noCorrectionIndices variable that is empty
+	return normalizedDf, constandOutput, removedData, metadata, processedDfFullPath  # todo find better solution than 2 returns
