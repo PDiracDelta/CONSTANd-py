@@ -235,6 +235,14 @@ def cleanModificationsInfo(df):
 	return df
 
 
+def getIntensityMetadata(df, quanColumns):
+	""" calculates max, mean and std of intensities for each quanColumn in the given df and returns it as a dataframe """
+	quanDF = df.loc[:, quanColumns]
+	return DataFrame([Series(np.amax(quanDF, 0), index=quanColumns),
+					  Series(np.nanmean(quanDF, 0), index=quanColumns),
+					  Series(np.nanstd(quanDF, 0), index=quanColumns)], index=['max', 'mean', 'std']).transpose()
+
+
 def isotopicCorrection(intensities, correctionsMatrix):
 	"""
 	Corrects isotopic impurities in the intensities using a given corrections matrix by solving the linear system:
