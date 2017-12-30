@@ -100,6 +100,7 @@ def processDf(df, params, writeToDisk, metadata, doConstand=True):
 		
 	if params['aggregatePTM_bool'] and 'Modifications' in df.columns:
 		# aggregate peptide list redundancy due to different charges (optional)
+		# todo IF there is aggregation, make it so that all modifications are kept, just make a long(er) list.
 		df, removedData['modifications'] = aggregate('PTM', df, quanColumns=params['quanColumns'], method=params['aggregate_method'],
 													 PSMEnginePriority=params['PSMEnginePriority'],
 													 removePSMEngineRedundancy_bool=params['removePSMEngineRedundancy_bool'],
