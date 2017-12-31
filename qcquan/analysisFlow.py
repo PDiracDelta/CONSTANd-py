@@ -68,6 +68,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	else:
 		minProteinPeptidesDict, __, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
 	metadata['numeric'].loc[0, 'numNoMasterProteinAccession'] = len(metadata['noMasterProteinAccession'])
+	metadata['numeric'].loc[0, 'numUniqueModifiedPeptides'] = len(unnest(minProteinPeptidesDict.values()))
 
 	if params['minExpression_bool']:
 		# Bring the data to the protein level in the case of minimal expression (no shared peptides allowed).
