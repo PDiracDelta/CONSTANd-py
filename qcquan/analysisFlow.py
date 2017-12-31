@@ -95,8 +95,11 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	commonPeptidesQuanValuesDF, metadata['uncommonModifiedPeptides'] = getCommonPeptidesQuanValuesDF(dfs, params['schema'])
 	metadata['numeric'].loc[0, 'numUnCommonModifiedPeptides'] = len(metadata['uncommonModifiedPeptides'])
 	metadata['numeric'].loc[0, 'numCommonModifiedPeptides'] = len(commonPeptidesQuanValuesDF)
+	metadata['numeric'].loc[0, 'numModifiedPeptides'] = \
+		metadata['numeric'].loc[0, 'numUnCommonModifiedPeptides'] + metadata['numeric'].loc[0, 'numCommonModifiedPeptides']
 	# save the amount of NaN values per channel for common peptides.
 	metadata['commonNanValues'] = pd.DataFrame(np.sum(np.isnan(commonPeptidesQuanValuesDF), axis=0))
+	# metadata['numUnCommonModifiedPeptidesPerCondition'] = getNumUnCommonModifiedPeptidesPerCondition(dfs, metadata['uncommonModifiedPeptides'])
 	# perform PCA
 	PCAResult = getPCA(commonPeptidesQuanValuesDF, params['PCA_components'])
 	# perform hierarchical clustering

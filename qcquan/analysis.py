@@ -304,6 +304,19 @@ def getCommonPeptidesQuanValuesDF(dfs, schema):
 	return peptidesDf.loc[:, allChannelAliases], uncommonModifiedPeptides
 
 
+# def getNumUnCommonModifiedPeptidesPerCondition(dfs, uncommonModifiedPeptides, schema):
+# 	allModifiedPeptidesPerCondition = dict()
+# 	for k in schema['allConditions']:
+# 		for eName in schema['allExperiments']:
+# 			if k in schema[eName]:
+# 				schema[eName][k]['channelAliases']
+# 				# N.B.: common peptides are defined to appear in every experiment, but in practise they appear in every
+# 				# condition as well (if not, they would already have been filtered out in processing).
+# 				allModifiedPeptidesPerCondition[k] = zip(dfs[eName]['Sequence'], dfs[eName]['Modifications'])
+#
+# 	return numUnCommonModifiedPeptidesPerCondition
+
+
 def getPCA(intensities, nComponents=2):
 	"""
 	Returns the nComponents Principal Component scores for the transposed intensity matrix. This means the reporter
