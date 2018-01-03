@@ -52,6 +52,28 @@ def getNoIsotopicCorrection(df, noCorrectionIndices):
 		return pd.DataFrame()
 
 
+def combineProcessingMetadata(metadata, perExperimentMetadata):
+	""" The metadata gathered during the Processing step is still spread over multiple dict entries.
+	Combine it where necessary. """
+	experimentNames = perExperimentMetadata.keys()
+	# Compile a list of all master proteins found at least in 1 PSM and at least in 1 experiment:
+	allObservedProteins = pd.Series(list(set().union(*[perExperimentMetadata[eName]['allMasterProteins'] for eName in experimentNames])))
+	# info on amount of PSMs
+	metadata['numPSMs'] = pd.DataFrame(index=experimentNames, columns=['initial', 'after cleaning'])
+	metadata['injectionTimeInfo'] = pd.DataFrame(index=experimentNames, columns=['max', 'mean', 'std'])
+	metadata['intensityStatistics'] = dict()  # dict because we need a whole dataframe per experiment
+	metadata['deltappmStatistics'] = dict()  # dict because we need a whole dataframe per experiment
+	# pd.DataFrame(index=['intensityStatistics', 'deltappmStatistics'], columns=experimentNames)
+	for eName in experimentNames:
+		metadata['numPSMs'].loc[eName, :] = [perExperimentMetadata[eName]['numPSMs_initial'],
+											 perExperimentMetadata[eName]['numPSMs_afterCleaning']]
+		metadata['injectionTimeInfo'].loc[eName, :] = perExperimentMetadata[eName]['injectionTimeInfo'].iloc[0, :]  # there is only 1 entry
+		metadata['intensityStatisticsPerExp'][eName] = perExperimentMetadata[eName]['intensityStatistics']
+		metadata['deltappmStatisticsPerExp'][eName] = perExperimentMetadata[eName]['deltappmStatistics']
+	
+	return metadata, allObservedProteins
+
+
 def combineExperimentDFs(dfs):
 	"""
 	Merge dataframes of all experiments into one multi-indexed (eName, oldIndex) dataframe, by performing an outer join.

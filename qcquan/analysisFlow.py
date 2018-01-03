@@ -42,19 +42,21 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	removedDatas = dict((eName, result[2]) for eName, result in processingResultsItems)
 	metadatas = dict((eName, result[3]) for eName, result in processingResultsItems)
 	processedDfFullPaths = dict((eName, result[4]) for eName, result in processingResultsItems)
-
-	experimentNames = processingResults.keys()
+	
 	# contains statistics and metadata (like the parameters) about the analysis.
 	metadata = dict()
-	metadata.update(metadatas)  # include metadata from each processing job
+	# metadataframe for all simple numeric values
 	metadata['numeric'] = pd.DataFrame()
-	# Compile a list of all master proteins found at least in 1 PSM and at least in 1 experiment:
-	allObservedProteins = pd.Series(list(set().union(*[metadatas[eName]['allMasterProteins'] for eName in experimentNames])))
+	
+	# combine all metadata from each separate MS run
+	metadata, allObservedProteins = combineProcessingMetadata(metadata, metadatas)
+	
 	metadata['numeric'].loc[0, 'numObservedProteins'] = len(allObservedProteins)
 	metadata['allObservedProteins'] = pd.DataFrame({'protein': allObservedProteins})
 	
 	# record RT isolation statistics. Future: flag. Multi-indexed on experiment names and old indices!
 	if params['getRTIsolationInfo_bool']:
+		experimentNames = processingResults.keys()
 		metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for
 												 eName in experimentNames], keys=experimentNames)
 	
