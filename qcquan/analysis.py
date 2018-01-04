@@ -60,7 +60,7 @@ def combineProcessingMetadata(metadata, perExperimentMetadata):
 	allObservedProteins = pd.Series(list(set().union(*[perExperimentMetadata[eName]['allMasterProteins'] for eName in experimentNames])))
 	# info on amount of PSMs
 	metadata['numPSMs'] = pd.DataFrame(index=experimentNames, columns=['initial', 'after cleaning'])
-	metadata['injectionTimeInfo'] = pd.DataFrame(index=experimentNames, columns=['max', 'mean', 'std'])
+	metadata['injectionTimeInfo'] = pd.DataFrame(index=experimentNames, columns=['max', 'num max', 'num below'])
 	metadata['deltappmStatistics'] = pd.DataFrame(index=experimentNames, columns=['max', 'mean', 'std'])
 	metadata['intensityStatisticsPerExp'] = dict()  # dict because we need a whole dataframe per experiment
 	for eName in experimentNames:
