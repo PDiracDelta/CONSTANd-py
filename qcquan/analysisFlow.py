@@ -70,7 +70,6 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	else:
 		minProteinPeptidesDict, __, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
 	metadata['numeric'].loc[0, 'numNoMasterProteinAccession'] = len(metadata['noMasterProteinAccession'])
-	metadata['numeric'].loc[0, 'numUniqueModifiedPeptides'] = len(unnest(minProteinPeptidesDict.values()))
 
 	if params['minExpression_bool']:
 		# Bring the data to the protein level in the case of minimal expression (no shared peptides allowed).
@@ -79,7 +78,9 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 			DEA(allExperimentsDF, minProteinPeptidesDict, params)
 	else:
 		minProteinDF = pd.DataFrame()
-
+	
+	metadata['numeric'].loc[0, 'numUniqueModifiedPeptides'] = len(unnest(minProteinDF.loc[:, 'peptides']))
+	
 	if params['fullExpression_bool']:
 		# Bring the data to the protein level in the case of full expression (shared peptides allowed).
 		# Execute the differential expression analysis and gather some metadata
