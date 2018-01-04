@@ -434,12 +434,12 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 	
 	# per condition: generate list of differentials HTML code separately because Jinja cant do this
 	if jobParams['minExpression_bool']:
-		minTopDifferentialsHTMLDict = dict((otherCondition, injectColumnWidthHTML(minTopDifferentialsDFs[otherCondition].to_html(index=False, justify='left')))
+		minTopDifferentialsHTMLDict = dict((otherCondition, injectColumnWidthHTML(minTopDifferentialsDFs[otherCondition].to_html(index=False, justify='center')))
 								   for otherCondition in otherConditions)
 	else:
 		minTopDifferentialsHTMLDict = None
 	if jobParams['fullExpression_bool']:
-		fullTopDifferentialsHTMLDict = dict((otherCondition, injectColumnWidthHTML(fullTopDifferentialsDFs[otherCondition].to_html(index=False, justify='left')))
+		fullTopDifferentialsHTMLDict = dict((otherCondition, injectColumnWidthHTML(fullTopDifferentialsDFs[otherCondition].to_html(index=False, justify='center')))
 								   for otherCondition in otherConditions)
 	else:
 		fullTopDifferentialsHTMLDict = None
