@@ -141,7 +141,7 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		doReport = (args[4] == 'True')
 		writeToDisk = (args[5] == 'True')
 	else:  # you didn't call main.py from the command line but from pycharm
-		doProcessing = False
+		doProcessing = True
 		doAnalysis = True
 		doReport = True
 		writeToDisk = True
@@ -164,7 +164,8 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '2017-12-05 12:06:06.865343_MAX_testLoopOrderChange/jobConfig_MAX_testLoopOrderChange.ini'
 		# jobConfigFilePath = '2017-12-05 16:06:02.211023_MAX_testPSMEnginePriority/jobConfig_MAX_testPSMEnginePriority.ini'
 		# jobConfigFilePath = '2017-12-22 13:19:56.823574_MAX_numpeptfix/jobConfig_MAX_numpeptfix.ini'
-		jobConfigFilePath = '2017-12-30 00:46:56.082681_MAX_testglobalmetadata/jobConfig_MAX_testglobalmetadata.ini'
+		# jobConfigFilePath = '2017-12-30 00:46:56.082681_MAX_testglobalmetadata/jobConfig_MAX_testglobalmetadata.ini'
+		jobConfigFilePath = '2018-01-04 09:16:13.321179_MAX_test_metadata_report/jobConfig_MAX_test_metadata_report.ini'
 		
 		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	

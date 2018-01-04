@@ -246,9 +246,9 @@ def getIntensityMetadata(df, quanColumns):
 def getDeltappmMetadata(df, deltappmCol):
 	""" calculates max, mean and std of the deltappm column in the given df and returns it as a dataframe """
 	quanDF = df.loc[:, deltappmCol]
-	return DataFrame([Series(np.amax(quanDF, 0), index=deltappmCol),
-					  Series(np.nanmean(quanDF, 0), index=deltappmCol),
-					  Series(np.nanstd(quanDF, 0), index=deltappmCol)], index=['max', 'mean', 'std']).transpose()
+	return DataFrame([Series(np.amax(quanDF, 0), index=[deltappmCol]),
+					  Series(np.nanmean(quanDF, 0), index=[deltappmCol]),
+					  Series(np.nanstd(quanDF, 0), index=[deltappmCol])], index=['max', 'mean', 'std']).transpose()
 
 
 def getInjectionTimeInfo(df, ITCol):
