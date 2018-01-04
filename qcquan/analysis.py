@@ -189,7 +189,7 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 		proteinData = df.loc[peptideIndices, ['Sequence', 'Protein Descriptions', 'Modifications']]
 		# start out with empty protein entry
 		proteinEntry = emptyProteinEntry(allConditions)
-		proteinEntry[['peptides', 'description', 'modifications']] = [proteinData['Sequence'].tolist(),
+		proteinEntry[['peptides', 'description', 'modifications']] = [list(set(proteinData['Sequence'])),
 																	  proteinData['Protein Descriptions'][0],
 																	  uniqueMods(proteinData['Modifications']), ]
 		# interpret as multi index so that you can call .levels and .get_level_values()
