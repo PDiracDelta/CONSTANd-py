@@ -165,7 +165,7 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		# jobConfigFilePath = '2017-12-05 16:06:02.211023_MAX_testPSMEnginePriority/jobConfig_MAX_testPSMEnginePriority.ini'
 		# jobConfigFilePath = '2017-12-22 13:19:56.823574_MAX_numpeptfix/jobConfig_MAX_numpeptfix.ini'
 		# jobConfigFilePath = '2017-12-30 00:46:56.082681_MAX_testglobalmetadata/jobConfig_MAX_testglobalmetadata.ini'
-		jobConfigFilePath = '2018-01-04 09:16:13.321179_MAX_test_metadata_report/jobConfig_MAX_test_metadata_report.ini'
+		jobConfigFilePath = '2018-01-04 09:53:10.586251_MAX_test_metadataReport/jobConfig_MAX_test_metadataReport.ini'
 		
 		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	

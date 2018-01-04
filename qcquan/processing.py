@@ -254,7 +254,7 @@ def getDeltappmMetadata(df, deltappmCol):
 def getInjectionTimeInfo(df, ITCol):
 	""" calculates max injection time, and #PSMs at and below this value, then returns this info as a dataframe """
 	ITvals = df.loc[:, ITCol]
-	ITmax = np.nanmax(ITvals)
+	ITmax = np.nanmax(np.array(ITvals))
 	numBelowMax = len(list(filter(lambda x: x < ITmax, ITvals)))
 	numMax = len(list(filter(lambda x: x == ITmax, ITvals)))
 	return DataFrame([[ITmax, numMax, numBelowMax]], columns=['max', 'num max', 'num below'])
