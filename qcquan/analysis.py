@@ -61,8 +61,8 @@ def combineProcessingMetadata(metadata, perExperimentMetadata):
 	# info on amount of PSMs
 	metadata['numPSMs'] = pd.DataFrame(index=experimentNames, columns=['initial', 'after cleaning'])
 	metadata['injectionTimeInfo'] = pd.DataFrame(index=experimentNames, columns=['max', 'mean', 'std'])
-	metadata['intensityStatistics'] = dict()  # dict because we need a whole dataframe per experiment
-	metadata['deltappmStatistics'] = dict()  # dict because we need a whole dataframe per experiment
+	metadata['intensityStatisticsPerExp'] = dict()  # dict because we need a whole dataframe per experiment
+	metadata['deltappmStatisticsPerExp'] = dict()  # dict because we need a whole dataframe per experiment
 	# pd.DataFrame(index=['intensityStatistics', 'deltappmStatistics'], columns=experimentNames)
 	for eName in experimentNames:
 		metadata['numPSMs'].loc[eName, :] = [perExperimentMetadata[eName]['numPSMs_initial'],
