@@ -123,6 +123,9 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	if writeToDisk:
 		HCDendrogramFullPath = exportData(HCDendrogram, dataType='fig', path_out=params['path_results'],
 				   filename=params['jobName'] + '_HCDendrogram')
+	
+	ScoreVsDeltaMppmScatter = getScoreVsDeltaMppmScatter(metadata['relPSMScoreVsDeltaMppmPerExp'])
+
 
 	if writeToDisk:
 		htmlReport, pdfhtmlreport = makeHTML(jobParams=params, allProcessingParams=processingParams,

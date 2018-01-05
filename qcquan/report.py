@@ -355,6 +355,22 @@ def getHCDendrogram(HCResult, schema, title=None):
 	return HCDendrogram
 
 
+def getScoreVsDeltaMppmScatter(relPSMScoreVsDeltaMppmPerExp):
+	""" Make one scatter plot of engineScore vs deltaM of all PSMs, coloured per experiment.
+	Scores are relative to within-experiment maximum. """
+	f = plt.figure(figsize=(figwidth, figheight))
+	ax = f.add_subplot(111)
+	plt.xlabel(r'\Delta M [ppm]', figure=f)
+	plt.ylabel('PSM engine score (relative to max)', figure=f)
+	
+	experimentNames = relPSMScoreVsDeltaMppmPerExp.keys()
+	colormap = distinguishableColours(len(experimentNames), type='jet')
+	i = 0
+	for eName, valuesdf in relPSMScoreVsDeltaMppmPerExp.items():
+		ax.scatter(valuesdf['deltaMppm'], valuesdf['relScore'], s=2, c=colormap[i], label=eName)
+	return f
+
+
 def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferentialsDFs, fullTopDifferentialsDFs, minVolcanoFullPaths,
 			 fullVolcanoFullPaths, PCAPlotFullPath, HCDendrogramFullPath, metadata, logFilePath, startTime):
 	"""
