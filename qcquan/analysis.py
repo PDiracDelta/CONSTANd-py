@@ -60,6 +60,7 @@ def combineProcessingMetadata(metadata, perExperimentMetadata):
 	allObservedProteins = pd.Series(list(set().union(*[perExperimentMetadata[eName]['allMasterProteins'] for eName in experimentNames])))
 	# info on amount of PSMs
 	metadata['numPSMs'] = pd.DataFrame(index=experimentNames, columns=['initial', 'after cleaning'])
+	metadata['pctPSMsIsolInterfTooHigh'] = pd.DataFrame(columns=experimentNames)
 	metadata['injectionTimeInfo'] = pd.DataFrame(index=experimentNames, columns=['max', 'num max', 'num below'])
 	metadata['deltappmStatistics'] = pd.DataFrame(index=experimentNames, columns=['max', 'mean', 'std'])
 	metadata['intensityStatisticsPerExp'] = dict()  # dict because we need a whole dataframe per experiment
@@ -69,6 +70,7 @@ def combineProcessingMetadata(metadata, perExperimentMetadata):
 		metadata['injectionTimeInfo'].loc[eName, :] = perExperimentMetadata[eName]['injectionTimeInfo'].iloc[0, :]  # there is only 1 entry
 		metadata['deltappmStatistics'].loc[eName, :] = perExperimentMetadata[eName]['deltappmStatistics'].iloc[0, :]  # there is only 1 entry
 		metadata['intensityStatisticsPerExp'][eName] = perExperimentMetadata[eName]['intensityStatistics']
+		metadata['pctPSMsIsolInterfTooHigh'].loc[0, eName] = perExperimentMetadata[eName]['pctPSMsIsolInterfTooHigh']
 	
 	return metadata, allObservedProteins
 

@@ -141,7 +141,7 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		doReport = (args[4] == 'True')
 		writeToDisk = (args[5] == 'True')
 	else:  # you didn't call main.py from the command line but from pycharm
-		doProcessing = True
+		doProcessing = False
 		doAnalysis = True
 		doReport = True
 		writeToDisk = True
