@@ -81,6 +81,19 @@ def removeMissing(df, noMissingValuesColumns, quanColumns, PSMEnginePriority):
 	return df, removedData
 
 
+def getRelPSMScoreVsDeltaMppm(df, PSMEnginePriority):
+	""" returns dataframe with each PSM's Score relative to the maximum score of that PSM Engine, and its DeltaM in ppm. """
+	byEngine = df.groupby('Identifying Node Type').groups
+	relScores = []
+	deltaMppms = []
+	for e, indices in byEngine.items():
+		priorityIndex = PSMEnginePriority['engineNames'].index(e)
+		scoreColname = PSMEnginePriority['scoreNames'][priorityIndex]
+		relScores.extend(df.loc[indices, scoreColname]/np.nanmax(df.loc[indices, scoreColname]))
+		deltaMppms.extend(df.loc[indices, 'DeltaM [ppm]'])
+	return DataFrame(data=[relScores, deltaMppms], columns=['relScore', 'deltaMppm'])
+
+
 def removeBadConfidence(df, minimum, removalColumnsToSave):
 	"""
 	Removes PSMs from the input dataFrame if they have a confidence level worse than the given minimum. Saves some
