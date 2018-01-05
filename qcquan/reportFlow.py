@@ -125,6 +125,9 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 				   filename=params['jobName'] + '_HCDendrogram')
 	
 	ScoreVsDeltaMppmScatter = getScoreVsDeltaMppmScatter(metadata['relPSMScoreVsDeltaMppmPerExp'])
+	if writeToDisk:
+		ScoreVsDeltaMppmScatterFullPath = exportData(ScoreVsDeltaMppmScatter, dataType='fig', path_out=params['path_results'],
+				   filename=params['jobName'] + '_ScoreVsDeltaMppmScatter')
 
 
 	if writeToDisk:
@@ -135,6 +138,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 											 minVolcanoFullPaths=minVolcanoFullPaths,
 											 fullVolcanoFullPaths=fullVolcanoFullPaths,
 											 PCAPlotFullPath=PCAPlotFullPath, HCDendrogramFullPath=HCDendrogramFullPath,
+											 ScoreVsDeltaMppmScatterFullPath=ScoreVsDeltaMppmScatterFullPath,
 											 metadata=metadata, logFilePath=logFilePath, startTime=startTime)
 		htmlFullPath = exportData(htmlReport, dataType='html', path_out=params['path_results'],
 				   filename=params['jobName'] + '_report')

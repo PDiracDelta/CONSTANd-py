@@ -372,7 +372,7 @@ def getScoreVsDeltaMppmScatter(relPSMScoreVsDeltaMppmPerExp):
 
 
 def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferentialsDFs, fullTopDifferentialsDFs, minVolcanoFullPaths,
-			 fullVolcanoFullPaths, PCAPlotFullPath, HCDendrogramFullPath, metadata, logFilePath, startTime):
+			 fullVolcanoFullPaths, PCAPlotFullPath, HCDendrogramFullPath, ScoreVsDeltaMppmScatterFullPath, metadata, logFilePath, startTime):
 	"""
 	Pour all report visualizations, the list(s) of differentials, metadata and job parameters into an HTML file.
 	A second HTML file used for conversion to PDF is generated slightly different from the one used	for actual HTML
@@ -475,9 +475,10 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 										fullExpression_bool=jobParams['fullExpression_bool'],
 										mindifferentialsdict=minTopDifferentialsHTMLDict,
 										fulldifferentialsdict=fullTopDifferentialsHTMLDict, PCAFileName=PCAPlotFullPath,
-										HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
+										HCDFileName=HCDendrogramFullPath, ScoreVsDeltaMppmScatterFullPath=ScoreVsDeltaMppmScatterFullPath,
+										metadata=metadata, date=jobParams['date'],
 										duration=approxDuration, log=logContents, jobParams=jobParams,
-										allProcessingParams=allProcessingParams, pdfsrc='True')#, experiments=experiments)
+										allProcessingParams=allProcessingParams, pdfsrc='True')
 	# get the tails of the input paths, starting from the jobs dir, so the Jinja report template can couple it to the
 	# jobs symlink in the static dir.
 	for condition in otherConditions:
@@ -500,9 +501,10 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 									 fullExpression_bool=jobParams['fullExpression_bool'],
 									 mindifferentialsdict=minTopDifferentialsHTMLDict,
 									 fulldifferentialsdict=fullTopDifferentialsHTMLDict, PCAFileName=PCAPlotFullPath,
-									 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
+									 HCDFileName=HCDendrogramFullPath, ScoreVsDeltaMppmScatterFullPath=ScoreVsDeltaMppmScatterFullPath,
+									 metadata=metadata, date=jobParams['date'],
 									 duration=approxDuration, log=logContents, jobParams=jobParams,
-									 allProcessingParams=allProcessingParams)#, experiments=experiments)
+									 allProcessingParams=allProcessingParams)
 	return htmlReport, pdfhtmlreport
 
 
