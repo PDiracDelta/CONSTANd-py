@@ -360,7 +360,7 @@ def getScoreVsDeltaMppmScatter(relPSMScoreVsDeltaMppmPerExp):
 	Scores are relative to within-experiment maximum. """
 	f = plt.figure(figsize=(figwidth, figheight))
 	ax = f.add_subplot(111)
-	plt.xlabel(r'\Delta M [ppm]', figure=f)
+	plt.xlabel(r'$\Delta$M [ppm]', figure=f)
 	plt.ylabel('PSM engine score (relative to max)', figure=f)
 	
 	experimentNames = relPSMScoreVsDeltaMppmPerExp.keys()
@@ -368,6 +368,8 @@ def getScoreVsDeltaMppmScatter(relPSMScoreVsDeltaMppmPerExp):
 	i = 0
 	for eName, valuesdf in relPSMScoreVsDeltaMppmPerExp.items():
 		ax.scatter(valuesdf['deltaMppm'], valuesdf['relScore'], s=2, c=colormap[i], label=eName)
+		i += 1
+	plt.legend(markerscale=5)#loc='upper left')
 	return f
 
 
