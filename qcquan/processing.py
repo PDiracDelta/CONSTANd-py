@@ -91,7 +91,7 @@ def getRelPSMScoreVsDeltaMppm(df, PSMEnginePriority):
 		scoreColname = PSMEnginePriority['scoreNames'][priorityIndex]
 		relScores.extend(df.loc[indices, scoreColname]/np.nanmax(df.loc[indices, scoreColname]))
 		deltaMppms.extend(df.loc[indices, 'DeltaM [ppm]'])
-	return DataFrame(data=[relScores, deltaMppms], columns=['relScore', 'deltaMppm'])
+	return DataFrame(data={'relScore': relScores, 'deltaMppm': deltaMppms}, columns=['relScore', 'deltaMppm'])
 
 
 def removeBadConfidence(df, minimum, removalColumnsToSave):
