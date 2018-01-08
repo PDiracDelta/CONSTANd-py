@@ -68,11 +68,11 @@ def combineProcessingMetadata(metadata, perExperimentMetadata):
 	for eName in experimentNames:
 		metadata['numPSMs'].loc[eName, :] = [perExperimentMetadata[eName]['numPSMs_initial'],
 											 perExperimentMetadata[eName]['numPSMs_afterCleaning']]
+		metadata['pctPSMsIsolInterfTooHigh'].loc[0, eName] = perExperimentMetadata[eName]['pctPSMsIsolInterfTooHigh']
 		metadata['injectionTimeInfo'].loc[eName, :] = perExperimentMetadata[eName]['injectionTimeInfo'].iloc[0, :]  # there is only 1 entry
 		metadata['deltappmStatistics'].loc[eName, :] = perExperimentMetadata[eName]['deltappmStatistics'].iloc[0, :]  # there is only 1 entry
 		metadata['intensityStatisticsPerExp'][eName] = perExperimentMetadata[eName]['intensityStatistics']
 		metadata['relPSMScoreVsDeltaMppmPerExp'][eName] = perExperimentMetadata[eName]['relPSMScoreVsDeltaMppm']
-		metadata['pctPSMsIsolInterfTooHigh'].loc[0, eName] = perExperimentMetadata[eName]['pctPSMsIsolInterfTooHigh']
 	
 	return metadata, allObservedProteins
 
