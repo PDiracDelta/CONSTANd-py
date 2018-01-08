@@ -42,6 +42,9 @@ def processDf(df, params, writeToDisk, metadata, doConstand=True):
 	# remove PSMs where (essential) data is missing.
 	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['quanColumns'], params['PSMEnginePriority'])
 	
+	# get MS1 intensities on the PSM level of all sensible PSMs (after removing missing data PSMs)
+	metadata['MS1Intensities_PSMs'] = df.loc[:, 'Intensity']
+	
 	# get PSM scores relative to maximum versus DeltaMppm
 	metadata['relPSMScoreVsDeltaMppm'] = getRelPSMScoreVsDeltaMppm(df, params['PSMEnginePriority'])
 	

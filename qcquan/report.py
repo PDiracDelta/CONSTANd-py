@@ -373,8 +373,26 @@ def getScoreVsDeltaMppmScatter(relPSMScoreVsDeltaMppmPerExp):
 	return f
 
 
+def getMS1IntensityHist(MS1Intensities_PSMs, MS1Intensities_peptides):
+	eNames = list(MS1Intensities_peptides.keys())
+	NUM_EXPERIMENTS = len(eNames)
+	f = plt.figure(figsize=(figwidth, figheight))
+	plt.title("MS1 intensities")
+	# construct subplot grid with correct size
+	firstDigit = 2 if NUM_EXPERIMENTS > 1 else 1
+	secondDigit = np.ceil(NUM_EXPERIMENTS/2)
+	firstTwoDigits = 100*firstDigit + 10*secondDigit
+	for i in range(NUM_EXPERIMENTS):
+		ax = f.add_subplot(firstTwoDigits+i+1)
+		ax.hist(MS1Intensities_PSMs[eNames[i]])
+		ax.hist(MS1Intensities_peptides[eNames[i]])
+		ax.legend(label=["All", "Used by QCQuan"])
+	return f
+
+
 def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferentialsDFs, fullTopDifferentialsDFs, minVolcanoFullPaths,
-			 fullVolcanoFullPaths, PCAPlotFullPath, HCDendrogramFullPath, ScoreVsDeltaMppmScatterFullPath, metadata, logFilePath, startTime):
+			 fullVolcanoFullPaths, PCAPlotFullPath, HCDendrogramFullPath, ScoreVsDeltaMppmScatterFullPath, MS1IntensityHistFullPath,
+			 metadata, logFilePath, startTime):
 	"""
 	Pour all report visualizations, the list(s) of differentials, metadata and job parameters into an HTML file.
 	A second HTML file used for conversion to PDF is generated slightly different from the one used	for actual HTML
@@ -478,6 +496,7 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 										mindifferentialsdict=minTopDifferentialsHTMLDict,
 										fulldifferentialsdict=fullTopDifferentialsHTMLDict, PCAFileName=PCAPlotFullPath,
 										HCDFileName=HCDendrogramFullPath, ScoreVsDeltaMppmScatterFullPath=ScoreVsDeltaMppmScatterFullPath,
+										MS1IntensityHistFullPath=MS1IntensityHistFullPath,
 										metadata=metadata, date=jobParams['date'],
 										duration=approxDuration, log=logContents, jobParams=jobParams,
 										allProcessingParams=allProcessingParams, pdfsrc='True')
@@ -504,6 +523,7 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 									 mindifferentialsdict=minTopDifferentialsHTMLDict,
 									 fulldifferentialsdict=fullTopDifferentialsHTMLDict, PCAFileName=PCAPlotFullPath,
 									 HCDFileName=HCDendrogramFullPath, ScoreVsDeltaMppmScatterFullPath=ScoreVsDeltaMppmScatterFullPath,
+									 MS1IntensityHistFullPath=MS1IntensityHistFullPath,
 									 metadata=metadata, date=jobParams['date'],
 									 duration=approxDuration, log=logContents, jobParams=jobParams,
 									 allProcessingParams=allProcessingParams)

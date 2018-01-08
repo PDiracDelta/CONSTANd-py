@@ -128,6 +128,11 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	if writeToDisk:
 		ScoreVsDeltaMppmScatterFullPath = exportData(ScoreVsDeltaMppmScatter, dataType='fig', path_out=params['path_results'],
 				   filename=params['jobName'] + '_ScoreVsDeltaMppmScatter')
+	
+	MS1IntensityHist = getMS1IntensityHist(metadata['MS1Intensities_PSMs'], metadata['MS1Intensities_peptides'])
+	if writeToDisk:
+		MS1IntensityHistFullPath = exportData(MS1IntensityHist, dataType='fig', path_out=params['path_results'],
+				   filename=params['jobName'] + '_MS1IntensityHist')
 
 
 	if writeToDisk:
@@ -139,6 +144,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 											 fullVolcanoFullPaths=fullVolcanoFullPaths,
 											 PCAPlotFullPath=PCAPlotFullPath, HCDendrogramFullPath=HCDendrogramFullPath,
 											 ScoreVsDeltaMppmScatterFullPath=ScoreVsDeltaMppmScatterFullPath,
+											 MS1IntensityHistFullPath=MS1IntensityHistFullPath,
 											 metadata=metadata, logFilePath=logFilePath, startTime=startTime)
 		htmlFullPath = exportData(htmlReport, dataType='html', path_out=params['path_results'],
 				   filename=params['jobName'] + '_report')
