@@ -27,7 +27,7 @@ from qcquan import fontweight, fontsize, figwidth, figheight
 
 # adjust font size globally
 matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # todo remove?
 
 
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
@@ -376,18 +376,32 @@ def getScoreVsDeltaMppmScatter(relPSMScoreVsDeltaMppmPerExp):
 def getMS1IntensityHist(MS1Intensities_PSMs, MS1Intensities_peptides):
 	eNames = list(MS1Intensities_peptides.keys())
 	NUM_EXPERIMENTS = len(eNames)
-	f = plt.figure(figsize=(figwidth, figheight))
-	plt.title("MS1 intensities")
-	# construct subplot grid with correct size
-	firstDigit = 2 if NUM_EXPERIMENTS > 1 else 1
-	secondDigit = np.ceil(NUM_EXPERIMENTS/2)
-	firstTwoDigits = 100*firstDigit + 10*secondDigit
+	# 2 by N/2 array of plots, unless N<2 then plot just one.
+	fig, axes = plt.subplots(nrows=int(np.ceil(NUM_EXPERIMENTS/2)), ncols=int(min(NUM_EXPERIMENTS, 2)), figsize=(figwidth, figheight))
 	for i in range(NUM_EXPERIMENTS):
-		ax = f.add_subplot(firstTwoDigits+i+1)
-		ax.hist(MS1Intensities_PSMs[eNames[i]])
-		ax.hist(MS1Intensities_peptides[eNames[i]])
-		ax.legend(label=["All", "Used by QCQuan"])
-	return f
+		PSMdata = MS1Intensities_PSMs[eNames[i]].dropna()
+		peptidedata = MS1Intensities_peptides[eNames[i]].dropna()
+		globMax = max(max(PSMdata), max(peptidedata))
+		# globMin = min(min(PSMdata), min(peptidedata))
+		globMin = 0
+		ax = axes[divmod(i, 2)]
+		ax.hist(PSMdata, bins=50, range=(globMin, globMax), label="All", alpha=0.7)
+		ax.hist(peptidedata, bins=50, range=(globMin, globMax), label="Used by QCQuan", alpha=0.7)
+		ax.set_yscale("log")
+		# ax.set_xscale("log")
+		ax.legend(prop={'size': fontsize/2 if NUM_EXPERIMENTS > 1 else fontsize})
+		ax.set_title(eNames[i])
+	
+	# hack in common X label
+	fig.add_subplot(111, frameon=False)
+	# hide tick and tick label of the big axes
+	plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
+	plt.grid(False)
+	plt.xlabel("MS1 Intensity")
+	# plt.xlabel(r"log$_{10}$(MS1 Intensity)")
+	# plt.ylabel("Amount of PSMs or peptides")
+	plt.tight_layout()
+	return fig
 
 
 def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferentialsDFs, fullTopDifferentialsDFs, minVolcanoFullPaths,
