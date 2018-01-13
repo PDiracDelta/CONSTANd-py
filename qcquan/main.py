@@ -25,7 +25,8 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 	from qcquan_web.web import DB_setJobReportRelPaths
 	logFilePath = os.path.abspath(os.path.join(jobConfigFilePath, os.path.join(os.pardir, 'log.txt')))
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
-	start = time()
+	metadata = dict()
+	metadata['start'] = time()
 	jobParams = getJobConfig(jobConfigFilePath)  # config filenames + params for the combination of experiments
 	allProcessingParams = {}  # specific params for each experiment
 	dfs = {}
@@ -58,7 +59,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 			logging.info(
 				"Starting processing of experiment '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.utcnow()).split('.')[0])
-			processingResults[eName] = processDf(dfs[eName], allProcessingParams[eName], writeToDisk)
+			processingResults[eName] = processDf(dfs[eName], allProcessingParams[eName], writeToDisk, metadata)
 			logging.info(
 				"Finished processing of experiment '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.utcnow()).split('.')[0])
@@ -113,7 +114,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 		# visualize and make a report
 		logging.info("Starting visualization end report generation of job: " + jobParams['jobName'] + " at " +
 					 str(datetime.datetime.utcnow()).split('.')[0])
-		generateReport(analysisResults, jobParams, logFilePath, writeToDisk, allProcessingParams, start)
+		generateReport(analysisResults, jobParams, logFilePath, writeToDisk, allProcessingParams, metadata['start'])
 		DB_setJobReportRelPaths(jobID=jobDirName, resultpath=jobParams['path_results'],
 								jobName=jobParams['jobName'])
 		logging.info("Finished visualization end report generation of job: " + jobParams['jobName'] + " at " +
@@ -121,7 +122,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 	else:
 		logging.warning("No report generated!")
 	stop = time()
-	print(stop - start)
+	print(stop - metadata['start'])
 
 
 if __name__ == '__main__':  # this should not execute if main.py is not the main module called by the python interpreter,
@@ -146,23 +147,8 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		writeToDisk = True
 		
 		from qcquan_web.config import ALLJOBSDIR
-		#jobConfigFilePath = '2017-08-23 10:20:21.345488_test_updatedRemoveBadConfidence/jobConfig_test_updatedRemoveBadConfidence.ini'
-		#jobConfigFilePath = '2017-08-23 17:01:13.474192_df/jobConfig_df.ini'
-		# jobConfigFilePath = '2017-08-30 16:56:24.378757_ESmit_digests_v2/jobConfig_ESmit_digests_v2.ini'
-		# jobConfigFilePath = '2017-09-13 17:16:18.431969_Gatto/jobConfig_Gatto.ini'
-		# jobConfigFilePath = '2017-09-14 12:02:02.772295_Schmidt/jobConfig_Schmidt.ini'
-		# jobConfigFilePath = '2017-09-21 09:53:22.528726_test_zipfileinjobifopage/jobConfig_test_zipfileinjobifopage.ini'
-		# jobConfigFilePath = '2017-10-03 13:48:11.434715_test_after_qcquan_rename/jobConfig_test_after_qcquan_rename.ini'
-		# jobConfigFilePath = '2017-10-17 10:04:40.957958_Schmidt_EColi/jobConfig_Schmidt_EColi.ini'
-		# jobConfigFilePath = '2017-11-09 14:25:37.510140_fullzip_MAX/jobConfig_fullzip_MAX.ini'
-		# jobConfigFilePath = '2017-09-21 14:01:04.901275_Gatto_PSMs/jobConfig_Gatto_PSMs.ini'
-		# jobConfigFilePath = '2017-10-10 13:52:21.393429_Gatto_R_incl_NA_PSM/jobConfig_Gatto_R_incl_NA_PSM.ini'
-		# jobConfigFilePath = '2017-11-22 10:13:00.911475_Schmidt_HeLa-RPE/jobConfig_Schmidt_HeLa-RPE.ini'
-		# jobConfigFilePath = '2017-10-18 12:58:44.290228_MAX/jobConfig_MAX.ini'
-		# jobConfigFilePath = '2017-11-23 15:32:09.090927_Schmidt_HeLa-RPE_full/jobConfig_Schmidt_HeLa-RPE_full.ini'
-		# jobConfigFilePath = '2017-12-05 12:06:06.865343_MAX_testLoopOrderChange/jobConfig_MAX_testLoopOrderChange.ini'
-		# jobConfigFilePath = '2017-12-05 16:06:02.211023_MAX_testPSMEnginePriority/jobConfig_MAX_testPSMEnginePriority.ini'
-		jobConfigFilePath = '2017-12-22 13:19:56.823574_MAX_numpeptfix/jobConfig_MAX_numpeptfix.ini'
+
+		jobConfigFilePath = '2018-01-13 19:58:25.464877_MAX_testexpoverwrite/jobConfig_MAX_testexpoverwrite.ini'
 		
 		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	
