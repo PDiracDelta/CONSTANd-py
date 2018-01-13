@@ -5,6 +5,7 @@
 Workflow of the processing part of QCQuan.
 """
 
+import logging
 from qcquan.report import *
 from qcquan.dataIO import exportData, genZip
 
@@ -129,10 +130,14 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		ScoreVsDeltaMppmScatterFullPath = exportData(ScoreVsDeltaMppmScatter, dataType='fig', path_out=params['path_results'],
 				   filename=params['jobName'] + '_ScoreVsDeltaMppmScatter')
 	
-	MS1IntensityHist = getMS1IntensityHist(metadata['MS1Intensities_PSMs'], metadata['MS1Intensities_peptides'])
-	if writeToDisk:
-		MS1IntensityHistFullPath = exportData(MS1IntensityHist, dataType='fig', path_out=params['path_results'],
-				   filename=params['jobName'] + '_MS1IntensityHist')
+	try:
+		MS1IntensityHist = getMS1IntensityHist(metadata['MS1Intensities_PSMs'], metadata['MS1Intensities_peptides'])
+		if writeToDisk:
+			MS1IntensityHistFullPath = exportData(MS1IntensityHist, dataType='fig', path_out=params['path_results'],
+					   filename=params['jobName'] + '_MS1IntensityHist')
+	except KeyError as e:
+		logging.warning("QC entry '" + str(e.args[0]) + "' was not found. Not producing MS1IntensityHist.")
+		MS1IntensityHist = None
 
 
 	if writeToDisk:
