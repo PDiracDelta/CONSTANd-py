@@ -342,16 +342,20 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 			else:  # save all removedData in separate files per category.
 				fullPaths = dict()
 				for key, value in data.items():  # recursively export all frames in the dict in a separate file.
-					if type(value) in [dict, pd.DataFrame]:
+					if type(value) in [dict, pd.DataFrame, pd.Series]:
 						valueDataType = 'df'
+						if isinstance(value, pd.Series):  # convert to dataframe for conserving index when writing to file
+							value = value.to_frame()
 					elif type(value) in [list, float, int, set]:
 						valueDataType = 'txt'
 					else:
 						valueDataType = 'obj'
 					fullPaths[key] = exportData(value, valueDataType, path_out, filename + '_' + key, delim_out, False)
 				return fullPaths
-		else:  # it's just a single dataframe
-			assert isinstance(data, pd.DataFrame)
+		else:  # it's just a single dataframe OR series
+			assert isinstance(data, pd.DataFrame) or isinstance(data, pd.Series)
+			if isinstance(data, pd.Series):
+				data = data.to_frame()
 			data.to_csv(fullPath, sep=delim_out, index=False)
 			return fullPath
 	elif dataType == 'fig':
