@@ -386,19 +386,21 @@ def getMS1IntensityHist(MS1Intensities_PSMs, MS1Intensities_peptides):
 		# globMin = min(min(PSMdata), min(peptidedata))
 		globMin = 0
 		ax = axes[divmod(i, 2)]
-		ax.hist(PSMdata, bins=50, range=(globMin, globMax), label="All", alpha=0.7)
-		ax.hist(peptidedata, bins=50, range=(globMin, globMax), label="Used by QCQuan", alpha=0.7)
+		ax.hist(PSMdata, bins=50, range=(globMin, globMax), label="all PSMs")#, alpha=0.7)
+		ax.hist(peptidedata, bins=50, range=(globMin, globMax), label="used PSMs")#, alpha=0.7)
 		ax.set_yscale("log")
 		# ax.set_xscale("log")
 		ax.legend(prop={'size': fontsize/2 if NUM_EXPERIMENTS > 1 else fontsize})
 		ax.set_title(eNames[i])
+		ax.ticklabel_format(style='sci', scilimits=(0, 0), axis='x')
+		ax.set_xlabel("MS1 Intensity")
 	
 	# hack in common X label
 	fig.add_subplot(111, frameon=False)
 	# hide tick and tick label of the big axes
 	plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
 	plt.grid(False)
-	plt.xlabel("MS1 Intensity")
+	# plt.xlabel("MS1 Intensity")
 	# plt.xlabel(r"log$_{10}$(MS1 Intensity)")
 	# plt.ylabel("Amount of PSMs or peptides")
 	plt.tight_layout()
