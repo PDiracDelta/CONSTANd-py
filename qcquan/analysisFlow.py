@@ -51,9 +51,11 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# combine all metadata from each separate MS run
 	metadata, allObservedProteins = combineProcessingMetadata(metadata, metadatas)
 	# get MS1 intensities on the peptide level, i.e. after aggregation and cleaning.
-	metadata['MS1Intensities_peptides'] = pd.DataFrame(columns=list(dfs.keys()))
+	metadata['MS1Intensities_peptides'] = pd.Series(index=list(dfs.keys()))
 	for eName in dfs.keys():
-		metadata['MS1Intensities_peptides'].loc[:, eName] = dfs[eName].loc[:, 'Intensity']
+		# reset index because otherwise the df will get NaN values since not all MS1 intensity indices are equal
+		# across all experiments
+		metadata['MS1Intensities_peptides'][eName] = dfs[eName].loc[:, 'Intensity'].tolist()
 	
 	metadata['numeric'].loc[0, 'numObservedProteins'] = len(allObservedProteins)
 	metadata['allObservedProteins'] = pd.DataFrame({'protein': allObservedProteins})

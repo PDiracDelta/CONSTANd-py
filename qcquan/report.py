@@ -379,8 +379,9 @@ def getMS1IntensityHist(MS1Intensities_PSMs, MS1Intensities_peptides):
 	# 2 by N/2 array of plots, unless N<2 then plot just one.
 	fig, axes = plt.subplots(nrows=int(np.ceil(NUM_EXPERIMENTS/2)), ncols=int(min(NUM_EXPERIMENTS, 2)), figsize=(figwidth, figheight))
 	for i in range(NUM_EXPERIMENTS):
-		PSMdata = MS1Intensities_PSMs[eNames[i]].dropna()
-		peptidedata = MS1Intensities_peptides[eNames[i]].dropna()
+		# do NOT drop NA because that should not be necessary! It will illegitimately remove data. Fix your input data.
+		PSMdata = MS1Intensities_PSMs[eNames[i]]  # .dropna()
+		peptidedata = MS1Intensities_peptides[eNames[i]]  # .dropna()
 		globMax = max(max(PSMdata), max(peptidedata))
 		# globMin = min(min(PSMdata), min(peptidedata))
 		globMin = 0
