@@ -61,7 +61,7 @@ def combineProcessingMetadata(metadata, perExperimentMetadata):
 	# info on amount of PSMs
 	metadata['numPSMs'] = pd.DataFrame(index=experimentNames, columns=['initial', 'after cleaning'])
 	metadata['pctPSMsIsolInterfTooHigh'] = pd.DataFrame(columns=experimentNames)
-	metadata['MS1Intensities_PSMs'] = pd.DataFrame(columns=experimentNames)
+	metadata['MS1Intensities_PSMs'] = pd.Series(index=experimentNames, dtype=object)
 	metadata['injectionTimeInfo'] = pd.DataFrame(index=experimentNames, columns=['max', 'num max', 'num below'])
 	metadata['deltappmStatistics'] = pd.DataFrame(index=experimentNames, columns=['max', 'mean', 'std'])
 	metadata['intensityStatisticsPerExp'] = dict()  # dict because we need a whole dataframe per experiment
@@ -70,7 +70,7 @@ def combineProcessingMetadata(metadata, perExperimentMetadata):
 		metadata['numPSMs'].loc[eName, :] = [perExperimentMetadata[eName]['numPSMs_initial'],
 											 perExperimentMetadata[eName]['numPSMs_afterCleaning']]
 		metadata['pctPSMsIsolInterfTooHigh'].loc[0, eName] = perExperimentMetadata[eName]['pctPSMsIsolInterfTooHigh']
-		metadata['MS1Intensities_PSMs'].loc[:, eName] = perExperimentMetadata[eName]['MS1Intensities_PSMs']
+		metadata['MS1Intensities_PSMs'][eName] = perExperimentMetadata[eName]['MS1Intensities_PSMs'].tolist()
 		metadata['injectionTimeInfo'].loc[eName, :] = perExperimentMetadata[eName]['injectionTimeInfo'].iloc[0, :]  # there is only 1 entry
 		metadata['deltappmStatistics'].loc[eName, :] = perExperimentMetadata[eName]['deltappmStatistics'].iloc[0, :]  # there is only 1 entry
 		metadata['intensityStatisticsPerExp'][eName] = perExperimentMetadata[eName]['intensityStatistics']
