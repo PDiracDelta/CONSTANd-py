@@ -24,6 +24,9 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 	from time import time
 	from qcquan_web.web import DB_setJobReportRelPaths
 	logFilePath = os.path.abspath(os.path.join(jobConfigFilePath, os.path.join(os.pardir, 'log.txt')))
+	if os.path.exists(logFilePath):
+		# clean up old log file so as not to clog it while debugging
+		os.remove(logFilePath)
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
 	metadata = dict()
 	metadata['start'] = time()
