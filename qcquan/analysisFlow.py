@@ -48,16 +48,9 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# metadataframe for all simple numeric values
 	metadata['numeric'] = pd.DataFrame()
 	
-	# assert metadatas['R']['injectionTimeInfo'].loc[0, 'num max'] != metadatas['B']['injectionTimeInfo'].loc[0, 'num max']  # TEST
 	# combine all metadata from each separate MS run
 	metadata, allObservedProteins = combineProcessingMetadata(metadata, metadatas)
-	# if metadata['injectionTimeInfo'].loc['R', 'num max'] == metadata['injectionTimeInfo'].loc['B', 'num max']:  # TEST
-	# 	from json import dumps
-	# 	print("HOLD YOUR HORSES")
-	# 	logging.info('metadatas:'+dumps(metadatas))
-	# 	logging.info('metadata:'+dumps(metadata))
-	# else:
-	# 	print("nothing special here")
+
 	try:
 		# get MS1 intensities on the peptide level, i.e. after aggregation and cleaning.
 		metadata['MS1Intensities_peptides'] = pd.Series(index=list(dfs.keys()), dtype=object)

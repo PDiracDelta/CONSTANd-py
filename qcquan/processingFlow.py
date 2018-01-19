@@ -123,9 +123,9 @@ def processDf(df, params, writeToDisk, metadata, doConstand=True):
 		logging.warning("No PTM aggregation done.")
 		
 	# SANITY CHECK: there should be no more duplicates if all aggregates have been applied.
-	if params['removePSMEngineRedundancy_bool'] and params['aggregateCharge_bool'] and params['aggregatePTM_bool']:  # TEST
-		assert np.prod((len(i) < 2 for (s, i) in df.groupby(
-			'Sequence').groups))  # only 1 index vector in dict of SEQUENCE:[INDICES] for all sequences
+	# if params['removePSMEngineRedundancy_bool'] and params['aggregateCharge_bool'] and params['aggregatePTM_bool']:  # TEST
+	# 	assert np.prod((len(i) < 2 for (s, i) in df.groupby(
+	# 		'Sequence').groups))  # only 1 index vector in dict of SEQUENCE:[INDICES] for all sequences
 
 	if doConstand:
 		# perform the CONSTANd algorithm;
