@@ -50,12 +50,15 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	
 	# combine all metadata from each separate MS run
 	metadata, allObservedProteins = combineProcessingMetadata(metadata, metadatas)
-	# get MS1 intensities on the peptide level, i.e. after aggregation and cleaning.
-	metadata['MS1Intensities_peptides'] = pd.Series(index=list(dfs.keys()), dtype=object)
-	for eName in dfs.keys():
-		# reset index because otherwise the df will get NaN values since not all MS1 intensity indices are equal
-		# across all experiments
-		metadata['MS1Intensities_peptides'][eName] = dfs[eName].loc[:, 'Intensity'].tolist()
+	try:
+		# get MS1 intensities on the peptide level, i.e. after aggregation and cleaning.
+		metadata['MS1Intensities_peptides'] = pd.Series(index=list(dfs.keys()), dtype=object)
+		for eName in dfs.keys():
+			# reset index because otherwise the df will get NaN values since not all MS1 intensity indices are equal
+			# across all experiments
+			metadata['MS1Intensities_peptides'][eName] = dfs[eName].loc[:, 'Intensity'].tolist()
+	except KeyError:  # don't use e.args[0]: that doesn't work with pandas KeyErrors
+		logging.warning("Column 'Intensity' was not found. Not gathering MS1 intensity QC info.")
 	
 	metadata['numeric'].loc[0, 'numObservedProteins'] = len(allObservedProteins)
 	metadata['allObservedProteins'] = pd.DataFrame({'protein': allObservedProteins})

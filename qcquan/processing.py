@@ -66,8 +66,8 @@ def removeMissing(df, noMissingValuesColumns, quanColumns, PSMEnginePriority):
 			if PSMEnginePriority['scoreNames'][0] != 'unspecified':  # if no PSMEngine specified, there are no score columns.
 				# delete all PSMs that have a missing value in all PSMEngine score columns
 				toDelete.extend([x[0] for x in df[PSMEnginePriority['scoreNames']].isnull().iterrows() if x[1].all()])  # x[0] is the index
-		except KeyError as e:
-			logging.warning("Column '" + str(e.args[0]) + "' was not found. Not removing its missing values.")
+		except KeyError:
+			logging.warning("Column '" + str(column) + "' was not found. Not removing its missing values.")
 	# get the indices of all PSMs which have no quan values at all (those have their nansum equal to zero)
 	noIntensitiesBool = np.nansum(getIntensities(df=df, quanColumns=quanColumns), axis=1) == 0.
 	toDelete.extend(df.index[noIntensitiesBool])

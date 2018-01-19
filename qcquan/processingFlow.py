@@ -45,8 +45,8 @@ def processDf(df, params, writeToDisk, metadata, doConstand=True):
 	# get MS1 intensities on the PSM level of all sensible PSMs (after removing missing data PSMs)
 	try:
 		metadata['MS1Intensities_PSMs'] = df.loc[:, 'Intensity']
-	except KeyError as e:
-		logging.warning("Column '" + str(e.args[0]) + "' was not found. Not gathering MS1 intensity QC info.")
+	except KeyError:  # don't use e.args[0]: that doesn't work with pandas KeyErrors
+		logging.warning("Column 'Intensity' was not found. Not gathering MS1 intensity QC info.")
 	
 	# get PSM scores relative to maximum versus DeltaMppm
 	metadata['relPSMScoreVsDeltaMppm'] = getRelPSMScoreVsDeltaMppm(df, params['PSMEnginePriority'])

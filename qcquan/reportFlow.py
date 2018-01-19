@@ -5,7 +5,7 @@
 Workflow of the processing part of QCQuan.
 """
 
-import logging
+
 from qcquan.report import *
 from qcquan.dataIO import exportData, genZip
 
@@ -28,6 +28,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	:param processingParams:dict	experiment-specific processing parameters (see getConfig.py.)
 	:param startTime:		float	UNIX epoch timestamp at which the reportFlow was started
 	"""
+	import logging  # for some reason it doesnt work if you put it at the top of the file
 	minProteinDF = analysisResults[0]
 	fullProteinDF = analysisResults[1]
 	PCAResult = analysisResults[2]
@@ -137,7 +138,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 					   filename=params['jobName'] + '_MS1IntensityHist')
 	except KeyError as e:
 		logging.warning("QC entry '" + str(e.args[0]) + "' was not found. Not producing MS1IntensityHist.")
-		MS1IntensityHist = None
+		MS1IntensityHistFullPath = None
 
 
 	if writeToDisk:
