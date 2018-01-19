@@ -30,6 +30,7 @@ def processDf(df, params, writeToDisk, metadata, doConstand=True):
 														PSMEngine, RT, charge, modifications]
 	"""
 	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
+	metadata = dict()
 	
 	metadata['numPSMs_initial'] = len(df)
 	
