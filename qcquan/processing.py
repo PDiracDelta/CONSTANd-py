@@ -66,8 +66,8 @@ def removeMissing(df, noMissingValuesColumns, quanColumns, PSMEnginePriority):
 			if PSMEnginePriority['scoreNames'][0] != 'unspecified':  # if no PSMEngine specified, there are no score columns.
 				# delete all PSMs that have a missing value in all PSMEngine score columns
 				toDelete.extend([x[0] for x in df[PSMEnginePriority['scoreNames']].isnull().iterrows() if x[1].all()])  # x[0] is the index
-		except KeyError as e:
-			logging.warning("Column '" + str(e.args[0]) + "' was not found. Not removing its missing values.")
+		except KeyError:
+			logging.warning("Column '" + str(column) + "' was not found. Not removing its missing values.")
 	# get the indices of all PSMs which have no quan values at all (those have their nansum equal to zero)
 	noIntensitiesBool = np.nansum(getIntensities(df=df, quanColumns=quanColumns), axis=1) == 0.
 	toDelete.extend(df.index[noIntensitiesBool])
@@ -79,6 +79,19 @@ def removeMissing(df, noMissingValuesColumns, quanColumns, PSMEnginePriority):
 			"Some PSMs have been removed from the workflow due to missing values: see removedData['missing'].")
 	df.drop(toDelete, inplace=True)
 	return df, removedData
+
+
+def getRelPSMScoreVsDeltaMppm(df, PSMEnginePriority):
+	""" returns dataframe with each PSM's Score relative to the maximum score of that PSM Engine, and its DeltaM in ppm. """
+	byEngine = df.groupby('Identifying Node Type').groups
+	relScores = []
+	deltaMppms = []
+	for e, indices in byEngine.items():
+		priorityIndex = PSMEnginePriority['engineNames'].index(e)
+		scoreColname = PSMEnginePriority['scoreNames'][priorityIndex]
+		relScores.extend(df.loc[indices, scoreColname]/np.nanmax(df.loc[indices, scoreColname]))
+		deltaMppms.extend(df.loc[indices, 'DeltaM [ppm]'])
+	return DataFrame(data={'relScore': relScores, 'deltaMppm': deltaMppms}, columns=['relScore', 'deltaMppm'])
 
 
 def removeBadConfidence(df, minimum, removalColumnsToSave):
@@ -233,6 +246,31 @@ def cleanModificationsInfo(df):
 		# sort alphabetically (so modification order is always the same!)
 		df['Modifications'] = df['Modifications'].apply(sorted)
 	return df
+
+
+def getIntensityMetadata(df, quanColumns):
+	""" calculates max, mean and std of intensities for each quanColumn in the given df and returns it as a dataframe """
+	quanDF = df.loc[:, quanColumns]
+	return DataFrame([Series(np.amax(quanDF, 0), index=quanColumns),
+					  Series(np.nanmean(quanDF, 0), index=quanColumns),
+					  Series(np.nanstd(quanDF, 0), index=quanColumns)], index=['max', 'mean', 'std']).transpose()
+
+
+def getDeltappmMetadata(df, deltappmCol):
+	""" calculates max, mean and std of the deltappm column in the given df and returns it as a dataframe """
+	quanDF = df.loc[:, deltappmCol]
+	return DataFrame([Series(np.amax(quanDF, 0), index=[deltappmCol]),
+					  Series(np.nanmean(quanDF, 0), index=[deltappmCol]),
+					  Series(np.nanstd(quanDF, 0), index=[deltappmCol])], index=['max', 'mean', 'std']).transpose()
+
+
+def getInjectionTimeInfo(df, ITCol):
+	""" calculates max injection time, and #PSMs at and below this value, then returns this info as a dataframe """
+	ITvals = df.loc[:, ITCol]
+	ITmax = np.nanmax(np.array(ITvals))
+	numBelowMax = len(list(filter(lambda x: x < ITmax, ITvals)))
+	numMax = len(list(filter(lambda x: x == ITmax, ITvals)))
+	return DataFrame([[ITmax, numMax, numBelowMax]], columns=['max', 'num max', 'num below'])
 
 
 def isotopicCorrection(intensities, correctionsMatrix):

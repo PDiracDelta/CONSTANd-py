@@ -28,8 +28,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 		# clean up old log file so as not to clog it while debugging
 		os.remove(logFilePath)
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
-	metadata = dict()
-	metadata['start'] = time()
+	startTime = time()
 	jobParams = getJobConfig(jobConfigFilePath)  # config filenames + params for the combination of experiments
 	allProcessingParams = {}  # specific params for each experiment
 	dfs = {}
@@ -62,7 +61,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 			logging.info(
 				"Starting processing of experiment '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.utcnow()).split('.')[0])
-			processingResults[eName] = processDf(dfs[eName], allProcessingParams[eName], writeToDisk, metadata)
+			processingResults[eName] = processDf(dfs[eName], allProcessingParams[eName], writeToDisk, startTime)
 			logging.info(
 				"Finished processing of experiment '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.utcnow()).split('.')[0])
@@ -115,17 +114,17 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 				os.makedirs(results_path_out)
 		
 		# visualize and make a report
-		logging.info("Starting visualization end report generation of job: " + jobParams['jobName'] + " at " +
+		logging.info("Starting visualization and report generation of job: " + jobParams['jobName'] + " at " +
 					 str(datetime.datetime.utcnow()).split('.')[0])
-		generateReport(analysisResults, jobParams, logFilePath, writeToDisk, allProcessingParams, metadata['start'])
+		generateReport(analysisResults, jobParams, logFilePath, writeToDisk, allProcessingParams, startTime)
 		DB_setJobReportRelPaths(jobID=jobDirName, resultpath=jobParams['path_results'],
 								jobName=jobParams['jobName'])
-		logging.info("Finished visualization end report generation of job: " + jobParams['jobName'] + " at " +
+		logging.info("Finished visualization and report generation of job: " + jobParams['jobName'] + " at " +
 					 str(datetime.datetime.utcnow()).split('.')[0])
 	else:
 		logging.warning("No report generated!")
 	stop = time()
-	print(stop - metadata['start'])
+	print(stop - startTime)
 
 
 if __name__ == '__main__':  # this should not execute if main.py is not the main module called by the python interpreter,
@@ -145,15 +144,15 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		writeToDisk = (args[5] == 'True')
 	else:  # you didn't call main.py from the command line but from pycharm
 		doProcessing = False
-		doAnalysis = True
+		doAnalysis = False
 		doReport = True
 		writeToDisk = True
 		
 		from qcquan_web.config import ALLJOBSDIR
 
-		jobConfigFilePath = '2018-01-13 19:58:25.464877_MAX_testexpoverwrite/jobConfig_MAX_testexpoverwrite.ini'
+		jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/QCQuan/jobs/2018-01-19 17:06:32.794899_MAX_MOCK_noInt/jobConfig_MAX_MOCK_noInt.ini'
 		
-		jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
+		# jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	
 	with app.app_context():
 		jobDirName = os.path.basename(os.path.abspath(os.path.join(jobConfigFilePath, os.pardir)))

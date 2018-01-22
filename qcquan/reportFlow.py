@@ -5,6 +5,7 @@
 Workflow of the processing part of QCQuan.
 """
 
+
 from qcquan.report import *
 from qcquan.dataIO import exportData, genZip
 
@@ -27,6 +28,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	:param processingParams:dict	experiment-specific processing parameters (see getConfig.py.)
 	:param startTime:		float	UNIX epoch timestamp at which the reportFlow was started
 	"""
+	import logging  # for some reason it doesnt work if you put it at the top of the file
 	minProteinDF = analysisResults[0]
 	fullProteinDF = analysisResults[1]
 	PCAResult = analysisResults[2]
@@ -123,6 +125,26 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	if writeToDisk:
 		HCDendrogramFullPath = exportData(HCDendrogram, dataType='fig', path_out=params['path_results'],
 				   filename=params['jobName'] + '_HCDendrogram')
+	
+	try:
+		ScoreVsDeltaMppmScatter = getScoreVsDeltaMppmScatter(metadata['relPSMScoreVsDeltaMppmPerExp'])
+		if writeToDisk:
+			ScoreVsDeltaMppmScatterFullPath = exportData(ScoreVsDeltaMppmScatter, dataType='fig',
+														 path_out=params['path_results'],
+														 filename=params['jobName'] + '_ScoreVsDeltaMppmScatter')
+	except KeyError:
+		logging.warning("No relPSMScoreVsDeltaMppmPerExp QC info available. Not making MS1 calibration QC plot.")
+		ScoreVsDeltaMppmScatterFullPath = None
+	
+	try:
+		MS1IntensityHist = getMS1IntensityHist(metadata['MS1Intensities_PSMs'], metadata['MS1Intensities_peptides'])
+		if writeToDisk:
+			MS1IntensityHistFullPath = exportData(MS1IntensityHist, dataType='fig', path_out=params['path_results'],
+					   filename=params['jobName'] + '_MS1IntensityHist')
+	except KeyError as e:
+		logging.warning("QC entry '" + str(e.args[0]) + "' was not found. Not producing MS1IntensityHist.")
+		MS1IntensityHistFullPath = None
+
 
 	if writeToDisk:
 		htmlReport, pdfhtmlreport = makeHTML(jobParams=params, allProcessingParams=processingParams,
@@ -132,6 +154,8 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 											 minVolcanoFullPaths=minVolcanoFullPaths,
 											 fullVolcanoFullPaths=fullVolcanoFullPaths,
 											 PCAPlotFullPath=PCAPlotFullPath, HCDendrogramFullPath=HCDendrogramFullPath,
+											 ScoreVsDeltaMppmScatterFullPath=ScoreVsDeltaMppmScatterFullPath,
+											 MS1IntensityHistFullPath=MS1IntensityHistFullPath,
 											 metadata=metadata, logFilePath=logFilePath, startTime=startTime)
 		htmlFullPath = exportData(htmlReport, dataType='html', path_out=params['path_results'],
 				   filename=params['jobName'] + '_report')

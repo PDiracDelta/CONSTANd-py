@@ -12,14 +12,17 @@ from qcquan.aggregate import aggregate
 from qcquan.constand import constand
 
 
-def processDf(df, params, writeToDisk, doConstand=True):
+def processDf(df, params, writeToDisk, metadata, doConstand=True):
 	"""
 	Calls all the necessary functions to process the dataframe of one experiment and prepare the analysis input objects.
 	Cleans the input data, removes redundancy due to PSM algorithm, charge (optional) and PTMs (optional), then corrects
 	isotopic impurities (optional),	normalizes using the CONSTANd method and saves the output to disk if so required.
-	Along the way, removed data is kept in a corresponding dict of dataframes.
+	Along the way, removed data is kept in a corresponding dict of dataframes, and metadata is gathered for meta-analysis
+	and QC purposes.
 	:param df:						pd.DataFrame		Peptide Spectrum Match dataframe (see documentation).
 	:param params:					dict				experiment-specific processing parameters (see getConfig.py.)
+	:param metadata:				dict				metadata about the job, including QC information.
+														[allMasterProteins; (noIsotopicCorrectionIndices)]
 	:param writeToDisk:				bool				write results to harddisk (if not: only pass via return statement).
 	:return normalizedDf:			pd.DataFrame		cleaned, normalized data on the "unique modified peptide" level
 	:return normalizedIntensities:	np.ndarray			matrix of quantification values on the "unique modified peptide" level
@@ -27,23 +30,43 @@ def processDf(df, params, writeToDisk, doConstand=True):
 														PSMEngine, RT, charge, modifications]
 	"""
 	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
+	metadata = dict()
+	
+	metadata['numPSMs_initial'] = len(df)
 	
 	# remove all useless columns from the dataFrame
 	df = removeObsoleteColumns(df, wantedColumns=params['wantedColumns'])
 	
 	# get a set of all master proteins detected in at least one PSM.
-	allMasterProteins = getAllPresentProteins(df)
+	metadata['allMasterProteins'] = getAllPresentProteins(df)
 	
 	# remove PSMs where (essential) data is missing.
 	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['quanColumns'], params['PSMEnginePriority'])
+	
+	# get MS1 intensities on the PSM level of all sensible PSMs (after removing missing data PSMs)
+	if 'Intensity' in df.columns:
+		metadata['MS1Intensities_PSMs'] = df.loc[:, 'Intensity']
+	else:
+		logging.warning("Column 'Intensity' was not found. Not gathering MS1 intensity QC info.")
+	
+	# get PSM scores relative to maximum versus DeltaMppm
+	try:
+		metadata['relPSMScoreVsDeltaMppm'] = getRelPSMScoreVsDeltaMppm(df, params['PSMEnginePriority'])
+	except KeyError as e:  # pandas KeyError: args[0] contains whole message.
+		# can be either the 'DeltaM [ppm]' column or the Identifying Node column or ...
+		logging.warning(e.args[0]+" Not gathering MS1 calibration QC info.")
 	
 	if params['removeBadConfidence_bool']:
 		df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'], params['removalColumnsToSave'])
 	
 	if params['removeIsolationInterference_bool']:
+		num_before = len(df)
 		# remove all data with too high isolation interference
 		df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'],
 																			   params['removalColumnsToSave'])
+		num_after = len(df)
+		if 'Isolation Interference [%]' in df.columns:  # else the corresponding metadata entry should not exist
+			metadata['pctPSMsIsolInterfTooHigh'] = (num_before - num_after)/num_before * 100
 		
 	# remove all non-master protein accessions (entire column) and descriptions (selective).
 	df = setMasterProteinDescriptions(df)
@@ -63,10 +86,21 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	else:
 		logging.warning("No PSM Algorithm redundancy removal done.")
 	
+	metadata['numPSMs_afterCleaning'] = len(df)
+	metadata['intensityStatistics'] = getIntensityMetadata(df, params['quanColumns'])
+	try:
+		metadata['deltappmStatistics'] = getDeltappmMetadata(df, 'DeltaM [ppm]')
+	except KeyError:
+		logging.warning("Column 'DeltaM [ppm]' not found. Not gathering its QC info.")
+	try:
+		metadata['injectionTimeInfo'] = getInjectionTimeInfo(df, 'Ion Inject Time [ms]')
+	except KeyError:
+		logging.warning("Column 'Ion Inject Time [ms]' not found. Not gathering its QC info.")
+	
 	if params['isotopicCorrection_bool']:
 		# perform isotopic corrections and then apply them to the dataframe. No i-TRAQ copyright issues as of 2017-05-04
 		# (see logboek.txt or git history)
-		correctedIntensities, noCorrectionIndices = isotopicCorrection(getIntensities(df, quanColumns=params['quanColumns']),
+		correctedIntensities, metadata['noIsotopicCorrectionIndices'] = isotopicCorrection(getIntensities(df, quanColumns=params['quanColumns']),
 															  correctionsMatrix=params['isotopicCorrection_matrix'])
 		df = setIntensities(df, intensities=correctedIntensities, quanColumns=params['quanColumns'])
 		# TEST remove the negative quan value rows
@@ -89,6 +123,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 		
 	if params['aggregatePTM_bool'] and 'Modifications' in df.columns:
 		# aggregate peptide list redundancy due to different charges (optional)
+		# todo IF there is aggregation, make it so that all modifications are kept, just make a long(er) list.
 		df, removedData['modifications'] = aggregate('PTM', df, quanColumns=params['quanColumns'], method=params['aggregate_method'],
 													 PSMEnginePriority=params['PSMEnginePriority'],
 													 removePSMEngineRedundancy_bool=params['removePSMEngineRedundancy_bool'],
@@ -98,9 +133,9 @@ def processDf(df, params, writeToDisk, doConstand=True):
 		logging.warning("No PTM aggregation done.")
 		
 	# SANITY CHECK: there should be no more duplicates if all aggregates have been applied.
-	if params['removePSMEngineRedundancy_bool'] and params['aggregateCharge_bool'] and params['aggregatePTM_bool']:  # TEST
-		assert np.prod((len(i) < 2 for (s, i) in df.groupby(
-			'Sequence').groups))  # only 1 index vector in dict of SEQUENCE:[INDICES] for all sequences
+	# if params['removePSMEngineRedundancy_bool'] and params['aggregateCharge_bool'] and params['aggregatePTM_bool']:  # TEST
+	# 	assert np.prod((len(i) < 2 for (s, i) in df.groupby(
+	# 		'Sequence').groups))  # only 1 index vector in dict of SEQUENCE:[INDICES] for all sequences
 
 	if doConstand:
 		# perform the CONSTANd algorithm;
@@ -131,7 +166,4 @@ def processDf(df, params, writeToDisk, doConstand=True):
 				   filename=params['filename_out'] + '_normalizedIntensities', delim_out=params['delim_out'])
 		# save the DE analysis results
 
-	if params['isotopicCorrection_bool']:
-		return normalizedDf, constandOutput, removedData, allMasterProteins, processedDfFullPath, noCorrectionIndices  # todo find better solution than 2 returns
-	else:
-		return normalizedDf, constandOutput, removedData, allMasterProteins, processedDfFullPath  #todo add noCorrectionIndices variable that is empty
+	return normalizedDf, constandOutput, removedData, metadata, processedDfFullPath  # todo find better solution than 2 returns

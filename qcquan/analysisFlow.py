@@ -40,31 +40,33 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	dfs = dict((eName, result[0]) for eName, result in processingResultsItems)
 	constandOutputs = dict((eName, result[1]) for eName, result in processingResultsItems)
 	removedDatas = dict((eName, result[2]) for eName, result in processingResultsItems)
-	allMasterProteinss = dict((eName, result[3]) for eName, result in processingResultsItems)
+	metadatas = dict((eName, result[3]) for eName, result in processingResultsItems)
 	processedDfFullPaths = dict((eName, result[4]) for eName, result in processingResultsItems)
-	noCorrectionIndicess = {}
-	for eName, result in processingResultsItems:
-		if len(result) > 5:  # if noCorrectionIndices exists in results
-			noCorrectionIndicess[eName] = result[-1]
-
-	experimentNames = processingResults.keys()
+	
 	# contains statistics and metadata (like the parameters) about the analysis.
-	metadata = {}
+	metadata = dict()
+	# metadataframe for all simple numeric values
 	metadata['numeric'] = pd.DataFrame()
-	# Compile a list of all master proteins found at least in 1 PSM and at least in 1 experiment:
-	allObservedProteins = pd.Series(list(set(unnest(allMasterProteinss.values()))))
+	
+	# combine all metadata from each separate MS run
+	metadata, allObservedProteins = combineProcessingMetadata(metadata, metadatas)
+
+	try:
+		# get MS1 intensities on the peptide level, i.e. after aggregation and cleaning.
+		metadata['MS1Intensities_peptides'] = pd.Series(index=list(dfs.keys()), dtype=object)
+		for eName in dfs.keys():
+			# reset index because otherwise the df will get NaN values since not all MS1 intensity indices are equal
+			# across all experiments
+			metadata['MS1Intensities_peptides'][eName] = dfs[eName].loc[:, 'Intensity'].tolist()
+	except KeyError:  # don't use e.args[0]: that doesn't work with pandas KeyErrors
+		logging.warning("Column 'Intensity' was not found. Not gathering MS1 intensity QC info.")
+	
 	metadata['numeric'].loc[0, 'numObservedProteins'] = len(allObservedProteins)
 	metadata['allObservedProteins'] = pd.DataFrame({'protein': allObservedProteins})
 	
-	# record PSMs without isotopic correction applied. Multi-indexed on experiment names and old indices!
-	# This is done here instead of the processing flow because back then there was no metadata variable yet.
-	try:
-		metadata['noIsotopicCorrection'] = pd.concat([getNoIsotopicCorrection(dfs[eName], noCorrectionIndicess[eName]) for
-												  eName in noCorrectionIndicess.keys()], keys=experimentNames)  # todo ugly
-	except ValueError:
-		pass  # not a single noCorrectionIndices was found. OK.
 	# record RT isolation statistics. Future: flag. Multi-indexed on experiment names and old indices!
 	if params['getRTIsolationInfo_bool']:
+		experimentNames = processingResults.keys()
 		metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for
 												 eName in experimentNames], keys=experimentNames)
 	
@@ -86,7 +88,9 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 			DEA(allExperimentsDF, minProteinPeptidesDict, params)
 	else:
 		minProteinDF = pd.DataFrame()
-
+	
+	metadata['numeric'].loc[0, 'numUniqueModifiedPeptides'] = len(unnest(minProteinDF.loc[:, 'peptides']))
+	
 	if params['fullExpression_bool']:
 		# Bring the data to the protein level in the case of full expression (shared peptides allowed).
 		# Execute the differential expression analysis and gather some metadata
@@ -105,8 +109,11 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	commonPeptidesQuanValuesDF, metadata['uncommonModifiedPeptides'] = getCommonPeptidesQuanValuesDF(dfs, params['schema'])
 	metadata['numeric'].loc[0, 'numUnCommonModifiedPeptides'] = len(metadata['uncommonModifiedPeptides'])
 	metadata['numeric'].loc[0, 'numCommonModifiedPeptides'] = len(commonPeptidesQuanValuesDF)
+	metadata['numeric'].loc[0, 'numModifiedPeptides'] = \
+		metadata['numeric'].loc[0, 'numUnCommonModifiedPeptides'] + metadata['numeric'].loc[0, 'numCommonModifiedPeptides']
 	# save the amount of NaN values per channel for common peptides.
 	metadata['commonNanValues'] = pd.DataFrame(np.sum(np.isnan(commonPeptidesQuanValuesDF), axis=0))
+	# metadata['numUnCommonModifiedPeptidesPerCondition'] = getNumUnCommonModifiedPeptidesPerCondition(dfs, metadata['uncommonModifiedPeptides'])
 	# perform PCA
 	PCAResult = getPCA(commonPeptidesQuanValuesDF, params['PCA_components'])
 	# perform hierarchical clustering

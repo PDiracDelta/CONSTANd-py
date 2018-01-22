@@ -27,7 +27,7 @@ from qcquan import fontweight, fontsize, figwidth, figheight
 
 # adjust font size globally
 matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # todo remove?
 
 
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
@@ -189,7 +189,6 @@ def getVolcanoPlot(df, condition, alpha, FCThreshold, labelPlot=[False, ] * 4, t
 	:param topIndices:		list			indices of proteins for which to show the label exclusively
 	:return volcanoPlot:	plt.figure		volcano plot as a matplotlib figure object
 	"""
-	# todo add protein ID labels according to sorted list entry ID
 	volcanoPlot = plt.figure(
 		figsize=(figwidth, figheight))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
@@ -355,8 +354,61 @@ def getHCDendrogram(HCResult, schema, title=None):
 	return HCDendrogram
 
 
+def getScoreVsDeltaMppmScatter(relPSMScoreVsDeltaMppmPerExp):
+	""" Make one scatter plot of engineScore vs deltaM of all PSMs, coloured per experiment.
+	Scores are relative to within-experiment maximum. """
+	f = plt.figure(figsize=(figwidth, figheight))
+	ax = f.add_subplot(111)
+	plt.xlabel(r'$\Delta$M [ppm]', figure=f)
+	plt.ylabel('PSM engine score (relative to max)', figure=f)
+	
+	experimentNames = relPSMScoreVsDeltaMppmPerExp.keys()
+	colormap = distinguishableColours(len(experimentNames), type='jet')
+	i = 0
+	for eName, valuesdf in relPSMScoreVsDeltaMppmPerExp.items():
+		ax.scatter(valuesdf['deltaMppm'], valuesdf['relScore'], s=2, c=colormap[i], label=eName)
+		i += 1
+	plt.legend(markerscale=5)#loc='upper left')
+	return f
+
+
+def getMS1IntensityHist(MS1Intensities_PSMs, MS1Intensities_peptides):
+	eNames = list(MS1Intensities_peptides.keys())
+	NUM_EXPERIMENTS = len(eNames)
+	# 2 by N/2 array of plots, unless N<2 then plot just one.
+	fig, axes = plt.subplots(nrows=int(np.ceil(NUM_EXPERIMENTS/2)), ncols=int(min(NUM_EXPERIMENTS, 2)), figsize=(figwidth, figheight))
+	for i in range(NUM_EXPERIMENTS):
+		# do NOT drop NA because that should not be necessary! It will illegitimately remove data. Fix your input data.
+		PSMdata = MS1Intensities_PSMs[eNames[i]]  # .dropna()
+		peptidedata = MS1Intensities_peptides[eNames[i]]  # .dropna()
+		globMax = max(max(PSMdata), max(peptidedata))
+		# globMin = min(min(PSMdata), min(peptidedata))
+		globMin = 0
+		ax = axes[divmod(i, 2)]
+		ax.hist(PSMdata, bins=50, range=(globMin, globMax), label="all PSMs")#, alpha=0.7)
+		ax.hist(peptidedata, bins=50, range=(globMin, globMax), label="used PSMs")#, alpha=0.7)
+		ax.set_yscale("log")
+		# ax.set_xscale("log")
+		ax.legend(prop={'size': fontsize/2 if NUM_EXPERIMENTS > 1 else fontsize})
+		ax.set_title(eNames[i])
+		ax.ticklabel_format(style='sci', scilimits=(0, 0), axis='x')
+		ax.set_xlabel("MS1 Intensity")
+	
+	# hack in common X label
+	fig.add_subplot(111, frameon=False)
+	# hide tick and tick label of the big axes
+	plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
+	plt.grid(False)
+	# plt.xlabel("MS1 Intensity")
+	# plt.xlabel(r"log$_{10}$(MS1 Intensity)")
+	# plt.ylabel("Amount of PSMs or peptides")
+	plt.tight_layout()
+	return fig
+
+
 def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferentialsDFs, fullTopDifferentialsDFs, minVolcanoFullPaths,
-			 fullVolcanoFullPaths, PCAPlotFullPath, HCDendrogramFullPath, metadata, logFilePath, startTime):
+			 fullVolcanoFullPaths, PCAPlotFullPath, HCDendrogramFullPath, ScoreVsDeltaMppmScatterFullPath, MS1IntensityHistFullPath,
+			 metadata, logFilePath, startTime):
 	"""
 	Pour all report visualizations, the list(s) of differentials, metadata and job parameters into an HTML file.
 	A second HTML file used for conversion to PDF is generated slightly different from the one used	for actual HTML
@@ -434,12 +486,12 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 	
 	# per condition: generate list of differentials HTML code separately because Jinja cant do this
 	if jobParams['minExpression_bool']:
-		minTopDifferentialsHTMLDict = dict((otherCondition, injectColumnWidthHTML(minTopDifferentialsDFs[otherCondition].to_html(index=False, justify='left')))
+		minTopDifferentialsHTMLDict = dict((otherCondition, injectColumnWidthHTML(minTopDifferentialsDFs[otherCondition].to_html(index=False, justify='center')))
 								   for otherCondition in otherConditions)
 	else:
 		minTopDifferentialsHTMLDict = None
 	if jobParams['fullExpression_bool']:
-		fullTopDifferentialsHTMLDict = dict((otherCondition, injectColumnWidthHTML(fullTopDifferentialsDFs[otherCondition].to_html(index=False, justify='left')))
+		fullTopDifferentialsHTMLDict = dict((otherCondition, injectColumnWidthHTML(fullTopDifferentialsDFs[otherCondition].to_html(index=False, justify='center')))
 								   for otherCondition in otherConditions)
 	else:
 		fullTopDifferentialsHTMLDict = None
@@ -459,9 +511,11 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 										fullExpression_bool=jobParams['fullExpression_bool'],
 										mindifferentialsdict=minTopDifferentialsHTMLDict,
 										fulldifferentialsdict=fullTopDifferentialsHTMLDict, PCAFileName=PCAPlotFullPath,
-										HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
+										HCDFileName=HCDendrogramFullPath, ScoreVsDeltaMppmScatterFullPath=ScoreVsDeltaMppmScatterFullPath,
+										MS1IntensityHistFullPath=MS1IntensityHistFullPath,
+										metadata=metadata, date=jobParams['date'],
 										duration=approxDuration, log=logContents, jobParams=jobParams,
-										allProcessingParams=allProcessingParams, pdfsrc='True')#, experiments=experiments)
+										allProcessingParams=allProcessingParams, pdfsrc='True')
 	# get the tails of the input paths, starting from the jobs dir, so the Jinja report template can couple it to the
 	# jobs symlink in the static dir.
 	for condition in otherConditions:
@@ -475,6 +529,11 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 			pass
 	HCDendrogramFullPath = hackImagePathToSymlinkInStaticDir(HCDendrogramFullPath)
 	PCAPlotFullPath = hackImagePathToSymlinkInStaticDir(PCAPlotFullPath)
+	if MS1IntensityHistFullPath is not None:
+		MS1IntensityHistFullPath = hackImagePathToSymlinkInStaticDir(MS1IntensityHistFullPath)
+	if ScoreVsDeltaMppmScatterFullPath is not None:
+		ScoreVsDeltaMppmScatterFullPath = hackImagePathToSymlinkInStaticDir(ScoreVsDeltaMppmScatterFullPath)
+	
 	with app.app_context():
 		htmlReport = render_template('report.html', version=str(__version__), jobName=jobParams['jobName'],
 									 otherConditions=otherConditions,
@@ -484,9 +543,11 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 									 fullExpression_bool=jobParams['fullExpression_bool'],
 									 mindifferentialsdict=minTopDifferentialsHTMLDict,
 									 fulldifferentialsdict=fullTopDifferentialsHTMLDict, PCAFileName=PCAPlotFullPath,
-									 HCDFileName=HCDendrogramFullPath, metadata=metadata, date=jobParams['date'],
+									 HCDFileName=HCDendrogramFullPath, ScoreVsDeltaMppmScatterFullPath=ScoreVsDeltaMppmScatterFullPath,
+									 MS1IntensityHistFullPath=MS1IntensityHistFullPath,
+									 metadata=metadata, date=jobParams['date'],
 									 duration=approxDuration, log=logContents, jobParams=jobParams,
-									 allProcessingParams=allProcessingParams)#, experiments=experiments)
+									 allProcessingParams=allProcessingParams)
 	return htmlReport, pdfhtmlreport
 
 
