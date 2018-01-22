@@ -180,6 +180,8 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 	"""
 	def uniqueMods(dfModSeries):
 		""" Selects only the unique, non-TMT modifications. """
+		if dfModSeries.dtype == np.float64:  # there was no modifications column present
+			return []
 		# make set of all occurring modifications
 		allMods = set(unnest(dfModSeries.values))
 		# The TMT6plex ones are now removed in processing
