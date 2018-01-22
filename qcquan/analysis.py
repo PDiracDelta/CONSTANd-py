@@ -340,7 +340,10 @@ def getCommonPeptidesQuanValuesDF(dfs, schema):
 	for eName in dfs.keys():
 		eChannelAliases = schema[eName]['allExperimentChannelAliases']
 		# convert modifications list to strings because they need to be hashable
-		dfs[eName]['Modifications'] = dfs[eName]['Modifications'].apply(';'.join)
+		try:
+			dfs[eName]['Modifications'] = dfs[eName]['Modifications'].apply(';'.join)
+		except KeyError:  # there was no Modifications column
+			dfs[eName]['Modifications'] = ['', ]*len(dfs[eName])
 		if peptidesDf.empty:
 			peptidesDf = dfs[eName].loc[:, ['Sequence', 'Modifications'] + eChannelAliases]
 		else:

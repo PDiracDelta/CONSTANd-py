@@ -59,13 +59,14 @@ def processDf(df, params, writeToDisk, metadata, doConstand=True):
 	if params['removeBadConfidence_bool']:
 		df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'], params['removalColumnsToSave'])
 	
-	num_before = len(df)
 	if params['removeIsolationInterference_bool']:
+		num_before = len(df)
 		# remove all data with too high isolation interference
 		df, removedData['isolationInterference'] = removeIsolationInterference(df, params['removeIsolationInterference_threshold'],
 																			   params['removalColumnsToSave'])
-	num_after = len(df)
-	metadata['pctPSMsIsolInterfTooHigh'] = (num_before - num_after)/num_before * 100
+		num_after = len(df)
+		if 'Isolation Interference [%]' in df.columns:  # else the corresponding metadata entry should not exist
+			metadata['pctPSMsIsolInterfTooHigh'] = (num_before - num_after)/num_before * 100
 		
 	# remove all non-master protein accessions (entire column) and descriptions (selective).
 	df = setMasterProteinDescriptions(df)
