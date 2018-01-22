@@ -529,6 +529,9 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 			pass
 	HCDendrogramFullPath = hackImagePathToSymlinkInStaticDir(HCDendrogramFullPath)
 	PCAPlotFullPath = hackImagePathToSymlinkInStaticDir(PCAPlotFullPath)
+	if MS1IntensityHistFullPath is not None:
+		MS1IntensityHistFullPath = hackImagePathToSymlinkInStaticDir(MS1IntensityHistFullPath)
+	
 	with app.app_context():
 		htmlReport = render_template('report.html', version=str(__version__), jobName=jobParams['jobName'],
 									 otherConditions=otherConditions,
