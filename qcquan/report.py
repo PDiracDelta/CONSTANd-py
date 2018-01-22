@@ -531,6 +531,8 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 	PCAPlotFullPath = hackImagePathToSymlinkInStaticDir(PCAPlotFullPath)
 	if MS1IntensityHistFullPath is not None:
 		MS1IntensityHistFullPath = hackImagePathToSymlinkInStaticDir(MS1IntensityHistFullPath)
+	if ScoreVsDeltaMppmScatterFullPath is not None:
+		ScoreVsDeltaMppmScatterFullPath = hackImagePathToSymlinkInStaticDir(ScoreVsDeltaMppmScatterFullPath)
 	
 	with app.app_context():
 		htmlReport = render_template('report.html', version=str(__version__), jobName=jobParams['jobName'],

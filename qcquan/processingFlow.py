@@ -44,13 +44,17 @@ def processDf(df, params, writeToDisk, metadata, doConstand=True):
 	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['quanColumns'], params['PSMEnginePriority'])
 	
 	# get MS1 intensities on the PSM level of all sensible PSMs (after removing missing data PSMs)
-	try:
+	if 'Intensity' in df.columns:
 		metadata['MS1Intensities_PSMs'] = df.loc[:, 'Intensity']
-	except KeyError:  # don't use e.args[0]: that doesn't work with pandas KeyErrors
+	else:
 		logging.warning("Column 'Intensity' was not found. Not gathering MS1 intensity QC info.")
 	
 	# get PSM scores relative to maximum versus DeltaMppm
-	metadata['relPSMScoreVsDeltaMppm'] = getRelPSMScoreVsDeltaMppm(df, params['PSMEnginePriority'])
+	try:
+		metadata['relPSMScoreVsDeltaMppm'] = getRelPSMScoreVsDeltaMppm(df, params['PSMEnginePriority'])
+	except KeyError as e:  # pandas KeyError: args[0] contains whole message.
+		# can be either the 'DeltaM [ppm]' column or the Identifying Node column or ...
+		logging.warning(e.args[0]+" Not gathering MS1 calibration QC info.")
 	
 	if params['removeBadConfidence_bool']:
 		df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'], params['removalColumnsToSave'])

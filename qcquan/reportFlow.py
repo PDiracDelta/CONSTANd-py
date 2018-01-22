@@ -126,10 +126,15 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		HCDendrogramFullPath = exportData(HCDendrogram, dataType='fig', path_out=params['path_results'],
 				   filename=params['jobName'] + '_HCDendrogram')
 	
-	ScoreVsDeltaMppmScatter = getScoreVsDeltaMppmScatter(metadata['relPSMScoreVsDeltaMppmPerExp'])
-	if writeToDisk:
-		ScoreVsDeltaMppmScatterFullPath = exportData(ScoreVsDeltaMppmScatter, dataType='fig', path_out=params['path_results'],
-				   filename=params['jobName'] + '_ScoreVsDeltaMppmScatter')
+	try:
+		ScoreVsDeltaMppmScatter = getScoreVsDeltaMppmScatter(metadata['relPSMScoreVsDeltaMppmPerExp'])
+		if writeToDisk:
+			ScoreVsDeltaMppmScatterFullPath = exportData(ScoreVsDeltaMppmScatter, dataType='fig',
+														 path_out=params['path_results'],
+														 filename=params['jobName'] + '_ScoreVsDeltaMppmScatter')
+	except KeyError:
+		logging.warning("No relPSMScoreVsDeltaMppmPerExp QC info available. Not making MS1 calibration QC plot.")
+		ScoreVsDeltaMppmScatter = None
 	
 	try:
 		MS1IntensityHist = getMS1IntensityHist(metadata['MS1Intensities_PSMs'], metadata['MS1Intensities_peptides'])

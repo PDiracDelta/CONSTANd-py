@@ -70,7 +70,7 @@ def combineProcessingMetadata(metadata, perExperimentMetadata):
 		metadata['numPSMs'].loc[eName, :] = [perExperimentMetadata[eName]['numPSMs_initial'],
 											 perExperimentMetadata[eName]['numPSMs_afterCleaning']]
 		metadata['pctPSMsIsolInterfTooHigh'].loc[0, eName] = perExperimentMetadata[eName]['pctPSMsIsolInterfTooHigh']
-		try:
+		try:  # either fill MS1Intensities_PSMs or delete it
 			metadata['MS1Intensities_PSMs'][eName] = perExperimentMetadata[eName]['MS1Intensities_PSMs'].tolist()
 		except KeyError as e:
 			logging.warning("Entry '" + str(e.args[0]) + "' was not found for experiment "+eName+". Not gathering ANY MS1 intensity QC info.")
@@ -79,7 +79,12 @@ def combineProcessingMetadata(metadata, perExperimentMetadata):
 		metadata['injectionTimeInfo'].loc[eName, :] = perExperimentMetadata[eName]['injectionTimeInfo'].iloc[0, :]  # there is only 1 entry
 		metadata['deltappmStatistics'].loc[eName, :] = perExperimentMetadata[eName]['deltappmStatistics'].iloc[0, :]  # there is only 1 entry
 		metadata['intensityStatisticsPerExp'][eName] = perExperimentMetadata[eName]['intensityStatistics']
-		metadata['relPSMScoreVsDeltaMppmPerExp'][eName] = perExperimentMetadata[eName]['relPSMScoreVsDeltaMppm']
+		try:  # either fill relPSMScoreVsDeltaMppmPerExp or delete it
+			metadata['relPSMScoreVsDeltaMppmPerExp'][eName] = perExperimentMetadata[eName]['relPSMScoreVsDeltaMppm']
+		except KeyError:
+			logging.warning("Column 'DeltaM [ppm]' was not found for experiment "+eName+". Not gathering ANY MS1 calibration QC info.")
+			if 'relPSMScoreVsDeltaMppm' in metadata.keys():
+				del metadata['relPSMScoreVsDeltaMppm']
 	
 	return metadata, allObservedProteins
 
