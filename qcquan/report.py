@@ -189,7 +189,6 @@ def getVolcanoPlot(df, condition, alpha, FCThreshold, labelPlot=[False, ] * 4, t
 	:param topIndices:		list			indices of proteins for which to show the label exclusively
 	:return volcanoPlot:	plt.figure		volcano plot as a matplotlib figure object
 	"""
-	plt.clf()
 	volcanoPlot = plt.figure(
 		figsize=(figwidth, figheight))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
