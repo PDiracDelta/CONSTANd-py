@@ -134,7 +134,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 														 filename=params['jobName'] + '_ScoreVsDeltaMppmScatter')
 	except KeyError:
 		logging.warning("No relPSMScoreVsDeltaMppmPerExp QC info available. Not making MS1 calibration QC plot.")
-		ScoreVsDeltaMppmScatter = None
+		ScoreVsDeltaMppmScatterFullPath = None
 	
 	try:
 		MS1IntensityHist = getMS1IntensityHist(metadata['MS1Intensities_PSMs'], metadata['MS1Intensities_peptides'])

@@ -87,9 +87,14 @@ def processDf(df, params, writeToDisk, metadata, doConstand=True):
 	
 	metadata['numPSMs_afterCleaning'] = len(df)
 	metadata['intensityStatistics'] = getIntensityMetadata(df, params['quanColumns'])
-	metadata['deltappmStatistics'] = getDeltappmMetadata(df, 'DeltaM [ppm]')
-	metadata['injectionTimeInfo'] = getInjectionTimeInfo(df, 'Ion Inject Time [ms]')
-	# metadata['numPeptidesPerPSM'] = np.nanmean()  # NOT IMPLEMENTED: this info is not given by PD2.1
+	try:
+		metadata['deltappmStatistics'] = getDeltappmMetadata(df, 'DeltaM [ppm]')
+	except KeyError:
+		logging.warning("Column 'DeltaM [ppm]' not found. Not gathering its QC info.")
+	try:
+		metadata['injectionTimeInfo'] = getInjectionTimeInfo(df, 'Ion Inject Time [ms]')
+	except KeyError:
+		logging.warning("Column 'Ion Inject Time [ms]' not found. Not gathering its QC info.")
 	
 	if params['isotopicCorrection_bool']:
 		# perform isotopic corrections and then apply them to the dataframe. No i-TRAQ copyright issues as of 2017-05-04

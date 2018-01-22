@@ -69,22 +69,37 @@ def combineProcessingMetadata(metadata, perExperimentMetadata):
 	for eName in experimentNames:
 		metadata['numPSMs'].loc[eName, :] = [perExperimentMetadata[eName]['numPSMs_initial'],
 											 perExperimentMetadata[eName]['numPSMs_afterCleaning']]
-		metadata['pctPSMsIsolInterfTooHigh'].loc[0, eName] = perExperimentMetadata[eName]['pctPSMsIsolInterfTooHigh']
+		try:
+			metadata['pctPSMsIsolInterfTooHigh'].loc[0, eName] = perExperimentMetadata[eName]['pctPSMsIsolInterfTooHigh']
+		except KeyError:
+			logging.warning("Entry 'pctPSMsIsolInterfTooHigh' was not found for experiment "+eName+". Not gathering its QC info for ANY tandem-MS run.")
+			if 'pctPSMsIsolInterfTooHigh' in metadata.keys():
+				del metadata['pctPSMsIsolInterfTooHigh']
 		try:  # either fill MS1Intensities_PSMs or delete it
 			metadata['MS1Intensities_PSMs'][eName] = perExperimentMetadata[eName]['MS1Intensities_PSMs'].tolist()
 		except KeyError as e:
 			logging.warning("Entry '" + str(e.args[0]) + "' was not found for experiment "+eName+". Not gathering ANY MS1 intensity QC info.")
 			if 'MS1Intensities_PSMs' in metadata.keys():
 				del metadata['MS1Intensities_PSMs']
-		metadata['injectionTimeInfo'].loc[eName, :] = perExperimentMetadata[eName]['injectionTimeInfo'].iloc[0, :]  # there is only 1 entry
-		metadata['deltappmStatistics'].loc[eName, :] = perExperimentMetadata[eName]['deltappmStatistics'].iloc[0, :]  # there is only 1 entry
+		try:
+			metadata['injectionTimeInfo'].loc[eName, :] = perExperimentMetadata[eName]['injectionTimeInfo'].iloc[0, :]  # there is only 1 entry
+		except KeyError:
+			logging.warning("Entry 'injectionTimeInfo' was not found for experiment "+eName+". Not gathering its QC info for ANY tandem-MS run.")
+			if 'injectionTimeInfo' in metadata.keys():
+				del metadata['injectionTimeInfo']
+		try:
+			metadata['deltappmStatistics'].loc[eName, :] = perExperimentMetadata[eName]['deltappmStatistics'].iloc[0, :]  # there is only 1 entry
+		except KeyError:
+			logging.warning("Entry 'deltappmStatistics' was not found for experiment "+eName+". Not gathering its QC info for ANY tandem-MS run.")
+			if 'deltappmStatistics' in metadata.keys():
+				del metadata['deltappmStatistics']
 		metadata['intensityStatisticsPerExp'][eName] = perExperimentMetadata[eName]['intensityStatistics']
 		try:  # either fill relPSMScoreVsDeltaMppmPerExp or delete it
 			metadata['relPSMScoreVsDeltaMppmPerExp'][eName] = perExperimentMetadata[eName]['relPSMScoreVsDeltaMppm']
 		except KeyError:
 			logging.warning("Column 'DeltaM [ppm]' was not found for experiment "+eName+". Not gathering ANY MS1 calibration QC info.")
-			if 'relPSMScoreVsDeltaMppm' in metadata.keys():
-				del metadata['relPSMScoreVsDeltaMppm']
+			if 'relPSMScoreVsDeltaMppmPerExp' in metadata.keys():
+				del metadata['relPSMScoreVsDeltaMppmPerExp']
 	
 	return metadata, allObservedProteins
 
