@@ -31,7 +31,8 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	:return commonPeptidesQuanValuesDF:	pd.DataFrame	for all COMMON (found in all experiments) peptides:
 																		[e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
 	:return metadata:			pd.DataFrame	metadata: [noIsotopicCorrection, RTIsolationInfo, noMasterProteinAccession,
-												minSingleConditionProteins, fullSingleConditionProteins, uncommonModifiedPeptides, commonNanValues]
+												minSingleConditionProteins, fullSingleConditionProteins,
+												uncommonModifiedPeptides, commonNanValues, ...]
 	:return extraOutputFiles:	list			list of full paths of extra output files to be included in the .zip file
 	"""
 	
@@ -84,8 +85,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	if params['minExpression_bool']:
 		# Bring the data to the protein level in the case of minimal expression (no shared peptides allowed).
 		# Execute the differential expression analysis and gather some metadata
-		minProteinDF, metadata['minSingleConditionProteins'], metadata['numeric'].loc[0, 'minNumProteins'] = \
-			DEA(allExperimentsDF, minProteinPeptidesDict, params)
+		minProteinDF, metadata['numeric'].loc[0, 'minNumProteins'] = DEA(allExperimentsDF, minProteinPeptidesDict, params)
 	else:
 		minProteinDF = pd.DataFrame()
 	
@@ -94,8 +94,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	if params['fullExpression_bool']:
 		# Bring the data to the protein level in the case of full expression (shared peptides allowed).
 		# Execute the differential expression analysis and gather some metadata
-		fullProteinDF, metadata['fullSingleConditionProteins'], metadata['numeric'].loc[0, 'fullNumProteins'] = \
-			DEA(allExperimentsDF, fullProteinPeptidesDict, params)
+		fullProteinDF, metadata['numeric'].loc[0, 'fullNumProteins'] = DEA(allExperimentsDF, fullProteinPeptidesDict, params)
 	else:
 		fullProteinDF = pd.DataFrame()
 	

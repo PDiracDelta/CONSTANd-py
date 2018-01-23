@@ -24,7 +24,6 @@ def DEA(this_allExperimentsDF, proteinPeptidesDict, params):
 														Structure:
 														['peptides', 'description', {{condition}}, {{'p-value', 'adjusted p-value'}},
 														{{'log2 fold change'}}, {{'significant'}}, {{'#peptides'}}]
-	:return singleConditionProteins:	pd.DataFrame	protein entries removed due to invalid t-test results
 	:return numProteins:				int				number of proteins taken into account in the DEA
 	"""
 	referenceCondition = params['referenceCondition']
@@ -36,8 +35,7 @@ def DEA(this_allExperimentsDF, proteinPeptidesDict, params):
 	
 	# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
 	# nan values for a certain condition and keep the removed ones in metadata
-	proteinDF, singleConditionProteins = testDifferentialExpression(proteinDF, params['alpha'], referenceCondition,
-																	otherConditions)
+	proteinDF = testDifferentialExpression(proteinDF, params['alpha'], referenceCondition, otherConditions)
 	numProteins = len(proteinDF)
 	
 	# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
@@ -47,4 +45,4 @@ def DEA(this_allExperimentsDF, proteinPeptidesDict, params):
 	# indicate significance based on given thresholds alpha and FCThreshold
 	proteinDF = applySignificance(proteinDF, otherConditions, params['alpha'], params['FCThreshold'])
 	
-	return proteinDF, singleConditionProteins, numProteins
+	return proteinDF, numProteins

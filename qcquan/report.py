@@ -425,7 +425,7 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 	:param HCDendrogramFullPath: 	str				path to the HC dendrogram image
 	:param metadata:				dict			[noIsotopicCorrection, RTIsolationInfo, noMasterProteinAccession,
 													minSingleConditionProteins, fullSingleConditionProteins,
-													uncommonModifiedPeptides, commonNanValues]
+													uncommonModifiedPeptides, commonNanValues, ...]
 	:param logFilePath:				str				path to the log file with information about each
 													processingFlow and analysisFlow call
 	:param startTime:				float			UNIX epoch timestamp at which the reportFlow was started

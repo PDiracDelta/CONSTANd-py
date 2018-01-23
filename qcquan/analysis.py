@@ -254,29 +254,28 @@ def testDifferentialExpression(this_proteinDF, alpha, referenceCondition, otherC
 	"""
 	Perform a t-test for independent samples for each protein on its (2) associated lists of peptide quantifications,
 	do a Benjamini-Hochberg correction and store the results in new "p-values" and "adjusted p-values" columns in the
-	dataframe. If a test returns NaN or masked values (e.g. due to sample size==1) the corresponding protein is removed.
+	dataframe.
 	:param this_proteinDF:		pd.DataFrame	data from all experiments on the protein level
 	:param alpha:				float			confidence level for the t-test
 	:param referenceCondition:	str				name of the condition to be used as the reference
 	:param otherConditions:		list 			all non-reference conditions in the experiment
 	:return this_proteinDF:		pd.DataFrame	data on protein level, with statistical test information
-	:return removedData:		pd.DataFrame	protein entries removed due to invalid t-test results
 	"""
 	# { protein : indices of (uniquely/all) associated peptides }
 	# perform t-test on the intensities lists of both conditions of each protein, assuming data is independent.
 	for condition in otherConditions:
 		pValueColumn = 'p-value (' + condition + ')'
 		this_proteinDF[pValueColumn] = this_proteinDF.apply(lambda x: ttest(x[referenceCondition], x[condition], nan_policy='omit')[1], axis=1)
-		# remove masked values
+		
+		# remove masked values because otherwise you run into trouble applying significance to masked values and stuff.
 		this_proteinDF.loc[:, pValueColumn] = this_proteinDF.loc[:, pValueColumn].apply(lambda x: np.nan if x is np.ma.masked or x == 0.0 else x)
-		toDeleteProteins = this_proteinDF[np.isnan(this_proteinDF[pValueColumn])].index
-		removedData = this_proteinDF.loc[toDeleteProteins, :].copy()
-		this_proteinDF.drop(toDeleteProteins, inplace=True)
+		
 		# Benjamini-Hochberg correction
 		# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
-		__, this_proteinDF['adjusted '+pValueColumn], __, __ = multipletests(pvals=np.asarray(this_proteinDF.loc[:, pValueColumn]),
+		nonNaNIndices = this_proteinDF.loc[:, pValueColumn].dropna().index
+		__, this_proteinDF.loc[nonNaNIndices, 'adjusted '+pValueColumn], __, __ = multipletests(pvals=np.asarray(this_proteinDF.loc[nonNaNIndices, pValueColumn]),
 																	   alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
-	return this_proteinDF, removedData
+	return this_proteinDF
 
 
 def applyFoldChange(proteinDF, pept2protCombinationMethod, referenceCondition, otherConditions):
@@ -313,14 +312,17 @@ def applySignificance(df, otherConditions, alpha, FCThreshold):
 		def significant(x):
 			pvalueSignificant = x['adjusted p-value ('+condition+')'] < alpha
 			FCSignificant = abs(x['log2 fold change ('+condition+')']) > FCThreshold
-			if pvalueSignificant & FCSignificant:
-				return 'yes'
-			elif pvalueSignificant:
-				return 'p'
-			elif FCSignificant:
-				return 'fc'
-			else:
-				return 'no'
+			try:
+				if pvalueSignificant & FCSignificant:
+					return 'yes'
+				elif pvalueSignificant:
+					return 'p'
+				elif FCSignificant:
+					return 'fc'
+				else:
+					return 'no'
+			except TypeError:
+				print("egfs")  # TEST
 		
 		df['significant ('+condition+')'] = df.apply(significant, axis=1)
 	return df

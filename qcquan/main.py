@@ -143,14 +143,15 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		doReport = (args[4] == 'True')
 		writeToDisk = (args[5] == 'True')
 	else:  # you didn't call main.py from the command line but from pycharm
-		doProcessing = True
+		doProcessing = False
 		doAnalysis = True
 		doReport = True
 		writeToDisk = True
 		
 		from qcquan_web.config import ALLJOBSDIR
 
-		jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/QCQuan/jobs/2018-01-22 12:10:23.706871_test_QCInfo_onlyRequiredCols/jobConfig_test_QCInfo_onlyRequiredCols.ini'
+		jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/QCQuan/jobs/2018-01-23 17:33:56.298102_COON_NaNAllowed/jobConfig_COON_NaNAllowed.ini'
+		# jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/QCQuan/jobs/2018-01-23 15:32:50.511677_Gatto_R_ref129_inclNA_nomods/jobConfig_Gatto_R_ref129_inclNA_nomods.ini'
 		
 		# jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	
