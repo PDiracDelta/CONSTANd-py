@@ -32,22 +32,22 @@ def processDf(df, params, writeToDisk, metadata, doConstand=True):
 	removedData = {}  # is to contain basic info about data that will be removed during the workflow, per removal category.
 	metadata = dict()
 	
-	metadata['numPSMs_initial'] = len(df)
-	
 	# remove all useless columns from the dataFrame
 	df = removeObsoleteColumns(df, wantedColumns=params['wantedColumns'])
+	
+	metadata['numPSMs_initial'] = len(df)
+
+	# get MS1 intensities of all PSMs
+	if 'Intensity' in df.columns:
+		metadata['MS1Intensities_PSMs_all'] = df.loc[:, 'Intensity']
+	else:
+		logging.warning("Column 'Intensity' was not found. Not gathering MS1 intensity QC info.")
 	
 	# get a set of all master proteins detected in at least one PSM.
 	metadata['allMasterProteins'] = getAllPresentProteins(df)
 	
 	# remove PSMs where (essential) data is missing.
 	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['quanColumns'], params['PSMEnginePriority'])
-	
-	# get MS1 intensities on the PSM level of all sensible PSMs (after removing missing data PSMs)
-	if 'Intensity' in df.columns:
-		metadata['MS1Intensities_PSMs'] = df.loc[:, 'Intensity']
-	else:
-		logging.warning("Column 'Intensity' was not found. Not gathering MS1 intensity QC info.")
 	
 	# get PSM scores relative to maximum versus DeltaMppm
 	try:
@@ -88,6 +88,13 @@ def processDf(df, params, writeToDisk, metadata, doConstand=True):
 	
 	metadata['numPSMs_afterCleaning'] = len(df)
 	metadata['intensityStatistics'] = getIntensityMetadata(df, params['quanColumns'])
+	
+	# get MS1 intensities of the PSMs that are actually used (after cleaning)
+	if 'Intensity' in df.columns:
+		metadata['MS1Intensities_PSMs_used'] = df.loc[:, 'Intensity']
+	else:
+		logging.warning("Column 'Intensity' was not found. Not gathering MS1 intensity QC info.")
+	
 	try:
 		metadata['deltappmStatistics'] = getDeltappmMetadata(df, 'DeltaM [ppm]')
 	except KeyError:

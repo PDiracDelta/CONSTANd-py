@@ -59,9 +59,10 @@ def combineProcessingMetadata(metadata, perExperimentMetadata):
 	# Compile a list of all master proteins found at least in 1 PSM and at least in 1 experiment:
 	allObservedProteins = pd.Series(list(set().union(*[perExperimentMetadata[eName]['allMasterProteins'] for eName in experimentNames])))
 	# info on amount of PSMs
-	metadata['numPSMs'] = pd.DataFrame(index=experimentNames, columns=['initial', 'after cleaning'])
+	metadata['numPSMs'] = pd.DataFrame(index=experimentNames, columns=['detected', 'used'])
 	metadata['pctPSMsIsolInterfTooHigh'] = pd.DataFrame(columns=experimentNames)
-	metadata['MS1Intensities_PSMs'] = pd.Series(index=experimentNames, dtype=object)
+	metadata['MS1Intensities_PSMs_all'] = pd.Series(index=experimentNames, dtype=object)
+	metadata['MS1Intensities_PSMs_used'] = pd.Series(index=experimentNames, dtype=object)
 	metadata['injectionTimeInfo'] = pd.DataFrame(index=experimentNames, columns=['max', 'num max', 'num below'])
 	metadata['deltappmStatistics'] = pd.DataFrame(index=experimentNames, columns=['max', 'mean', 'std'])
 	metadata['intensityStatisticsPerExp'] = dict()  # dict because we need a whole dataframe per experiment
@@ -76,11 +77,14 @@ def combineProcessingMetadata(metadata, perExperimentMetadata):
 			if 'pctPSMsIsolInterfTooHigh' in metadata.keys():
 				del metadata['pctPSMsIsolInterfTooHigh']
 		try:  # either fill MS1Intensities_PSMs or delete it
-			metadata['MS1Intensities_PSMs'][eName] = perExperimentMetadata[eName]['MS1Intensities_PSMs'].tolist()
+			metadata['MS1Intensities_PSMs_all'][eName] = perExperimentMetadata[eName]['MS1Intensities_PSMs_all'].tolist()
+			metadata['MS1Intensities_PSMs_used'][eName] = perExperimentMetadata[eName]['MS1Intensities_PSMs_used'].tolist()
 		except KeyError as e:
 			logging.warning("Entry '" + str(e.args[0]) + "' was not found for experiment "+eName+". Not gathering ANY MS1 intensity QC info.")
-			if 'MS1Intensities_PSMs' in metadata.keys():
-				del metadata['MS1Intensities_PSMs']
+			if 'MS1Intensities_PSMs_all' in metadata.keys():
+				del metadata['MS1Intensities_PSMs_all']
+			if 'MS1Intensities_PSMs_used' in metadata.keys():
+				del metadata['MS1Intensities_PSMs_used']
 		try:
 			metadata['injectionTimeInfo'].loc[eName, :] = perExperimentMetadata[eName]['injectionTimeInfo'].iloc[0, :]  # there is only 1 entry
 		except KeyError:
