@@ -269,12 +269,18 @@ def testDifferentialExpression(this_proteinDF, alpha, referenceCondition, otherC
 		
 		# remove masked values because otherwise you run into trouble applying significance to masked values and stuff.
 		this_proteinDF.loc[:, pValueColumn] = this_proteinDF.loc[:, pValueColumn].apply(lambda x: np.nan if x is np.ma.masked or x == 0.0 else x)
+		if np.nan in this_proteinDF.loc[:, pValueColumn].values:
+			logging.warning("Some DEA p-values could not be calculated.")
 		
 		# Benjamini-Hochberg correction
 		# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
 		nonNaNIndices = this_proteinDF.loc[:, pValueColumn].dropna().index
-		__, this_proteinDF.loc[nonNaNIndices, 'adjusted '+pValueColumn], __, __ = multipletests(pvals=np.asarray(this_proteinDF.loc[nonNaNIndices, pValueColumn]),
+		if len(nonNaNIndices)> 0:
+			__, this_proteinDF.loc[nonNaNIndices, 'adjusted '+pValueColumn], __, __ = multipletests(pvals=np.asarray(this_proteinDF.loc[nonNaNIndices, pValueColumn]),
 																	   alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
+		else:
+			this_proteinDF.loc[nonNaNIndices, 'adjusted ' + pValueColumn] = pd.Series()
+			logging.warning("No adjusted p-values could be calculated. You probably have only 1 sample per condition.")
 	return this_proteinDF
 
 
