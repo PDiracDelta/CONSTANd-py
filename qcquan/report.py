@@ -31,8 +31,6 @@ from qcquan import fontweight, fontsize, figwidth, figheight
 
 # adjust font size globally
 matplotlib.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
-matplotlib.use('Agg')  # todo remove?
-
 
 # save matplotlib images without whitespace: savefig('foo.png', bbox_inches='tight')
 
