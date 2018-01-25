@@ -3,7 +3,12 @@
 import numpy as np
 from qcquan import fontsize, fontweight, figheight, figwidth
 import matplotlib as mpl
-mpl.use('Agg')  # you need a backend that doesn't use X-server and you need to do it before you import pyplot.
+from os import environ
+if bool(environ.get('DISPLAY')):  # check whether X server is running
+	mpl.use('GTKAgg')
+else:
+	mpl.use('Agg')  # you need a backend that doesn't use X-server and you need to do it before you import pyplot.
+
 import matplotlib.pyplot as plt
 
 
