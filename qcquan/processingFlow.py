@@ -12,7 +12,7 @@ from qcquan.aggregate import aggregate
 from qcquan.constand import constand
 
 
-def processDf(df, params, writeToDisk, metadata, doConstand=True):
+def processDf(df, params, writeToDisk, doConstand=True):
 	"""
 	Calls all the necessary functions to process the dataframe of one experiment and prepare the analysis input objects.
 	Cleans the input data, removes redundancy due to PSM algorithm, charge (optional) and PTMs (optional), then corrects
