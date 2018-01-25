@@ -19,7 +19,7 @@ from scipy.cluster.hierarchy import dendrogram
 import matplotlib
 from os import environ
 if bool(environ.get('DISPLAY')):  # check whether X server is running
-	matplotlib.use('GTKAgg')
+	matplotlib.use('TkAgg')
 else:
 	matplotlib.use('Agg')  # you need a backend that doesn't use X-server and you need to do it before you import pyplot.
 from matplotlib import pyplot as plt
