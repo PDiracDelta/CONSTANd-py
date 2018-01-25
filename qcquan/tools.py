@@ -107,7 +107,7 @@ def scatterPlot(x, y, title=None, xlab=None, ylab=None):
 	:param ylab:	str			label for the y-axis
 	:return f:		plt.figure	scatterPlot as a matplotlib figure object
 	"""
-	mpl.use('Agg')
+	# mpl.use('Agg')
 	mpl.rcParams.update({'font.size': fontsize, 'font.weight': fontweight})
 	
 	f = plt.figure(figsize=(figwidth, figheight))

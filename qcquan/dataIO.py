@@ -363,8 +363,6 @@ def exportData(data, dataType, path_out, filename, delim_out=None, inOneFile=Fal
 		with open(outFileFullPathNoExt + '.pkl', "wb") as fout:
 			# save as pickle. Load again later as: ax = pickle.load(file('myplot.pickle')); then plt.show()
 			pickle.dump(data, fout, protocol=4)
-		# from matplotlib import pyplot as plt
-		# ax = data
 		data.savefig(outFileFullPathNoExt + '.png', format='png', bbox_inches='tight')
 		return outFileFullPathNoExt + '.png'
 	elif dataType == 'html':
