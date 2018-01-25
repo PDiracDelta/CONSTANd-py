@@ -257,15 +257,19 @@ def getVolcanoPlot(df, condition, alpha, FCThreshold, labelPlot=[False, ] * 4, t
 	# adjust limits
 	allXdata = pd.concat([xdataFC, xdataYES, xdataNO, xdataP])
 	allYdata = pd.concat([ydataFC, ydataYES, ydataNO, ydataP])
-	try:
-		Xabsmax = max(abs(np.floor(min(allXdata))), abs(np.ceil(max(allXdata))))
-		plt.xlim([-Xabsmax, Xabsmax])
-	except ValueError:
-		plt.xlim([-5, 5])
-	try:
-		plt.ylim([0, np.ceil(max(allYdata) / 5) * 5])  # int(base * round(float(x)/base))
-	except ValueError:
-		plt.ylim([0, 100])  # int(base * round(float(x)/base))
+	# try:
+	Xabsmax = max(abs(np.floor(np.nanmin(allXdata.values))), abs(np.ceil(np.nanmax(allXdata.values))))
+	plt.xlim([-Xabsmax, Xabsmax])
+	# except ValueError:
+	# 	plt.xlim([-5, 5])
+	# try:
+	ymax = np.nanmax(allYdata.values)
+	if ymax > 10:  # round up to 5
+		plt.ylim([0, np.ceil(ymax / 5) * 5])  # int(base * round(float(x)/base))
+	else:  # round up to 1
+		plt.ylim([0, np.ceil(ymax) + 1])  # int(base * round(float(x)/base))
+	# except ValueError:
+	# 	plt.ylim([0, 100])  # int(base * round(float(x)/base))
 	
 	# plt.show() # TEST
 	return volcanoPlot
