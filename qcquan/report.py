@@ -17,7 +17,11 @@ from qcquan.tools import unnest, getOtherConditions
 from warnings import warn
 from scipy.cluster.hierarchy import dendrogram
 import matplotlib
-matplotlib.use('Agg')  # you need a backend that doesn't use X-server and you need to do it before you import pyplot.
+from os import environ
+if bool(environ.get('DISPLAY')):  # check whether X server is running
+	matplotlib.use('GTKAgg')
+else:
+	matplotlib.use('Agg')  # you need a backend that doesn't use X-server and you need to do it before you import pyplot.
 from matplotlib import pyplot as plt
 from matplotlib import markers
 from matplotlib.colors import to_hex
