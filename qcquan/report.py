@@ -370,10 +370,19 @@ def getScoreVsDeltaMppmScatter(relPSMScoreVsDeltaMppmPerExp):
 	
 	experimentNames = relPSMScoreVsDeltaMppmPerExp.keys()
 	colormap = distinguishableColours(len(experimentNames), type='jet')
+	meanDeltaMppm = []
 	i = 0
 	for eName, valuesdf in relPSMScoreVsDeltaMppmPerExp.items():
 		ax.scatter(valuesdf['deltaMppm'], valuesdf['relScore'], s=2, c=colormap[i], label=eName)
+		meanDeltaMppm.append(np.nanmean(valuesdf['deltaMppm']))
 		i += 1
+	# draw averages lines
+	ylims = ax.get_ylim()
+	while i > 0:
+		i -= 1
+		ax.plot([meanDeltaMppm[i], meanDeltaMppm[i]], ylims, c=colormap[i])  # ylims = yvalues for line
+	ax.set_ylim(ylims)  # re-set them because ax.plot changed them
+	
 	plt.legend(markerscale=5)#loc='upper left')
 	return f
 
