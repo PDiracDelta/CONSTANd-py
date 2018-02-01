@@ -400,7 +400,10 @@ def getMS1IntensityHist(MS1Intensities_PSMs, MS1Intensities_peptides):
 		globMax = max(max(PSMdata), max(peptidedata))
 		# globMin = min(min(PSMdata), min(peptidedata))
 		globMin = 0
-		ax = axes[divmod(i, 2)]
+		if NUM_EXPERIMENTS > 1:
+			ax = axes[divmod(i, 2)]
+		else:  # axes object is not subscriptable
+			ax = axes
 		ax.hist(PSMdata, bins=50, range=(globMin, globMax), label="detected PSMs")#, alpha=0.7)
 		ax.hist(peptidedata, bins=50, range=(globMin, globMax), label="used PSMs")#, alpha=0.7)
 		ax.set_yscale("log")
