@@ -137,7 +137,7 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 		ScoreVsDeltaMppmScatterFullPath = None
 	
 	try:
-		MS1IntensityHist = getMS1IntensityHist(metadata['MS1Intensities_PSMs'], metadata['MS1Intensities_peptides'])
+		MS1IntensityHist = getMS1IntensityHist(metadata['MS1Intensities_PSMs_all'], metadata['MS1Intensities_PSMs_used'])
 		if writeToDisk:
 			MS1IntensityHistFullPath = exportData(MS1IntensityHist, dataType='fig', path_out=params['path_results'],
 					   filename=params['jobName'] + '_MS1IntensityHist')
