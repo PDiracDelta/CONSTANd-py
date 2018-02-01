@@ -393,6 +393,8 @@ def ext2delim(ext):
 		return ','
 	elif ext == 'tsv':
 		return '\t'
+	elif ext in ['xlsx', 'xls']:
+		return 'xlsx'
 	else:
 		return None
 
