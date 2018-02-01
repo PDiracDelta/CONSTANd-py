@@ -144,8 +144,9 @@ def getSortedProteinExpressionsDF(proteinDF, referenceCondition, condition):
 	numPeptColumn = '#peptides ('+condition+')'
 	refNumPeptColumn = '#peptides ('+referenceCondition+')'
 	reportColumns.extend([FCColumn, adjustedPValueColumn, numPeptColumn, refNumPeptColumn])
-	# sort and then also reset index to get protein as a column
-	return proteinDF.loc[:, reportColumns].sort_values(by=adjustedPValueColumn, ascending=True).reset_index(level=0, inplace=False)
+	# sort first on ABSOLUTE FOLD CHANGE (so if there are no non-NaN p-values it is sorted on FC still) and then on
+	# ADJUSTED P-VALUE and then also reset index to get protein as a column
+	return proteinDF.loc[:, reportColumns].reindex(proteinDF[FCColumn].abs().sort_values(ascending=False).index).sort_values(by=adjustedPValueColumn, ascending=True).reset_index(level=0, inplace=False)
 
 
 def addMissingObservedProteins(sortedProteinExpressionsDF, allProteinsSet):
