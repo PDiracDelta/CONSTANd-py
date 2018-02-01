@@ -54,7 +54,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 		metadata['relPSMScoreVsDeltaMppm'] = getRelPSMScoreVsDeltaMppm(df, params['PSMEnginePriority'])
 	except KeyError as e:  # pandas KeyError: args[0] contains whole message.
 		# can be either the 'DeltaM [ppm]' column or the Identifying Node column or ...
-		logging.warning(e.args[0]+" Not gathering MS1 calibration QC info.")
+		logging.warning("Cannot find column: "+e.args[0]+". Not gathering MS1 calibration QC info.")
 	
 	if params['removeBadConfidence_bool']:
 		df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'], params['removalColumnsToSave'])
