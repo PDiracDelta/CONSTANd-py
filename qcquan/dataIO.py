@@ -33,7 +33,13 @@ def importDataFrame(path_in, delim=None, header=0, dtype=None):
 			warn("No file extension nor delimiter specified; Pandas will try to automatically detect the delimiter.")
 	
 	if delim == 'xlsx':
-		df = pd.read_excel(path_in)
+		try:
+			df = pd.read_excel(path_in)
+		except ValueError as ve:  # possibly using comma instead of dot as decimal delimiter
+			try:
+				df = pd.read_excel(path_in, decimal=',')
+			except Exception as e:
+				raise Exception("Something is wrong with this Excel file (see below) Try to save it as .tsv or .csv (tab or comma-separated) first, then upload the resulting file.<br>"+e.args[0])
 	else:  # delim is something else OR None.
 		if delim is None:
 			possibleDelims = ['\t', ',']
