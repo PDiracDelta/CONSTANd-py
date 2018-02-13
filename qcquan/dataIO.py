@@ -243,7 +243,9 @@ def fixFixableFormatMistakes(df):
 		'Number of Protein Groups': '# Protein Groups',
 		'mz in Da': 'm/z [Da]',
 		'Delta mz in Da': 'Deltam/z [Da]',
-		'RT in min': 'RT [min]'
+		'RT in min': 'RT [min]',
+		'Ion Inject Time in ms': 'Ion Inject Time [ms]',
+		'Delta M in ppm': 'DeltaM [ppm]',
 	}
 	for original, replacement in replacementDict.items():
 		if original in columns:
