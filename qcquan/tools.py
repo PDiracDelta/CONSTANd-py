@@ -68,7 +68,7 @@ def setIntensities(df, intensities, quanColumns):
 def getOtherConditions(schema, referenceCondition):
 	"""
 	Takes a schema and returns the non-reference conditions.
-	:param schema:			dict	schema of the experiments' hierarchy
+	:param schema:			dict	schema of the MSRuns' hierarchy
 	:return otherConditions:list	non-reference conditions
 	"""
 	allConditions = list(schema['allConditions'])

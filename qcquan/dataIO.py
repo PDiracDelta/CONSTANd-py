@@ -111,19 +111,19 @@ def importWrapper(path_in='wrapper.tsv'):
 
 def parseDoEFile(DoEPath):  # todo either move this to web.py or redistribute file manipulation files(functions?) in web.py
 	"""
-	Parses the .tsv DoE file into a hierarchical overview with intensity columns groups per condition and experiment.
+	Parses the .tsv DoE file into a hierarchical overview with intensity columns groups per condition and MSRun.
 	The	wrapper and config entries are set to None for now. The structure of the schema should be as follows:
-		experiment_name	cond1:df_col1,df_col2:alias1,alias2		cond2:df_col3,df_col4:alias3,alias4
+		MSRun_name	cond1:df_col1,df_col2:alias1,alias2		cond2:df_col3,df_col4:alias3,alias4
 	IF aliases are provided for a certain row, they must all be provided. Else they are generated automatically as
-	EXPERIMENTNAME_CONDITION_COLNAME.
+	MSRunNAME_CONDITION_COLNAME.
 	:param DoEPath:              str     path to the DoE file that the user uploaded
 	:return incompleteSchemaDict:   dict    schema in dict format, without config and wrapper information, in the format
-											{ allExperiments: [experiments] ,
+											{ allMSRuns: [MSRuns] ,
 											  allConditions: [conditions] ,
-											  experiment: {
-											    allExperimentConditions: [conditions] ,
-												allExperimentChannelNames: [channelNames] ,
-												allExperimentChannelAliases: [channelAliases] ,
+											  MSRun: {
+											    allMSRunConditions: [conditions] ,
+												allMSRunChannelNames: [channelNames] ,
+												allMSRunChannelAliases: [channelAliases] ,
 												{ condition: { channelNames: [names] , channelAliases: [aliases] } }
 											  }
 											}
@@ -148,15 +148,15 @@ def parseDoEFile(DoEPath):  # todo either move this to web.py or redistribute fi
 	numCols = len(schemaDF.columns)
 	numRows = len(schemaDF)
 	if not (numCols > 1):  # at least 2 columns
-		raise Exception("Schema must have at least 3 columns EXPERIMENT\\tCONDITION (separated by tabs)")
-	incompleteSchemaDict['allExperiments'] = list(schemaDF.loc[:, 0])
-	# check if experiment names are unique
-	if not len(set(incompleteSchemaDict['allExperiments'])) == numRows:
-		raise Exception("Experiment names contain duplicates. Please provide unique names.")
-	forbiddenExperimentNames = {'allExperiments', 'allConditions'}
-	# check if no experiment names are forbidden
-	if set(incompleteSchemaDict['allExperiments']) & forbiddenExperimentNames:
-		raise Exception("Please do not use the following as experiment names: "+str(list(forbiddenExperimentNames)))
+		raise Exception("Schema must have at least 3 columns MSRun\\tCONDITION (separated by tabs)")
+	incompleteSchemaDict['allMSRuns'] = list(schemaDF.loc[:, 0])
+	# check if MSRun names are unique
+	if not len(set(incompleteSchemaDict['allMSRuns'])) == numRows:
+		raise Exception("MSRun names contain duplicates. Please provide unique names.")
+	forbiddenMSRunNames = {'allMSRuns', 'allConditions'}
+	# check if no MSRun names are forbidden
+	if set(incompleteSchemaDict['allMSRuns']) & forbiddenMSRunNames:
+		raise Exception("Please do not use the following as MSRun names: "+str(list(forbiddenMSRunNames)))
 	
 	""" construct schema dict """
 	allConditions = set()
@@ -166,63 +166,63 @@ def parseDoEFile(DoEPath):  # todo either move this to web.py or redistribute fi
 	numAllChannelAliases = 0
 	for __, row in schemaDF.iterrows():
 		row = [x for x in row if x != '']
-		experimentChannelNames = []
-		experimentChannelAliases = []
-		experimentName = str(row[0])
-		incompleteSchemaDict[experimentName] = OrderedDict()
+		MSRunChannelNames = []
+		MSRunChannelAliases = []
+		MSRunName = str(row[0])
+		incompleteSchemaDict[MSRunName] = OrderedDict()
 		conditionsList = [str(element).split(':')[0] for element in row[1:] if element != '']
 		allConditions.update(conditionsList)
 		try:
 			channelNamesList = [str(element).split(':')[1] for element in row[1:]]
 		except IndexError:
-			raise Exception("Couldn't find any experiment information. Do you have a line in your schema that's (nearly) empty?")
+			raise Exception("Couldn't find any MSRun information. Do you have a line in your schema that's (nearly) empty?")
 		# check if condition names unique
 		if not len(set(conditionsList)) == len(conditionsList):
-			raise Exception("Same condition name used multiple times for same experiment. Please define each condition only once per experiment.")
+			raise Exception("Same condition name used multiple times for same MSRun. Please define each condition only once per MSRun.")
 		channelAliasesList = [extractAliases(element) for element in row[1:]]
 		
 		# store each condition and its channelNames in the dict
 		for condition, channelNamesString, channelAliasesString in zip(conditionsList, channelNamesList, channelAliasesList):
-			incompleteSchemaDict[experimentName][condition] = OrderedDict()
+			incompleteSchemaDict[MSRunName][condition] = OrderedDict()
 			channelNames = channelNamesString.split(',')
 			if '' in channelNames:
 				raise Exception("Channel names cannot be empty strings. Maybe you placed an extra comma somewhere?")
-			incompleteSchemaDict[experimentName][condition]['channelNames'] = channelNames
+			incompleteSchemaDict[MSRunName][condition]['channelNames'] = channelNames
 			if channelAliasesString == '':  # no channelAliases provided: construct yourself
-				channelAliases = [experimentName + '_' + condition + '_' + channelName for channelName in channelNames]
+				channelAliases = [MSRunName + '_' + condition + '_' + channelName for channelName in channelNames]
 			else:  # channelAliases are provided.
 				channelAliases = channelAliasesString.split(',')
 			if '' in channelAliases:
 				raise Exception("Channel aliases cannot be empty strings (if you define one alias, you should define all aliases in that condition). Maybe you placed an extra comma somewhere?")
-			incompleteSchemaDict[experimentName][condition]['channelAliases'] = channelAliases
+			incompleteSchemaDict[MSRunName][condition]['channelAliases'] = channelAliases
 			numNames = len(channelNames)
 			numAliases = len(channelAliases)
 			numAllChannelNames += numNames
 			numAllChannelAliases += numAliases
-			experimentChannelNames += channelNames  # channel names must be tested for uniqueness per experiment
-			experimentChannelAliases += channelAliases
+			MSRunChannelNames += channelNames  # channel names must be tested for uniqueness per MSRun
+			MSRunChannelAliases += channelAliases
 			allChannelNames.update(channelNames)
 			allChannelAliases.update(channelAliases)
 			# check if there are as many names as aliases
 			if not numNames == numAliases:
 				raise Exception("Amount of channel names and channel aliases must either be equal, or no aliases should be provided.")
 		
-		incompleteSchemaDict[experimentName]['allExperimentConditions'] = conditionsList
-		incompleteSchemaDict[experimentName]['allExperimentChannelNames'] = experimentChannelNames
-		incompleteSchemaDict[experimentName]['allExperimentChannelAliases'] = experimentChannelAliases
+		incompleteSchemaDict[MSRunName]['allMSRunConditions'] = conditionsList
+		incompleteSchemaDict[MSRunName]['allMSRunChannelNames'] = MSRunChannelNames
+		incompleteSchemaDict[MSRunName]['allMSRunChannelAliases'] = MSRunChannelAliases
 		# check if channel names unique
-		if not len(set(experimentChannelNames)) == len(experimentChannelNames):
-			raise Exception("Same channel name used multiple times for same experiment. Please define each condition only once per experiment.")
+		if not len(set(MSRunChannelNames)) == len(MSRunChannelNames):
+			raise Exception("Same channel name used multiple times for same MSRun. Please define each condition only once per MSRun.")
 	
 	# check if channel aliases unique
 	if not len(allChannelAliases) == numAllChannelAliases:
-		raise Exception("Same alias name used multiple times for same experiment. Please define each condition only once per experiment.")
+		raise Exception("Same alias name used multiple times for same MSRun. Please define each condition only once per MSRun.")
 	
-	# channelNames already checked per experiment, and are allowed to be non-unique across experiments since they get replaced anyway.
+	# channelNames already checked per MSRun, and are allowed to be non-unique across MSRuns since they get replaced anyway.
 	incompleteSchemaDict['allConditions'] = list(allConditions)
 	
 	# check if some of the conditions provided do not actually have forbidden names (union not empty)
-	forbiddenConditionNames = {'data', 'config', 'isotopicCorrection_matrix', 'wrapper', 'allExperimentConditions',
+	forbiddenConditionNames = {'data', 'config', 'isotopicCorrection_matrix', 'wrapper', 'allMSRunConditions',
 							   'protein', 'peptides', 'description', 'fold change log2(c1/c2)', 'p-value'}
 	if allConditions & {'data', 'config', 'isotopicCorrection_matrix', 'wrapper'}:
 		raise Exception("Please do not use as condition names any of the following: " + str(list(forbiddenConditionNames)))
@@ -299,15 +299,15 @@ def applyWrapper(columns, wrapper):
 	return newColumns
 
 
-def importExperimentData(path_in, delim=None, header=0, wrapper=None):
+def importMSRunData(path_in, delim=None, header=0, wrapper=None):
 	"""
-	Gets the experimental data specified by path_in from disk, applies a wrapper (optional) and fixes common
+	Gets the MSRunal data specified by path_in from disk, applies a wrapper (optional) and fixes common
 	format mistakes.
 	:param path_in:     string          existing path to input file
 	:param delim:       char            delimiter of the data
 	:param header:      int             row that contains the header of the data (None if no header)
 	:param wrapper: 	list(tuples)	wrapper (nested list of pairs) specifying column name transformations
-	:return df:			pd.DataFrame    ready-to-use experimental data
+	:return df:			pd.DataFrame    ready-to-use MSRunal data
 	"""
 	df = importDataFrame(path_in, delim=delim, header=header)
 	df.columns = applyWrapper(df.columns, wrapper)

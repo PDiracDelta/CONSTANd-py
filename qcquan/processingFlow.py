@@ -14,13 +14,13 @@ from qcquan.constand import constand
 
 def processDf(df, params, writeToDisk, doConstand=True):
 	"""
-	Calls all the necessary functions to process the dataframe of one experiment and prepare the analysis input objects.
+	Calls all the necessary functions to process the dataframe of one MSRun and prepare the analysis input objects.
 	Cleans the input data, removes redundancy due to PSM algorithm, charge (optional) and PTMs (optional), then corrects
 	isotopic impurities (optional),	normalizes using the CONSTANd method and saves the output to disk if so required.
 	Along the way, removed data is kept in a corresponding dict of dataframes, and metadata is gathered for meta-analysis
 	and QC purposes.
 	:param df:						pd.DataFrame		Peptide Spectrum Match dataframe (see documentation).
-	:param params:					dict				experiment-specific processing parameters (see getConfig.py.)
+	:param params:					dict				MSRun-specific processing parameters (see getConfig.py.)
 	:param metadata:				dict				metadata about the job, including QC information.
 														[allMasterProteins; (noIsotopicCorrectionIndices)]
 	:param writeToDisk:				bool				write results to harddisk (if not: only pass via return statement).

@@ -61,7 +61,7 @@ def aggregate(toAggregate, df, quanColumns, method, PSMEnginePriority, removePSM
 	Generic aggregate function, which removes redundancy in the data due to property toAggregate.
 	Looks for duplicate 'Sequence' values in the dataFrame and further groups by other possible properties
 	(PSMEngine, Charge, Modifications) if necessary, while respecting the aggregate order imposed in the main() function.
-	Removes each group of duplicate from the experimental data df and replaces them by a representative entry that has
+	Removes each group of duplicate from the MSRunal data df and replaces them by a representative entry that has
 	all properties of the entry amongst them with the best PSM score, but with quantification values determined by a
 	method specified through `method`.
 	intensities (via getNewIntensities function): remove all duplicates and enter one replacement PSM.

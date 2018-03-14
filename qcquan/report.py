@@ -48,9 +48,9 @@ def distinguishableColours(n, type='jet'):
 
 def getColours(schema, hex=False):
 	"""
-	Returns list of colours for all the channels in all experiments (based on schema) so that the channels of the same
+	Returns list of colours for all the channels in all MSRuns (based on schema) so that the channels of the same
 	condition have the same colour.
-	:param schema:  			dict    schema of the experiments' hierarchy
+	:param schema:  			dict    schema of the MSRuns' hierarchy
 	:return channelColoursDict:	dict    colour for each channel; a different one for each condition
 	"""
 	numConditions = len(schema['allConditions'])
@@ -60,7 +60,7 @@ def getColours(schema, hex=False):
 	channelColoursDict = dict()
 	c = 0  # colour counter
 	for cond in schema['allConditions']:
-		for eName in schema['allExperiments']:
+		for eName in schema['allMSRuns']:
 			if cond in schema[eName]:
 				numChannels = len(schema[eName][cond]['channelAliases'])
 				channelColoursDict.update(dict(zip(schema[eName][cond]['channelAliases'], np.tile(distColours[c], (numChannels, 1)))))
@@ -85,30 +85,30 @@ def distinguishableMarkers(n):
 	
 	if n > len(easilyDistinguishable):  # not enough distinguishable markers
 		if n < len(visibleMarkers):  # enough visible markers
-			warn("More experiments than easily distinguishable markers; using all (visible) markers.")
+			warn("More MSRuns than easily distinguishable markers; using all (visible) markers.")
 			return [list(allMarkers.keys())[i] for i in range(n)]
 		else:  # not enough markers at all
-			warn("More experiments than markers. Using all (visible) markers with possible repetitions!")
+			warn("More MSRuns than markers. Using all (visible) markers with possible repetitions!")
 			# number of times to re-use ALL visible markers
 			nRepetitions = np.mod(len(visibleMarkers), n)
 			nResidual = len(visibleMarkers) - n
 			return list(visibleMarkers.keys()) * nRepetitions + list(visibleMarkers.keys())[0:nResidual]
-	else:  # have enough distinguishable markers for the n experiments
+	else:  # have enough distinguishable markers for the n MSRuns
 		return easilyDistinguishable[0:n]
 
 
 def getMarkers(schema):
 	"""
-	Returns list of markers for the channels in all experiments (based on schema) so that the channels of the same
-	experiment have the same marker.
-	:param schema:  			dict    schema of the experiments' hierarchy
-	:return channelMarkersDict:	dict	marker for each channel; a different one for each experiment
+	Returns list of markers for the channels in all MSRuns (based on schema) so that the channels of the same
+	MSRun have the same marker.
+	:param schema:  			dict    schema of the MSRuns' hierarchy
+	:return channelMarkersDict:	dict	marker for each channel; a different one for each MSRun
 	"""
 	distMarkers = distinguishableMarkers(len(schema))
 	channelMarkersDict = {}
 	i = 0
-	for eName in schema['allExperiments']:
-		for alias in schema[eName]['allExperimentChannelAliases']:
+	for eName in schema['allMSRuns']:
+		for alias in schema[eName]['allMSRunChannelAliases']:
 			channelMarkersDict[alias] = distMarkers[i]
 		i += 1
 	return channelMarkersDict
@@ -118,7 +118,7 @@ def getSortedProteinExpressionsDFs(proteinDF, schema, referenceCondition):
 	"""
 	Returns a list of sortedProteinDFs (see getSortedProteinExpressionsDF); one for each non-reference condition.
 	:param proteinDF: 					pd.DataFrame    	unsorted DE analysis results on the protein level
-	:param schema: 						dict				schema of the experiments' hierarchy.
+	:param schema: 						dict				schema of the MSRuns' hierarchy.
 	:return sortedProteinExpressionsDFs:dict				{ condition : sortedProteinDF }
 	"""
 	otherConditions = getOtherConditions(schema, referenceCondition)
@@ -154,7 +154,7 @@ def addMissingObservedProteins(sortedProteinExpressionsDF, allProteinsSet):
 	Add all proteins in allProteinsSet that are not present -- due to missing values or whatever -- in the proteins
 	column of the DEA output, for completeness. The other columns for these entries are NaN.
 	:param sortedProteinExpressionsDF:	pd.DataFrame	DEA output table with only useful entries
-	:param allProteinsSet:				Set				all proteins observed in at least 1 PSM of at least 1 experiment
+	:param allProteinsSet:				Set				all proteins observed in at least 1 PSM of at least 1 MSRun
 	:return sortedProteinExpressionsDF:	pd.DataFrame	DEA output table including proteins without DE results
 	"""
 	presentProteinsSet = set(sortedProteinExpressionsDF.loc[:, 'protein'])
@@ -279,9 +279,9 @@ def getVolcanoPlot(df, condition, alpha, FCThreshold, labelPlot=[False, ] * 4, t
 def getPCAPlot(PCAResult, schema, title=None):
 	"""
 	Generates a 2D plot of each quantification channel's first 2 PC scores. Identical colour means identical condition,
-	and identical marker means identical experiment.
+	and identical marker means identical MSRun.
 	:param PCAResult:	np.ndarray		PC scores of the channels for each protein (see getPCA() in analysis.py)
-	:param schema:		dict			schema of the experiments' hierarchy
+	:param schema:		dict			schema of the MSRuns' hierarchy
 	:param title:		str				title for the plot
 	:return PCAPlot:	plt.figure		PCA plot as a matplotlib figure object
 	"""
@@ -296,8 +296,8 @@ def getPCAPlot(PCAResult, schema, title=None):
 	plt.ylabel('Second PC', figure=PCAPlot)
 	
 	# labels for annotation
-	allChannelAliases = unnest([schema[eName]['allExperimentChannelAliases'] for eName in schema['allExperiments']])
-	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
+	allChannelAliases = unnest([schema[eName]['allMSRunChannelAliases'] for eName in schema['allMSRuns']])
+	# generate colors/markers so that the channels of the same condition/MSRun have the same colour/markers
 	channelColorsDict = getColours(schema)
 	channelMarkersDict = getMarkers(schema)
 	
@@ -308,12 +308,12 @@ def getPCAPlot(PCAResult, schema, title=None):
 					 textcoords='offset points', ha='right', va='bottom', fontsize=20)
 	legendHandles = []
 	legendStrings = []
-	# look up the corresponding experiment name for each marker to construct the legend
+	# look up the corresponding MSRun name for each marker to construct the legend
 	markersToCheck = set(channelMarkersDict.values())
 	for channel, marker in channelMarkersDict.items():
 		if marker in markersToCheck:
-			for eName in schema['allExperiments']:
-				if channel in schema[eName]['allExperimentChannelAliases']:
+			for eName in schema['allMSRuns']:
+				if channel in schema[eName]['allMSRunChannelAliases']:
 					handle = plt.scatter([], [], color='k', marker=marker, s=160)
 					legendHandles.append(handle)
 					legendStrings.append(eName)
@@ -329,13 +329,13 @@ def getPCAPlot(PCAResult, schema, title=None):
 def getHCDendrogram(HCResult, schema, title=None):
 	"""
 	Generates a hierarchical clustering dendrogram (horizontal) using the NxN linkage matrix HCResult. Each leaf
-	corresponds to a quantification channel. Identical colour means identical condition, and experiment labels are shown.
+	corresponds to a quantification channel. Identical colour means identical condition, and MSRun labels are shown.
 	:param HCResult:		np.ndarray		NxN linkage matrix (N=#channels)
-	:param schema:			dict			schema of the experiments' hierarchy
+	:param schema:			dict			schema of the MSRuns' hierarchy
 	:return HCDendrogram:	plt.figure		HC dendrogram as a matplotlib figure object
 	"""
 	# hierarchical clustering dendrogram
-	allChannelAliases = unnest([schema[eName]['allExperimentChannelAliases'] for eName in schema['allExperiments']])
+	allChannelAliases = unnest([schema[eName]['allMSRunChannelAliases'] for eName in schema['allMSRuns']])
 	HCDendrogram = plt.figure(
 		figsize=(figwidth, figheight))  # size(inches wide, height); a4paper: width = 8.267in; height 11.692in
 	# maximize figure
@@ -346,7 +346,7 @@ def getHCDendrogram(HCResult, schema, title=None):
 	plt.title(title, figure=HCDendrogram)
 	plt.xlabel('distance', figure=HCDendrogram)
 	plt.ylabel('reporter channel', figure=HCDendrogram)
-	# generate colors/markers so that the channels of the same condition/experiment have the same colour/markers
+	# generate colors/markers so that the channels of the same condition/MSRun have the same colour/markers
 	# first transform to hex code because the dendrogram() function only takes strings.
 	channelColorsDict = getColours(schema, hex=False)
 	dendrogram(HCResult, orientation='right', leaf_rotation=0., leaf_font_size=24, labels=allChannelAliases,
@@ -362,15 +362,15 @@ def getHCDendrogram(HCResult, schema, title=None):
 
 
 def getScoreVsDeltaMppmScatter(relPSMScoreVsDeltaMppmPerExp):
-	""" Make one scatter plot of engineScore vs deltaM of all PSMs, coloured per experiment.
-	Scores are relative to within-experiment maximum. """
+	""" Make one scatter plot of engineScore vs deltaM of all PSMs, coloured per MSRun.
+	Scores are relative to within-MSRun maximum. """
 	f = plt.figure(figsize=(figwidth, figheight))
 	ax = f.add_subplot(111)
 	plt.xlabel(r'$\Delta$M [ppm]', figure=f)
 	plt.ylabel('PSM engine score (relative to max)', figure=f)
 	
-	experimentNames = relPSMScoreVsDeltaMppmPerExp.keys()
-	colormap = distinguishableColours(len(experimentNames), type='jet')
+	MSRunNames = relPSMScoreVsDeltaMppmPerExp.keys()
+	colormap = distinguishableColours(len(MSRunNames), type='jet')
 	meanDeltaMppm = []
 	i = 0
 	for eName, valuesdf in relPSMScoreVsDeltaMppmPerExp.items():
@@ -390,17 +390,17 @@ def getScoreVsDeltaMppmScatter(relPSMScoreVsDeltaMppmPerExp):
 
 def getMS1IntensityHist(MS1Intensities_PSMs, MS1Intensities_peptides):
 	eNames = list(MS1Intensities_peptides.keys())
-	NUM_EXPERIMENTS = len(eNames)
+	NUM_MSRunS = len(eNames)
 	# 2 by N/2 array of plots, unless N<2 then plot just one.
-	fig, axes = plt.subplots(nrows=int(np.ceil(NUM_EXPERIMENTS/2)), ncols=int(min(NUM_EXPERIMENTS, 2)), figsize=(figwidth, figheight))
-	for i in range(NUM_EXPERIMENTS):
+	fig, axes = plt.subplots(nrows=int(np.ceil(NUM_MSRunS/2)), ncols=int(min(NUM_MSRunS, 2)), figsize=(figwidth, figheight))
+	for i in range(NUM_MSRunS):
 		# do NOT drop NA because that should not be necessary! It will illegitimately remove data. Fix your input data.
 		PSMdata = MS1Intensities_PSMs[eNames[i]]  # .dropna()
 		peptidedata = MS1Intensities_peptides[eNames[i]]  # .dropna()
 		globMax = max(max(PSMdata), max(peptidedata))
 		# globMin = min(min(PSMdata), min(peptidedata))
 		globMin = 0
-		if NUM_EXPERIMENTS > 1:
+		if NUM_MSRunS > 1:
 			ax = axes[divmod(i, 2)]
 		else:  # axes object is not subscriptable
 			ax = axes
@@ -408,7 +408,7 @@ def getMS1IntensityHist(MS1Intensities_PSMs, MS1Intensities_peptides):
 		ax.hist(peptidedata, bins=50, range=(globMin, globMax), label="used PSMs")#, alpha=0.7)
 		ax.set_yscale("log")
 		# ax.set_xscale("log")
-		ax.legend(prop={'size': fontsize/2 if NUM_EXPERIMENTS > 1 else fontsize})
+		ax.legend(prop={'size': fontsize/2 if NUM_MSRunS > 1 else fontsize})
 		ax.set_title(eNames[i])
 		ax.ticklabel_format(style='sci', scilimits=(0, 0), axis='x')
 		ax.set_xlabel("MS1 Intensity")
@@ -433,7 +433,7 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 	A second HTML file used for conversion to PDF is generated slightly different from the one used	for actual HTML
 	representation, for technical reasons to do with image representation.
 	:param jobParams:				dict			job (global) parameters
-	:param allProcessingParams:		dict			per experiment, all parameters for the processing step
+	:param allProcessingParams:		dict			per MSRun, all parameters for the processing step
 	:param minTopDifferentialsDFs:	{pd.DataFrame}	top X differential protein data (minimal expression, injective)
 													sorted on adjusted p-value and only specified columns, per condition
 	:param fullTopDifferentialsDFs:	{pd.DataFrame}	top X differential protein data (full expression, non-injective)

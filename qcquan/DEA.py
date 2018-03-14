@@ -12,12 +12,12 @@ Contains all steps to be undertaken in a single DEA operation:
 from qcquan.analysis import *
 
 
-def DEA(this_allExperimentsDF, proteinPeptidesDict, params):
+def DEA(this_allMSRunsDF, proteinPeptidesDict, params):
 	"""
 	Bring the data to the protein level in the case of [minimal]{full} expression (shared peptides are [not allowed]{allowed}).
 	Execute the differential expression analysis (t-test + B-H correction, compute log2 fold change and some useful
 	extra columns) and gather some metadata.
-	:param this_allExperimentsDF:		pd.DataFrame	dataframe containing an outer join of all the experiment dataframes
+	:param this_allMSRunsDF:		pd.DataFrame	dataframe containing an outer join of all the MSRun dataframes
 	:param proteinPeptidesDict:			dict			{ protein : all associated peptide indices (non-injective) }
 	:param params:						dict			job (global) parameters
 	:return proteinDF:					pd.DataFrame	Transformed and selected data on the protein level.
@@ -30,7 +30,7 @@ def DEA(this_allExperimentsDF, proteinPeptidesDict, params):
 	# use list() so that the new variable is not an alias
 	otherConditions = getOtherConditions(params['schema'], referenceCondition)
 	# execute mappings to get all peptideintensities per protein, over each whole condition. Index = 'protein'
-	proteinDF = getProteinDF(this_allExperimentsDF, proteinPeptidesDict, params['schema'],
+	proteinDF = getProteinDF(this_allMSRunsDF, proteinPeptidesDict, params['schema'],
 							 referenceCondition=referenceCondition, otherConditions=otherConditions)
 	
 	# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all

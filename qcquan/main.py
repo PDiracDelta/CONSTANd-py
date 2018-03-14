@@ -29,19 +29,19 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 		os.remove(logFilePath)
 	logging.basicConfig(filename=logFilePath, level=logging.INFO)
 	startTime = time()
-	jobParams = getJobConfig(jobConfigFilePath)  # config filenames + params for the combination of experiments
-	allProcessingParams = {}  # specific params for each experiment
+	jobParams = getJobConfig(jobConfigFilePath)  # config filenames + params for the combination of MSRuns
+	allProcessingParams = {}  # specific params for each MSRun
 	dfs = {}
 	processingResults = {}
-	experimentNames = jobParams['schema']['allExperiments']
+	MSRunNames = jobParams['schema']['allMSRuns']
 	
-	for eName in experimentNames:
+	for eName in MSRunNames:
 		""" Data processing """
 		# get all input parameters
 		allProcessingParams[eName] = getProcessingConfig(jobParams['schema'][eName]['config'])
 		# get the dataframes
 		# todo move this step to processingFlow --> NO because everything inside the Flow.py files should reside in memory, not on disk.
-		dfs[eName] = importExperimentData(allProcessingParams[eName]['data'],
+		dfs[eName] = importMSRunData(allProcessingParams[eName]['data'],
 										  delim=allProcessingParams[eName]['delim_in'],
 										  header=allProcessingParams[eName]['header_in'],
 										  wrapper=allProcessingParams[eName]['wrapper'])
@@ -59,11 +59,11 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 			
 			# process every input dataframe
 			logging.info(
-				"Starting processing of experiment '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
+				"Starting processing of MSRun '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.utcnow()).split('.')[0])
 			processingResults[eName] = processDf(dfs[eName], allProcessingParams[eName], writeToDisk, startTime)
 			logging.info(
-				"Finished processing of experiment '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
+				"Finished processing of MSRun '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.utcnow()).split('.')[0])
 			pickle.dump(processingResults[eName], open(processingResultsDumpFilename, 'wb'))  # TEST
 		elif doAnalysis:
@@ -74,7 +74,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 					"There is no previously processed data in this path: " + processingResultsDumpFilename)
 		else:
 			logging.warning(
-				"No processing step performed nor processing file loaded for experiment " + str(eName) + "!")
+				"No processing step performed nor processing file loaded for MSRun " + str(eName) + "!")
 	
 	""" Data analysis """
 	analysis_path_out = jobParams['path_out']

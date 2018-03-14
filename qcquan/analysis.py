@@ -52,67 +52,67 @@ def getNoIsotopicCorrection(df, noCorrectionIndices):
 		return pd.DataFrame()
 
 
-def combineProcessingMetadata(metadata, perExperimentMetadata):
+def combineProcessingMetadata(metadata, perMSRunMetadata):
 	""" The metadata gathered during the Processing step is still spread over multiple dict entries.
 	Combine it where necessary. """
-	experimentNames = perExperimentMetadata.keys()
-	# Compile a list of all master proteins found at least in 1 PSM and at least in 1 experiment:
-	allObservedProteins = pd.Series(list(set().union(*[perExperimentMetadata[eName]['allMasterProteins'] for eName in experimentNames])))
+	MSRunNames = perMSRunMetadata.keys()
+	# Compile a list of all master proteins found at least in 1 PSM and at least in 1 MSRun:
+	allObservedProteins = pd.Series(list(set().union(*[perMSRunMetadata[eName]['allMasterProteins'] for eName in MSRunNames])))
 	# info on amount of PSMs
-	metadata['numPSMs'] = pd.DataFrame(index=experimentNames, columns=['detected', 'used'])
-	metadata['pctPSMsIsolInterfTooHigh'] = pd.DataFrame(columns=experimentNames)
-	metadata['MS1Intensities_PSMs_all'] = pd.Series(index=experimentNames, dtype=object)
-	metadata['MS1Intensities_PSMs_used'] = pd.Series(index=experimentNames, dtype=object)
-	metadata['injectionTimeInfo'] = pd.DataFrame(index=experimentNames, columns=['max', 'num max', 'num below'])
-	metadata['deltappmStatistics'] = pd.DataFrame(index=experimentNames, columns=['max', 'mean', 'std'])
-	metadata['intensityStatisticsPerExp'] = dict()  # dict because we need a whole dataframe per experiment
-	metadata['relPSMScoreVsDeltaMppmPerExp'] = dict()  # dict because we need a whole dataframe per experiment
-	for eName in experimentNames:
-		metadata['numPSMs'].loc[eName, :] = [perExperimentMetadata[eName]['numPSMs_initial'],
-											 perExperimentMetadata[eName]['numPSMs_afterCleaning']]
+	metadata['numPSMs'] = pd.DataFrame(index=MSRunNames, columns=['detected', 'used'])
+	metadata['pctPSMsIsolInterfTooHigh'] = pd.DataFrame(columns=MSRunNames)
+	metadata['MS1Intensities_PSMs_all'] = pd.Series(index=MSRunNames, dtype=object)
+	metadata['MS1Intensities_PSMs_used'] = pd.Series(index=MSRunNames, dtype=object)
+	metadata['injectionTimeInfo'] = pd.DataFrame(index=MSRunNames, columns=['max', 'num max', 'num below'])
+	metadata['deltappmStatistics'] = pd.DataFrame(index=MSRunNames, columns=['max', 'mean', 'std'])
+	metadata['intensityStatisticsPerRun'] = dict()  # dict because we need a whole dataframe per MSRun
+	metadata['relPSMScoreVsDeltaMppmPerExp'] = dict()  # dict because we need a whole dataframe per MSRun
+	for eName in MSRunNames:
+		metadata['numPSMs'].loc[eName, :] = [perMSRunMetadata[eName]['numPSMs_initial'],
+											 perMSRunMetadata[eName]['numPSMs_afterCleaning']]
 		try:
-			metadata['pctPSMsIsolInterfTooHigh'].loc[0, eName] = perExperimentMetadata[eName]['pctPSMsIsolInterfTooHigh']
+			metadata['pctPSMsIsolInterfTooHigh'].loc[0, eName] = perMSRunMetadata[eName]['pctPSMsIsolInterfTooHigh']
 		except KeyError:
-			logging.warning("Entry 'pctPSMsIsolInterfTooHigh' was not found for experiment "+eName+". Not gathering its QC info for ANY tandem-MS run.")
+			logging.warning("Entry 'pctPSMsIsolInterfTooHigh' was not found for MSRun "+eName+". Not gathering its QC info for ANY tandem-MS run.")
 			if 'pctPSMsIsolInterfTooHigh' in metadata.keys():
 				del metadata['pctPSMsIsolInterfTooHigh']
 		try:  # either fill MS1Intensities_PSMs or delete it
-			metadata['MS1Intensities_PSMs_all'][eName] = perExperimentMetadata[eName]['MS1Intensities_PSMs_all'].tolist()
-			metadata['MS1Intensities_PSMs_used'][eName] = perExperimentMetadata[eName]['MS1Intensities_PSMs_used'].tolist()
+			metadata['MS1Intensities_PSMs_all'][eName] = perMSRunMetadata[eName]['MS1Intensities_PSMs_all'].tolist()
+			metadata['MS1Intensities_PSMs_used'][eName] = perMSRunMetadata[eName]['MS1Intensities_PSMs_used'].tolist()
 		except KeyError as e:
-			logging.warning("Entry '" + str(e.args[0]) + "' was not found for experiment "+eName+". Not gathering ANY MS1 intensity QC info.")
+			logging.warning("Entry '" + str(e.args[0]) + "' was not found for MSRun "+eName+". Not gathering ANY MS1 intensity QC info.")
 			if 'MS1Intensities_PSMs_all' in metadata.keys():
 				del metadata['MS1Intensities_PSMs_all']
 			if 'MS1Intensities_PSMs_used' in metadata.keys():
 				del metadata['MS1Intensities_PSMs_used']
 		try:
-			metadata['injectionTimeInfo'].loc[eName, :] = perExperimentMetadata[eName]['injectionTimeInfo'].iloc[0, :]  # there is only 1 entry
+			metadata['injectionTimeInfo'].loc[eName, :] = perMSRunMetadata[eName]['injectionTimeInfo'].iloc[0, :]  # there is only 1 entry
 		except KeyError:
-			logging.warning("Entry 'injectionTimeInfo' was not found for experiment "+eName+". Not gathering its QC info for ANY tandem-MS run.")
+			logging.warning("Entry 'injectionTimeInfo' was not found for MSRun "+eName+". Not gathering its QC info for ANY tandem-MS run.")
 			if 'injectionTimeInfo' in metadata.keys():
 				del metadata['injectionTimeInfo']
 		try:
-			metadata['deltappmStatistics'].loc[eName, :] = perExperimentMetadata[eName]['deltappmStatistics'].iloc[0, :]  # there is only 1 entry
+			metadata['deltappmStatistics'].loc[eName, :] = perMSRunMetadata[eName]['deltappmStatistics'].iloc[0, :]  # there is only 1 entry
 		except KeyError:
-			logging.warning("Entry 'deltappmStatistics' was not found for experiment "+eName+". Not gathering its QC info for ANY tandem-MS run.")
+			logging.warning("Entry 'deltappmStatistics' was not found for MSRun "+eName+". Not gathering its QC info for ANY tandem-MS run.")
 			if 'deltappmStatistics' in metadata.keys():
 				del metadata['deltappmStatistics']
-		metadata['intensityStatisticsPerExp'][eName] = perExperimentMetadata[eName]['intensityStatistics']
+		metadata['intensityStatisticsPerRun'][eName] = perMSRunMetadata[eName]['intensityStatistics']
 		try:  # either fill relPSMScoreVsDeltaMppmPerExp or delete it
-			metadata['relPSMScoreVsDeltaMppmPerExp'][eName] = perExperimentMetadata[eName]['relPSMScoreVsDeltaMppm']
+			metadata['relPSMScoreVsDeltaMppmPerExp'][eName] = perMSRunMetadata[eName]['relPSMScoreVsDeltaMppm']
 		except KeyError:
-			logging.warning("Column 'DeltaM [ppm]' was not found for experiment "+eName+". Not gathering ANY MS1 calibration QC info.")
+			logging.warning("Column 'DeltaM [ppm]' was not found for MSRun "+eName+". Not gathering ANY MS1 calibration QC info.")
 			if 'relPSMScoreVsDeltaMppmPerExp' in metadata.keys():
 				del metadata['relPSMScoreVsDeltaMppmPerExp']
 	
 	return metadata, allObservedProteins
 
 
-def combineExperimentDFs(dfs):
+def combineMSRunDFs(dfs):
 	"""
-	Merge dataframes of all experiments into one multi-indexed (eName, oldIndex) dataframe, by performing an outer join.
+	Merge dataframes of all MSRuns into one multi-indexed (eName, oldIndex) dataframe, by performing an outer join.
 	The intensity columns are non-identical across different dataframes and resulting empty fields are valued NaN.
-	:param dfs:     [pd.DataFrame]	dataframes from multiple experiments
+	:param dfs:     [pd.DataFrame]	dataframes from multiple MSRuns
 	:return: 		pd.DataFrame	dataframe containing an outer join of the input list of dataframes
 	"""
 	# how are PSMs combined with multiple charge states for instance?
@@ -135,7 +135,7 @@ def getProteinPeptidesDicts(df, fullExpression_bool):
 	# create this column if it doesn't exist. It gets removed afterwards anyway.
 	if "# Protein Groups" not in df.columns.values:
 		df["# Protein Groups"] = df.apply(lambda x: len(str(x['Master Protein Accessions']).split(';')), axis=1)
-	# its OK that # Protein Groups is inferred only from info within the same experiment. This is how it should be.
+	# its OK that # Protein Groups is inferred only from info within the same MSRun. This is how it should be.
 	numProteinGroupsDict = df.groupby("# Protein Groups").groups  # { # Protein Groups : indices }
 	# DEFAULTDICT doesn't return a KeyError when key not found, but rather None. !!! so you can safely .extend()
 	minProteinPeptidesDict = None  # proteins get contribution only from peptides which correspond uniquely to them
@@ -172,11 +172,11 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 	Quantification values from all associated unique modified peptides are averaged per channel/sample and kept in a
 	list per condition for each protein. The total (before averaging) number of peptide observations per protein is also
 	kept (this is thus NOT the number of observations used in the t-test, but contains also repeated measurements).
-	:param df:					pd.DataFrame				outer join of all experiments.
+	:param df:					pd.DataFrame				outer join of all MSRuns.
 	:param proteinPeptidesDict:	{protein: [peptide ids]}	proteins and their associated peptide ids.
-	:param schema:				dict                		schema of the experiments' hierarchy.
+	:param schema:				dict                		schema of the MSRuns' hierarchy.
 	:param referenceCondition:	str							reference condition for the fold change calculation.
-	:param otherConditions:		list 						all non-reference conditions in the experiment
+	:param otherConditions:		list 						all non-reference conditions in the MSRun
 	:return proteinDF:			pd.DataFrame				transformed and selected data on the protein level.
 															Structure:
 															['protein', 'peptides', 'description',
@@ -230,14 +230,14 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 																	  uniqueMods(proteinData['Modifications']), ]
 		# interpret as multi index so that you can call .levels and .get_level_values()
 		peptideIndices = pd.MultiIndex.from_tuples(peptideIndices)
-		# per experiment, get the list of indices and append the corresponding df values to the right quanPerCondition.
-		for eName in peptideIndices.levels[0]:  # peptideIndices.levels[0] is the experimentName part of the index.
-			# get the indices of the current experiment
-			peptideIndicesPerExperiment = peptideIndices.values[peptideIndices.get_level_values(0) == eName]
+		# per MSRun, get the list of indices and append the corresponding df values to the right quanPerCondition.
+		for eName in peptideIndices.levels[0]:  # peptideIndices.levels[0] is the MSRunName part of the index.
+			# get the indices of the current MSRun
+			peptideIndicesPerMSRun = peptideIndices.values[peptideIndices.get_level_values(0) == eName]
 			# retrieve all quan values for these peptides
-			allPeptidesQuanValues = df.loc[peptideIndicesPerExperiment, schema[eName]['allExperimentChannelAliases']]
-			# for each condition in the experiment, append all its channels to the quanPerCondition Series.
-			for condition in schema[eName]['allExperimentConditions']:
+			allPeptidesQuanValues = df.loc[peptideIndicesPerMSRun, schema[eName]['allMSRunChannelAliases']]
+			# for each condition in the MSRun, append all its channels to the quanPerCondition Series.
+			for condition in schema[eName]['allMSRunConditions']:
 				for channel in schema[eName][condition]['channelAliases']:
 					# variable assignment because a pd.Series is returned after the append operation
 					# NP.NANMEAN TO AVOID UNDERSTIMATION OF VARIANCE BECAUSE OF REPEATED MEASUREMENTS (stay conservative)
@@ -255,10 +255,10 @@ def testDifferentialExpression(this_proteinDF, alpha, referenceCondition, otherC
 	Perform a t-test for independent samples for each protein on its (2) associated lists of peptide quantifications,
 	do a Benjamini-Hochberg correction and store the results in new "p-values" and "adjusted p-values" columns in the
 	dataframe.
-	:param this_proteinDF:		pd.DataFrame	data from all experiments on the protein level
+	:param this_proteinDF:		pd.DataFrame	data from all MSRuns on the protein level
 	:param alpha:				float			confidence level for the t-test
 	:param referenceCondition:	str				name of the condition to be used as the reference
-	:param otherConditions:		list 			all non-reference conditions in the experiment
+	:param otherConditions:		list 			all non-reference conditions in the MSRun
 	:return this_proteinDF:		pd.DataFrame	data on protein level, with statistical test information
 	"""
 	# { protein : indices of (uniquely/all) associated peptides }
@@ -291,7 +291,7 @@ def applyFoldChange(proteinDF, pept2protCombinationMethod, referenceCondition, o
 	:param proteinDF:					pd.DataFrame	data on the protein level with t-test results.
 	:param pept2protCombinationMethod:  str				method for reducing peptide information into one figure per protein
 	:param referenceCondition:	str				name of the condition to be used as the reference
-	:param otherConditions:		list 			all non-reference conditions in the experiment
+	:param otherConditions:		list 			all non-reference conditions in the MSRun
 	:return proteinDF:					pd.DataFrame	data on the protein level, including fold changes
 	"""
 	for condition in otherConditions:
@@ -337,20 +337,20 @@ def applySignificance(df, otherConditions, alpha, FCThreshold):
 def getCommonPeptidesQuanValuesDF(dfs, schema):
 	"""
 	Takes a list of dataframes and selects only the sequence, modifications and intensities, then inner joins them on
-	sequence and modifications.	The result is the intensity matrix as a dataframe with header with ALL experiment
+	sequence and modifications.	The result is the intensity matrix as a dataframe with header with ALL MSRun
 	channels per peptide, for only the COMMON modified, non-redundant peptides i.e. those peptides detected in ALL
-	experiments. Also returns list/DataFrame of peptides that are not common for all experiments.
-	:param dfs:     [ pd.DataFrame ]	data of the experiments
-	:param schema:  dict                schema of the experiments' hierarchy
+	MSRuns. Also returns list/DataFrame of peptides that are not common for all MSRuns.
+	:param dfs:     [ pd.DataFrame ]	data of the MSRuns
+	:param schema:  dict                schema of the MSRuns' hierarchy
 	:return:        pd.DataFrame		[e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN] for all COMMON peptides.
 	"""
-	allChannelAliases = unnest([schema[eName]['allExperimentChannelAliases'] for eName in schema['allExperiments']])
+	allChannelAliases = unnest([schema[eName]['allMSRunChannelAliases'] for eName in schema['allMSRuns']])
 	peptidesDf = pd.DataFrame()
-	# join all dataframes together on the Sequence: you get ALL channels from ALL experiments as columns per peptide.
+	# join all dataframes together on the Sequence: you get ALL channels from ALL MSRuns as columns per peptide.
 	# [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
 	allModifiedPeptides = set()
 	for eName in dfs.keys():
-		eChannelAliases = schema[eName]['allExperimentChannelAliases']
+		eChannelAliases = schema[eName]['allMSRunChannelAliases']
 		# convert modifications list to strings because they need to be hashable
 		try:
 			dfs[eName]['Modifications'] = dfs[eName]['Modifications'].apply(';'.join)
@@ -359,7 +359,7 @@ def getCommonPeptidesQuanValuesDF(dfs, schema):
 		if peptidesDf.empty:
 			peptidesDf = dfs[eName].loc[:, ['Sequence', 'Modifications'] + eChannelAliases]
 		else:
-			# Merge makes sure that only peptides whose Sequence appears in EACH experiment get selected
+			# Merge makes sure that only peptides whose Sequence appears in EACH MSRun get selected
 			# If a channel in eChannelAliases does not exist in this eName, then it will return a column of NaNs (good).
 			# The same applies to the Modifications column: if there are none, there is no problem.
 			peptidesDf = pd.merge(peptidesDf, dfs[eName].loc[:, ['Sequence', 'Modifications'] + eChannelAliases],
@@ -369,17 +369,17 @@ def getCommonPeptidesQuanValuesDF(dfs, schema):
 	allCommonModifiedPeptides = set(zip(peptidesDf['Sequence'], peptidesDf['Modifications']))
 	uncommonModifiedPeptides = pd.DataFrame(list(allModifiedPeptides.difference(allCommonModifiedPeptides)))
 	if len(peptidesDf) < 2:
-		raise Exception("Only "+str(len(peptidesDf))+" peptides found that were common across all experiments. Cannot perform PCA nor HC.")
+		raise Exception("Only "+str(len(peptidesDf))+" peptides found that were common across all MSRuns. Cannot perform PCA nor HC.")
 	return peptidesDf.loc[:, allChannelAliases], uncommonModifiedPeptides
 
 
 # def getNumUnCommonModifiedPeptidesPerCondition(dfs, uncommonModifiedPeptides, schema):
 # 	allModifiedPeptidesPerCondition = dict()
 # 	for k in schema['allConditions']:
-# 		for eName in schema['allExperiments']:
+# 		for eName in schema['allMSRuns']:
 # 			if k in schema[eName]:
 # 				schema[eName][k]['channelAliases']
-# 				# N.B.: common peptides are defined to appear in every experiment, but in practise they appear in every
+# 				# N.B.: common peptides are defined to appear in every MSRun, but in practise they appear in every
 # 				# condition as well (if not, they would already have been filtered out in processing).
 # 				allModifiedPeptidesPerCondition[k] = zip(dfs[eName]['Sequence'], dfs[eName]['Modifications'])
 #
@@ -412,7 +412,7 @@ def getHC(intensities):
 	the UPGMA algorithm. NaN values are converted to zero!!!
 	See https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html for more information.
 	:param intensities: np.ndarray  MxN ndarray with intensities
-	:param nClusters:   int         number of clusters we want to find (= number of conditions in the experiment(s))
+	:param nClusters:   int         number of clusters we want to find (= number of conditions in the MSRun(s))
 	:return:            np.ndarray  Nx4 linkage matrix
 	"""
 	# assign zero so that the PCA doesn't fail! This is OK, because NaN means that either the intensity was so low that
@@ -428,7 +428,7 @@ def buildHandyColumnOrder(inColumns, referenceCondition, schema):
 	Reshuffles the entries of a given list of proteinDF columns into a handy order.
 	:param inColumns:			[ str ]	proteinDF columns, unordered
 	:param referenceCondition:	str		reference condition
-	:param schema:				dict    schema of the experiments' hierarchy
+	:param schema:				dict    schema of the MSRuns' hierarchy
 	:return outColumns:			[ str ]	proteinDF columns, ordered according to: ['protein', 'description',
 										{{ 'adjusted p-value', 'log2 fold change'}}, {{'#peptides'}}, {{'significant'}},
 										{{'p-value'}}, {{'condition'}} , 'peptides']

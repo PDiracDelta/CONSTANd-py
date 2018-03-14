@@ -13,22 +13,22 @@ from qcquan.DEA import DEA
 def analyzeProcessingResult(processingResults, params, writeToDisk):
 	"""
 	Calls all the necessary functions to perform the analysis on a processingResults dict of objects.
-	Takes the processed dataframe of each experiment in the setup, combines it into one global dataframe for all
-	experiments, maps it to the protein level and performs a differential expression analysis, indicating the
+	Takes the processed dataframe of each MSRun in the setup, combines it into one global dataframe for all
+	MSRuns, maps it to the protein level and performs a differential expression analysis, indicating the
 	significance of each protein. The analysis can be carried out either for only injective	protein-peptide associations
 	(minProteinDF) or using also the non-injective associations (fullProteinDF) or both.
 	Also, on the common-peptide-level global dataframe a Principal Component Analysis is performed of which the first 2 PCs are
 	saved, as well as a Hierarchical Clustering.
 	Along the way, removed data as well as some metadata are saved in the corresponding variables.
-	:param processingResults:	dict			for each experiment: [normalizedDf, normalizedIntensities, removedData, noCorrectionIndices]
+	:param processingResults:	dict			for each MSRun: [normalizedDf, normalizedIntensities, removedData, noCorrectionIndices]
 	:param params:				dict			job (global) parameters
 	:param writeToDisk:			bool			write results to disk (if not: just pass the return statement)
-	:return minProteinDF:		pd.DataFrame	combined analysis data of all experiments, on the protein level, only
+	:return minProteinDF:		pd.DataFrame	combined analysis data of all MSRuns, on the protein level, only
 												for injective protein-peptide associations
-	:return fullProteinDF:		pd.DataFrame	combined analysis data of all experiments, on the protein level
+	:return fullProteinDF:		pd.DataFrame	combined analysis data of all MSRuns, on the protein level
 	:return PCAResult:			np.ndarray		PC scores for the quantification channels in the common-peptide-level global dataframe
 	:return HCResult:			np.ndarray  	Nx4 linkage matrix of the quantification channels in the common-peptide-level global dataframe
-	:return commonPeptidesQuanValuesDF:	pd.DataFrame	for all COMMON (found in all experiments) peptides:
+	:return commonPeptidesQuanValuesDF:	pd.DataFrame	for all COMMON (found in all MSRuns) peptides:
 																		[e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
 	:return metadata:			pd.DataFrame	metadata: [noIsotopicCorrection, RTIsolationInfo, noMasterProteinAccession,
 												minSingleConditionProteins, fullSingleConditionProteins,
@@ -57,7 +57,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	# 	metadata['MS1Intensities_peptides'] = pd.Series(index=list(dfs.keys()), dtype=object)
 	# 	for eName in dfs.keys():
 	# 		# reset index because otherwise the df will get NaN values since not all MS1 intensity indices are equal
-	# 		# across all experiments
+	# 		# across all MSRuns
 	# 		metadata['MS1Intensities_peptides'][eName] = dfs[eName].loc[:, 'Intensity'].tolist()
 	# except KeyError:  # don't use e.args[0]: that doesn't work with pandas KeyErrors
 	# 	logging.warning("Column 'Intensity' was not found. Not gathering MS1 intensity QC info.")
@@ -65,27 +65,27 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	metadata['numeric'].loc[0, 'numObservedProteins'] = len(allObservedProteins)
 	metadata['allObservedProteins'] = pd.DataFrame({'protein': allObservedProteins})
 	
-	# record RT isolation statistics. Future: flag. Multi-indexed on experiment names and old indices!
+	# record RT isolation statistics. Future: flag. Multi-indexed on MSRun names and old indices!
 	if params['getRTIsolationInfo_bool']:
-		experimentNames = processingResults.keys()
+		MSRunNames = processingResults.keys()
 		metadata['RTIsolationInfo'] = pd.concat([getRTIsolationInfo(removedDatas[eName]['RT']) for
-												 eName in experimentNames], keys=experimentNames)
+												 eName in MSRunNames], keys=MSRunNames)
 	
 	""" Differential Expression Analysis """
-	# merge all experiments in multi-indexed: (eName, oldIndex) dataframe as an outer join
-	allExperimentsDF = combineExperimentDFs(dfs)
+	# merge all MSRuns in multi-indexed: (eName, oldIndex) dataframe as an outer join
+	allMSRunsDF = combineMSRunDFs(dfs)
 
 	# get min and max protein-peptide mappings
 	if params['fullExpression_bool']:
-		minProteinPeptidesDict, fullProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
+		minProteinPeptidesDict, fullProteinPeptidesDict, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allMSRunsDF, params['fullExpression_bool'])
 	else:
-		minProteinPeptidesDict, __, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allExperimentsDF, params['fullExpression_bool'])
+		minProteinPeptidesDict, __, metadata['noMasterProteinAccession'] = getProteinPeptidesDicts(allMSRunsDF, params['fullExpression_bool'])
 	metadata['numeric'].loc[0, 'numNoMasterProteinAccession'] = len(metadata['noMasterProteinAccession'])
 
 	if params['minExpression_bool']:
 		# Bring the data to the protein level in the case of minimal expression (no shared peptides allowed).
 		# Execute the differential expression analysis and gather some metadata
-		minProteinDF, metadata['numeric'].loc[0, 'minNumProteins'] = DEA(allExperimentsDF, minProteinPeptidesDict, params)
+		minProteinDF, metadata['numeric'].loc[0, 'minNumProteins'] = DEA(allMSRunsDF, minProteinPeptidesDict, params)
 	else:
 		minProteinDF = pd.DataFrame()
 	
@@ -94,7 +94,7 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	if params['fullExpression_bool']:
 		# Bring the data to the protein level in the case of full expression (shared peptides allowed).
 		# Execute the differential expression analysis and gather some metadata
-		fullProteinDF, metadata['numeric'].loc[0, 'fullNumProteins'] = DEA(allExperimentsDF, fullProteinPeptidesDict, params)
+		fullProteinDF, metadata['numeric'].loc[0, 'fullNumProteins'] = DEA(allMSRunsDF, fullProteinPeptidesDict, params)
 	else:
 		fullProteinDF = pd.DataFrame()
 	

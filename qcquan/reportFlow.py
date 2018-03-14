@@ -21,11 +21,11 @@ def generateReport(analysisResults, params, logFilePath, writeToDisk, processing
 	file than the "public" HTML file.
 	Graphs and report files are written to disk if so specified by writeToDisk.
 	:param analysisResults:	list	[minProteinDF, fullProteinDF, PCAResult, HCResult,
-									allExperimentsIntensitiesPerCommonPeptide, metadata, extraOutputFilesFullPaths]
+									allMSRunsIntensitiesPerCommonPeptide, metadata, extraOutputFilesFullPaths]
 	:param params:			dict	job (global) parameters
 	:param logFilePath:		str		path to the log file with information about each processingFlow and analysisFlow call
 	:param writeToDisk:		bool	write visualizations and reports to disk (if not: just pass the return statement)
-	:param processingParams:dict	experiment-specific processing parameters (see getConfig.py.)
+	:param processingParams:dict	MSRun-specific processing parameters (see getConfig.py.)
 	:param startTime:		float	UNIX epoch timestamp at which the reportFlow was started
 	"""
 	import logging  # for some reason it doesnt work if you put it at the top of the file
