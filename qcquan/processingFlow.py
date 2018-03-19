@@ -50,11 +50,14 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	df, removedData['missing'] = removeMissing(df, params['noMissingValuesColumns'], params['quanColumns'], params['PSMEnginePriority'])
 	
 	# get PSM scores relative to maximum versus DeltaMppm
-	try:
-		metadata['relPSMScoreVsDeltaMppm'] = getRelPSMScoreVsDeltaMppm(df, params['PSMEnginePriority'])
-	except KeyError as e:  # pandas KeyError: args[0] contains whole message.
-		# can be either the 'DeltaM [ppm]' column or the Identifying Node column or ...
-		logging.warning("Cannot find column: "+e.args[0]+". Not gathering MS1 calibration QC info.")
+	if 'unspecified' not in params['PSMEnginePriority']['engineNames']:
+		try:
+			metadata['relPSMScoreVsDeltaMppm'] = getRelPSMScoreVsDeltaMppm(df, params['PSMEnginePriority'])
+		except KeyError as e:  # pandas KeyError: args[0] contains whole message.
+			# can be either the 'DeltaM [ppm]' column or the Identifying Node column or ...
+			logging.warning("Cannot find column: "+e.args[0]+". Not gathering MS1 calibration QC info.")
+	else:
+		logging.warning("No PSM Engines provided. Not gathering MS1 calibration QC info.")
 	
 	if params['removeBadConfidence_bool']:
 		df, removedData['confidence'] = removeBadConfidence(df, params['removeBadConfidence_minimum'], params['removalColumnsToSave'])
