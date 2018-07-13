@@ -62,6 +62,8 @@ def setIntensities(df, intensities, quanColumns):
 	elif isinstance(intensities, dict):
 		for index in intensities.keys():
 			df.loc[index, quanColumns] = intensities[index]
+	else:
+		raise Exception("setIntensities received illegal 'intensities' argument of type", str(type(intensities)))
 	return df
 
 
