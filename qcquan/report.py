@@ -63,7 +63,10 @@ def getColours(schema, hex=False):
 		for eName in schema['allMSRuns']:
 			if cond in schema[eName]:
 				numChannels = len(schema[eName][cond]['channelAliases'])
-				channelColoursDict.update(dict(zip(schema[eName][cond]['channelAliases'], np.tile(distColours[c], (numChannels, 1)))))
+				colorsOfChannelAliases = np.tile(distColours[c], (numChannels, 1))
+				if hex:
+					colorsOfChannelAliases = np.array(unnest(colorsOfChannelAliases))
+				channelColoursDict.update(dict(zip(schema[eName][cond]['channelAliases'], colorsOfChannelAliases)))
 		c += 1
 	assert c == numConditions
 	return channelColoursDict
@@ -348,7 +351,7 @@ def getHCDendrogram(HCResult, schema, title=None):
 	plt.ylabel('reporter channel', figure=HCDendrogram)
 	# generate colors/markers so that the channels of the same condition/MSRun have the same colour/markers
 	# first transform to hex code because the dendrogram() function only takes strings.
-	channelColorsDict = getColours(schema, hex=False)
+	channelColorsDict = getColours(schema, hex=True)
 	dendrogram(HCResult, orientation='right', leaf_rotation=0., leaf_font_size=24, labels=allChannelAliases,
 			   link_color_func=lambda x: channelColorsDict[allChannelAliases[x]] if x < len(allChannelAliases) else 'k',
 			   above_threshold_color='k')
