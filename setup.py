@@ -10,5 +10,5 @@ setup(name='qcquan',
       license='VITO',
       packages=find_packages(),
       install_requires=['werkzeug', 'flask', 'requests', 'scipy', 'pandas', 'numpy', 'sklearn',
-                        'statsmodels', 'weasyprint', 'matplotlib', 'wtforms'],
+                        'statsmodels', 'weasyprint', 'matplotlib', 'wtforms', 'flask-mail', 'flask-wtf'],
       zip_safe=False)
