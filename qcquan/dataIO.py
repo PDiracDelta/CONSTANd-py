@@ -25,6 +25,23 @@ def importDataFrame(path_in, delim=None, header=0, dtype=None):
 	"""
 	assert os.path.exists(path_in)
 	
+	def try_standard_delims():
+		possibleDelims = ['\t', ',', ';']
+		for d in possibleDelims:
+			try:
+				df = pd.read_csv(path_in, delimiter=d, header=header, dtype=dtype)
+				break
+			except Exception:
+				pass
+		if 'df' not in locals():  # possibleDelims did not work
+			# try without delim
+			try:
+				df = pd.read_csv(path_in, header=header, dtype=dtype)
+			except Exception as e:
+				raise Exception(
+					"Data cannot be read: no delimiter specified and Pandas failed automatic recognition: " + e.args[0])
+		return df
+	
 	if delim is None:
 		if '.' in path_in:  # file has an extension
 			extension = path_in.split('.')[-1]  # set extension equal to the file extension (can return None)
@@ -42,25 +59,19 @@ def importDataFrame(path_in, delim=None, header=0, dtype=None):
 				raise Exception("Something is wrong with this Excel file (see below) Try to save it as .tsv or .csv (tab or comma-separated) first, then upload the resulting file.<br>"+e.args[0])
 	else:  # delim is something else OR None.
 		if delim is None:
-			possibleDelims = ['\t', ',']
-			for d in possibleDelims:
-				try:
-					df = pd.read_csv(path_in, delimiter=d, header=header, dtype=dtype)
-					break
-				except Exception:
-					pass
-			if 'df' not in locals():  # possibleDelims did not work
-				# try without delim
-				try:
-					df = pd.read_csv(path_in, header=header, dtype=dtype)
-				except Exception as e:
-					raise Exception("Data cannot be read: no delimiter specified and Pandas failed automatic recognition: " + e.args[0])
+			df = try_standard_delims()
 		else:
 			try:
 				df = pd.read_csv(path_in, delimiter=delim, header=header, dtype=dtype)
 			except pd.errors.EmptyDataError as e:
 				# catch these specifically to re-raise (necessary when doing checkRequiredColumns() in web.py)
 				raise e
+			except pd.errors.ParserError as e:
+				try:
+					df = try_standard_delims()
+				except Exception as e:
+					raise Exception("Data cannot be read: the delimiter " + str(
+						delim) + " is not right for this file. Pandas returned: " + e.args[0])
 			except Exception as e:
 				raise Exception("Data cannot be read: the delimiter " + str(delim) + " is not right for this file. Pandas returned: "+e.args[0])
 	
@@ -307,7 +318,7 @@ def importMSRunData(path_in, delim=None, header=0, wrapper=None):
 	:param delim:       char            delimiter of the data
 	:param header:      int             row that contains the header of the data (None if no header)
 	:param wrapper: 	list(tuples)	wrapper (nested list of pairs) specifying column name transformations
-	:return df:			pd.DataFrame    ready-to-use MSRunal data
+	:return df:			pd.DataFrame    ready-to-use MSRun data
 	"""
 	df = importDataFrame(path_in, delim=delim, header=header)
 	df.columns = applyWrapper(df.columns, wrapper)
