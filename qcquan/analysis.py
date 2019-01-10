@@ -268,7 +268,7 @@ def testDifferentialExpression(this_proteinDF, alpha, referenceCondition, otherC
 		this_proteinDF[pValueColumn] = this_proteinDF.apply(lambda x: ttest(x[referenceCondition], x[condition], nan_policy='omit')[1], axis=1)
 		
 		# remove masked values because otherwise you run into trouble applying significance to masked values and stuff.
-		this_proteinDF.loc[:, pValueColumn] = this_proteinDF.loc[:, pValueColumn].apply(lambda x: np.nan if x is np.ma.masked or x == 0.0 else x)
+		this_proteinDF.loc[:, pValueColumn] = this_proteinDF.loc[:, pValueColumn].apply(lambda x: np.nan if ((x is np.ma.masked) or (x == 0.0)) else x)
 		if np.nan in this_proteinDF.loc[:, pValueColumn].values:
 			logging.warning("Some DEA p-values could not be calculated.")
 		
