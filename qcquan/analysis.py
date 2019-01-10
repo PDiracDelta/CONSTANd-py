@@ -240,10 +240,12 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 			for condition in schema[eName]['allMSRunConditions']:
 				for channel in schema[eName][condition]['channelAliases']:
 					# variable assignment because a pd.Series is returned after the append operation
+					# get ALL quan values for this channel
+					channel_allPeptidesQuanValues = allPeptidesQuanValues[channel].dropna()
 					# NP.NANMEAN TO AVOID UNDERSTIMATION OF VARIANCE BECAUSE OF REPEATED MEASUREMENTS (stay conservative)
-					proteinEntry[condition].append(np.nanmean(pd.Series(allPeptidesQuanValues[channel]).dropna()))
+					proteinEntry[condition].append(np.nanmean(channel_allPeptidesQuanValues)) if len(channel_allPeptidesQuanValues) > 0 else None
 					# keep track of the total number of OBSERVED (!=used in DEA) peptides
-					proteinEntry['#peptides (' + str(condition) + ')'] += len(pd.Series(allPeptidesQuanValues[channel]).dropna())
+					proteinEntry['#peptides (' + str(condition) + ')'] += len(channel_allPeptidesQuanValues)
 		# fill new dataframe
 		proteinDF.loc[protein, :] = proteinEntry
 	
