@@ -60,7 +60,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 			logging.info(
 				"Starting processing of MSRun '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.utcnow()).split('.')[0])
-			processingResults[eName] = processDf(dfs[eName], allProcessingParams[eName], writeToDisk, startTime)
+			processingResults[eName] = processDf(dfs[eName], allProcessingParams[eName], writeToDisk)
 			logging.info(
 				"Finished processing of MSRun '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.utcnow()).split('.')[0])
