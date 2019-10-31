@@ -10,7 +10,7 @@ import traceback
 from qcquan.dataIO import *
 
 
-def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
+def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk, doConstand=True):
 	"""
 	Contains and explicits the workflow of the program. Using the booleans doProcessing, doAnalysis, deReport and
 	writeToDisk one can control	which parts of the workflow to perform.
@@ -60,7 +60,7 @@ def main(jobConfigFilePath, doProcessing, doAnalysis, doReport, writeToDisk):
 			logging.info(
 				"Starting processing of MSRun '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.utcnow()).split('.')[0])
-			processingResults[eName] = processDf(dfs[eName], allProcessingParams[eName], writeToDisk)
+			processingResults[eName] = processDf(dfs[eName], allProcessingParams[eName], writeToDisk, doConstand)
 			logging.info(
 				"Finished processing of MSRun '" + eName + "' of job '" + jobParams['jobName'] + "' at " +
 				str(datetime.datetime.utcnow()).split('.')[0])
@@ -158,7 +158,7 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		jobDirName = os.path.basename(os.path.abspath(os.path.join(jobConfigFilePath, os.pardir)))
 		try:
 			main(jobConfigFilePath=jobConfigFilePath, doProcessing=doProcessing, doAnalysis=doAnalysis,
-				 doReport=doReport, writeToDisk=writeToDisk)
+				 doReport=doReport, writeToDisk=writeToDisk, doConstand=doConstand)
 			DB_setJobCompleted(jobDirName)
 		except:
 			DB_setJobFailed(jobDirName)
