@@ -146,6 +146,13 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		doAnalysis = True
 		doReport = True
 		writeToDisk = True
+		doConstand = True
+		if not doConstand:
+			r = input("WARNING you are not performing CONSTANd. Continue? (y/n)")
+			if r == 'y':
+				pass
+			if r == 'no':
+				raise Exception('Aborted.')
 		
 		from qcquan_web.config import ALLJOBSDIR
 
