@@ -13,7 +13,7 @@ from warnings import warn
 import logging
 
 
-def importDataFrame(path_in, delim=None, header=0, dtype=None):
+def importDataFrame(path_in, delim=None, header=0, dtype=None, **kwargs):
 	"""
 	Get the data from disk as a Pandas DataFrame.
 	:param path_in:     string          existing path to input file
@@ -50,10 +50,10 @@ def importDataFrame(path_in, delim=None, header=0, dtype=None):
 	
 	if delim == 'xlsx':
 		try:
-			df = pd.read_excel(path_in)
+			df = pd.read_excel(path_in, **kwargs)
 		except ValueError as ve:  # possibly using comma instead of dot as decimal delimiter
 			try:
-				df = pd.read_excel(path_in, decimal=',')
+				df = pd.read_excel(path_in, decimal=',', **kwargs)
 			except Exception as e:
 				raise Exception("Something is wrong with this Excel file (see below) Try to save it as .tsv or .csv (tab or comma-separated) first, then upload the resulting file.<br>"+e.args[0])
 	else:  # delim is something else OR None.
