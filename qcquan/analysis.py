@@ -361,6 +361,9 @@ def getCommonPeptidesQuanValuesDF(dfs, schema):
 			peptidesDf = dfs[eName].loc[:, ['Sequence', 'Modifications'] + eChannelAliases]
 		else:
 			# Merge makes sure that only peptides whose Sequence appears in EACH MSRun get selected
+			# It is not necessary to remove peptides not present in each condition, because no assumptions about this
+			# 	analysis require so and the zero-imputation step for the PCA and HCD requires only that each peptide is
+			# 	seen in each MS run (because all peptides of the conditions are pooled together).
 			# If a channel in eChannelAliases does not exist in this eName, then it will return a column of NaNs (good).
 			# The same applies to the Modifications column: if there are none, there is no problem.
 			peptidesDf = pd.merge(peptidesDf, dfs[eName].loc[:, ['Sequence', 'Modifications'] + eChannelAliases],
