@@ -117,7 +117,7 @@ def combineMSRunDFs(dfs):
 	# how are PSMs combined with multiple charge states for instance?
 	# since we are using keys= there will be NO merging of entries, because each peptide will have its own unique index
 	# index = (eName, oldIndex)
-	return pd.concat(dfs.values(), keys=dfs.keys(), join='outer')
+	return pd.concat(dfs.values(), keys=dfs.keys(), join='outer', sort=False)  # do not sort columns unnecessarily
 
 
 def getProteinPeptidesDicts(df, fullExpression_bool):

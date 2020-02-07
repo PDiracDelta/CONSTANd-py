@@ -418,7 +418,7 @@ def getMS1IntensityHist(MS1Intensities_PSMs, MS1Intensities_peptides):
 	# hack in common X label
 	fig.add_subplot(111, frameon=False)
 	# hide tick and tick label of the big axes
-	plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
+	plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
 	plt.grid(False)
 	# plt.xlabel("MS1 Intensity")
 	# plt.xlabel(r"log$_{10}$(MS1 Intensity)")

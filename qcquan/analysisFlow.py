@@ -99,8 +99,8 @@ def analyzeProcessingResult(processingResults, params, writeToDisk):
 	
 	# set the protein names back as columns instead of the index, and sort the columns so the df is easier to read
 	handyColumnOrder = buildHandyColumnOrder(minProteinDF.columns, params['referenceCondition'], params['schema'])
-	minProteinDF = minProteinDF.reindex_axis(handyColumnOrder, axis=1)
-	fullProteinDF = fullProteinDF.reindex_axis(handyColumnOrder, axis=1)
+	minProteinDF = minProteinDF.reindex(handyColumnOrder, axis=1)
+	fullProteinDF = fullProteinDF.reindex(handyColumnOrder, axis=1)
 	
 	""" Quality Control """
 	# dataframe with ALL intensities per peptide: [peptide, e1_channel1, e1_channel2, ..., eM_channel1, ..., eM_channelN]
