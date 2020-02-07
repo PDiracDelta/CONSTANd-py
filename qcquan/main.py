@@ -141,10 +141,11 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		doAnalysis = (args[3] == 'True')
 		doReport = (args[4] == 'True')
 		writeToDisk = (args[5] == 'True')
+		doConstand = True
 	else:  # you didn't call main.py from the command line but from pycharm
 		doProcessing = True
-		doAnalysis = True
-		doReport = True
+		doAnalysis = False
+		doReport = False
 		writeToDisk = True
 		doConstand = True
 		if not doConstand:
@@ -157,7 +158,7 @@ if __name__ == '__main__':  # this should not execute if main.py is not the main
 		from qcquan_web.config import ALLJOBSDIR
 
 		# jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/QCQuan/jobs/2018-02-05 14:22:56.936690_Gatto_newPSMs_selfprocessed_ref129/jobConfig_Gatto_newPSMs_selfprocessed_ref129.ini'
-		jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/QCQuan/jobs/2018-01-25 15:12:07.373181_ESmit_conditions/jobConfig_ESmit_conditions.ini'
+		jobConfigFilePath = '/home/pdiracdelta/Documents/UHasselt/QCQuan/jobs/2018-02-07 13:32:45.466981_Gatto_selfAssembledPSMs_ref129/jobConfig_Gatto_selfAssembledPSMs_ref129.ini'
 		
 		# jobConfigFilePath = os.path.join(ALLJOBSDIR, jobConfigFilePath)
 	
