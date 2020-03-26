@@ -160,6 +160,7 @@ def processDf(df, params, writeToDisk, doConstand=True):
 		normalizedDf = df
 
 	""" save results """
+	processedDfFullPath = None
 	if writeToDisk:
 		from os import path, makedirs
 		# save the removed data information
