@@ -118,9 +118,10 @@ def processDf(df, params, writeToDisk, doConstand=True):
 	
 	# aggregate peptide list redundancy due to multiple PSMs at different RT.
 	# This works even if Charge and Modifications not present in columns.
-	df, removedData['RT'] = aggregate('RT', df, quanColumns=params['quanColumns'], method=params['aggregate_method'],
-									 PSMEnginePriority=params['PSMEnginePriority'],
-									 removePSMEngineRedundancy_bool=params['removePSMEngineRedundancy_bool'], columnsToSave=params['aggregateColumnsToSave'])
+	if params['aggregateRT_bool'] and 'RT' in df.columns:
+		df, removedData['RT'] = aggregate('RT', df, quanColumns=params['quanColumns'], method=params['aggregate_method'],
+										 PSMEnginePriority=params['PSMEnginePriority'],
+										 removePSMEngineRedundancy_bool=params['removePSMEngineRedundancy_bool'], columnsToSave=params['aggregateColumnsToSave'])
 	
 	if params['aggregateCharge_bool'] and 'Charge' in df.columns:
 		# aggregate peptide list redundancy due to different charges (optional)

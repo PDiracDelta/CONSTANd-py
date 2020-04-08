@@ -59,6 +59,7 @@ def getProcessingConfig(configFilePath):
 	PSMEnginePriority = parseExpression(config.get('DEFAULT', 'PSMEnginePriority'))
 	removePSMEngineRedundancy_bool = config.getboolean('DEFAULT', 'removePSMEngineRedundancy_bool')
 	removePSMEngineRedundancy_exclusive_bool = config.getboolean('DEFAULT', 'removePSMEngineRedundancy_exclusive_bool')
+	aggregateRT_bool = config.getboolean('DEFAULT', 'aggregateRT_bool')
 	aggregateCharge_bool = config.getboolean('DEFAULT', 'aggregateCharge_bool')
 	aggregatePTM_bool = config.getboolean('DEFAULT', 'aggregatePTM_bool')
 	isotopicCorrection_bool = config.getboolean('DEFAULT', 'isotopicCorrection_bool')
@@ -105,6 +106,8 @@ def getProcessingConfig(configFilePath):
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple PSM Algorithms.")
 	if removePSMEngineRedundancy_exclusive_bool is None:
 		raise Exception("Please indicate whether PSM Algorithm redundancy removal should be exclusive or not.")
+	if aggregateRT_bool is None:
+		raise Exception("Please indicate whether you would like to remove redundancy due to multiple retention times.")
 	if aggregateCharge_bool is None:
 		raise Exception("Please indicate whether you would like to remove redundancy due to multiple charge states.")
 	if aggregatePTM_bool is None:
@@ -153,6 +156,7 @@ def getProcessingConfig(configFilePath):
 		'removePSMEngineRedundancy_bool': removePSMEngineRedundancy_bool,
 		'removePSMEngineRedundancy_exclusive_bool': removePSMEngineRedundancy_exclusive_bool,
 		'aggregate_method': aggregate_method,
+		'aggregateRT_bool': aggregateRT_bool,
 		'aggregateCharge_bool': aggregateCharge_bool,
 		'aggregatePTM_bool': aggregatePTM_bool,
 		'isotopicCorrection_bool': isotopicCorrection_bool,
