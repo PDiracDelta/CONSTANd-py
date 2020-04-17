@@ -281,6 +281,8 @@ def testDifferentialExpression(this_proteinDF, alpha, referenceCondition, otherC
 																	   alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
 		else:
 			this_proteinDF.loc[nonNaNIndices, 'adjusted ' + pValueColumn] = pd.Series()
+			# If only 1 sample per condition, then each protein has only 1 value for each condition in the t-test,
+			# because the multiple values _within_ each sample have already been averaged (they are correlated).
 			logging.warning("No adjusted p-values could be calculated. You probably have only 1 sample per condition.")
 	return this_proteinDF
 
