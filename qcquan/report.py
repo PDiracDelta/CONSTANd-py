@@ -267,6 +267,7 @@ def getVolcanoPlot(df, condition, alpha, FCThreshold, labelPlot=[False, ] * 4, t
 	# 	plt.xlim([-5, 5])
 	# try:
 	ymax = np.nanmax(allYdata.values)
+	ymax = 1 if np.isnan(ymax) else ymax  # perhaps ALL values were NaN...
 	if ymax > 10:  # round up to 5
 		plt.ylim([0, np.ceil(ymax / 5) * 5])  # int(base * round(float(x)/base))
 	else:  # round up to 1
