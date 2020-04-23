@@ -279,7 +279,7 @@ def getVolcanoPlot(df, condition, alpha, FCThreshold, labelPlot=[False, ] * 4, t
 	return volcanoPlot
 
 
-def getPCAPlot(PCAResult, schema, title=None):
+def getPCAPlot(PCAResult, schema, title=None, B_labels=True):
 	"""
 	Generates a 2D plot of each quantification channel's first 2 PC scores. Identical colour means identical condition,
 	and identical marker means identical MSRun.
@@ -307,8 +307,9 @@ def getPCAPlot(PCAResult, schema, title=None):
 	for (x, y, label) in zip(PCAResult[:, 0], PCAResult[:, 1], allChannelAliases):
 		# produce scatterPlot of two first principal components and annotate
 		plt.scatter(x, y, color=channelColorsDict[label], marker=channelMarkersDict[label], figure=PCAPlot, s=80)
-		plt.annotate(label, xy=(x, y), xytext=(-1, 1),
-					 textcoords='offset points', ha='right', va='bottom', fontsize=20)
+		if B_labels:
+			plt.annotate(label, xy=(x, y), xytext=(-1, 1),
+						 textcoords='offset points', ha='right', va='bottom', fontsize=20)
 	legendHandles = []
 	legendStrings = []
 	# look up the corresponding MSRun name for each marker to construct the legend
