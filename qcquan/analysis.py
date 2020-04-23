@@ -408,8 +408,7 @@ def getPCA(intensities, nComponents=2):
 	# it could not be detected, or it just wasn't present at all. Both cases: close to zero.
 	# ALSO this doesn't affect the row sums.
 	intensities[np.isnan(intensities)] = 0
-	pca.fit(intensities.T)
-	return pca.transform(intensities.T)
+	return pca.fit_transform(intensities.T)
 
 
 def getHC(intensities):
