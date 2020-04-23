@@ -401,6 +401,8 @@ def getPCA(intensities, nComponents=2):
 	:param nComponents: int         number of PC to keep
 	:return:            np.ndarray  principal component scores of the input intensities
 	"""
+	# Linear dimensionality reduction using Singular Value Decomposition of the data to project it to a
+	# lower dimensional space. The input data is centered but not scaled for each feature before applying the SVD.
 	pca = PCA(n_components=nComponents, svd_solver='randomized')
 	# assign zero so that the PCA doesn't fail! This is OK, because NaN means that either the intensity was so low that
 	# it could not be detected, or it just wasn't present at all. Both cases: close to zero.
