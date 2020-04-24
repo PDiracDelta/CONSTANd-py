@@ -392,7 +392,7 @@ def getCommonPeptidesQuanValuesDF(dfs, schema):
 # 	return numUnCommonModifiedPeptidesPerCondition
 
 
-def getPCA(intensities, nComponents=2):
+def getPCA(intensities, nComponents=2, B_explained=False):
 	"""
 	Returns the nComponents Principal Component scores for the transposed intensity matrix. This means the reporter
 	channels are "observations" with each protein intensity as a variable/attribute. The fast randomized method by Halko
@@ -408,7 +408,11 @@ def getPCA(intensities, nComponents=2):
 	# it could not be detected, or it just wasn't present at all. Both cases: close to zero.
 	# ALSO this doesn't affect the row sums.
 	intensities[np.isnan(intensities)] = 0
-	return pca.fit_transform(intensities.T)
+	if B_explained:
+		pca.fit(intensities.T)
+		return pca.transform(intensities.T), pca.explained_variance_ratio_
+	else:
+		return pca.fit_transform(intensities.T)
 
 
 def getHC(intensities):
