@@ -32,6 +32,7 @@ moderated_ttest <- function(dat, design) {  # dat = datp[, c(tr,ct)]
   colnames(q.ord) <- paste0('q.ord', '_', colnames(q.ord))
   colnames(q.mod) <- paste0('q.mod', '_', colnames(q.mod))
   results <- data.frame(logFC, t.ord, t.mod, p.ord, p.mod, q.ord, q.mod, df.r, df.0, s2.0, s2, s2.post)
+  rownames(results) <- rownames(dat)
   # results <- results[order(results$p.mod), ]  # ordering doesn't work when you have mutiple groups and thus columns
   return(results)
 }
