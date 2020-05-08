@@ -299,39 +299,56 @@ def get_protein_intensities_as_long_format(proteinDF, D_arbitrary_column_names_b
 	return protein_intensities
 
 
-def testDifferentialExpression(this_proteinDF, alpha, referenceCondition, otherConditions):
+def testDifferentialExpression(this_proteinDF, alpha, referenceCondition, otherConditions, schema):
 	"""
-	Perform a t-test for independent samples for each protein on its (2) associated lists of peptide quantifications,
-	do a Benjamini-Hochberg correction and store the results in new "p-values" and "adjusted p-values" columns in the
-	dataframe.
+	Perform a moderated t-test (https://doi.org/10.2202/1544-6115.1055, Smyth2004.pdf) for independent samples for each
+	protein on its (2) associated lists of peptide quantifications,	do a Benjamini-Hochberg correction and store the
+	results in new "p-values" and "adjusted p-values" columns in the dataframe.
+	This makes use of the moderated_ttest.R (which also includes the BH correction) script via rpy2.
 	:param this_proteinDF:		pd.DataFrame	data from all MSRuns on the protein level
 	:param alpha:				float			confidence level for the t-test
 	:param referenceCondition:	str				name of the condition to be used as the reference
 	:param otherConditions:		list 			all non-reference conditions in the MSRun
 	:return this_proteinDF:		pd.DataFrame	data on protein level, with statistical test information
 	"""
-	# { protein : indices of (uniquely/all) associated peptides }
-	# perform t-test on the intensities lists of both conditions of each protein, assuming data is independent.
+	import rpy2.robjects as ro
+	from rpy2.robjects.packages import importr
+	from rpy2.robjects import r, pandas2ri, numpy2ri
+	from rpy2.robjects.conversion import localconverter
+
+	FP_moderated_ttest = '/home/pdiracdelta/Documents/UHasselt/QCQuan/src/qcquan/qcquan/moderated_ttest.R'
+	rbase = importr('base')
+	importr('limma')
+	rbase.source(FP_moderated_ttest)
+	numpy2ri.activate()
+	
+	D_arbitrary_column_names_by_condition = get_arbitrary_column_names_by_condition(schema, referenceCondition)
+	df_intensities = get_protein_intensities_as_long_format(this_proteinDF, D_arbitrary_column_names_by_condition)
+	design = get_design_matrix(D_arbitrary_column_names_by_condition)
+	# put df into R, call moderated ttest on it, and extract the result from R.
+	with localconverter(ro.default_converter + pandas2ri.converter):
+		r_df_intensities = ro.conversion.py2ro(df_intensities)
+	r_moderated_ttest = r['moderated_ttest']
+	# assign design matrix colnames using black magic https://stackoverflow.com/a/38808519
+	r_colnames = r["colnames<-"]
+	r_design = r_colnames(design, list(D_arbitrary_column_names_by_condition.keys()))
+	r_result_mtt = r_moderated_ttest(r_df_intensities, r_design)
+	numpy2ri.deactivate()
+	with localconverter(ro.default_converter + pandas2ri.converter):
+		result_mtt = ro.conversion.ri2py(r_result_mtt)
 	for condition in otherConditions:
 		pValueColumn = 'p-value (' + condition + ')'
-		this_proteinDF[pValueColumn] = this_proteinDF.apply(lambda x: ttest(x[referenceCondition], x[condition], nan_policy='omit')[1], axis=1)
-		
-		# remove masked values because otherwise you run into trouble applying significance to masked values and stuff.
-		this_proteinDF.loc[:, pValueColumn] = this_proteinDF.loc[:, pValueColumn].apply(lambda x: np.nan if ((x is np.ma.masked) or (x == 0.0)) else x)
-		if np.nan in this_proteinDF.loc[:, pValueColumn].values:
-			logging.warning("Some DEA p-values could not be calculated.")
-		
-		# Benjamini-Hochberg correction
-		# is_sorted==false &&returnsorted==false makes sure that the output is in the same order as the input.
-		nonNaNIndices = this_proteinDF.loc[:, pValueColumn].dropna().index
-		if len(nonNaNIndices)> 0:
-			__, this_proteinDF.loc[nonNaNIndices, 'adjusted '+pValueColumn], __, __ = multipletests(pvals=np.asarray(this_proteinDF.loc[nonNaNIndices, pValueColumn]),
-																	   alpha=alpha, method='fdr_bh', is_sorted=False, returnsorted=False)
-		else:
-			this_proteinDF.loc[nonNaNIndices, 'adjusted ' + pValueColumn] = pd.Series()
-			# If only 1 sample per condition, then each protein has only 1 value for each condition in the t-test,
-			# because the multiple values _within_ each sample have already been averaged (they are correlated).
-			logging.warning("No adjusted p-values could be calculated. You probably have only 1 sample per condition.")
+		# use .values otherwise it sets values to NaN because the indices don't match
+		this_proteinDF.loc[:, pValueColumn] = result_mtt.loc[:, 'p.mod_' + condition].values
+		this_proteinDF['adjusted ' + pValueColumn] = result_mtt['q.mod_' + condition].values
+		# set entries where at a condition has <=1 observations to np.nan
+		indices_too_few_observations = ~np.logical_and(this_proteinDF['#peptides (' + condition + ')'] > 1,
+													   this_proteinDF['#peptides (' + referenceCondition + ')'] > 1)
+		this_proteinDF.loc[indices_too_few_observations, [pValueColumn, 'adjusted ' + pValueColumn]] = np.nan
+		# If only 1 sample per condition, then each protein has only 1 value for each condition in the t-test,
+		# because the multiple values _within_ each sample have already been averaged (they are correlated).
+		if all(indices_too_few_observations):
+			logging.warning("No (adjusted) p-values could be calculated. You probably have only 1 sample per condition.")
 	return this_proteinDF
 
 

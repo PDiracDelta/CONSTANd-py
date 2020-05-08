@@ -32,9 +32,10 @@ def DEA(this_allMSRunsDF, proteinPeptidesDict, params):
 	proteinDF = getProteinDF(this_allMSRunsDF, proteinPeptidesDict, params['schema'],
 							 referenceCondition=referenceCondition, otherConditions=otherConditions)
 	
-	# perform differential expression analysis with Benjamini-Hochberg correction. Also remove proteins that have all
+	# perform differential expression analysis with Kai Kammer's moderated t-test
+	# and do a Benjamini-Hochberg correction. Also remove proteins that have all
 	# nan values for a certain condition and keep the removed ones in metadata
-	proteinDF = testDifferentialExpression(proteinDF, params['alpha'], referenceCondition, otherConditions)
+	proteinDF = testDifferentialExpression(proteinDF, params['alpha'], referenceCondition, otherConditions, params['schema'])
 	numProteins = len(proteinDF)
 	
 	# calculate fold changes of the average protein expression value per CONDITION/GROUP (not per channel!)
