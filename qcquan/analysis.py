@@ -251,6 +251,54 @@ def getProteinDF(df, proteinPeptidesDict, schema, referenceCondition, otherCondi
 	return proteinDF
 
 
+def get_arbitrary_column_names_by_condition(schema, referenceCondition):
+	""" For each condition create as many arbitrary column names as necessary, in a dict, reference first. """
+	from collections import OrderedDict
+	otherConditions = getOtherConditions(schema, referenceCondition)
+	allConditions = [referenceCondition, ] + otherConditions
+	D_N_channels = OrderedDict.fromkeys(allConditions)
+	for k in D_N_channels.keys():
+		D_N_channels[k] = 0
+	for c in allConditions:
+		for r in schema['allMSRuns']:
+			if c in schema[r]:
+				# we want the NUMBER of channels, NOT actual names (we don't know which sample each value comes from)
+				D_N_channels[c] += len(schema[r][c]['channelAliases'])
+	D_arbitrary_column_names = {c: [c+'#'+str(i) for i in range(1, 1+n)] for c, n in D_N_channels.items()}
+	return D_arbitrary_column_names
+
+
+def get_design_matrix(D_arbitrary_column_names_by_condition):
+	""" ANOVA-like design matrix for use in moderated_ttest, indicating group (condition) membership of each entry in
+	all_channels.
+	:param	D_arbitrary_column_names_by_condition	OrderedDict		All conditions as keys, referenceCondition first(!)
+	"""
+	otherConditions = list(D_arbitrary_column_names_by_condition.keys())[1:]
+	all_channels = unnest(list(D_arbitrary_column_names_by_condition.values()))
+	N_channels = len(all_channels)
+	N_conditions = 1+len(otherConditions)
+	design = np.zeros((N_channels, N_conditions), dtype=int)
+	design[:, 0] = 1  # reference gets 1 everywhere
+	for con in otherConditions:  # for each channel in each condition, put a "1" in the design matrix.
+		for chan in D_arbitrary_column_names_by_condition[con]:
+			design[all_channels.index(chan), 1+otherConditions.index(con)] = 1
+	return design
+
+
+def get_protein_intensities_as_long_format(proteinDF, D_arbitrary_column_names_by_condition):
+	""" Returns one numerical value in per column (ARBITRARY sample) for each protein, in contrast with
+	getProteinDF which returns a list per condition for each protein. Spans all MS runs. """
+	conditions = D_arbitrary_column_names_by_condition.keys()
+	all_arbitrary_column_names = unnest(D_arbitrary_column_names_by_condition.values())
+	protein_intensities = pd.DataFrame(index=proteinDF.index, columns=all_arbitrary_column_names, dtype=float)
+	for row in proteinDF.iterrows():
+		entry = pd.Series(index=protein_intensities.columns)
+		for c in conditions:
+			entry[D_arbitrary_column_names_by_condition[c][:len(row[1][c])]] = row[1][c]
+		protein_intensities.loc[row[0], :] = entry
+	return protein_intensities
+
+
 def testDifferentialExpression(this_proteinDF, alpha, referenceCondition, otherConditions):
 	"""
 	Perform a t-test for independent samples for each protein on its (2) associated lists of peptide quantifications,
