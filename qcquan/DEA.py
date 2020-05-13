@@ -125,7 +125,7 @@ def testDifferentialExpression(this_proteinDF, alpha, referenceCondition, otherC
 	design = get_design_matrix(D_arbitrary_column_names_by_condition)
 	# put df into R, call moderated ttest on it, and extract the result from R.
 	with localconverter(ro.default_converter + pandas2ri.converter):
-		r_df_intensities = ro.conversion.py2ro(df_intensities)
+		r_df_intensities = ro.conversion.py2rpy(df_intensities)
 	r_moderated_ttest = r['moderated_ttest']
 	# assign design matrix colnames using black magic https://stackoverflow.com/a/38808519
 	r_colnames = r["colnames<-"]
@@ -133,7 +133,8 @@ def testDifferentialExpression(this_proteinDF, alpha, referenceCondition, otherC
 	r_result_mtt = r_moderated_ttest(r_df_intensities, r_design)
 	numpy2ri.deactivate()
 	with localconverter(ro.default_converter + pandas2ri.converter):
-		result_mtt = ro.conversion.ri2py(r_result_mtt)
+		# in rpy2v3.2.0 rpy2py apparently doesn't work properly, so we need a pd.DataFrame call
+		result_mtt = pd.DataFrame(ro.conversion.rpy2py(r_result_mtt))
 	for condition in otherConditions:
 		pValueColumn = 'p-value (' + condition + ')'
 		# use .values otherwise it sets values to NaN because the indices don't match
