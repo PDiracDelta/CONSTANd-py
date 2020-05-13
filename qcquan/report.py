@@ -462,7 +462,7 @@ def makeHTML(jobParams, allProcessingParams, otherConditions, minTopDifferential
 	from pandas import set_option
 	
 	allJobsParDir = path.abspath(path.join(app.config.get('ALLJOBSDIR'), pardir))
-	set_option('display.max_colwidth', -1)  # otherwise the Description column text is truncated.
+	set_option('display.max_colwidth', None)  # otherwise the Description column text is truncated.
 	
 	def injectColumnWidthHTML(DETableHTML):
 		"""
