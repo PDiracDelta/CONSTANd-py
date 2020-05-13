@@ -19,3 +19,4 @@ fontweight = 'normal'
 figwidth = 14
 figheight = 10.5
 BASEDIR = '/var/www/QCQuan/qcquan/qcquan/'
+P_Rblas_so_for_LD_LIBRARY_PATH = '/usr/local/lib/R/lib'
