@@ -288,7 +288,12 @@ def getCommonPeptidesQuanValuesDF(dfs, schema):
 	uncommonModifiedPeptides = pd.DataFrame(list(allModifiedPeptides.difference(allCommonModifiedPeptides)))
 	if len(peptidesDf) < 2:
 		raise Exception("Only "+str(len(peptidesDf))+" peptides found that were common across all MSRuns. Cannot perform PCA nor HC.")
-	return peptidesDf.loc[:, allChannelAliases], uncommonModifiedPeptides
+	# If a channel contains absolutely no values common to all other MS runs, it will not appear in the merge.
+	# To prohibit .loc[channels] from throwing an Exception for unknown keys (columns) we must check first.
+	channel_aliases_present_in_peptidesDf = np.intersect1d(allChannelAliases, peptidesDf.columns.values)
+	if len(channel_aliases_present_in_peptidesDf) == len(allChannelAliases):
+		logging.warning("Channels "+str(channel_aliases_present_in_peptidesDf), " not in dataframe with peptides common across all MS runs.")
+	return peptidesDf.loc[:, channel_aliases_present_in_peptidesDf], uncommonModifiedPeptides
 
 
 # def getNumUnCommonModifiedPeptidesPerCondition(dfs, uncommonModifiedPeptides, schema):
