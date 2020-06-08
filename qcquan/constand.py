@@ -25,13 +25,13 @@ def constand(data, precision=1e-5, maxIterations=50):
 	"""
 	Return the normalized version of the input data (matrix) as an ndarray, as well as the convergence trail (residual
 	error after each iteration) and the row and column multipliers R and S.
-	:param data:                np.ndArray  (N,6) absolute intensities
-	:param precision:            float       combined allowed deviation (residual error) of col and row means from 1/6
-	:param maxIterations:       int         maximum amount of iterations (1x row and 1x col per iteration)
-	:return normalizedData:     np.ndArray  (N,6) normalized intensities
-	:return convergenceTrail:   np.ndArray  list of the residual error after each iteration
-	:return R:                  np.ndArray  (N,) row multipliers
-	:return S:                  np.ndArray  (6,) column multipliers
+	:param data:				np.ndArray	(N,6) absolute intensities
+	:param precision:			float		combined allowed deviation (residual error) of col and row means from TARGET
+	:param maxIterations:		int			maximum amount of iterations (1x row and 1x col per iteration)
+	:return normalizedData:		np.ndArray	(N,6) normalized intensities
+	:return convergenceTrail:	np.ndArray	list of the residual error after each iteration
+	:return R:					np.ndArray	(N,) row multipliers
+	:return S:					np.ndArray	(6,) column multipliers
 	"""
 	assert isinstance(data, np.ndarray) and data.dtype in ['float64', 'int64']
 	assert precision > 0
@@ -42,7 +42,8 @@ def constand(data, precision=1e-5, maxIterations=50):
 	convergenceTrail = np.asarray([nan]*(2*maxIterations))
 	convergence = np.inf
 	normalizedData = data
-
+	TARGET = 1
+	
 	i = 0  # number of current iteration
 	# without reshaping the ndarrays, they have shape (x,) (no second value) and the procedure fails.
 	R = np.ones((Nrows))  # R matrix diagonal from RAS
@@ -52,18 +53,18 @@ def constand(data, precision=1e-5, maxIterations=50):
 	while convergence > precision and i < maxIterations:
 
 		# fit the rows
-		Ri = 1/Ncols * np.asarray(1/np.nanmean(normalizedData, 1)).reshape(Nrows,)
+		Ri = TARGET * np.asarray(1/np.nanmean(normalizedData, 1)).reshape(Nrows,)
 		normalizedData = (normalizedData.T * Ri).T
 		R *= Ri
 		# calculate deviation from column marginals; row deviation is zero at even indices. (index start = 0)
-		convergenceTrail[2*i] = Nrows * 0.5 * np.nansum(np.abs(np.nanmean(normalizedData, 0) - 1/Ncols))
+		convergenceTrail[2*i] = Nrows * 0.5 * np.nansum(np.abs(np.nanmean(normalizedData, 0) - TARGET))
 
 		# fit the columns
-		Si = 1/Ncols * np.asarray(1/np.nanmean(normalizedData, 0)).reshape(Ncols,)
+		Si = TARGET * np.asarray(1/np.nanmean(normalizedData, 0)).reshape(Ncols,)
 		normalizedData *= Si
 		S *= Si
 		# calculate deviation from row marginals; column deviation is zero at odd indices. (index start = 0)
-		convergenceTrail[2*i+1] = Ncols * 0.5 * np.nansum(np.abs(np.nanmean(normalizedData, 1) - 1/Ncols))
+		convergenceTrail[2*i+1] = Ncols * 0.5 * np.nansum(np.abs(np.nanmean(normalizedData, 1) - TARGET))
 
 		convergence = convergenceTrail[2*i+1]
 		i += 1
