@@ -17,6 +17,8 @@ Analysis"
 Ported to Python by Joris Van Houtven, 2016
 """
 
+__version__ = 1.1
+
 import numpy as np
 from numpy import nan
 from warnings import warn
