@@ -19,6 +19,7 @@ Ported to Python by Joris Van Houtven, 2016
 
 import numpy as np
 from numpy import nan
+from warnings import warn
 
 
 def constand(data, precision=1e-5, maxIterations=50):
@@ -68,6 +69,9 @@ def constand(data, precision=1e-5, maxIterations=50):
 
 		convergence = convergenceTrail[2*i+1]
 		i += 1
-
+	
+	if i == maxIterations:
+		warn(f"Max number of CONSTANd iterations ({maxIterations}) reached. Attained precision: {convergence}.")
+	
 	return normalizedData, convergenceTrail[~np.isnan(convergenceTrail)], R, S
 
