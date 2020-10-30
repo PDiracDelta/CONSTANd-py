@@ -39,7 +39,17 @@ def constand(data, precision=1e-5, maxIterations=50):
 	assert isinstance(data, np.ndarray) and data.dtype in ['float64', 'int64']
 	assert precision > 0
 	assert maxIterations > 0
-
+	
+	# replace zeros with nan
+	if (data < 0).any():
+		raise ValueError("Negative values detected in quantification matrix. Are you using log-transformed ratio's? "
+						 "If so, use intensities instead.")
+	zeros = (data == 0)
+	if zeros.any():
+		warn("Zeros in quantification matrix detected; replacing with NA.")
+		data = data.astype(float)
+		data[zeros] = np.nan
+	
 	# initialize variables
 	Nrows, Ncols = data.shape
 	convergenceTrail = np.asarray([nan]*(2*maxIterations))
