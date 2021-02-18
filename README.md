@@ -1,6 +1,6 @@
 # INSTALL INSTRUCTIONS:
 After cloning this repository and entering the top directory, use the following command to install in-place, in editable mode:
-python3 -m pip install -e <path_to_repository>
+`python3 -m pip install -e <path_to_repository>`
 You can update it by simply pulling from the repository again.
 
 # USAGE
