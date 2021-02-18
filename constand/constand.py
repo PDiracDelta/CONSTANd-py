@@ -85,5 +85,12 @@ def constand(data, precision=1e-5, maxIterations=50):
 	if i == maxIterations:
 		warn(f"Max number of CONSTANd iterations ({maxIterations}) reached. Attained precision: {convergence}.")
 	
-	return normalizedData, convergenceTrail[~np.isnan(convergenceTrail)], R, S
+	return {'normalizedData': normalizedData,
+			0: normalizedData,  # backwards compatibility
+			'convergenceTrail': convergenceTrail[~np.isnan(convergenceTrail)],
+			1: convergenceTrail[~np.isnan(convergenceTrail)],  # backwards compatibility
+			'R': R,
+			2: R,   # backwards compatibility
+			'S': S,
+			3: S}  # backwards compatibility
 
