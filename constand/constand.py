@@ -17,7 +17,7 @@ Analysis"
 Ported to Python by Joris Van Houtven, 2016
 """
 
-__version__ = 1.2
+__version__ = "1.2.1"
 
 import numpy as np
 from numpy import nan
